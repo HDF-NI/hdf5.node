@@ -1,6 +1,6 @@
 
-var assert = require('assert');
-var binding = require('../build/Release/binding');
+// import module
+var hdf5 = require('../build/Release/hdf5');
 
-assert.equal('world', binding.hello());
-console.log('binding.hello() =', binding.hello());
+// instantiate h5file
+var h5file = new hdf5.H5File();
