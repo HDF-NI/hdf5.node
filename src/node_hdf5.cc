@@ -8,7 +8,10 @@ extern "C" {
 
     static void init (Handle<Object> target) {
         
+        // create local scope
         HandleScope scope;
+        
+        // initialize file object
         File::Initialize(target);
         
     }
