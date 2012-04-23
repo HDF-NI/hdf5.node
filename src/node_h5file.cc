@@ -11,32 +11,31 @@ namespace NodeHDF5 {
 
     File::File (std::string path) {
     
-        file = new H5File(path.c_str(), H5F_ACC_RDONLY);
+        m_file = new H5File(path.c_str(), H5F_ACC_RDONLY);
         
     }
     
     File::~File () {
         
-        delete file;
+        delete m_file;
         
     }
     
     void File::Initialize (Handle<Object> target) {
         
-        Local<String> class_name = String::NewSymbol("H5File");
-    
+        HandleScope scope;
+        
         // instantiate constructor template
-        Local<FunctionTemplate> plate = FunctionTemplate::New(New);
+        Local<FunctionTemplate> t = FunctionTemplate::New(New);
+        t->InstanceTemplate()->SetInternalFieldCount(1);
         
-        // initialize template properties
-        plate->SetClassName(class_name);
-        plate->InstanceTemplate()->SetInternalFieldCount(1);
-        
-        // get context function instance
-        Persistent<Function> constructor = Persistent<Function>::New(plate->GetFunction());
+        // member method prototypes
+        SetPrototypeMethod(t, "close", Close);
+        SetPrototypeMethod(t, "filename", getFilename);
+        SetPrototypeMethod(t, "filesize", getFilesize);
         
         // specify constructor function
-        target->Set(class_name, constructor);
+        target->Set(String::NewSymbol("H5File"), t->GetFunction());
         
     }
     
@@ -44,15 +43,64 @@ namespace NodeHDF5 {
         
         HandleScope scope;
         
-        // get path argument
-        String::Utf8Value path(args[0]->ToString());
+        if (args.Length() != 1 || !args[0]->IsString()) {
+            
+            // fail out if arguments are not correct
+            ThrowException(v8::Exception::SyntaxError(String::New("expected file path")));
+            return scope.Close(Undefined());
+            
+        }
         
-        // create file object
-        File* f = new File(std::string(*path));
+        // store specified file path
+        String::Utf8Value path (args[0]->ToString());
+        
+        // also store cstring version
+        std::string c_path (*path);
+        
+        if (!H5::H5File::isHdf5(c_path.c_str())) {
+            
+            // fail out if file is not valid hdf5
+            ThrowException(v8::Exception::TypeError(String::New("file is not hdf5 format")));
+            return scope.Close(Undefined());
+            
+        }
+        
+        // instantiate h5 file object
+        File* f = new File(c_path);
         f->Wrap(args.This());
         
-        // return file object
+        return args.This();
+        
+    }
+    
+    Handle<Value> File::Close (const Arguments& args) {
+        
+        HandleScope scope;
+        
+        File* f = ObjectWrap::Unwrap<File>(args.This());
+        f->m_file->close();
+        
         return scope.Close(args.This());
+        
+    }
+    
+    Handle<Value> File::getFilename (const Arguments& args) {
+        
+        HandleScope scope;
+        
+        File* f = ObjectWrap::Unwrap<File>(args.This());
+        
+        return scope.Close(String::New(f->m_file->getFileName().c_str()));
+        
+    }
+    
+    Handle<Value> File::getFilesize (const Arguments& args) {
+        
+        HandleScope scope;
+        
+        File* f = ObjectWrap::Unwrap<File>(args.This());
+        
+        return scope.Close(Number::New(f->m_file->getFileSize()));
         
     }
 

@@ -11,7 +11,7 @@ namespace NodeHDF5 {
     class File : public ObjectWrap {
         
         private:
-            H5::H5File* file;
+            H5::H5File* m_file;
         
         public:
             File(std::string path);
@@ -19,6 +19,9 @@ namespace NodeHDF5 {
             
             static void Initialize (Handle<Object> target);
             static Handle<Value> New (const Arguments& args);
+            static Handle<Value> Close (const Arguments& args);
+            static Handle<Value> getFilename (const Arguments& args);
+            static Handle<Value> getFilesize (const Arguments& args);
         
     };
 
