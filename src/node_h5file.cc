@@ -11,7 +11,7 @@ namespace NodeHDF5 {
 
     File::File (std::string path) {
     
-        // file = new H5File(path.c_str(), H5F_ACC_RDONLY);
+        file = new H5File(path.c_str(), H5F_ACC_RDONLY);
         
     }
     
