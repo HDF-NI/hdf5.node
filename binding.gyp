@@ -10,13 +10,13 @@
                 'src/h5_file.cc',
                 'src/h5_group.cc'
             ],
-            'ldflags': [
-                '-L/usr/local/hdf5/lib'
-            ],
-            'libraries': [
-                '-lhdf5',
-                '-lhdf5_cpp'
-            ]
+            'link_settings': {
+                'ldflags': [
+                    '-L/usr/local/hdf5/lib',
+                    '-lhdf5',
+                    '-lhdf5_cpp'
+                ]
+            }
         }
     ]
 }
