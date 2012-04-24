@@ -31,8 +31,6 @@ namespace NodeHDF5 {
         
         // member method prototypes
         SetPrototypeMethod(t, "close", Close);
-        SetPrototypeMethod(t, "filename", getFilename);
-        SetPrototypeMethod(t, "filesize", getFilesize);
         
         // specify constructor function
         target->Set(String::NewSymbol("H5File"), t->GetFunction());
@@ -69,6 +67,10 @@ namespace NodeHDF5 {
         File* f = new File(c_path);
         f->Wrap(args.This());
         
+        // attach various properties
+        args.This()->Set(String::NewSymbol("path"), String::New(f->m_file->getFileName().c_str()));
+        args.This()->Set(String::NewSymbol("size"), Number::New(f->m_file->getFileSize()));
+        
         return args.This();
         
     }
@@ -81,26 +83,6 @@ namespace NodeHDF5 {
         f->m_file->close();
         
         return scope.Close(args.This());
-        
-    }
-    
-    Handle<Value> File::getFilename (const Arguments& args) {
-        
-        HandleScope scope;
-        
-        File* f = ObjectWrap::Unwrap<File>(args.This());
-        
-        return scope.Close(String::New(f->m_file->getFileName().c_str()));
-        
-    }
-    
-    Handle<Value> File::getFilesize (const Arguments& args) {
-        
-        HandleScope scope;
-        
-        File* f = ObjectWrap::Unwrap<File>(args.This());
-        
-        return scope.Close(Number::New(f->m_file->getFileSize()));
         
     }
 

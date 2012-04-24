@@ -20,8 +20,6 @@ namespace NodeHDF5 {
             static void Initialize (Handle<Object> target);
             static Handle<Value> New (const Arguments& args);
             static Handle<Value> Close (const Arguments& args);
-            static Handle<Value> getFilename (const Arguments& args);
-            static Handle<Value> getFilesize (const Arguments& args);
         
     };
 
