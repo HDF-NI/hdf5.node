@@ -2,7 +2,7 @@
 #include <string>
 
 #include "H5Cpp.h"
-#include "node_h5file.h"
+#include "hdf5.h"
 
 namespace NodeHDF5 {
     
@@ -33,7 +33,7 @@ namespace NodeHDF5 {
         SetPrototypeMethod(t, "close", Close);
         
         // specify constructor function
-        target->Set(String::NewSymbol("H5File"), t->GetFunction());
+        target->Set(String::NewSymbol("File"), t->GetFunction());
         
     }
     
@@ -70,6 +70,8 @@ namespace NodeHDF5 {
         // attach various properties
         args.This()->Set(String::NewSymbol("path"), String::New(f->m_file->getFileName().c_str()));
         args.This()->Set(String::NewSymbol("size"), Number::New(f->m_file->getFileSize()));
+        args.This()->Set(String::NewSymbol("freeSpace"), Number::New(f->m_file->getFreeSpace()));
+        args.This()->Set(String::NewSymbol("objectCount"), Number::New(f->m_file->getObjCount()));
         
         return args.This();
         

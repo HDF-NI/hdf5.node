@@ -1,5 +1,5 @@
 #include <node.h>
-#include "node_h5file.h"
+#include "hdf5.h"
 
 using namespace v8;
 using namespace NodeHDF5;
@@ -11,8 +11,9 @@ extern "C" {
         // create local scope
         HandleScope scope;
         
-        // initialize file object
+        // initialize objects
         File::Initialize(target);
+        Group::Initialize(target);
         
     }
     

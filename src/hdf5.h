@@ -22,5 +22,19 @@ namespace NodeHDF5 {
             static Handle<Value> Close (const Arguments& args);
         
     };
+    
+    class Group : public ObjectWrap {
+            
+        private:
+            H5::Group* m_group;
+        
+        public:
+            Group();
+            ~Group();
+            
+            static void Initialize (Handle<Object> target);
+            static Handle<Value> New (const Arguments& args);
+        
+    };
 
 };
