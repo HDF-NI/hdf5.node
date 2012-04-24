@@ -84,7 +84,7 @@ namespace NodeHDF5 {
         File* f = ObjectWrap::Unwrap<File>(args.This());
         f->m_file->close();
         
-        return scope.Close(args.This());
+        return scope.Close(Undefined());
         
     }
 

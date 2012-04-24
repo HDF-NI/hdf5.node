@@ -11,10 +11,12 @@
                 'src/h5_group.cc'
             ],
             'link_settings': {
-                'ldflags': [
-                    '-L/usr/local/hdf5/lib',
+                'libraries': [
                     '-lhdf5',
                     '-lhdf5_cpp'
+                ],
+                'ldflags': [
+                    '-L/usr/local/hdf5/lib'
                 ]
             }
         }
