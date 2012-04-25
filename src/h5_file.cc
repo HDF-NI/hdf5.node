@@ -72,6 +72,7 @@ namespace NodeHDF5 {
         args.This()->Set(String::NewSymbol("size"), Number::New(f->m_file->getFileSize()));
         args.This()->Set(String::NewSymbol("freeSpace"), Number::New(f->m_file->getFreeSpace()));
         args.This()->Set(String::NewSymbol("objectCount"), Number::New(f->m_file->getObjCount()));
+        args.This()->Set(String::NewSymbol("id"), Number::New(f->m_file->getId()));
         
         return args.This();
         

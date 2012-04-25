@@ -16,4 +16,4 @@ When compiling the HDF5 C++ library, be sure to use the `--enable-cxx` flag. I h
 
 ## Environment Variables
 
-The path to the HDF5 shared objects must be added to the runtime library search path. To do this, `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/hdf5/lib`. I've looked into linking with `-R`, but I have not been able to get that to work, yet.
+The path to the HDF5 shared objects must be added to the runtime library search path. To do this, `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/hdf5/lib`.
