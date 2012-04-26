@@ -107,7 +107,7 @@ namespace NodeHDF5 {
         Local<Value> argv[] = {
                 
                 Local<Value>::New(Null()),
-                Group::Instantiate(group_argv)
+                Local<Value>::New(Null())
                 
         };
         
