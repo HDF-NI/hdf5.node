@@ -7,30 +7,24 @@
 namespace NodeHDF5 {
     
     using namespace v8;
-    using namespace H5;
-
-    Group::Group () {
+    
+    Group::Group(H5::Group group) {
         
-        /* stub */
+        m_group = group;
         
     }
     
-    Group::~Group () {
-        
-        delete m_group;
-        
-    }
-    
-    void Group::Initialize (Handle<Object> target) {
-        
-        HandleScope scope;
+    void Group::Initialize () {
         
         // instantiate constructor template
         Local<FunctionTemplate> t = FunctionTemplate::New(New);
+        
+        // set properties
+        t->SetClassName(String::New("Group"));
         t->InstanceTemplate()->SetInternalFieldCount(1);
         
-        // specify constructor function
-        target->Set(String::NewSymbol("Group"), t->GetFunction());
+        // initialize constructor reference
+        Constructor = Persistent<Function>::New(t->GetFunction());
         
     }
     
@@ -38,10 +32,42 @@ namespace NodeHDF5 {
         
         HandleScope scope;
         
-        Group* g = new Group();
-        g->Wrap(args.This());
+        // fail out if arguments are not correct
+        if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
+            
+            ThrowException(v8::Exception::SyntaxError(String::New("expected name, file")));
+            return scope.Close(Undefined());
+            
+        }
+        
+        // store specified group name
+        String::Utf8Value group_name (args[0]->ToString());
+        
+        // unwrap file object
+        File* f = ObjectWrap::Unwrap<File>(args[1]->ToObject());
+        
+        // create group
+        Group* group = new Group(f->m_file->openGroup(*group_name));
+        group->Wrap(args.This());
         
         return args.This();
+        
+    }
+    
+    Handle<Value> Group::Instantiate (const Arguments& args) {
+        
+        HandleScope scope;
+        
+        // group name and file reference
+        Handle<Value> argv[2] = {
+            
+            args[0],
+            args[1]
+            
+        };
+        
+        // return new group instance
+        return scope.Close(Constructor->NewInstance(2, argv));
         
     }
 

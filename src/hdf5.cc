@@ -11,9 +11,11 @@ extern "C" {
         // create local scope
         HandleScope scope;
         
-        // initialize objects
+        // initialize wrapped objects
         File::Initialize(target);
-        Group::Initialize(target);
+        
+        // initialize wrapped object factories
+        Group::Initialize();
         
     }
     

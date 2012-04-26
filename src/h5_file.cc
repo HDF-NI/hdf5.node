@@ -7,16 +7,19 @@
 namespace NodeHDF5 {
     
     using namespace v8;
-    using namespace H5;
 
     File::File (std::string path) {
     
-        m_file = new H5File(path.c_str(), H5F_ACC_RDONLY);
+        m_file = new H5::H5File(path.c_str(), H5F_ACC_RDONLY);
         
     }
     
     File::~File () {
         
+        // close file
+        m_file->close();
+        
+        // free up memory
         delete m_file;
         
     }
@@ -30,7 +33,7 @@ namespace NodeHDF5 {
         t->InstanceTemplate()->SetInternalFieldCount(1);
         
         // member method prototypes
-        SetPrototypeMethod(t, "close", Close);
+        SetPrototypeMethod(t, "group", OpenGroup);
         
         // specify constructor function
         target->Set(String::NewSymbol("File"), t->GetFunction());
@@ -41,9 +44,9 @@ namespace NodeHDF5 {
         
         HandleScope scope;
         
+        // fail out if arguments are not correct
         if (args.Length() != 1 || !args[0]->IsString()) {
             
-            // fail out if arguments are not correct
             ThrowException(v8::Exception::SyntaxError(String::New("expected file path")));
             return scope.Close(Undefined());
             
@@ -78,12 +81,39 @@ namespace NodeHDF5 {
         
     }
     
-    Handle<Value> File::Close (const Arguments& args) {
+    Handle<Value> File::OpenGroup (const Arguments& args) {
         
         HandleScope scope;
         
-        File* f = ObjectWrap::Unwrap<File>(args.This());
-        f->m_file->close();
+        // fail out if arguments are not correct
+        if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsFunction()) {
+            
+            ThrowException(v8::Exception::SyntaxError(String::New("expected name, callback")));
+            return scope.Close(Undefined());
+            
+        }
+        
+        // store specified group name
+        String::Utf8Value group_name (args[0]->ToString());
+        
+        Local<Value> group_argv[] = {
+                
+                args[0],
+                args.This()
+                
+        };
+        
+        // create callback params
+        Local<Value> argv[] = {
+                
+                Local<Value>::New(Null()),
+                Group::Instantiate(group_argv)
+                
+        };
+        
+        // execute callback
+        Local<Function> callback = Local<Function>::Cast(args[1]);
+        callback->Call(Context::GetCurrent()->Global(), 2, argv);
         
         return scope.Close(Undefined());
         

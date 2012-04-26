@@ -1,13 +1,12 @@
 
-// import module
 var hdf5 = require('../build/Release/hdf5');
 
-console.log(hdf5);
+// open hdf file
+var file = new hdf5.File('/home/ryan/data/MillionSongSubset/data/A/A/A/TRAAAAW128F429D538.h5');
 
-// instantiate h5file
-var h5file = new hdf5.File('/home/ryan/data/MillionSongSubset/data/A/A/A/TRAAAAW128F429D538.h5');
-
-console.log(h5file);
-
-// close the file
-h5file.close();
+// open group
+file.group('foo', function (err, group) {
+    
+    console.log(group);
+    
+});

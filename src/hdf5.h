@@ -10,30 +10,29 @@ namespace NodeHDF5 {
     
     class File : public ObjectWrap {
         
-        private:
-            H5::H5File* m_file;
-        
         public:
+            H5::H5File* m_file;
+            
             File(std::string path);
             ~File();
             
             static void Initialize (Handle<Object> target);
             static Handle<Value> New (const Arguments& args);
-            static Handle<Value> Close (const Arguments& args);
+            static Handle<Value> OpenGroup (const Arguments& args);
         
     };
     
     class Group : public ObjectWrap {
-            
-        private:
-            H5::Group* m_group;
         
-        public:
-            Group();
-            ~Group();
-            
-            static void Initialize (Handle<Object> target);
+        private:
+            H5::Group m_group;
+            static Persistent<Function> Constructor;
             static Handle<Value> New (const Arguments& args);
+            
+        public:
+            Group(H5::Group group);
+            static void Initialize ();
+            static Handle<Value> Instantiate (const Arguments& args);
         
     };
 
