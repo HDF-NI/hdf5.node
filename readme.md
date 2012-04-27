@@ -1,6 +1,13 @@
 A node module for reading the HDF5 file format.
 
-
+```
+    var hdf5 = require('hdf5');
+    var file = new hdf5.File('/tmp/foo.h5');
+    
+    file.group('group1', function (err, group) {
+        console.log(group);
+    });
+```
 
 ## Dependencies
 
