@@ -11,12 +11,12 @@ namespace NodeHDF5 {
     class File : public ObjectWrap {
         
         public:
-            H5::H5File* m_file;
-            
-            File(std::string path);
-            ~File();
-            
             static void Initialize (Handle<Object> target);
+            H5::H5File* FileObject();
+            
+        private:
+            H5::H5File* m_file;
+            File(const char* path); ~File();
             static Handle<Value> New (const Arguments& args);
             static Handle<Value> OpenGroup (const Arguments& args);
         
@@ -32,7 +32,7 @@ namespace NodeHDF5 {
         public:
             Group(H5::Group group);
             static void Initialize ();
-            static Handle<Value> Instantiate (const Arguments& args);
+            static Handle<Value> Instantiate (const char* path, Local<Object> file);
         
     };
 

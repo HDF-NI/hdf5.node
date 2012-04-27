@@ -14,6 +14,8 @@ namespace NodeHDF5 {
         
     }
     
+    Persistent<Function> Group::Constructor;
+    
     void Group::Initialize () {
         
         // instantiate constructor template
@@ -44,26 +46,29 @@ namespace NodeHDF5 {
         String::Utf8Value group_name (args[0]->ToString());
         
         // unwrap file object
-        File* f = ObjectWrap::Unwrap<File>(args[1]->ToObject());
+        File* file = ObjectWrap::Unwrap<File>(args[1]->ToObject());
         
         // create group
-        Group* group = new Group(f->m_file->openGroup(*group_name));
+        Group* group = new Group(file->FileObject()->openGroup(*group_name));
         group->Wrap(args.This());
+        
+        // attach various properties
+        args.This()->Set(String::NewSymbol("id"), Number::New(group->m_group.getId()));
         
         return args.This();
         
     }
     
-    Handle<Value> Group::Instantiate (const Arguments& args) {
+    Handle<Value> Group::Instantiate (const char* name, Local<Object> file) {
         
         HandleScope scope;
         
         // group name and file reference
-        Handle<Value> argv[2] = {
-            
-            args[0],
-            args[1]
-            
+        Local<Value> argv[2] = {
+                
+                Local<Value>::New(String::New(name)),
+                file
+                
         };
         
         // return new group instance

@@ -7,35 +7,37 @@
 namespace NodeHDF5 {
     
     using namespace v8;
-
-    File::File (std::string path) {
     
-        m_file = new H5::H5File(path.c_str(), H5F_ACC_RDONLY);
+    File::File (const char* path) {
+        
+        m_file = new H5::H5File(path, H5F_ACC_RDONLY);
         
     }
     
     File::~File () {
         
-        // close file
-        m_file->close();
-        
-        // free up memory
         delete m_file;
         
     }
     
+    H5::H5File* File::FileObject() {
+        
+        return m_file;
+        
+    }
+
     void File::Initialize (Handle<Object> target) {
         
         HandleScope scope;
         
-        // instantiate constructor template
+        // instantiate constructor function template
         Local<FunctionTemplate> t = FunctionTemplate::New(New);
         t->InstanceTemplate()->SetInternalFieldCount(1);
         
         // member method prototypes
         SetPrototypeMethod(t, "group", OpenGroup);
         
-        // specify constructor function
+        // append this function to the target object
         target->Set(String::NewSymbol("File"), t->GetFunction());
         
     }
@@ -52,22 +54,20 @@ namespace NodeHDF5 {
             
         }
         
-        // store specified file path
         String::Utf8Value path (args[0]->ToString());
         
-        // also store cstring version
-        std::string c_path (*path);
-        
-        if (!H5::H5File::isHdf5(c_path.c_str())) {
+        // fail out if file is not valid hdf5
+        if (!H5::H5File::isHdf5(*path)) {
             
-            // fail out if file is not valid hdf5
             ThrowException(v8::Exception::TypeError(String::New("file is not hdf5 format")));
             return scope.Close(Undefined());
             
         }
         
-        // instantiate h5 file object
-        File* f = new File(c_path);
+        // create hdf file object
+        File* f = new File(*path);
+        
+        // extend target object with file
         f->Wrap(args.This());
         
         // attach various properties
@@ -93,21 +93,13 @@ namespace NodeHDF5 {
             
         }
         
-        // store specified group name
         String::Utf8Value group_name (args[0]->ToString());
         
-        Local<Value> group_argv[] = {
-                
-                args[0],
-                args.This()
-                
-        };
-        
         // create callback params
-        Local<Value> argv[] = {
+        Local<Value> argv[2] = {
                 
                 Local<Value>::New(Null()),
-                Local<Value>::New(Null())
+                Local<Value>::New(Group::Instantiate(*group_name, args.This()))
                 
         };
         
