@@ -1,5 +1,9 @@
+
+#include <iostream>
+
 #include <node.h>
 #include <string>
+#include <iostream>
 
 #include "H5Cpp.h"
 #include "hdf5.h"
@@ -14,11 +18,19 @@ namespace NodeHDF5 {
         
     }
     
+    File::File (const char* path, unsigned long flags) {
+        m_file = new H5::H5File(path, toAccessMap[flags]);
+        
+    }
+    
     File::~File () {
         
+        m_file->close();
         delete m_file;
         
     }
+    
+    Persistent<FunctionTemplate> File::Constructor;
     
     H5::H5File* File::FileObject() {
         
@@ -28,86 +40,125 @@ namespace NodeHDF5 {
 
     void File::Initialize (Handle<Object> target) {
         
-        HandleScope scope;
+        HandleScope scope(v8::Isolate::GetCurrent());
         
         // instantiate constructor function template
-        Local<FunctionTemplate> t = FunctionTemplate::New(New);
+        Local<FunctionTemplate> t = FunctionTemplate::New(v8::Isolate::GetCurrent(), New);
+        t->SetClassName(String::NewFromUtf8(v8::Isolate::GetCurrent(), "File"));
         t->InstanceTemplate()->SetInternalFieldCount(1);
-        
+        Constructor.Reset(v8::Isolate::GetCurrent(), t);
         // member method prototypes
-        SetPrototypeMethod(t, "group", OpenGroup);
-        
+        NODE_SET_PROTOTYPE_METHOD(t, "createGroup", CreateGroup);
+        NODE_SET_PROTOTYPE_METHOD(t, "openGroup", OpenGroup);
+        Local<Function> f=t->GetFunction();
         // append this function to the target object
-        target->Set(String::NewSymbol("File"), t->GetFunction());
+        target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "File"), t->GetFunction());
         
     }
     
-    Handle<Value> File::New (const Arguments& args) {
+    void File::New (const v8::FunctionCallbackInfo<Value>& args) {
         
-        HandleScope scope;
+//        HandleScope scope;
         
         // fail out if arguments are not correct
-        if (args.Length() != 1 || !args[0]->IsString()) {
+        if (args.Length() <1 || !args[0]->IsString()) {
             
-            ThrowException(v8::Exception::SyntaxError(String::New("expected file path")));
-            return scope.Close(Undefined());
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected file path")));
+            args.GetReturnValue().SetUndefined();
+            return;
             
         }
         
         String::Utf8Value path (args[0]->ToString());
         
         // fail out if file is not valid hdf5
-        if (!H5::H5File::isHdf5(*path)) {
+        if (args.Length() <2 && !H5::H5File::isHdf5(*path)) {
             
-            ThrowException(v8::Exception::TypeError(String::New("file is not hdf5 format")));
-            return scope.Close(Undefined());
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "file is not hdf5 format")));
+            args.GetReturnValue().SetUndefined();
+            return;
             
         }
-        
         // create hdf file object
-        File* f = new File(*path);
+        File* f;
+        if(args.Length() <2)
+            f=new File(*path);
+        else
+            f=new File(*path,args[1]->ToUint32()->IntegerValue());
         
         // extend target object with file
         f->Wrap(args.This());
         
         // attach various properties
-        args.This()->Set(String::NewSymbol("path"), String::New(f->m_file->getFileName().c_str()));
-        args.This()->Set(String::NewSymbol("size"), Number::New(f->m_file->getFileSize()));
-        args.This()->Set(String::NewSymbol("freeSpace"), Number::New(f->m_file->getFreeSpace()));
-        args.This()->Set(String::NewSymbol("objectCount"), Number::New(f->m_file->getObjCount()));
-        args.This()->Set(String::NewSymbol("id"), Number::New(f->m_file->getId()));
+        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "path"), String::NewFromUtf8(v8::Isolate::GetCurrent(), f->m_file->getFileName().c_str()));
+        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "size"), Number::New(v8::Isolate::GetCurrent(), f->m_file->getFileSize()));
+        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "freeSpace"), Number::New(v8::Isolate::GetCurrent(), f->m_file->getFreeSpace()));
+        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "objectCount"), Number::New(v8::Isolate::GetCurrent(), f->m_file->getObjCount()));
+        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), f->m_file->getId()));
         
-        return args.This();
+        return;
         
     }
     
-    Handle<Value> File::OpenGroup (const Arguments& args) {
-        
-        HandleScope scope;
+    void File::CreateGroup (const v8::FunctionCallbackInfo<Value>& args) {
         
         // fail out if arguments are not correct
-        if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsFunction()) {
+//        if (args.Length() != 1 || !args[0]->IsString()) {
+//            
+//            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, callback")));
+//            args.GetReturnValue().SetUndefined();
+//            return;
+//            
+//        }
+//        
+//        String::Utf8Value group_name (args[0]->ToString());
+        
+        Local<Object> instance=Group::Instantiate(args.This());
+        // create callback params
+//        Local<Value> argv[2] = {
+//                
+//                Local<Value>::New(v8::Isolate::GetCurrent(), Null(v8::Isolate::GetCurrent())),
+//                Local<Value>::New(v8::Isolate::GetCurrent(), instance)
+//                
+//        };
+////        instance->
+//        // execute callback
+//        Local<Function> callback = Local<Function>::Cast(args[1]);
+//        callback->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), 2, argv);
+        
+        args.GetReturnValue().Set(instance);
+        return;
+        
+    }
+    
+    void File::OpenGroup (const v8::FunctionCallbackInfo<Value>& args) {
+        
+        // fail out if arguments are not correct
+        if (args.Length() != 1 || !args[0]->IsString()) {
             
-            ThrowException(v8::Exception::SyntaxError(String::New("expected name, callback")));
-            return scope.Close(Undefined());
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
+            args.GetReturnValue().SetUndefined();
+            return;
             
         }
         
         String::Utf8Value group_name (args[0]->ToString());
         
+        Local<Object> instance=Group::Instantiate(*group_name, args.This());
         // create callback params
-        Local<Value> argv[2] = {
-                
-                Local<Value>::New(Null()),
-                Local<Value>::New(Group::Instantiate(*group_name, args.This()))
-                
-        };
+//        Local<Value> argv[2] = {
+//                
+//                Local<Value>::New(v8::Isolate::GetCurrent(), Null(v8::Isolate::GetCurrent())),
+//                Local<Value>::New(v8::Isolate::GetCurrent(), Group::Instantiate(*group_name, args.This()))
+//                
+//        };
         
         // execute callback
-        Local<Function> callback = Local<Function>::Cast(args[1]);
-        callback->Call(Context::GetCurrent()->Global(), 2, argv);
+//        Local<Function> callback = Local<Function>::Cast(args[1]);
+//        callback->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), 2, argv);
         
-        return scope.Close(Undefined());
+        args.GetReturnValue().Set(instance);
+        return;
         
     }
 

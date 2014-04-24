@@ -1,24 +1,22 @@
 #include <node.h>
 #include "hdf5.h"
+#include "h5_im.hpp"
 
 using namespace v8;
 using namespace NodeHDF5;
 
 extern "C" {
 
-    static void init (Handle<Object> target) {
+    static void init_im (Handle<Object> target) {
         
         // create local scope
         HandleScope scope(v8::Isolate::GetCurrent());
         
         // initialize wrapped objects
-        File::Initialize(target);
-        
-        // initialize wrapped object factories
-        Group::Initialize();
+        H5im::Initialize(target);
         
     }
     
-    NODE_MODULE(hdf5, init)
+    NODE_MODULE(h5im, init_im)
 
 }
