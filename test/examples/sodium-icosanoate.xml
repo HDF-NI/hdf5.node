@@ -1,0 +1,579 @@
+<cml:cml xmlns:cml="http://www.xml-cml.org/schema"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.xml-cml.org/schema file:///home/roger/NetBeansProjects/OOBackbone/schemas/cml/schema.xsd">
+    <cml:molecule title="C20H39NaO2
+">
+            <cml:molecule title="1"
+                            formalCharge="-1">
+                    <cml:atomArray>
+                            <cml:atom elementType="C"
+                                            x3="9.4051"
+                                            y3="-1.7143"
+                                            z3="-0.1788">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp2</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="8.0882"
+                                            y3="-2.1939"
+                                            z3="0.3753">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="6.9528"
+                                            y3="-1.347"
+                                            z3="-0.2032">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="5.6158"
+                                            y3="-1.8339"
+                                            z3="0.3593">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="4.4804"
+                                            y3="-0.987"
+                                            z3="-0.2191">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="3.1435"
+                                            y3="-1.4739"
+                                            z3="0.3434">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="2.0081"
+                                            y3="-0.6271"
+                                            z3="-0.2351">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="0.6711"
+                                            y3="-1.1139"
+                                            z3="0.3275">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="-0.4643"
+                                            y3="-0.2671"
+                                            z3="-0.251">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="-1.8012"
+                                            y3="-0.7539"
+                                            z3="0.3115">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="-2.9366"
+                                            y3="0.0929"
+                                            z3="-0.267">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="-4.2736"
+                                            y3="-0.3939"
+                                            z3="0.2956">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="-5.409"
+                                            y3="0.4529"
+                                            z3="-0.2829">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="-6.7459"
+                                            y3="-0.0339"
+                                            z3="0.2796">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="-7.8814"
+                                            y3="0.8129"
+                                            z3="-0.2988">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="-9.2183"
+                                            y3="0.3261"
+                                            z3="0.2637">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="-10.3537"
+                                            y3="1.1729"
+                                            z3="-0.3148">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="-11.6907"
+                                            y3="0.6861"
+                                            z3="0.2477">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="-12.8261"
+                                            y3="1.5329"
+                                            z3="-0.3307">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="C"
+                                            x3="-14.163"
+                                            y3="1.046"
+                                            z3="0.2318">
+                                    <cml:atomType name="C"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="O"
+                                            x3="9.4329"
+                                            y3="-0.7817"
+                                            z3="-0.9636">
+                                    <cml:atomType name="O"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp2</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="O"
+                                            formalCharge="-1"
+                                            x3="10.4431"
+                                            y3="-2.2558"
+                                            z3="0.1616">
+                                    <cml:atomType name="O"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="7.9379"
+                                            y3="-3.2384"
+                                            z3="0.1023">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="8.0949"
+                                            y3="-2.0995"
+                                            z3="1.4612">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="7.1031"
+                                            y3="-0.3025"
+                                            z3="0.0698">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="6.9461"
+                                            y3="-1.4414"
+                                            z3="-1.2891">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="5.4655"
+                                            y3="-2.8784"
+                                            z3="0.0863">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="5.6226"
+                                            y3="-1.7395"
+                                            z3="1.4452">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="4.6308"
+                                            y3="0.0574"
+                                            z3="0.0539">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="4.4737"
+                                            y3="-1.0814"
+                                            z3="-1.305">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="2.9932"
+                                            y3="-2.5184"
+                                            z3="0.0704">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="3.1502"
+                                            y3="-1.3795"
+                                            z3="1.4293">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="2.1584"
+                                            y3="0.4174"
+                                            z3="0.0379">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="2.0013"
+                                            y3="-0.7214"
+                                            z3="-1.321">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="0.5208"
+                                            y3="-2.1584"
+                                            z3="0.0544">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="0.6779"
+                                            y3="-1.0195"
+                                            z3="1.4133">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-0.314"
+                                            y3="0.7774"
+                                            z3="0.022">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-0.471"
+                                            y3="-0.3614"
+                                            z3="-1.3369">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-1.9516"
+                                            y3="-1.7984"
+                                            z3="0.0385">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-1.7945"
+                                            y3="-0.6595"
+                                            z3="1.3974">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-2.7863"
+                                            y3="1.1374"
+                                            z3="0.0061">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-2.9434"
+                                            y3="-0.0014"
+                                            z3="-1.3528">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-4.4239"
+                                            y3="-1.4384"
+                                            z3="0.0226">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-4.2669"
+                                            y3="-0.2996"
+                                            z3="1.3815">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-5.2587"
+                                            y3="1.4974"
+                                            z3="-0.0099">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-5.4157"
+                                            y3="0.3586"
+                                            z3="-1.3688">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-6.8963"
+                                            y3="-1.0784"
+                                            z3="0.0066">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-6.7392"
+                                            y3="0.0604"
+                                            z3="1.3655">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-7.731"
+                                            y3="1.8574"
+                                            z3="-0.0258">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-7.8881"
+                                            y3="0.7186"
+                                            z3="-1.3847">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-9.3686"
+                                            y3="-0.7184"
+                                            z3="-0.0093">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-9.2116"
+                                            y3="0.4204"
+                                            z3="1.3496">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-10.2034"
+                                            y3="2.2174"
+                                            z3="-0.0418">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-10.3604"
+                                            y3="1.0785"
+                                            z3="-1.4007">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-11.841"
+                                            y3="-0.3584"
+                                            z3="-0.0253">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-11.6839"
+                                            y3="0.7804"
+                                            z3="1.3336">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-12.6757"
+                                            y3="2.5774"
+                                            z3="-0.0577">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-12.8328"
+                                            y3="1.4385"
+                                            z3="-1.4166">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-14.3133"
+                                            y3="0.0016"
+                                            z3="-0.0412">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-14.1563"
+                                            y3="1.1404"
+                                            z3="1.3177">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                            <cml:atom elementType="H"
+                                            x3="-14.9719"
+                                            y3="1.6493"
+                                            z3="-0.1803">
+                                    <cml:atomType name="H"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                    </cml:atomArray>
+                    <cml:scalar title="sequence">1</cml:scalar>
+            </cml:molecule>
+            <cml:molecule title="2"
+                            formalCharge="1">
+                    <cml:atomArray>
+                            <cml:atom elementType="Na"
+                                            formalCharge="1"
+                                            x3="16.5723"
+                                            y3="5.97"
+                                            z3="0.2377">
+                                    <cml:atomType name="NA"/>
+                                    <cml:scalar title="chainID">A</cml:scalar>
+                                    <cml:scalar title="hybridization">sp3</cml:scalar>
+                            </cml:atom>
+                    </cml:atomArray>
+                    <cml:scalar title="sequence">2</cml:scalar>
+            </cml:molecule>
+            <cml:bondArray>
+                    <cml:bond atomRefs2="m1-a1 m1-a2"/>
+                    <cml:bond atomRefs2="m1-a2 m1-a3"/>
+                    <cml:bond atomRefs2="m1-a3 m1-a4"/>
+                    <cml:bond atomRefs2="m1-a4 m1-a5"/>
+                    <cml:bond atomRefs2="m1-a5 m1-a6"/>
+                    <cml:bond atomRefs2="m1-a6 m1-a7"/>
+                    <cml:bond atomRefs2="m1-a7 m1-a8"/>
+                    <cml:bond atomRefs2="m1-a8 m1-a9"/>
+                    <cml:bond atomRefs2="m1-a9 m1-a10"/>
+                    <cml:bond atomRefs2="m1-a10 m1-a11"/>
+                    <cml:bond atomRefs2="m1-a11 m1-a12"/>
+                    <cml:bond atomRefs2="m1-a12 m1-a13"/>
+                    <cml:bond atomRefs2="m1-a13 m1-a14"/>
+                    <cml:bond atomRefs2="m1-a14 m1-a15"/>
+                    <cml:bond atomRefs2="m1-a15 m1-a16"/>
+                    <cml:bond atomRefs2="m1-a16 m1-a17"/>
+                    <cml:bond atomRefs2="m1-a17 m1-a18"/>
+                    <cml:bond atomRefs2="m1-a18 m1-a19"/>
+                    <cml:bond atomRefs2="m1-a19 m1-a20"/>
+                    <cml:bond atomRefs2="m1-a1 m1-a21"/>
+                    <cml:bond atomRefs2="m1-a1 m1-a22"/>
+                    <cml:bond atomRefs2="m1-a2 m1-a24"/>
+                    <cml:bond atomRefs2="m1-a2 m1-a25"/>
+                    <cml:bond atomRefs2="m1-a3 m1-a26"/>
+                    <cml:bond atomRefs2="m1-a3 m1-a27"/>
+                    <cml:bond atomRefs2="m1-a4 m1-a28"/>
+                    <cml:bond atomRefs2="m1-a4 m1-a29"/>
+                    <cml:bond atomRefs2="m1-a5 m1-a30"/>
+                    <cml:bond atomRefs2="m1-a5 m1-a31"/>
+                    <cml:bond atomRefs2="m1-a6 m1-a32"/>
+                    <cml:bond atomRefs2="m1-a6 m1-a33"/>
+                    <cml:bond atomRefs2="m1-a7 m1-a34"/>
+                    <cml:bond atomRefs2="m1-a7 m1-a35"/>
+                    <cml:bond atomRefs2="m1-a8 m1-a36"/>
+                    <cml:bond atomRefs2="m1-a8 m1-a37"/>
+                    <cml:bond atomRefs2="m1-a9 m1-a38"/>
+                    <cml:bond atomRefs2="m1-a9 m1-a39"/>
+                    <cml:bond atomRefs2="m1-a10 m1-a40"/>
+                    <cml:bond atomRefs2="m1-a10 m1-a41"/>
+                    <cml:bond atomRefs2="m1-a11 m1-a42"/>
+                    <cml:bond atomRefs2="m1-a11 m1-a43"/>
+                    <cml:bond atomRefs2="m1-a12 m1-a44"/>
+                    <cml:bond atomRefs2="m1-a12 m1-a45"/>
+                    <cml:bond atomRefs2="m1-a13 m1-a46"/>
+                    <cml:bond atomRefs2="m1-a13 m1-a47"/>
+                    <cml:bond atomRefs2="m1-a14 m1-a48"/>
+                    <cml:bond atomRefs2="m1-a14 m1-a49"/>
+                    <cml:bond atomRefs2="m1-a15 m1-a50"/>
+                    <cml:bond atomRefs2="m1-a15 m1-a51"/>
+                    <cml:bond atomRefs2="m1-a16 m1-a52"/>
+                    <cml:bond atomRefs2="m1-a16 m1-a53"/>
+                    <cml:bond atomRefs2="m1-a17 m1-a54"/>
+                    <cml:bond atomRefs2="m1-a17 m1-a55"/>
+                    <cml:bond atomRefs2="m1-a18 m1-a56"/>
+                    <cml:bond atomRefs2="m1-a18 m1-a57"/>
+                    <cml:bond atomRefs2="m1-a19 m1-a58"/>
+                    <cml:bond atomRefs2="m1-a19 m1-a59"/>
+                    <cml:bond atomRefs2="m1-a20 m1-a60"/>
+                    <cml:bond atomRefs2="m1-a20 m1-a61"/>
+                    <cml:bond atomRefs2="m1-a20 m1-a62"/>
+            </cml:bondArray>
+    </cml:molecule>
+</cml:cml>

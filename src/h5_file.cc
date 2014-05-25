@@ -4,6 +4,7 @@
 #include <node.h>
 #include <string>
 #include <iostream>
+#include <sstream>
 
 #include "H5Cpp.h"
 #include "hdf5.h"
@@ -15,11 +16,29 @@ namespace NodeHDF5 {
     File::File (const char* path) {
         
         m_file = new H5::H5File(path, H5F_ACC_RDONLY);
+        gcpl = H5Pcreate(H5P_GROUP_CREATE);
+        herr_t err = H5Pset_link_creation_order(gcpl, H5P_CRT_ORDER_TRACKED |
+                H5P_CRT_ORDER_INDEXED);
+        if (err < 0) {
+            std::stringstream ss;
+            ss << "Failed to set link creation order, with return: " << err << ".\n";
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
+            return;
+        }
         
     }
     
     File::File (const char* path, unsigned long flags) {
         m_file = new H5::H5File(path, toAccessMap[flags]);
+        gcpl = H5Pcreate(H5P_GROUP_CREATE);
+        herr_t err = H5Pset_link_creation_order(gcpl, H5P_CRT_ORDER_TRACKED |
+                H5P_CRT_ORDER_INDEXED);
+        if (err < 0) {
+            std::stringstream ss;
+            ss << "Failed to set link creation order, with return: " << err << ".\n";
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
+            return;
+        }
         
     }
     
@@ -134,7 +153,7 @@ namespace NodeHDF5 {
     void File::OpenGroup (const v8::FunctionCallbackInfo<Value>& args) {
         
         // fail out if arguments are not correct
-        if (args.Length() != 1 || !args[0]->IsString()) {
+        if (args.Length() < 1 || args.Length() >2 || !args[0]->IsString()) {
             
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
             args.GetReturnValue().SetUndefined();
