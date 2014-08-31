@@ -45,9 +45,18 @@ var Access = {
     h5lt.makeDataset(group.id, 'Refractive Index', buffer);
     var readBuffer=h5lt.readDataset(group.id, 'Refractive Index');
 
+    //A rank two dataset with 3 columns of doubles
+                var frequency=new Float64Array(3*numberOfDataLines);
+    var groupFrequencies=file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
+    groupFrequencies.open('pmcservices/sodium-icosanoate/Frequency Data/Frequencies', file);
+    frequency.rank=2;
+    frequency.rows=numberOfDataLines;
+    frequency.columns=3;
+    h5lt.makeDataset(groupFrequencies.id, title, frequency);
+
 ```
 
-The dataset members of a group can be retieved in order of creation. Something I've need more often than not.
+The dataset members of a group can be retrieved in order of creation. Something I've need more often than not.
 ```
             var groupFrequencies=file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
             var frequencyNames=groupFrequencies.getMemberNamesByCreationOrder();
@@ -76,7 +85,7 @@ Because javscript has the ability to have property names with spaces are similar
             groupTargets.Information="\"There are no solutions; there are only trade-offs.\" -- Thomas Sowell";
             groupTargets.flush();
 ```
-If an attribute is already there it will get updated by h5 exists check, remove and then added back. Types are allowed to change to match the javascript side.
+Types are allowed to change to match the javascript side. If an attribute is already there it will get updated by h5 existence check, remove and then added back. 
 When opening an h5 the group's attributes can be refreshed to the javascript in reverse manner
 ```
             var groupTarget=file.openGroup('pmcservices/sodium-icosanoate');
@@ -88,7 +97,7 @@ When opening an h5 the group's attributes can be refreshed to the javascript in 
 Currently testing with node v0.11.13-pre and V8 3.25.30
 
 And a legacy development for node v0.10.31 and V8 3.14.5.9 resides in ./legacy/node-v0.10.31. This probably will work a number of v0.10.x's.
-Go into the ./legacy/node-v0.10.31 folder and with npm, node-gyp and node pointing to compatible version, compile the same as below. Then go back two folders and test using the same javascript code.  Make sure your NODEPATH has your obj.target.
+Go into the ./legacy/node-v0.10.31 folder and with npm, node-gyp and node pointing to compatible version, compile the same as below. Then go back two folders and test using the same javascript code.  Make sure your NODE_PATH has your obj.target.
 For example:
 ```
 export NODE_PATH=/home/roger/NodeProjects/hdf5.node/build/Release/obj.target:$NODE_PATH
