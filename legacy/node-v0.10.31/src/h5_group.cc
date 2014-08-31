@@ -236,14 +236,13 @@ namespace NodeHDF5 {
         Group* group = ObjectWrap::Unwrap<Group>(args.This());
 
         v8::Local<v8::Array> propertyNames=args.This()->GetPropertyNames();
-        std::cout<<(*String::Utf8Value(args.This()->GetConstructorName()))<<" PropertyNames "<<propertyNames->Length()<<std::endl;
         for(unsigned int index=0;index<propertyNames->Length();index++)
         {
              v8::Local<v8::Value> name=propertyNames->Get (index);
              if(!args.This()->Get(name)->IsFunction() && strncmp("id",(*String::Utf8Value(name->ToString())), 2)!=0)
              {
-                std::cout<<index<<" "<<name->IsString()<<std::endl;
-                std::cout<<index<<" "<<(*String::Utf8Value(name->ToString()))<<std::endl;
+//                std::cout<<index<<" "<<name->IsString()<<std::endl;
+//                std::cout<<index<<" "<<(*String::Utf8Value(name->ToString()))<<std::endl;
                 if(args.This()->Get(name)->IsUint32())
                 {
                     uint32_t value=args.This()->Get(name)->ToUint32()->Uint32Value();

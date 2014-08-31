@@ -209,6 +209,7 @@ describe("testing lite interface ",function(){
                                 firstTrajectory.rank=2;
                                 firstTrajectory.rows=numberOfDataLines;
                                 firstTrajectory.columns=3;
+                                firstTrajectory.Dipole=2.9;
                                 h5lt.makeDataset(groupGeometries.id, '0', firstTrajectory);
                                 lastTrajectory.rank=2;
                                 lastTrajectory.rows=numberOfDataLines;

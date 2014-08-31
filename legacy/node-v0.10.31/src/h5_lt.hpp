@@ -158,7 +158,63 @@ static v8::Handle<v8::Value> make_dataset (const v8::Arguments& args)
 //        args.GetReturnValue().SetUndefined();
         return scope.Close(Undefined());;
     }
-//    args.GetReturnValue().SetUndefined();
+
+    //Atributes
+        v8::Local<v8::Array> propertyNames=buffer->GetPropertyNames();
+        for(unsigned int index=buffer->GetIndexedPropertiesExternalArrayDataLength ()-1;index<propertyNames->Length();index++)
+        {
+             v8::Local<v8::Value> name=propertyNames->Get (index);
+             if(!buffer->Get(name)->IsFunction() && !buffer->Get(name)->IsArray() && strncmp("id",(*String::Utf8Value(name->ToString())), 2)!=0 && strncmp("rank",(*String::Utf8Value(name->ToString())), 4)!=0 && strncmp("rows",(*String::Utf8Value(name->ToString())), 4)!=0 && strncmp("columns",(*String::Utf8Value(name->ToString())), 7)!=0 && strncmp("buffer",(*String::Utf8Value(name->ToString())), 6)!=0)
+             {
+//                std::cout<<index<<" "<<name->IsString()<<std::endl;
+//                std::cout<<index<<" "<<(*String::Utf8Value(name->ToString()))<<" rnp "<<buffer->HasRealNamedProperty( Local<String>::Cast(name))<<std::endl;
+                if(buffer->Get(name)->IsUint32())
+                {
+                    uint32_t value=buffer->Get(name)->ToUint32()->Uint32Value();
+                    if(H5Aexists_by_name(args[0]->ToInt32()->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
+                    {
+                        H5Adelete_by_name(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+                    }
+                    H5LTset_attribute_uint(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), (unsigned int*)&value, 1);
+                    
+                }
+                else if(buffer->Get(name)->IsInt32())
+                {
+                    int32_t value=buffer->Get(name)->ToInt32()->Int32Value();
+                    if(H5Aexists_by_name(args[0]->ToInt32()->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
+                    {
+                        H5Adelete_by_name(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+                    }
+                    H5LTset_attribute_int(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), (int*)&value, 1);
+                    
+                }
+                else if(buffer->Get(name)->IsNumber())
+                {
+                    double value=buffer->Get(name)->ToNumber()->NumberValue();
+                    if(H5Aexists_by_name(args[0]->ToInt32()->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
+                    {
+                        H5Adelete_by_name(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+                    }
+                    H5LTset_attribute_double(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), (double*)&value, 1);
+                    
+                }
+                else if(buffer->Get(name)->IsString())
+                {
+                    std::string value((*String::Utf8Value(buffer->Get(name)->ToString())));
+                    if(H5Aexists_by_name(args[0]->ToInt32()->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
+                    {
+                        H5Adelete_by_name(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+                    }
+                     H5::DataSpace ds(H5S_SIMPLE);
+                     const long long unsigned int currentExtent=name->ToString()->Utf8Length();
+                     ds.setExtentSimple(1, &currentExtent);
+                    H5LTset_attribute_string(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), (const char*)value.c_str());
+                    
+                }
+             }
+        }
+
+       
     return scope.Close(Undefined());
 }
 
