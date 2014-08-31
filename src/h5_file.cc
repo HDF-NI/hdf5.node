@@ -3,6 +3,7 @@
 
 #include <node.h>
 #include <string>
+#include <cstring>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -253,7 +254,60 @@ namespace NodeHDF5 {
         
          // unwrap file object
         File* file = ObjectWrap::Unwrap<File>(args.This());
-//        group->m_group.close();
+        v8::Local<v8::Array> propertyNames=args.This()->GetPropertyNames();
+        std::cout<<(*String::Utf8Value(args.This()->GetConstructorName()))<<" PropertyNames "<<propertyNames->Length()<<std::endl;
+        for(unsigned int index=0;index<propertyNames->Length();index++)
+        {
+             v8::Local<v8::Value> name=propertyNames->Get (index);
+             if(!args.This()->Get(name)->IsFunction() && strncmp("id",(*String::Utf8Value(name->ToString())), 2)!=0)
+             {
+                std::cout<<index<<" "<<name->IsString()<<std::endl;
+                std::cout<<index<<" "<<(*String::Utf8Value(name->ToString()))<<std::endl;
+                if(args.This()->Get(name)->IsUint32())
+                {
+                    uint32_t value=args.This()->Get(name)->ToUint32()->Uint32Value();
+                    if(file->FileObject()->attrExists((*String::Utf8Value(name->ToString()))))
+                    {
+                        file->FileObject()->removeAttr((*String::Utf8Value(name->ToString())));
+                    }
+                    file->FileObject()->createAttribute((*String::Utf8Value(name->ToString())), H5::PredType::NATIVE_UINT, H5::DataSpace()).write(H5::PredType::NATIVE_UINT, (void*)&value);
+                    
+                }
+                else if(args.This()->Get(name)->IsInt32())
+                {
+                    int32_t value=args.This()->Get(name)->ToInt32()->Int32Value();
+                    if(file->FileObject()->attrExists((*String::Utf8Value(name->ToString()))))
+                    {
+                        file->FileObject()->removeAttr((*String::Utf8Value(name->ToString())));
+                    }
+                    file->FileObject()->createAttribute((*String::Utf8Value(name->ToString())), H5::PredType::NATIVE_INT, H5::DataSpace()).write(H5::PredType::NATIVE_INT, (void*)&value);
+                    
+                }
+                else if(args.This()->Get(name)->IsNumber())
+                {
+                    double value=args.This()->Get(name)->ToNumber()->NumberValue();
+                    if(file->FileObject()->attrExists((*String::Utf8Value(name->ToString()))))
+                    {
+                        file->FileObject()->removeAttr((*String::Utf8Value(name->ToString())));
+                    }
+                    file->FileObject()->createAttribute((*String::Utf8Value(name->ToString())), H5::PredType::NATIVE_DOUBLE, H5::DataSpace()).write(H5::PredType::NATIVE_DOUBLE, (void*)&value);
+                    
+                }
+                else if(args.This()->Get(name)->IsString())
+                {
+                    std::string value((*String::Utf8Value(args.This()->Get(name)->ToString())));
+                    if(file->FileObject()->attrExists((*String::Utf8Value(name->ToString()))))
+                    {
+                        file->FileObject()->removeAttr((*String::Utf8Value(name->ToString())));
+                    }
+                     H5::DataSpace ds(H5S_SIMPLE);
+                     const long long unsigned int currentExtent=name->ToString()->Utf8Length();
+                     ds.setExtentSimple(1, &currentExtent);
+                    file->FileObject()->createAttribute((*String::Utf8Value(name->ToString())), H5::StrType(H5::PredType::C_S1, name->ToString()->Utf8Length()),ds).write(H5::StrType(H5::PredType::C_S1, name->ToString()->Utf8Length()), value);
+                    
+                }
+             }
+        }
         
         return;
         
