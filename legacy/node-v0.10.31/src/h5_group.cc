@@ -24,10 +24,10 @@ namespace NodeHDF5 {
     void Group::Initialize () {
         
         // instantiate constructor template
-        Local<FunctionTemplate> t = FunctionTemplate::New(v8::Isolate::GetCurrent(), New);
+        Local<FunctionTemplate> t = FunctionTemplate::New(New);
         
         // set properties
-        t->SetClassName(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group"));
+        t->SetClassName(String::New("Group"));
         t->InstanceTemplate()->SetInternalFieldCount(1);
         // member method prototypes
         NODE_SET_PROTOTYPE_METHOD(t, "create", Create);
@@ -43,18 +43,20 @@ namespace NodeHDF5 {
         NODE_SET_PROTOTYPE_METHOD(t, "getMemberNamesByCreationOrder", GetMemberNamesByCreationOrder);
         
         // initialize constructor reference
-        Constructor.Reset(v8::Isolate::GetCurrent(), t);
-        
+//        std::cout<<"group Constructor  "<<std::endl;
+        Constructor=Persistent<FunctionTemplate>::New(t);
+//        std::cout<<"create  "<<std::endl;
+
     }
     
-    void Group::New (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> Group::New (const v8::Arguments& args) {
         
-//        HandleScope scope;
+        HandleScope scope;
         
         // fail out if arguments are not correct
 //        if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
 //            
-//            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file")));
+//            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::New("expected name, file")));
 //            args.GetReturnValue().SetUndefined();
 //            return;
 //            
@@ -63,46 +65,53 @@ namespace NodeHDF5 {
         if (args.Length() == 3 && args[0]->IsString() && args[1]->IsObject()) {
         // store specified group name
         String::Utf8Value group_name (args[0]->ToString());
-        
+        std::string name;
+        name.assign(*group_name);
+//        std::cout<<"  group->name "<<name<<std::endl;
+       
         // unwrap file object
         File* file = ObjectWrap::Unwrap<File>(args[1]->ToObject());
+//         std::cout<<" unwrapped "<<std::endl;
         
         // create group
         Group* group = new Group(file->FileObject()->openGroup(*group_name));
+//         std::cout<<" gcpl.reset "<<std::endl;
         group->gcpl.reset(new H5::PropList(H5Pcreate(H5P_GROUP_CREATE) ));
         herr_t err = H5Pset_link_creation_order(group->gcpl->getId(), args[2]->ToUint32()->IntegerValue());
+//         std::cout<<" err "<<err<<std::endl;
         if (err < 0) {
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
-            args.GetReturnValue().SetUndefined();
-            return;
+            ThrowException(v8::Exception::SyntaxError(String::New("Failed to set link creation order")));
+//            args.GetReturnValue().SetUndefined();
+            return scope.Close(Undefined());
             }
 //        group->m_group.
         group->name.assign(*group_name);
+//        std::cout<<"  group->name "<<group->name<<std::endl;
         group->Wrap(args.This());
         
         // attach various properties
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->m_group.getId()));
+        args.This()->Set(String::New("id"), Number::New(group->m_group.getId()));
         }
         else
         {
-            args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), -1));
+            args.This()->Set(String::New("id"), Number::New( -1));
             
         }
         
-        return;
+        return args.This();
         
     }
     
-    void Group::Create (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> Group::Create (const v8::Arguments& args) {
         
-//        HandleScope scope;
+        HandleScope scope;
         
         // fail out if arguments are not correct
         if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
             
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file")));
-            args.GetReturnValue().SetUndefined();
-            return;
+            ThrowException(v8::Exception::SyntaxError(String::New("expected name, file")));
+//            args.GetReturnValue().SetUndefined();
+            return scope.Close(Undefined());
             
         }
         
@@ -118,22 +127,22 @@ namespace NodeHDF5 {
         group->Wrap(args.This());
         
         // attach various properties
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->m_group.getId()));
+        args.This()->Set(String::New("id"), Number::New( group->m_group.getId()));
         
-        return;
+        return args.This();
         
     }
     
-    void Group::Open (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> Group::Open (const v8::Arguments& args) {
         
-//        HandleScope scope;
+        HandleScope scope;
         
         // fail out if arguments are not correct
         if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
             
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file")));
-            args.GetReturnValue().SetUndefined();
-            return;
+            ThrowException(v8::Exception::SyntaxError(String::New("expected name, file")));
+//            args.GetReturnValue().SetUndefined();
+            return scope.Close(Undefined());
             
         }
         
@@ -149,20 +158,21 @@ namespace NodeHDF5 {
         group->Wrap(args.This());
         
         // attach various properties
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->m_group.getId()));
+        args.This()->Set(String::New("id"), Number::New( group->m_group.getId()));
         
-        return;
+        return args.This();
         
     }
     
-    void Group::Refresh (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> Group::Refresh (const v8::Arguments& args) {
+        
+        HandleScope scope;
         
         // fail out if arguments are not correct
         if (args.Length() >0 ) {
             
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
-            args.GetReturnValue().SetUndefined();
-            return;
+            ThrowException(v8::Exception::SyntaxError(String::New("expected arguments")));
+            return scope.Close(Undefined());
             
         }
         
@@ -181,43 +191,44 @@ namespace NodeHDF5 {
             case H5T_INTEGER:
                 long long intValue;
                 attr.read(attr.getDataType(), &intValue);
-                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), Int32::New(v8::Isolate::GetCurrent(), intValue));
+                args.This()->Set(String::New(holder[index].c_str()), Int32::New(intValue));
                 break;
             case H5T_FLOAT:
                 double value;
                 attr.read(attr.getDataType(), &value);
-                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), Number::New(v8::Isolate::GetCurrent(), value));
+                args.This()->Set(String::New(holder[index].c_str()), Number::New(value));
                 break;
             case H5T_STRING:
             {
-//                std::cout<<"H5T_STRING "<<attr.getDataType().getSize ()<<" "<<attr.getDataType().fromClass()<<std::endl;
                 std::string strValue(attr.getStorageSize(),'\0');
-                attr.read(attr.getDataType(), strValue);
-                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str()));
+                attr.read(attr.getDataType(), (void*)strValue.c_str());
+                args.This()->Set(String::New(holder[index].c_str()), String::New(strValue.c_str()));
             }
                 break;
             case H5T_NO_CLASS:
             default:
 //                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
 //                    args.GetReturnValue().SetUndefined();
-                    return;
+                    return scope.Close(Undefined());
                 break;
         }
         attr.close();
         }
         
-        return;
+        return scope.Close(Undefined());
         
     }
     
-    void Group::Flush (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> Group::Flush (const v8::Arguments& args) {
+        
+        HandleScope scope;
         
         // fail out if arguments are not correct
         if (args.Length() >0 ) {
             
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
-            args.GetReturnValue().SetUndefined();
-            return;
+            ThrowException(v8::Exception::SyntaxError(String::New("expected arguments")));
+
+            return scope.Close(Undefined());
             
         }
         
@@ -272,6 +283,7 @@ namespace NodeHDF5 {
                     }
                      H5::DataSpace ds(H5S_SIMPLE);
                      const long long unsigned int currentExtent=name->ToString()->Utf8Length();
+                     std::cout<<"currentExtent "<<currentExtent<<std::endl;
                      ds.setExtentSimple(1, &currentExtent);
                     group->m_group.createAttribute((*String::Utf8Value(name->ToString())), H5::StrType(H5::PredType::C_S1, name->ToString()->Utf8Length()),ds).write(H5::StrType(H5::PredType::C_S1, name->ToString()->Utf8Length()), value);
                     
@@ -279,19 +291,20 @@ namespace NodeHDF5 {
              }
         }
         
-        
-        return;
+        return args.This();
         
     }
     
-    void Group::Close (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> Group::Close (const v8::Arguments& args) {
+        
+        HandleScope scope;
         
         // fail out if arguments are not correct
         if (args.Length() >0 ) {
             
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
-            args.GetReturnValue().SetUndefined();
-            return;
+            ThrowException(v8::Exception::SyntaxError(String::New("expected arguments")));
+//            args.GetReturnValue().SetUndefined();
+            return scope.Close(Undefined());
             
         }
         
@@ -299,18 +312,18 @@ namespace NodeHDF5 {
         Group* group = ObjectWrap::Unwrap<Group>(args.This());
         group->m_group.close();
         
-        return;
+        return args.This();
         
     }
     
-    void Group::GetNumAttrs (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> Group::GetNumAttrs (const v8::Arguments& args) {
         
-//        HandleScope scope;
+        HandleScope scope;
         
         // fail out if arguments are not correct
 //        if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
 //            
-//            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file")));
+//            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::New("expected name, file")));
 //            args.GetReturnValue().SetUndefined();
 //            return;
 //            
@@ -319,19 +332,19 @@ namespace NodeHDF5 {
         // unwrap group
         Group* group = ObjectWrap::Unwrap<Group>(args.This());
         
-        args.GetReturnValue().Set(group->m_group.getNumAttrs());
-        return;
+//        args.GetReturnValue().Set(group->m_group.getNumAttrs());
+        return scope.Close(Uint32::New(group->m_group.getNumAttrs()));
         
     }
     
-    void Group::GetAttributeNames (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> Group::GetAttributeNames (const v8::Arguments& args) {
         
-//        HandleScope scope;
+        HandleScope scope;
         
         // unwrap group
         Group* group = ObjectWrap::Unwrap<Group>(args.This());
         
-        Local<Array> array=Array::New(v8::Isolate::GetCurrent(), group->m_group.getNumAttrs());
+        Local<Array> array=Array::New(group->m_group.getNumAttrs());
         uint32_t index=0;
         std::vector<std::string> holder;
         group->m_group.iterateAttrs([&](H5::H5Location &loc, H5std_string attr_name, void *operator_data){
@@ -339,23 +352,23 @@ namespace NodeHDF5 {
         }, &index, &holder);
         for(index=0;index<(uint32_t)group->m_group.getNumAttrs();index++)
         {
-            array->Set(index, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()));
+            array->Set(index, v8::String::New(holder[index].c_str()));
         }
-        args.GetReturnValue().Set(array);
-        return;
+//        args.GetReturnValue().Set(array);
+        return scope.Close(array);
         
     }
     
-    void Group::ReadAttribute (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> Group::ReadAttribute (const v8::Arguments& args) {
         
-//        HandleScope scope;
+        HandleScope scope;
         
         // fail out if arguments are not correct
         if (args.Length() != 1 || !args[0]->IsString()) {
             
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected attribute name")));
-            args.GetReturnValue().SetUndefined();
-            return;
+            ThrowException(v8::Exception::SyntaxError(String::New("expected attribute name")));
+//            args.GetReturnValue().SetUndefined();
+            return scope.Close(Undefined());
             
         }
         
@@ -370,47 +383,47 @@ namespace NodeHDF5 {
             case 1:
                 double value;
                 attr.read(attr.getDataType(), &value);
-                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), (*attribute_name)), Number::New(v8::Isolate::GetCurrent(), value));
-                args.GetReturnValue().Set(value);
+//                args.GetReturnValue().Set(value);
+                return scope.Close(v8::NumberObject::New(value));
                 break;
             default:
-                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
-                    args.GetReturnValue().SetUndefined();
-                    return;
+                    ThrowException(v8::Exception::SyntaxError(String::New("unsupported data type")));
+//                    args.GetReturnValue().SetUndefined();
+                    return scope.Close(Undefined());
                 break;
         }
         attr.close();
-        return;
+        return args.This();
         
     }
     
-    void Group::GetNumObjs (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> Group::GetNumObjs (const v8::Arguments& args) {
         
-//        HandleScope scope;
+        HandleScope scope;
         
         // fail out if arguments are not correct
 //        if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
 //            
-//            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file")));
+//            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::New("expected name, file")));
 //            args.GetReturnValue().SetUndefined();
 //            return;
 //            
 //        }
         // unwrap group
         Group* group = ObjectWrap::Unwrap<Group>(args.This());
-        args.GetReturnValue().Set((uint32_t) group->m_group.getNumObjs());
-        return;
+//        args.GetReturnValue().Set((uint32_t) group->m_group.getNumObjs());
+        return scope.Close(v8::Uint32::New((uint32_t) group->m_group.getNumObjs()));
         
     }
     
-    void Group::GetMemberNames (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> Group::GetMemberNames (const v8::Arguments& args) {
         
-//        HandleScope scope;
+        HandleScope scope;
         
         // unwrap group
         Group* group = ObjectWrap::Unwrap<Group>(args.This());
         
-        Local<Array> array=Array::New(v8::Isolate::GetCurrent(), group->m_group.getNumObjs());
+        Local<Array> array=Array::New(group->m_group.getNumObjs());
         uint32_t index=0;
         std::vector<std::string> holder;
 //        std::cout<<"group_name "<<group->name<std::endl;
@@ -423,21 +436,21 @@ namespace NodeHDF5 {
 //        }, &holder);
         for(index=0;index<(uint32_t)group->m_group.getNumObjs();index++)
         {
-            array->Set(index, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), group->m_group.getObjnameByIdx(index).c_str()));
+            array->Set(index, v8::String::New(group->m_group.getObjnameByIdx(index).c_str()));
         }
-        args.GetReturnValue().Set(array);
-        return;
+//        args.GetReturnValue().Set(array);
+        return scope.Close(array);
         
     }
     
-    void Group::GetMemberNamesByCreationOrder (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> Group::GetMemberNamesByCreationOrder (const v8::Arguments& args) {
         
-//        HandleScope scope;
+        HandleScope scope;
         
         // unwrap group
         Group* group = ObjectWrap::Unwrap<Group>(args.This());
         
-        Local<Array> array=Array::New(v8::Isolate::GetCurrent(), group->m_group.getNumObjs());
+        Local<Array> array=Array::New(group->m_group.getNumObjs());
         uint32_t index=0;
         std::vector<std::string> holder;
 //        std::cout<<"group_name "<<group->name<std::endl;
@@ -451,9 +464,9 @@ namespace NodeHDF5 {
         herr_t err;
             H5G_info_t group_info;
             if ((err = H5Gget_info(group->m_group.getId(), &group_info)) < 0) {
-                v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), " has no info")));
-                args.GetReturnValue().SetUndefined();
-                return;
+                ThrowException(v8::Exception::SyntaxError(String::New(" has no info")));
+//                args.GetReturnValue().SetUndefined();
+                return scope.Close(Undefined());
             }
         for(index=0;index<(uint32_t)group_info.nlinks;index++)
         {
@@ -475,16 +488,16 @@ namespace NodeHDF5 {
              */
             size = H5Lget_name_by_idx(group->m_group.getId(), ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, index,
                     (char*) datasetTitle.c_str(), (size_t) size, H5P_DEFAULT);
-            array->Set(index, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), datasetTitle.c_str()));
+            array->Set(index, v8::String::New(datasetTitle.c_str()));
         }
-        args.GetReturnValue().Set(array);
-        return;
+//        args.GetReturnValue().Set(array);
+        return scope.Close(array);
         
     }
     
     Local<Object> Group::Instantiate (Local<Object> file) {
         
-//        HandleScope scope;
+        HandleScope scope;
         
         // group name and file reference
         Local<Value> argv[1] = {
@@ -492,9 +505,8 @@ namespace NodeHDF5 {
                 file
                 
         };
-        
         // return new group instance
-        return Local<FunctionTemplate>::New(v8::Isolate::GetCurrent(), Constructor)->GetFunction()->NewInstance(1, argv);
+        return Local<FunctionTemplate>::New(Constructor)->GetFunction()->NewInstance(1, argv);
         
     }
 
@@ -505,14 +517,14 @@ namespace NodeHDF5 {
         // group name and file reference
         Local<Value> argv[3] = {
                 
-                Local<Value>::New(v8::Isolate::GetCurrent(), String::NewFromUtf8(v8::Isolate::GetCurrent(), name)),
+                Local<Value>::New(String::New(name)),
                 file,
-                Uint32::New(v8::Isolate::GetCurrent(), creationOrder)
+                Uint32::New(creationOrder)
                 
         };
         
         // return new group instance
-        return Local<FunctionTemplate>::New(v8::Isolate::GetCurrent(), Constructor)->GetFunction()->NewInstance(3, argv);
+        return Local<FunctionTemplate>::New(Constructor)->GetFunction()->NewInstance(3, argv);
         
     }
 

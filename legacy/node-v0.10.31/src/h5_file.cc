@@ -23,7 +23,7 @@ namespace NodeHDF5 {
         if (err < 0) {
             std::stringstream ss;
             ss << "Failed to set link creation order, with return: " << err << ".\n";
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
+            ThrowException(v8::Exception::TypeError(String::New(ss.str().c_str())));
             return;
         }
         
@@ -37,7 +37,7 @@ namespace NodeHDF5 {
         if (err < 0) {
             std::stringstream ss;
             ss << "Failed to set link creation order, with return: " << err << ".\n";
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
+            ThrowException(v8::Exception::TypeError(String::New(ss.str().c_str())));
             return;
         }
         
@@ -60,13 +60,13 @@ namespace NodeHDF5 {
 
     void File::Initialize (Handle<Object> target) {
         
-        HandleScope scope(v8::Isolate::GetCurrent());
+        HandleScope scope;
         
         // instantiate constructor function template
-        Local<FunctionTemplate> t = FunctionTemplate::New(v8::Isolate::GetCurrent(), New);
-        t->SetClassName(String::NewFromUtf8(v8::Isolate::GetCurrent(), "File"));
+        Local<FunctionTemplate> t = FunctionTemplate::New(New);
+        t->SetClassName(String::New("File"));
         t->InstanceTemplate()->SetInternalFieldCount(1);
-        Constructor.Reset(v8::Isolate::GetCurrent(), t);
+        Constructor=Persistent<FunctionTemplate>::New( t);
         // member method prototypes
         NODE_SET_PROTOTYPE_METHOD(t, "createGroup", CreateGroup);
         NODE_SET_PROTOTYPE_METHOD(t, "openGroup", OpenGroup);
@@ -76,20 +76,19 @@ namespace NodeHDF5 {
         NODE_SET_PROTOTYPE_METHOD(t, "close", Close);
 //        Local<Function> f=t->GetFunction();
         // append this function to the target object
-        target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "File"), t->GetFunction());
+        target->Set(String::New("File"), t->GetFunction());
         
     }
     
-    void File::New (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> File::New (const v8::Arguments& args) {
         
-//        HandleScope scope;
-        
+        v8::HandleScope scope;
         // fail out if arguments are not correct
         if (args.Length() <1 || !args[0]->IsString()) {
             
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected file path")));
-            args.GetReturnValue().SetUndefined();
-            return;
+            ThrowException(v8::Exception::SyntaxError(String::New("expected file path")));
+//            args.GetReturnValue().SetUndefined();
+            return scope.Close(Undefined());
             
         }
         
@@ -98,9 +97,9 @@ namespace NodeHDF5 {
         // fail out if file is not valid hdf5
         if (args.Length() <2 && !H5::H5File::isHdf5(*path)) {
             
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "file is not hdf5 format")));
-            args.GetReturnValue().SetUndefined();
-            return;
+            ThrowException(v8::Exception::TypeError(String::New("file is not hdf5 format")));
+//            args.GetReturnValue().SetUndefined();
+            return scope.Close(Undefined());
             
         }
         // create hdf file object
@@ -114,22 +113,23 @@ namespace NodeHDF5 {
         f->Wrap(args.This());
         
         // attach various properties
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "path"), String::NewFromUtf8(v8::Isolate::GetCurrent(), f->m_file->getFileName().c_str()));
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "size"), Number::New(v8::Isolate::GetCurrent(), f->m_file->getFileSize()));
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "freeSpace"), Number::New(v8::Isolate::GetCurrent(), f->m_file->getFreeSpace()));
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "objectCount"), Number::New(v8::Isolate::GetCurrent(), f->m_file->getObjCount()));
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), f->m_file->getId()));
+        args.This()->Set(String::New("path"), String::New(f->m_file->getFileName().c_str()));
+        args.This()->Set(String::New("size"), Number::New(f->m_file->getFileSize()));
+        args.This()->Set(String::New("freeSpace"), Number::New(f->m_file->getFreeSpace()));
+        args.This()->Set(String::New("objectCount"), Number::New(f->m_file->getObjCount()));
+        args.This()->Set(String::New("id"), Number::New(f->m_file->getId()));
         
-        return;
+        return args.This();
         
     }
     
-    void File::CreateGroup (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> File::CreateGroup (const v8::Arguments& args) {
+        v8::HandleScope scope;
         
         // fail out if arguments are not correct
 //        if (args.Length() != 1 || !args[0]->IsString()) {
 //            
-//            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, callback")));
+//            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::New("expected name, callback")));
 //            args.GetReturnValue().SetUndefined();
 //            return;
 //            
@@ -150,25 +150,26 @@ namespace NodeHDF5 {
 //        Local<Function> callback = Local<Function>::Cast(args[1]);
 //        callback->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), 2, argv);
         
-        args.GetReturnValue().Set(instance);
-        return;
+//        args.GetReturnValue().Set(instance);
+        return scope.Close(instance);
         
     }
     
-    void File::OpenGroup (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> File::OpenGroup (const v8::Arguments& args) {
+    v8::HandleScope scope;
         
         // fail out if arguments are not correct
         if (args.Length() < 1 || args.Length() >2 || !args[0]->IsString()) {
             
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
-            args.GetReturnValue().SetUndefined();
-            return;
+            ThrowException(v8::Exception::SyntaxError(String::New("expected name")));
+//            args.GetReturnValue().SetUndefined();
+            return scope.Close(Undefined());
             
         }
         
         String::Utf8Value group_name (args[0]->ToString());
         
-        Local<Object> instance=Group::Instantiate(*group_name, args.This(), args[1]->ToUint32()->Uint32Value());
+        Local<Object> instance=Group::Instantiate(*group_name, args.This());
         // create callback params
 //        Local<Value> argv[2] = {
 //                
@@ -181,19 +182,20 @@ namespace NodeHDF5 {
 //        Local<Function> callback = Local<Function>::Cast(args[1]);
 //        callback->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), 2, argv);
         
-        args.GetReturnValue().Set(instance);
-        return;
+//        args.GetReturnValue().Set(instance);
+        return scope.Close(instance);
         
     }
 
-    void File::Refresh (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> File::Refresh (const v8::Arguments& args) {
         
+        HandleScope scope;
         // fail out if arguments are not correct
         if (args.Length() >0 ) {
             
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
-            args.GetReturnValue().SetUndefined();
-            return;
+            ThrowException(v8::Exception::SyntaxError(String::New("expected arguments")));
+
+            return scope.Close(Undefined());
             
         }
         
@@ -212,42 +214,43 @@ namespace NodeHDF5 {
             case H5T_INTEGER:
                 long long intValue;
                 attr.read(attr.getDataType(), &intValue);
-                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), Int32::New(v8::Isolate::GetCurrent(), intValue));
+                args.This()->Set(String::New(holder[index].c_str()), Int32::New(intValue));
                 break;
             case H5T_FLOAT:
                 double value;
                 attr.read(attr.getDataType(), &value);
-                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), Number::New(v8::Isolate::GetCurrent(), value));
+                args.This()->Set(String::New( holder[index].c_str()), Number::New( value));
                 break;
             case H5T_STRING:
             {
                 std::string strValue(attr.getStorageSize(),'\0');
                 attr.read(attr.getDataType(), (void*)strValue.c_str());
-                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str()));
+                args.This()->Set(String::New(holder[index].c_str()), String::New(strValue.c_str()));
             }
                 break;
             case H5T_NO_CLASS:
             default:
 //                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
 //                    args.GetReturnValue().SetUndefined();
-                    return;
+                    return scope.Close(args.This());
                 break;
         }
         attr.close();
         }
         
-        return;
+        return scope.Close(args.This());
         
     }
     
-    void File::Flush (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> File::Flush (const v8::Arguments& args) {
         
+        HandleScope scope;
         // fail out if arguments are not correct
         if (args.Length() >0 ) {
             
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
-            args.GetReturnValue().SetUndefined();
-            return;
+            ThrowException(v8::Exception::SyntaxError(String::New("expected arguments")));
+
+            return scope.Close(args.This());
             
         }
         
@@ -255,18 +258,19 @@ namespace NodeHDF5 {
         File* file = ObjectWrap::Unwrap<File>(args.This());
 //        group->m_group.close();
         
-        return;
+        return scope.Close(args.This());
         
     }
     
-    void File::Close (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> File::Close (const v8::Arguments& args) {
         
+        HandleScope scope;
         // fail out if arguments are not correct
         if (args.Length() >0 ) {
             
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
-            args.GetReturnValue().SetUndefined();
-            return;
+            ThrowException(v8::Exception::SyntaxError(String::New("expected arguments")));
+
+            return scope.Close(Undefined());
             
         }
         
@@ -274,13 +278,13 @@ namespace NodeHDF5 {
         File* file = ObjectWrap::Unwrap<File>(args.This());
         file->FileObject()->close();
         
-        return;
+        return scope.Close(args.This());
         
     }
     
-    void File::GetNumAttrs (const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Handle<v8::Value> File::GetNumAttrs (const v8::Arguments& args) {
         
-//        HandleScope scope;
+        HandleScope scope;
         
         // fail out if arguments are not correct
 //        if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
@@ -294,8 +298,7 @@ namespace NodeHDF5 {
         // unwrap file object
         File* file = ObjectWrap::Unwrap<File>(args.This());
         
-        args.GetReturnValue().Set(file->FileObject()->getNumAttrs());
-        return;
+        return scope.Close(Uint32::New(file->FileObject()->getNumAttrs()));
         
     }
     

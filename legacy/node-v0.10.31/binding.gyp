@@ -3,7 +3,7 @@
         {
             'target_name': 'hdf5',
             'include_dirs': [
-                '../../hdf5/include'
+                '/home/roger/NodeProjects/hdf5/include'
             ],
             'sources': [
                 'src/hdf5.cc',
@@ -17,16 +17,17 @@
                     '-lhdf5_cpp'
                 ],
                 'ldflags': [
-                    '-L../../hdf5/lib'
+                    '-L/home/roger/NodeProjects/hdf5/lib'
                 ]
             }
         },
         {
             'target_name': 'h5lt',
             'include_dirs': [
-                '../../hdf5/include'
+                '/home/roger/NodeProjects/hdf5/include'
             ],
             'sources': [
+                'src/Float64Array.hpp',
                 'src/h5lt.cc',
                 'src/h5_lt.hpp'
             ],
@@ -37,14 +38,14 @@
                     '-lhdf5_cpp'
                 ],
                 'ldflags': [
-                    '-L../../hdf5/lib'
+                    '-L/home/roger/NodeProjects/hdf5/lib'
                 ]
             }
         },
         {
             'target_name': 'h5im',
             'include_dirs': [
-                '../../hdf5/include'
+                '/home/roger/NodeProjects/hdf5/include'
             ],
             'sources': [
                 'src/h5im.cc',
@@ -57,7 +58,7 @@
                     '-lhdf5_cpp'
                 ],
                 'ldflags': [
-                    '-L../../hdf5/lib'
+                    '-L/home/roger/NodeProjects/hdf5/lib'
                 ]
             }
         }

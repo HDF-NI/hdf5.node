@@ -16,6 +16,11 @@ var Access = {
   ACC_CREAT :	5	/*create non-existing files  */
 };
 
+var CreationOrder = {
+    H5P_CRT_ORDER_TRACKED : 1,
+    H5P_CRT_ORDER_INDEXED : 2
+};
+
 var State = {
   COUNT : 0,
   TITLE : 1,
@@ -48,7 +53,12 @@ describe("testing lite interface ",function(){
             buffer[4]=5.0;
             h5lt.makeDataset(group.id, 'Refractive Index', buffer);
             var readBuffer=h5lt.readDataset(group.id, 'Refractive Index');
-            readBuffer.should.match(buffer);
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(5);
+            readBuffer.buffer.byteLength.should.match(buffer.buffer.byteLength);
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.should.match(readBuffer);
         });
         it("should be Float32Array io ", function(){
             var buffer=new Float32Array(5);
@@ -59,7 +69,11 @@ describe("testing lite interface ",function(){
             buffer[4]=1.0;
             h5lt.makeDataset(group.id, 'Refractive Index f', buffer);
             var readBuffer=h5lt.readDataset(group.id, 'Refractive Index f');
-            readBuffer.should.match(buffer);
+            readBuffer.constructor.name.should.match('Float32Array');
+            readBuffer.length.should.match(5);
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.should.match(readBuffer);
         });
         it("should be Int32Array io ", function(){
             var buffer=new Int32Array(5);
@@ -70,7 +84,11 @@ describe("testing lite interface ",function(){
             buffer[4]=1;
             h5lt.makeDataset(group.id, 'Refractive Index l', buffer);
             var readBuffer=h5lt.readDataset(group.id, 'Refractive Index l');
-            readBuffer.should.match(buffer);
+            readBuffer.constructor.name.should.match('Int32Array');
+            readBuffer.length.should.match(5);
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.should.match(readBuffer);
         });
         it("should be Uint32Array io ", function(){
             var buffer=new Uint32Array(5);
@@ -81,7 +99,33 @@ describe("testing lite interface ",function(){
             buffer[4]=1;
             h5lt.makeDataset(group.id, 'Refractive Index ui', buffer);
             var readBuffer=h5lt.readDataset(group.id, 'Refractive Index ui');
-            readBuffer.should.match(buffer);
+            readBuffer.length.should.match(5);
+            readBuffer.constructor.name.should.match('Uint32Array');
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.should.match(readBuffer);
+        });
+        it("flush properties to h5 ", function(){
+            group.getNumAttrs().should.equal(0);
+            group[ 'Computed Heat of Formation' ]=100.0;
+            group.flush();
+            group.getNumAttrs().should.equal(1);
+            group[ 'Computed Heat of Formation' ]=7.77;
+            group.flush();
+            group.getNumAttrs().should.equal(1);
+            group.Status=256;
+            group.flush();
+            group.getNumAttrs().should.equal(2);
+            group.Status=-1;
+            group.flush();
+            group.getNumAttrs().should.equal(2);
+            group.Information="\"There are no solutions; there are only trade-offs.\" -- Thomas Sowell";
+            group.flush();
+            group.getNumAttrs().should.equal(3);
+            console.dir(group.Information);
+        });
+        it("should close pmc ", function(){
+            group.close();
         });
     });
     describe("create an h5, group and some datasets ",function(){
@@ -93,6 +137,10 @@ describe("testing lite interface ",function(){
             groupPMCServices.create('pmcservices', file);
             var groupTargets=file.createGroup();
             groupTargets.create('pmcservices/sodium-icosanoate', file);
+            groupTargets[ 'Computed Heat of Formation' ]=-221.78436098572274;
+            groupTargets[ 'Computed Ionization Potential' ]=9.57689311885752;
+            groupTargets[ 'Computed Total Energy' ]=-3573.674399276322;
+            groupTargets.flush();
             var groupDocuments=file.createGroup();
             groupDocuments.create('pmcservices/sodium-icosanoate/Documents', file);
             var groupFrequencyData=file.createGroup();
@@ -151,8 +199,8 @@ describe("testing lite interface ",function(){
                             columnCount++;
                             if(columnCount===7)columnCount=0;
                             if(count === numberOfDataLines){
-                            console.dir(count);
-                            console.dir(title);
+                            //console.dir(count);
+                            //console.dir(title);
                             count=0;
                             if(firstFrequency)
                             {
@@ -189,6 +237,24 @@ describe("testing lite interface ",function(){
         var file;
         before(function(){
           file = new hdf5.File('./roothaan.h5', Access.ACC_RDONLY);
+        });
+        var groupTarget;
+        it("open of target should be >0", function(){
+            groupTarget=file.openGroup('pmcservices/sodium-icosanoate', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
+            groupTarget.id.should.not.equal(-1);
+        });
+        it("getNumAttrs of groupTarget should be 3", function(){
+//            console.dir(groupTarget);
+            groupTarget.getNumAttrs().should.equal(3);
+            groupTarget.refresh();
+//            console.dir(groupTarget);
+            
+            it("readAttribute Computed Heat Of Formation should be -221.78436098572274", function(){
+                groupTarget.refresh();
+                groupTarget[ 'Computed Heat Of Formation' ].should.equal(-221.78436098572274);
+                groupTarget[ 'Computed Ionization Potential' ].should.equal(9.57689311885752);
+                groupTarget[ 'Computed Total Energy' ].should.equal(-3573.674399276322);
+            });
         });
         it("open of Geometries should be >0", function(){
             var groupDocuments=file.openGroup('pmcservices/sodium-icosanoate/Documents');
@@ -233,7 +299,30 @@ describe("testing lite interface ",function(){
                 xmolDocument.length.should.equal(1435803);
                 fs.writeFile('sodium-icosanoate.xmol', xmolDocument, [flag='w'])
                 fs.writeFile('sodium-icosanoate.xml', xmlDocument, [flag='w'])
-            });            
+                groupGeometries.close();
+            });
+        });
+        var groupGeometries;
+        it("open of Geometries should be >0", function(){
+            groupGeometries=file.openGroup('pmcservices/sodium-icosanoate/Trajectories/Geometries');
+            groupGeometries.id.should.not.equal(-1);
+        });
+        it("getNumAttrs of Geometries should be 0", function(){
+            groupGeometries.getNumAttrs().should.equal(0);
+        });
+        it("getNumObjs of Geometries should be 2", function(){
+            groupGeometries.getNumObjs().should.equal(2);
+        });
+        it("getMemberNames of Geometries should be 240 names in creation order", function(){
+            var array=groupGeometries.getMemberNamesByCreationOrder();
+            array[1].should.equal("1");
+        });
+        it("getNumAttrs of file should be 3", function(){
+//            console.dir(file);
+            file.getNumAttrs().should.equal(0);
+            file.refresh();
+//            console.dir(file);
+
         });
     });
     

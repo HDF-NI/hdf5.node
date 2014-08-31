@@ -33,6 +33,12 @@ static void make_image (const v8::FunctionCallbackInfo<Value>& args)
     if(buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->ToInt32()->Value()==3)
     {
         herr_t err=H5IMmake_image_24bit (args[0]->ToInt32()->Value(), *dset_name,  buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))->ToInt32()->Value(), buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))->ToInt32()->Value(), *interlace, (const unsigned char *)buffer->Buffer()->Externalize().Data());
+        if(err<0)
+        {
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make image 24 bit")));
+            args.GetReturnValue().SetUndefined();
+            return;
+        }
     }
     args.GetReturnValue().SetUndefined();
 }
@@ -47,10 +53,22 @@ static void read_image (const v8::FunctionCallbackInfo<Value>& args)
     char interlace[255];
     hssize_t npals;
     herr_t err=H5IMget_image_info(args[0]->ToInt32()->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
+    if(err<0)
+    {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
+        args.GetReturnValue().SetUndefined();
+        return;
+    }
 //    Local<ArrayBuffer> arrayBuffer=ArrayBuffer::New(v8::Isolate::GetCurrent(), (size_t)(planes*width*height));
     std::unique_ptr<unsigned char[]> contentBuffer(new unsigned char[(size_t)(planes*width*height)]);
     Local<Uint8Array> buffer = Uint8Array::New(ArrayBuffer::New(v8::Isolate::GetCurrent(), (size_t)(planes*width*height)), 0, (size_t)(planes*width*height));
     err=H5IMread_image (args[0]->ToInt32()->Value(), *dset_name, contentBuffer.get() );
+    if(err<0)
+    {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read image")));
+        args.GetReturnValue().SetUndefined();
+        return;
+    }
     for(size_t index=0;index<(size_t)(planes*width*height);index++)
     {
         buffer->Set(index, Number::New(v8::Isolate::GetCurrent(), contentBuffer[index]));

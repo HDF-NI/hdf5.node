@@ -61,7 +61,17 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
     else if(args[2]->IsUint32Array())
     {
         type_id=H5T_NATIVE_UINT;
-        buffer = Local<Int32Array>::Cast(args[2]);
+        buffer = Local<Uint32Array>::Cast(args[2]);
+    }
+    else if(args[2]->IsInt8Array())
+    {
+        type_id=H5T_NATIVE_INT8;
+        buffer = Local<Int8Array>::Cast(args[2]);
+    }
+    else if(args[2]->IsUint8Array())
+    {
+        type_id=H5T_NATIVE_UINT8;
+        buffer = Local<Uint8Array>::Cast(args[2]);
     }
     else
     {
@@ -74,7 +84,7 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
     {
         Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"));
         rank=rankValue->ToInt32()->Value();
-        std::cout<<"has rank "<<rank<<std::endl;
+//        std::cout<<"has rank "<<rank<<std::endl;
     }
     if(rank==1)
     {
@@ -91,7 +101,7 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
     {
 //        Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value();
 //        Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value();
-        hsize_t dims[2]={buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value(), buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value()};
+        hsize_t dims[2]={(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value()};
         herr_t err=H5LTmake_dataset (args[0]->ToInt32()->Value(), *dset_name, rank, dims, type_id, buffer->Buffer()->Externalize().Data() );
         if(err<0)
         {
@@ -198,6 +208,23 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                     {
                         type_id=H5T_NATIVE_UINT;
                         buffer = Uint32Array::New(arrayBuffer, 0, theSize);
+                    }
+                    H5Tclose(t);
+                    H5Dclose(h);
+                }
+                else if(class_id==H5T_INTEGER && bufSize==1)
+                {
+                    hid_t h=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
+                    hid_t t=H5Dget_type(h);
+                    if(H5Tget_sign(H5Dget_type(h))==H5T_SGN_2)
+                    {
+                        type_id=H5T_NATIVE_INT8;
+                        buffer = Int8Array::New(arrayBuffer, 0, theSize);
+                    }
+                    else
+                    {
+                        type_id=H5T_NATIVE_UINT8;
+                        buffer = Uint8Array::New(arrayBuffer, 0, theSize);
                     }
                     H5Tclose(t);
                     H5Dclose(h);
