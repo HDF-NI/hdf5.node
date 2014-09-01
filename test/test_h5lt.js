@@ -314,18 +314,23 @@ describe("testing lite interface ",function(){
             groupGeometries.getNumAttrs().should.equal(0);
             done();
         });
-        it("getNumObjs of Geometries should be 2", function(){
+        it("getNumObjs of Geometries should be 2", function(done){
             groupGeometries.getNumObjs().should.equal(2);
+            done();
         });
-        it("getMemberNames of Geometries should be 240 names in creation order", function(){
+        it("getMemberNames of Geometries should be 240 names in creation order", function(done){
             var array=groupGeometries.getMemberNamesByCreationOrder();
             array[1].should.equal("1");
+            done();
         });
-        it("Size of dataset '0' should be 186 ", function(){
+        it("Size of dataset '0' should be 186 ", function(done){
             var readBuffer=h5lt.readDataset(groupGeometries.id, '0');
-            readBuffer.constructor.name.should.match('Float64Array');
-            readBuffer.length.should.match(186);
-            readBuffer.Dipole.should.match(2.9);
+            'Float64Array'.should.match(readBuffer.constructor.name);
+            var length=186;
+            length.should.match(readBuffer.length);
+            var value=2.9;
+            value.should.match(readBuffer.Dipole);
+            done();
         });
         it("getNumAttrs of file should be 3", function(){
 //            console.dir(file);

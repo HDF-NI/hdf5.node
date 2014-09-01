@@ -356,7 +356,7 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                     default:
         //                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
         //                    args.GetReturnValue().SetUndefined();
-                            return;
+//                            return;
                         break;
                 }
             }

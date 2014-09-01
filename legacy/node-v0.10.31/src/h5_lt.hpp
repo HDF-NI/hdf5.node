@@ -166,7 +166,8 @@ static v8::Handle<v8::Value> make_dataset (const v8::Arguments& args)
         for(unsigned int index=buffer->GetIndexedPropertiesExternalArrayDataLength();index<propertyNames->Length();index++)
         {
              v8::Local<v8::Value> name=propertyNames->Get (index);
-             if(!buffer->Get(name)->IsFunction() && !buffer->Get(name)->IsArray() && strncmp("id",(*String::Utf8Value(name->ToString())), 2)!=0 && strncmp("rank",(*String::Utf8Value(name->ToString())), 4)!=0 && strncmp("rows",(*String::Utf8Value(name->ToString())), 4)!=0 && strncmp("columns",(*String::Utf8Value(name->ToString())), 7)!=0 && strncmp("buffer",(*String::Utf8Value(name->ToString())), 6)!=0)
+             if(!buffer->Get(name)->IsFunction() && !buffer->Get(name)->IsArray() && strncmp("id",(*String::Utf8Value(name->ToString())), 2)!=0 && strncmp("rank",(*String::Utf8Value(name->ToString())), 4)!=0 && strncmp("rows",(*String::Utf8Value(name->ToString())), 4)!=0 && strncmp("columns",(*String::Utf8Value(name->ToString())), 7)!=0 &&
+                     strncmp("buffer", (*String::Utf8Value(name->ToString())), 6)!=0 && strncmp("BYTES_PER_ELEMENT", (*String::Utf8Value(name->ToString())), 17)!=0 && strncmp("byteLength", (*String::Utf8Value(name->ToString())), 10)!=0 && strncmp("byteOffset", (*String::Utf8Value(name->ToString())), 9)!=0 && strncmp("length", (*String::Utf8Value(name->ToString())), 6)!=0)
              {
 //                std::cout<<index<<" "<<name->IsString()<<std::endl;
 //                std::cout<<index<<" "<<(*String::Utf8Value(name->ToString()))<<" rnp "<<buffer->HasRealNamedProperty( Local<String>::Cast(name))<<std::endl;
@@ -388,40 +389,41 @@ static v8::Handle<v8::Value> read_dataset (const v8::Arguments& args)
                 if(ainfo->data_size>0)((std::vector<std::string>*)operator_data)->push_back(std::string(attr_name));
                 return (herr_t)((std::vector<std::string>*)operator_data)->size();
             }, (void*)&holder, H5P_DEFAULT);
-            std::cout<<(*dset_name)<<" attr loop "<<holder.size()<<" "<<idx<<std::endl;
+            if(strncmp("0", *dset_name, 1)==0)std::cout<<(*dset_name)<<" attr loop "<<holder.size()<<" "<<idx<<std::endl;
         for(index=0;index<(uint32_t)holder.size();index++)
         {
             hsize_t values_dim[1] = {1};
             size_t bufSize = 0;
             H5T_class_t class_id;
             err = H5LTget_attribute_info(args[0]->ToInt32()->Value(), *dset_name, holder[index].c_str(), values_dim, &class_id, &bufSize);
+            if(strncmp("0", *dset_name, 1)==0)std::cout<<(*dset_name)<<" attr loop "<<holder[index]<<" "<<idx<<std::endl;
             if (err >=0) {
                 switch(class_id)
                 {
                     case H5T_INTEGER:
                         long long intValue;
                          H5LTget_attribute_int(args[0]->ToInt32()->Value(), *dset_name, holder[index].c_str(), (int*)&intValue);
-                        buffer->Set(String::New( holder[index].c_str()), Int32::New(intValue));
+                        buffer->Set(String::NewSymbol( holder[index].c_str()), Int32::New(intValue));
                         break;
                     case H5T_FLOAT:
                         double value;
                          H5LTget_attribute_double(args[0]->ToInt32()->Value(), *dset_name, holder[index].c_str(), &value);
                         std::cout<<(*dset_name)<<" "<<holder[index].c_str()<<" "<<value<<std::endl;
-                        buffer->Set(String::New(holder[index].c_str()), Number::New( value));
+                        buffer->Set(String::NewSymbol(holder[index].c_str()), Number::New( value));
                         break;
                     case H5T_STRING:
                     {
         //                std::cout<<"H5T_STRING "<<attr.getDataType().getSize ()<<" "<<attr.getDataType().fromClass()<<std::endl;
                         std::string strValue(bufSize+1,'\0');
                          H5LTget_attribute_string(args[0]->ToInt32()->Value(), *dset_name, holder[index].c_str(), (char *)strValue.c_str());
-                        buffer->Set(String::New(holder[index].c_str()), String::New(strValue.c_str()));
+                        buffer->Set(String::NewSymbol(holder[index].c_str()), String::New(strValue.c_str()));
                     }
                         break;
                     case H5T_NO_CLASS:
                     default:
         //                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
         //                    args.GetReturnValue().SetUndefined();
-                            return scope.Close(buffer);
+//                            return scope.Close(buffer);
                         break;
                 }
             }
