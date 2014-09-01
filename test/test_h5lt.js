@@ -257,7 +257,7 @@ describe("testing lite interface ",function(){
                 groupTarget[ 'Computed Total Energy' ].should.equal(-3573.674399276322);
             });
         });
-        it("open of Geometries should be >0", function(){
+        it("open of Geometries should be >0", function(done){
             var groupDocuments=file.openGroup('pmcservices/sodium-icosanoate/Documents');
             var xmlDocument=h5lt.readDataset(groupDocuments.id, 'sodium-icosanoate.xml');
             parseString(xmlDocument, function (err, result) {
@@ -300,16 +300,19 @@ describe("testing lite interface ",function(){
                 xmolDocument.length.should.equal(1435803);
                 fs.writeFile('sodium-icosanoate.xmol', xmolDocument, [flag='w'])
                 fs.writeFile('sodium-icosanoate.xml', xmlDocument, [flag='w'])
-                groupGeometries.close();
+//                groupGeometries.close();
             });
+            done();
         });
         var groupGeometries;
-        it("open of Geometries should be >0", function(){
+        it("open of Geometries should be >0", function(done){
             groupGeometries=file.openGroup('pmcservices/sodium-icosanoate/Trajectories/Geometries');
             groupGeometries.id.should.not.equal(-1);
+            done();
         });
-        it("getNumAttrs of Geometries should be 0", function(){
+        it("getNumAttrs of Geometries should be 0", function(done){
             groupGeometries.getNumAttrs().should.equal(0);
+            done();
         });
         it("getNumObjs of Geometries should be 2", function(){
             groupGeometries.getNumObjs().should.equal(2);
@@ -317,6 +320,12 @@ describe("testing lite interface ",function(){
         it("getMemberNames of Geometries should be 240 names in creation order", function(){
             var array=groupGeometries.getMemberNamesByCreationOrder();
             array[1].should.equal("1");
+        });
+        it("Size of dataset '0' should be 186 ", function(){
+            var readBuffer=h5lt.readDataset(groupGeometries.id, '0');
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(186);
+            readBuffer.Dipole.should.match(2.9);
         });
         it("getNumAttrs of file should be 3", function(){
 //            console.dir(file);

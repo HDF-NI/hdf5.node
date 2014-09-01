@@ -5,6 +5,8 @@
 
 #include <iostream>
 #include <cstring>
+#include <vector>
+#include <functional>
 
 #include "hdf5.h"
 #include "H5LTpublic.h"
@@ -120,14 +122,18 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
     
     //Atributes
         v8::Local<v8::Array> propertyNames=buffer->GetPropertyNames();
-        for(unsigned int index=buffer->GetIndexedPropertiesExternalArrayDataLength ()-1;index<propertyNames->Length();index++)
+        for(unsigned int index=buffer->GetIndexedPropertiesExternalArrayDataLength();index<propertyNames->Length();index++)
         {
              v8::Local<v8::Value> name=propertyNames->Get (index);
              if(!buffer->Get(name)->IsFunction() && !buffer->Get(name)->IsArray() && strncmp("id",(*String::Utf8Value(name->ToString())), 2)!=0 && strncmp("rank",(*String::Utf8Value(name->ToString())), 4)!=0 && strncmp("rows",(*String::Utf8Value(name->ToString())), 4)!=0 && strncmp("columns",(*String::Utf8Value(name->ToString())), 7)!=0 && strncmp("buffer",(*String::Utf8Value(name->ToString())), 6)!=0)
              {
 //                std::cout<<index<<" "<<name->IsString()<<std::endl;
 //                std::cout<<index<<" "<<(*String::Utf8Value(name->ToString()))<<" rnp "<<buffer->HasRealNamedProperty( Local<String>::Cast(name))<<std::endl;
-                if(buffer->Get(name)->IsUint32())
+                if(buffer->Get(name)->IsObject() || buffer->Get(name)->IsExternal())
+                {
+                    
+                }
+                else if(buffer->Get(name)->IsUint32())
                 {
                     uint32_t value=buffer->Get(name)->ToUint32()->Uint32Value();
                     if(H5Aexists_by_name(args[0]->ToInt32()->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
@@ -147,16 +153,6 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
                     H5LTset_attribute_int(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), (int*)&value, 1);
                     
                 }
-                else if(buffer->Get(name)->IsNumber())
-                {
-                    double value=buffer->Get(name)->ToNumber()->NumberValue();
-                    if(H5Aexists_by_name(args[0]->ToInt32()->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
-                    {
-                        H5Adelete_by_name(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
-                    }
-                    H5LTset_attribute_double(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), (double*)&value, 1);
-                    
-                }
                 else if(buffer->Get(name)->IsString())
                 {
                     std::string value((*String::Utf8Value(buffer->Get(name)->ToString())));
@@ -168,6 +164,17 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
                      const long long unsigned int currentExtent=name->ToString()->Utf8Length();
                      ds.setExtentSimple(1, &currentExtent);
                     H5LTset_attribute_string(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), (const char*)value.c_str());
+                    
+                }
+                else if(buffer->Get(name)->IsNumber())
+                {
+                    double value=buffer->Get(name)->ToNumber()->NumberValue();
+//                std::cout<<index<<" "<<(*dset_name)<<" "<<name->IsString()<<" "<<value<<std::endl;
+                    if(H5Aexists_by_name(args[0]->ToInt32()->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
+                    {
+                        H5Adelete_by_name(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+                    }
+                    H5LTset_attribute_double(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), (double*)&value, 1);
                     
                 }
              }
@@ -305,6 +312,55 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim[0]));
                 if(rank>1)buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim[1]));
                 
+        //Attributes
+        uint32_t index=0;
+        hsize_t idx=0;
+        std::vector<std::string> holder;
+//        group->m_group.iterateAttrs([&](H5::H5Location &loc, H5std_string attr_name, void *operator_data){
+//            ((std::vector<std::string>*)operator_data)->push_back(attr_name);
+//        }, &index, &holder);
+        H5Aiterate_by_name(args[0]->ToInt32()->Value(), *dset_name, H5_INDEX_CRT_ORDER ,
+        H5_ITER_INC , &idx, [] (hid_t location_id, const char* attr_name, const H5A_info_t *ainfo, void *operator_data){
+                if(ainfo->data_size>0)((std::vector<std::string>*)operator_data)->push_back(std::string(attr_name));
+                return (herr_t)((std::vector<std::string>*)operator_data)->size();
+            }, (void*)&holder, H5P_DEFAULT);
+//            std::cout<<(*dset_name)<<" attr loop "<<holder.size()<<" "<<idx<<std::endl;
+        for(index=0;index<(uint32_t)holder.size();index++)
+        {
+            hsize_t values_dim[1] = {1};
+            size_t bufSize = 0;
+            H5T_class_t class_id;
+            err = H5LTget_attribute_info(args[0]->ToInt32()->Value(), *dset_name, holder[index].c_str(), values_dim, &class_id, &bufSize);
+            if (err >=0) {
+                switch(class_id)
+                {
+                    case H5T_INTEGER:
+                        long long intValue;
+                         H5LTget_attribute_int(args[0]->ToInt32()->Value(), *dset_name, holder[index].c_str(), (int*)&intValue);
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), Int32::New(v8::Isolate::GetCurrent(), intValue));
+                        break;
+                    case H5T_FLOAT:
+                        double value;
+                         H5LTget_attribute_double(args[0]->ToInt32()->Value(), *dset_name, holder[index].c_str(), &value);
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), Number::New(v8::Isolate::GetCurrent(), value));
+                        break;
+                    case H5T_STRING:
+                    {
+        //                std::cout<<"H5T_STRING "<<attr.getDataType().getSize ()<<" "<<attr.getDataType().fromClass()<<std::endl;
+                        std::string strValue(bufSize+1,'\0');
+                         H5LTget_attribute_string(args[0]->ToInt32()->Value(), *dset_name, holder[index].c_str(), (char *)strValue.c_str());
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str()));
+                    }
+                        break;
+                    case H5T_NO_CLASS:
+                    default:
+        //                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
+        //                    args.GetReturnValue().SetUndefined();
+                            return;
+                        break;
+                }
+            }
+        }
                 
                 //
                 args.GetReturnValue().Set(buffer);
