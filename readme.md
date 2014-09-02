@@ -94,7 +94,7 @@ When opening an h5 the group's attributes can be refreshed to the javascript in 
             console.dir(groupTarget.Information);
 ```
 
-Currently testing with node v0.11.13-pre and V8 3.25.30
+Currently testing with node v0.13.0-pre and V8 3.26.33
 
 And a legacy development for node v0.10.31 and V8 3.14.5.9 resides in ./legacy/node-v0.10.31. This probably will work a number of v0.10.x's.
 Go into the ./legacy/node-v0.10.31 folder and with npm, node-gyp and node pointing to compatible version, compile the same as below. Then go back two folders and test using the same javascript code.  Make sure your NODE_PATH has your obj.target.
