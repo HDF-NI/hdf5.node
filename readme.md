@@ -1,7 +1,7 @@
 A node module for reading/writing the HDF5 file format.
 
 ```javascript
-    var hdf5 = require('hdf5');
+var hdf5 = require('hdf5');
 
 //This will be refactored to match the native h5 for combining
 var Access = {
@@ -9,18 +9,20 @@ var Access = {
   ACC_RDWR :	1,	/*open for read and write    */
   ACC_TRUNC :	2,	/*overwrite existing files   */
   ACC_EXCL :	3,	/*fail if file already exists*/
-  ACC_DEBUG :	4,	/*print debug info	     */
+  ACC_DEBUG :	4,	/*print debug info	         */
   ACC_CREAT :	5	/*create non-existing files  */
 };
 
-    var file = new hdf5.File('/tmp/foo.h5', Access.ACC_RDONLY);
+var file = new hdf5.File('/tmp/foo.h5', Access.ACC_RDONLY);
     
-    var group=file.openGroup('pmc');
+var group=file.openGroup('pmc');
 ```
+
 To create a new h5 and put data into it,
+
 ```javascript
-    var hdf5 = require('hdf5');
-    var h5lt = require('h5lt');
+var hdf5 = require('hdf5');
+var h5lt = require('h5lt');
 
 //This will be refactored to match the native h5 for combining
 var Access = {
@@ -28,70 +30,72 @@ var Access = {
   ACC_RDWR :	1,	/*open for read and write    */
   ACC_TRUNC :	2,	/*overwrite existing files   */
   ACC_EXCL :	3,	/*fail if file already exists*/
-  ACC_DEBUG :	4,	/*print debug info	     */
+  ACC_DEBUG :	4,	/*print debug info	         */
   ACC_CREAT :	5	/*create non-existing files  */
 };
 
-    var file = new hdf5.File('/tmp/foo.h5', Access.ACC_TRUNC);
+var file = new hdf5.File('/tmp/foo.h5', Access.ACC_TRUNC);
     
-    var group=file.createGroup();
-    group.create('pmc', file);
-    var buffer=new Float64Array(5);
-    buffer[0]=1.0;
-    buffer[1]=2.0;
-    buffer[2]=3.0;
-    buffer[3]=4.0;
-    buffer[4]=5.0;
-    h5lt.makeDataset(group.id, 'Refractive Index', buffer);
-    var readBuffer=h5lt.readDataset(group.id, 'Refractive Index');
+var group=file.createGroup();
+group.create('pmc', file);
+var buffer=new Float64Array(5);
+buffer[0]=1.0;
+buffer[1]=2.0;
+buffer[2]=3.0;
+buffer[3]=4.0;
+buffer[4]=5.0;
+h5lt.makeDataset(group.id, 'Refractive Index', buffer);
+var readBuffer=h5lt.readDataset(group.id, 'Refractive Index');
 
-    //A rank two dataset with 3 columns of doubles
-                var frequency=new Float64Array(3*numberOfDataLines);
-    var groupFrequencies=file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
-    groupFrequencies.open('pmcservices/sodium-icosanoate/Frequency Data/Frequencies', file);
-    frequency.rank=2;
-    frequency.rows=numberOfDataLines;
-    frequency.columns=3;
-    h5lt.makeDataset(groupFrequencies.id, title, frequency);
-
+//A rank two dataset with 3 columns of doubles
+var frequency=new Float64Array(3*numberOfDataLines);
+var groupFrequencies=file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
+groupFrequencies.open('pmcservices/sodium-icosanoate/Frequency Data/Frequencies', file);
+frequency.rank=2;
+frequency.rows=numberOfDataLines;
+frequency.columns=3;
+h5lt.makeDataset(groupFrequencies.id, title, frequency);
 ```
 
 The dataset members of a group can be retrieved in order of creation. Something I've need more often than not.
-```
-            var groupFrequencies=file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
-            var frequencyNames=groupFrequencies.getMemberNamesByCreationOrder();
-            for (var frequencyIndex = 0; frequencyIndex < frequencyNames.length; frequencyIndex++)
-            {
-                xmolDocument+=elements.length+'\n';
-                xmolDocument+=frequencyNames[frequencyIndex]+'\n';
-                var frequency=h5lt.readDataset(groupFrequencies.id, frequencyNames[frequencyIndex]);
-                for (var index = 0; index < elements.length; index++)
-                {
-                    xmolDocument+=elements[index]+' '+lastTrajectory[3*index]+' '+lastTrajectory[3*index+1]+' '+lastTrajectory[3*index+2]+' '+frequency[3*index]+' '+frequency[3*index+1]+' '+frequency[3*index+2]+'\n';
-                }
-            }
 
+```javascript
+var groupFrequencies=file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
+var frequencyNames=groupFrequencies.getMemberNamesByCreationOrder();
+for (var frequencyIndex = 0; frequencyIndex < frequencyNames.length; frequencyIndex++)
+{
+    xmolDocument+=elements.length+'\n';
+    xmolDocument+=frequencyNames[frequencyIndex]+'\n';
+    var frequency=h5lt.readDataset(groupFrequencies.id, frequencyNames[frequencyIndex]);
+    for (var index = 0; index < elements.length; index++)
+    {
+        xmolDocument+=elements[index]+' '+lastTrajectory[3*index]+' '+lastTrajectory[3*index+1]+' '+lastTrajectory[3*index+2]+' '+frequency[3*index]+' '+frequency[3*index+1]+' '+frequency[3*index+2]+'\n';
+    }
+}
 ```
 
 Attributes can be attached to Groups by flush after the properties are added to javascript group instance.  Prototype properties also get flushed.
 Because javscript has the ability to have property names with spaces are similar characters via [ '' ] this is matched to the h5's similar nature.
+
+```javascript
+var groupTargets=file.createGroup();
+groupTargets.create('pmcservices/sodium-icosanoate', file);
+groupTargets[ 'Computed Heat of Formation' ]=-221.78436098572274;
+groupTargets[ 'Computed Ionization Potential' ]=9.57689311885752;
+groupTargets[ 'Computed Total Energy' ]=-3573.674399276322;
+groupTargets.Status=256;
+groupTargets.Information="\"There are no solutions; there are only trade-offs.\" -- Thomas Sowell";
+groupTargets.flush();
 ```
-            var groupTargets=file.createGroup();
-            groupTargets.create('pmcservices/sodium-icosanoate', file);
-            groupTargets[ 'Computed Heat of Formation' ]=-221.78436098572274;
-            groupTargets[ 'Computed Ionization Potential' ]=9.57689311885752;
-            groupTargets[ 'Computed Total Energy' ]=-3573.674399276322;
-            groupTargets.Status=256;
-            groupTargets.Information="\"There are no solutions; there are only trade-offs.\" -- Thomas Sowell";
-            groupTargets.flush();
-```
+
 Types are allowed to change to match the javascript side. If an attribute is already there it will get updated by h5 existence check, remove and then added back. 
 When opening an h5 the group's attributes can be refreshed to the javascript in reverse manner
-```
-            var groupTarget=file.openGroup('pmcservices/sodium-icosanoate');
-            groupTarget.refresh();
-            console.dir(groupTarget.[ 'Computed Heat Of Formation' ]);
-            console.dir(groupTarget.Information);
+
+```javascript
+var groupTarget=file.openGroup('pmcservices/sodium-icosanoate');
+groupTarget.refresh();
+console.dir(groupTarget.[ 'Computed Heat Of Formation' ]);
+console.dir(groupTarget.Information);
 ```
 
 Currently testing with node v0.13.0-pre and V8 3.26.33
@@ -99,9 +103,9 @@ Currently testing with node v0.13.0-pre and V8 3.26.33
 And a legacy development for node v0.10.31 and V8 3.14.5.9 resides in ./legacy/node-v0.10.31. This probably will work a number of v0.10.x's.
 Go into the ./legacy/node-v0.10.31 folder and with npm, node-gyp and node pointing to compatible version, compile the same as below. Then go back two folders and test using the same javascript code.  Make sure your NODE_PATH has your obj.target.
 For example:
-```
-export NODE_PATH=/home/roger/NodeProjects/hdf5.node/build/Release/obj.target:$NODE_PATH
 
+```bash
+export NODE_PATH=/home/roger/NodeProjects/hdf5.node/build/Release/obj.target:$NODE_PATH
 ```
 
 ## Dependencies
@@ -111,7 +115,7 @@ export NODE_PATH=/home/roger/NodeProjects/hdf5.node/build/Release/obj.target:$NO
 
 ## Compiling
 
-```
+```bash
 node-gyp configure build
 ```
 
@@ -119,16 +123,22 @@ When compiling the HDF5 C++ library, be sure to use the `--enable-cxx` flag. I h
 
 ## Environment Variables
 
-The path to the HDF5 shared objects must be added to the runtime library search path. To do this, `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./hdf5.node/../hdf5/lib`.
+The path to the HDF5 shared objects must be added to the runtime library search path. 
+
+```bash
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./hdf5.node/../hdf5/lib
+```
 
 ## Running Test
 
 The tests are based on mocha
-```
+
+```bash
 mocha
 ```
 or
-```
+
+```bash
 mocha --require should
 ```
 
@@ -136,9 +146,11 @@ mocha --require should
 
 While still very experimental, the compatibility of node/v8 is now being explored for the [High-level HDF5 Interfaces](http://www.hdfgroup.org/HDF5/doc/HL/).  Since the javascript objects have
 dimensions and type available the argument list is short to the native side. For example:
+
 ```javascript
 h5lt.makeDataset();
 ```
+
 takes three arguments; the id of the group or file, the dataset name and the javascript array object with the data. Reading
 a dataset only needs the id of the group or file and the dataset name.  It returns a javascript array compatible with the h5 dataset properties.
 
