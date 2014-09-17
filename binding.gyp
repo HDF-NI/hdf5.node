@@ -2,8 +2,9 @@
     'targets': [
         {
             'target_name': 'hdf5',
+            'cflags': ['-fPIC', "-O4", "-std=c++11"],
             'include_dirs': [
-                '../../hdf5/include'
+                '../hdf5/include'
             ],
             'sources': [
                 'src/hdf5.cc',
@@ -23,8 +24,9 @@
         },
         {
             'target_name': 'h5lt',
+            'cflags': ['-fPIC', "-O4", "-std=c++11"],
             'include_dirs': [
-                '../../hdf5/include'
+                '../hdf5/include'
             ],
             'sources': [
                 'src/h5lt.cc',
@@ -43,8 +45,9 @@
         },
         {
             'target_name': 'h5im',
+            'cflags': ['-fPIC', "-O4", "-std=c++11"],
             'include_dirs': [
-                '../../hdf5/include'
+                '../hdf5/include'
             ],
             'sources': [
                 'src/h5im.cc',

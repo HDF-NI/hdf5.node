@@ -75,7 +75,7 @@ for (var frequencyIndex = 0; frequencyIndex < frequencyNames.length; frequencyIn
 ```
 
 Attributes can be attached to Groups by flush after the properties are added to javascript group instance.  Prototype properties also get flushed.
-Because javscript has the ability to have property names with spaces are similar characters via [ '' ] this is matched to the h5's similar nature.
+Because javascript has the ability to have property names with spaces via [ '' ] these readily map to h5's similar nature.
 
 ```javascript
 var groupTargets=file.createGroup();
@@ -88,8 +88,8 @@ groupTargets.Information="\"There are no solutions; there are only trade-offs.\"
 groupTargets.flush();
 ```
 
-Types are allowed to change to match the javascript side. If an attribute is already there it will get updated by h5 existence check, remove and then added back. 
-When opening an h5 the group's attributes can be refreshed to the javascript in reverse manner
+Types are allowed to change to match the javascript side. If an attribute is already there it will get updated by h5's existence check, remove and then added back. 
+When opening an h5 the group's attributes can be refreshed to the javascript in a reverse manner
 
 ```javascript
 var groupTarget=file.openGroup('pmcservices/sodium-icosanoate');
@@ -100,7 +100,7 @@ console.dir(groupTarget.Information);
 
 Currently testing with node v0.13.0-pre and V8 3.26.33
 
-And a legacy development for node v0.10.31 and V8 3.14.5.9 resides in ./legacy/node-v0.10.31. This probably will work a number of v0.10.x's.
+A legacy development for node v0.10.31 and V8 3.14.5.9 resides in ./legacy/node-v0.10.31. This probably will work for a number of v0.10.x's.
 Go into the ./legacy/node-v0.10.31 folder and with npm, node-gyp and node pointing to compatible version, compile the same as below. Then go back two folders and test using the same javascript code.  Make sure your NODE_PATH has your obj.target.
 For example:
 
@@ -111,16 +111,39 @@ export NODE_PATH=/home/roger/NodeProjects/hdf5.node/build/Release/obj.target:$NO
 ## Dependencies
 
 + [HDF5 C++ Library](http://www.hdfgroup.org/downloads/index.html) v5-1.8.13
-        (untested yet should work numerous v5-1.8.x's)
-
-## Compiling
-
-```bash
-node-gyp configure build
-```
+        (Prior v5-1.8.x's untested yet should work)
 
 When compiling the HDF5 C++ library, be sure to use the `--enable-cxx` flag. I have installed HDF5 to sibling folder to `./hdf5.node/../hdf5`, so modify `binding.gyp` if yours is different.
 
+
+## Compiling
+The code requires a gcc compiler supporting C++11.  The binding.gyp defines the cflags with -std=c++11.  There isn't any cxxflags that I know of but cflags in node-gyp does 
+effect g++.
+```bash
+node-gyp configure build
+```
+To build a legacy version in folder legacy your script would be a modification of 
+
+```bash
+cd ./legacy/node-v0.10.31
+
+export V8_HOME=/home/roger/Software/node-v0.10.31/deps/v8
+export HDF5_HOME=/home/roger/NodeProjects/hdf5
+export NODE_PATH=`pwd`/build/Release/obj.target:`pwd`/build/Release/lib.target:$NODE_PATH
+
+export PATH=/home/roger/Software/gcc/dist/bin:$PATH
+export LD_LIBRARY_PATH=/home/roger/Software/gcc/dist/lib64:$HDF5_HOME/lib:`pwd`build/Release/obj.target:$LD_LIBRARY_PATH
+
+export FC=gfortran
+export CC=gcc
+export CXX=g++
+
+# comment out clean line for first build although it won't hurt if you choose not 
+/usr/local/bin/node-gyp clean
+/usr/local/bin/node-gyp configure --nodedir=/home/roger/Software/node-v0.10.31
+/usr/local/bin/node-gyp build
+
+```
 ## Environment Variables
 
 The path to the HDF5 shared objects must be added to the runtime library search path. 
@@ -140,6 +163,25 @@ or
 
 ```bash
 mocha --require should
+```
+For legacy, run with the same tests from project home directory but have environment specify the location of the legacy *.node 
+
+```bash
+export V8_HOME=/home/roger/Software/node-v0.10.31/deps/v8
+export HDF5_HOME=/home/roger/NodeProjects/hdf5
+export NODE_PATH=`pwd`/legacy/node-v0.10.31/build/Release/obj.target:$NODE_PATH
+
+export PATH=/home/roger/Software/gcc/dist/bin:$PATH
+export LD_LIBRARY_PATH=/home/roger/Software/gcc/dist/lib64:$HDF5_HOME/lib:$LD_LIBRARY_PATH
+
+export PATH=/home/roger/Software/node-v0.10.31-linux-x64/dist/bin:`pwd`/legacy/node-v0.10.31/node_modules/mocha/bin:$PATH
+
+mocha --require should 
+
+#To prove build tools
+node --version
+node -e "console.log(process.versions.v8)"
+
 ```
 
 ## Experimental

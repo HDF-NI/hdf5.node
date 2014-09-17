@@ -2,8 +2,9 @@
     'targets': [
         {
             'target_name': 'hdf5',
+            'cflags': ['-fPIC', "-O4", "-std=c++11"],
             'include_dirs': [
-                '/home/roger/NodeProjects/hdf5/include'
+                '../../../hdf5/include'
             ],
             'sources': [
                 'src/hdf5.cc',
@@ -17,14 +18,15 @@
                     '-lhdf5_cpp'
                 ],
                 'ldflags': [
-                    '-L/home/roger/NodeProjects/hdf5/lib'
+                    '-L../../../../hdf5/lib'
                 ]
             }
         },
         {
             'target_name': 'h5lt',
+            'cflags': ['-fPIC', "-O4", "-std=c++11"],
             'include_dirs': [
-                '/home/roger/NodeProjects/hdf5/include'
+                '../../../hdf5/include'
             ],
             'sources': [
                 'src/Float64Array.hpp',
@@ -38,14 +40,15 @@
                     '-lhdf5_cpp'
                 ],
                 'ldflags': [
-                    '-L/home/roger/NodeProjects/hdf5/lib'
+                    '-L../../../../hdf5/lib'
                 ]
             }
         },
         {
             'target_name': 'h5im',
+            'cflags': ['-fPIC', "-O4", "-std=c++11"],
             'include_dirs': [
-                '/home/roger/NodeProjects/hdf5/include'
+                '../../../hdf5/include'
             ],
             'sources': [
                 'src/h5im.cc',
@@ -58,7 +61,7 @@
                     '-lhdf5_cpp'
                 ],
                 'ldflags': [
-                    '-L/home/roger/NodeProjects/hdf5/lib'
+                    '-L../../../../hdf5/lib'
                 ]
             }
         }
