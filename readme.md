@@ -1,4 +1,5 @@
-A node module for reading/writing the HDF5 file format.
+A node module for reading/writing the HDF5 file format. Unlike other languages that wrap hdf5 API's this interface takes advantage of the compatibility of V8 and HDF5. The result 
+is a direct map to javascript behavior with the least amount of data copying and coding tasks for the user. Hopefully you won't need to write yet another layer in your code to accomplish your goals.
 
 ```javascript
 var hdf5 = require('hdf5');
@@ -57,7 +58,7 @@ frequency.columns=3;
 h5lt.makeDataset(groupFrequencies.id, title, frequency);
 ```
 
-The dataset members of a group can be retrieved in order of creation. Something I've need more often than not.
+The dataset members of a group can be retrieved in order of creation. Something I've needed more often than not.
 
 ```javascript
 var groupFrequencies=file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
