@@ -114,13 +114,14 @@ export NODE_PATH=/home/roger/NodeProjects/hdf5.node/build/Release/obj.target:$NO
 + [HDF5 C++ Library](http://www.hdfgroup.org/downloads/index.html) v5-1.8.13
         (Prior v5-1.8.x's untested yet should work)
 
-When compiling the HDF5 C++ library, be sure to use the `--enable-cxx` flag. I have installed HDF5 to sibling folder to `./hdf5.node/../hdf5`, so modify `binding.gyp` if yours is different.
+When compiling the HDF5 C++ library, be sure to use the `--enable-cxx` flag. The `binding.gyp` expects the HDF5_HOME environment variable set to your install.
 
 
 ## Compiling
 The code requires a gcc compiler supporting C++11.  The binding.gyp defines the cflags with -std=c++11.  There isn't any cxxflags that I know of but cflags in node-gyp does 
 effect g++.
 ```bash
+export HDF5_HOME=/home/roger/NodeProjects/hdf5
 node-gyp configure build
 ```
 To build a legacy version in folder legacy your script would be a modification of 

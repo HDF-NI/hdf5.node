@@ -60,6 +60,8 @@ namespace NodeHDF5 {
 //            
 //        }
 //        
+        try
+        {
         if (args.Length() == 3 && args[0]->IsString() && args[1]->IsObject()) {
         // store specified group name
         String::Utf8Value group_name (args[0]->ToString());
@@ -87,6 +89,25 @@ namespace NodeHDF5 {
         {
             args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), -1));
             
+        }
+        }
+        catch(H5::GroupIException& ex)
+        {
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.getCDetailMsg())));
+            args.GetReturnValue().SetUndefined();
+            return;
+        }
+        catch(H5::FileIException& ex)
+        {
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.getCDetailMsg())));
+            args.GetReturnValue().SetUndefined();
+            return;
+        }
+        catch(...)
+        {
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group open failed")));
+            args.GetReturnValue().SetUndefined();
+            return;
         }
         
         return;
