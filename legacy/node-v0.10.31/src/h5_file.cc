@@ -311,6 +311,7 @@ namespace NodeHDF5 {
                 }
              }
         }
+        file->FileObject()->flush(H5F_SCOPE_GLOBAL);
         
         return scope.Close(args.This());
         
