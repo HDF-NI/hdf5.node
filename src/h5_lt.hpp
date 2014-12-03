@@ -15,7 +15,7 @@ namespace NodeHDF5 {
 
     class H5lt {
     public:
-static void Initialize (Handle<Object> target) {
+    static void Initialize (Handle<Object> target) {
         
         // append this function to the target object
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeDataset"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::make_dataset)->GetFunction());

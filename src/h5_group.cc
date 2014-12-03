@@ -32,15 +32,15 @@ namespace NodeHDF5 {
         // member method prototypes
         NODE_SET_PROTOTYPE_METHOD(t, "create", Create);
         NODE_SET_PROTOTYPE_METHOD(t, "open", Open);
+        NODE_SET_PROTOTYPE_METHOD(t, "openGroup", OpenGroup);
         NODE_SET_PROTOTYPE_METHOD(t, "refresh", Refresh);
         NODE_SET_PROTOTYPE_METHOD(t, "flush", Flush);
         NODE_SET_PROTOTYPE_METHOD(t, "close", Close);
         NODE_SET_PROTOTYPE_METHOD(t, "getNumAttrs", GetNumAttrs);
-//        NODE_SET_PROTOTYPE_METHOD(t, "getAttributeNames", GetAttributeNames);
-//        NODE_SET_PROTOTYPE_METHOD(t, "readAttribute", ReadAttribute);
         NODE_SET_PROTOTYPE_METHOD(t, "getNumObjs", GetNumObjs);
         NODE_SET_PROTOTYPE_METHOD(t, "getMemberNames", GetMemberNames);
         NODE_SET_PROTOTYPE_METHOD(t, "getMemberNamesByCreationOrder", GetMemberNamesByCreationOrder);
+        NODE_SET_PROTOTYPE_METHOD(t, "getChildType", GetChildType);
         
         // initialize constructor reference
         Constructor.Reset(v8::Isolate::GetCurrent(), t);
@@ -63,27 +63,52 @@ namespace NodeHDF5 {
         try
         {
         if (args.Length() == 3 && args[0]->IsString() && args[1]->IsObject()) {
-        // store specified group name
-        String::Utf8Value group_name (args[0]->ToString());
-        
-        // unwrap file object
-        File* file = ObjectWrap::Unwrap<File>(args[1]->ToObject());
-        
-        // create group
-        Group* group = new Group(file->FileObject()->openGroup(*group_name));
-        group->gcpl.reset(new H5::PropList(H5Pcreate(H5P_GROUP_CREATE) ));
-        herr_t err = H5Pset_link_creation_order(group->gcpl->getId(), args[2]->ToUint32()->IntegerValue());
-        if (err < 0) {
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
-            args.GetReturnValue().SetUndefined();
-            return;
+            // store specified group name
+            String::Utf8Value group_name (args[0]->ToString());
+
+            // unwrap parent object
+            std::string constructorName="File";
+            if(constructorName.compare(*String::Utf8Value(args[1]->ToObject()->GetConstructorName()))==0)
+            {
+
+                File* parent = ObjectWrap::Unwrap<File>(args[1]->ToObject());
+
+                // create group
+                Group* group = new Group(parent->FileObject()->openGroup(*group_name));
+                group->gcpl.reset(new H5::PropList(H5Pcreate(H5P_GROUP_CREATE) ));
+                herr_t err = H5Pset_link_creation_order(group->gcpl->getId(), args[2]->ToUint32()->IntegerValue());
+                if (err < 0) {
+                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+                    args.GetReturnValue().SetUndefined();
+                    return;
+                    }
+        //        group->m_group.
+                group->name.assign(*group_name);
+                group->Wrap(args.This());
+
+                // attach various properties
+                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->m_group.getId()));
             }
-//        group->m_group.
-        group->name.assign(*group_name);
-        group->Wrap(args.This());
-        
-        // attach various properties
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->m_group.getId()));
+            else
+            {
+               Group* parent = ObjectWrap::Unwrap<Group>(args[1]->ToObject());
+
+                // open group
+                Group* group = new Group(parent->m_group.openGroup(*group_name));
+                group->gcpl.reset(new H5::PropList(H5Pcreate(H5P_GROUP_CREATE) ));
+                herr_t err = H5Pset_link_creation_order(group->gcpl->getId(), args[2]->ToUint32()->IntegerValue());
+                if (err < 0) {
+                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+                    args.GetReturnValue().SetUndefined();
+                    return;
+                    }
+        //        group->m_group.
+                group->name.assign(*group_name);
+                group->Wrap(args.This());
+
+                // attach various properties
+                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->m_group.getId()));
+            }
         }
         else
         {
@@ -130,17 +155,63 @@ namespace NodeHDF5 {
         // store specified group name
         String::Utf8Value group_name (args[0]->ToString());
         
-        // unwrap file object
-        File* file = ObjectWrap::Unwrap<File>(args[1]->ToObject());
-        
+        // unwrap parent object
+        File* parent = ObjectWrap::Unwrap<File>(args[1]->ToObject());
+        std::vector<std::string> trail;
+        std::istringstream buf(*group_name);
+        for(std::string token; getline(buf, token, '/'); )
+            if(!token.empty())trail.push_back(token);
+        hid_t previous_hid = parent->FileObject()->getId();
+        bool created=false;
+        for(unsigned int index=0;index<trail.size();index++)
+        {
+            //check existence of stem
+        hid_t hid=H5Gopen(previous_hid, trail[index].c_str(), H5P_DEFAULT);
+        if(hid>=0)
+        {
+            previous_hid=hid;
+            continue;
+        }
         // create group
-        Group* group = new Group(H5::Group((const hid_t)H5Gcreate(file->FileObject()->getId(), *group_name, H5P_DEFAULT, file->getGcpl(), H5P_DEFAULT)));
-        group->name.assign(*group_name);
-        group->Wrap(args.This());
-        
-        // attach various properties
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->m_group.getId()));
-        
+        hid=H5Gcreate(previous_hid, trail[index].c_str(), H5P_DEFAULT, parent->getGcpl(), H5P_DEFAULT);
+        if(hid<0){
+//            std::cout<<"group create error num "<<H5Eget_num(H5Eget_current_stack())<<std::endl;
+            //if(H5Eget_num(H5Eget_current_stack())>0)
+            std::string desc;
+            {
+                H5Ewalk2(H5Eget_current_stack(), H5E_WALK_UPWARD, [&](unsigned int n, const H5E_error2_t *err_desc, void *client_data) -> herr_t {
+//                std::cout<<"n="<<n<<" "<<err_desc[0].desc<<std::endl;
+                if(((std::string*)client_data)->empty())((std::string*)client_data)->assign(err_desc[0].desc, strlen(err_desc[0].desc));
+                return 0;
+            }, (void*)&desc);
+            }
+            desc="Group create failed: "+desc;
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), desc.c_str())));
+            args.GetReturnValue().SetUndefined();
+            return;
+        }
+        if(index==trail.size()-1)
+        {
+            Group* group = new Group(H5::Group((const hid_t)hid));
+            group->name.assign(trail[index].c_str());
+            group->Wrap(args.This());
+
+            // attach various properties
+            args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->m_group.getId()));
+            created=true;
+        }
+        previous_hid=hid;
+        }
+        if(!created)
+        {
+            Group* group = new Group(H5::Group((const hid_t)previous_hid));
+            group->name.assign(trail[trail.size()-1].c_str());
+            group->Wrap(args.This());
+
+            // attach various properties
+            args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->m_group.getId()));
+            created=true;
+        }
         return;
         
     }
@@ -176,6 +247,37 @@ namespace NodeHDF5 {
         
     }
     
+    void Group::OpenGroup (const v8::FunctionCallbackInfo<Value>& args) {
+        
+        // fail out if arguments are not correct
+        if (args.Length() < 1 || args.Length() >2 || !args[0]->IsString()) {
+            
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
+            args.GetReturnValue().SetUndefined();
+            return;
+            
+        }
+        
+        String::Utf8Value group_name (args[0]->ToString());
+        
+        Local<Object> instance=Group::Instantiate(*group_name, args.This(), args[1]->ToUint32()->Uint32Value());
+        // create callback params
+//        Local<Value> argv[2] = {
+//                
+//                Local<Value>::New(v8::Isolate::GetCurrent(), Null(v8::Isolate::GetCurrent())),
+//                Local<Value>::New(v8::Isolate::GetCurrent(), Group::Instantiate(*group_name, args.This()))
+//                
+//        };
+        
+        // execute callback
+//        Local<Function> callback = Local<Function>::Cast(args[1]);
+//        callback->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), 2, argv);
+        
+        args.GetReturnValue().Set(instance);
+        return;
+        
+    }
+
     void Group::Refresh (const v8::FunctionCallbackInfo<Value>& args) {
         
         // fail out if arguments are not correct
@@ -502,6 +604,27 @@ namespace NodeHDF5 {
         
     }
     
+    void Group::GetChildType (const v8::FunctionCallbackInfo<Value>& args) {
+        
+//        HandleScope scope;
+        
+        // fail out if arguments are not correct
+        if (args.Length() != 1 || !args[0]->IsString()) {
+            
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected child object's name")));
+            args.GetReturnValue().SetUndefined();
+            return;
+            
+        }
+        // unwrap group
+        Group* group = ObjectWrap::Unwrap<Group>(args.This());
+        // store specified child name
+        String::Utf8Value child_name (args[0]->ToString());
+        args.GetReturnValue().Set((uint32_t) group->m_group.childObjType(*child_name));
+        return;
+        
+    }
+    
     Local<Object> Group::Instantiate (Local<Object> file) {
         
 //        HandleScope scope;
@@ -518,15 +641,15 @@ namespace NodeHDF5 {
         
     }
 
-    Local<Object> Group::Instantiate (const char* name, Local<Object> file, unsigned long creationOrder) {
+    Local<Object> Group::Instantiate (const char* name, Local<Object> parent, unsigned long creationOrder) {
         
 //        HandleScope scope;
         
-        // group name and file reference
+        // group name and parent reference
         Local<Value> argv[3] = {
                 
                 Local<Value>::New(v8::Isolate::GetCurrent(), String::NewFromUtf8(v8::Isolate::GetCurrent(), name)),
-                file,
+                parent,
                 Uint32::New(v8::Isolate::GetCurrent(), creationOrder)
                 
         };

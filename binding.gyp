@@ -46,6 +46,27 @@
             }
         },
         {
+            'target_name': 'h5tb',
+            'cflags': ['-fPIC', "-O4", "-std=c++11", "-fexceptions"],
+            'include_dirs': [
+                '$(HDF5_HOME)/include'
+            ],
+            'sources': [
+                'src/h5tb.cc',
+                'src/h5_tb.hpp'
+            ],
+            'link_settings': {
+                'libraries': [
+                    '-lhdf5',
+                    '-lhdf5_hl',
+                    '-lhdf5_cpp'
+                ],
+                'ldflags': [
+                    '-L$(HDF5_HOME)/lib'
+                ]
+            }
+        },
+        {
             'target_name': 'h5im',
             'cflags': ['-fPIC', "-O4", "-std=c++11", "-fexceptions"],
             'include_dirs': [

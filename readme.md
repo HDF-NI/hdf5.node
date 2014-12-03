@@ -2,17 +2,10 @@ A node module for reading/writing the HDF5 file format. Unlike other languages t
 is a direct map to javascript behavior with the least amount of data copying and coding tasks for the user. Hopefully you won't need to write yet another layer in your code to accomplish your goals.
 
 ```javascript
-var hdf5 = require('hdf5');
+var hdf5 = require('hdf5').hdf5;
 
 //This will be refactored to match the native h5 for combining
-var Access = {
-  ACC_RDONLY :	0,	/*absence of rdwr => rd-only */
-  ACC_RDWR :	1,	/*open for read and write    */
-  ACC_TRUNC :	2,	/*overwrite existing files   */
-  ACC_EXCL :	3,	/*fail if file already exists*/
-  ACC_DEBUG :	4,	/*print debug info	         */
-  ACC_CREAT :	5	/*create non-existing files  */
-};
+var Access = require('lib/globals').Access;
 
 var file = new hdf5.File('/tmp/foo.h5', Access.ACC_RDONLY);
     
@@ -22,18 +15,11 @@ var group=file.openGroup('pmc');
 To create a new h5 and put data into it,
 
 ```javascript
-var hdf5 = require('hdf5');
-var h5lt = require('h5lt');
+var hdf5 = require('hdf5').hdf5;
+var h5lt = require('hdf5').h5lt;
 
 //This will be refactored to match the native h5 for combining
-var Access = {
-  ACC_RDONLY :	0,	/*absence of rdwr => rd-only */
-  ACC_RDWR :	1,	/*open for read and write    */
-  ACC_TRUNC :	2,	/*overwrite existing files   */
-  ACC_EXCL :	3,	/*fail if file already exists*/
-  ACC_DEBUG :	4,	/*print debug info	         */
-  ACC_CREAT :	5	/*create non-existing files  */
-};
+var Access = require('lib/globals').Access;
 
 var file = new hdf5.File('/tmp/foo.h5', Access.ACC_TRUNC);
     

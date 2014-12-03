@@ -4,14 +4,7 @@ var should = require("should");
 var hdf5 = require('hdf5');
 var h5im = require('h5im');
 
-var Access = {
-  ACC_RDONLY :	0,	/*absence of rdwr => rd-only */
-  ACC_RDWR :	1,	/*open for read and write    */
-  ACC_TRUNC :	2,	/*overwrite existing files   */
-  ACC_EXCL :	3,	/*fail if file already exists*/
-  ACC_DEBUG :	4,	/*print debug info	     */
-  ACC_CREAT :	5	/*create non-existing files  */
-};
+var Access = require('lib/globals.js').Access;
 
 describe("testing images ",function(){
 

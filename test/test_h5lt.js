@@ -7,25 +7,11 @@ var util = require('util');
 var hdf5 = require('hdf5');
 var h5lt = require('h5lt');
 
-var Access = {
-  ACC_RDONLY :	0,	/*absence of rdwr => rd-only */
-  ACC_RDWR :	1,	/*open for read and write    */
-  ACC_TRUNC :	2,	/*overwrite existing files   */
-  ACC_EXCL :	3,	/*fail if file already exists*/
-  ACC_DEBUG :	4,	/*print debug info	     */
-  ACC_CREAT :	5	/*create non-existing files  */
-};
+var Access = require('lib/globals.js').Access;
+var CreationOrder = require('lib/globals.js').CreationOrder;
+var State = require('lib/globals.js').State;
+var H5OType = require('lib/globals.js').H5OType;
 
-var CreationOrder = {
-    H5P_CRT_ORDER_TRACKED : 1,
-    H5P_CRT_ORDER_INDEXED : 2
-};
-
-var State = {
-  COUNT : 0,
-  TITLE : 1,
-  DATA : 2
-};
 
 describe("testing lite interface ",function(){
 
@@ -132,7 +118,7 @@ describe("testing lite interface ",function(){
         before(function(){
           file = new hdf5.File('./roothaan.h5', Access.ACC_TRUNC);
         });
-        it("open of Geometries should be >0", function(){
+        it("open of Geometries should be >0", function(done){
             var groupPMCServices=file.createGroup();
             groupPMCServices.create('pmcservices', file);
             var groupTargets=file.createGroup();
@@ -232,6 +218,26 @@ describe("testing lite interface ",function(){
                     }
                 });
             });
+            done();
+        });
+        it("Existing group should throw exception when trying to create again ", function(done){
+            try
+            {
+                var groupTargets=file.createGroup();
+                groupTargets.create('pmcservices/sodium-icosanoate', file);
+            }
+            catch(err) {
+                console.dir(err.message);
+            }
+            try
+            {
+                var groupDocuments=file.createGroup();
+                groupDocuments.create('pmcservices/sodium-icosanoate/Documents', file);
+            }
+            catch(err) {
+                console.dir(err.message);
+            }
+            done();
         });
     });
     describe("create an xmol with frequency pulled from h5 ",function(){

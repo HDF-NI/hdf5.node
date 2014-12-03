@@ -122,7 +122,24 @@ namespace NodeHDF5 {
         File* file = ObjectWrap::Unwrap<File>(args[1]->ToObject());
         
         // create group
-        Group* group = new Group(H5::Group((const hid_t)H5Gcreate(file->FileObject()->getId(), *group_name, H5P_DEFAULT, file->getGcpl(), H5P_DEFAULT)));
+        hid_t hid=H5Gcreate(file->FileObject()->getId(), *group_name, H5P_DEFAULT, file->getGcpl(), H5P_DEFAULT);
+        if(hid<0){
+//            std::cout<<"group create error num "<<H5Eget_num(H5Eget_current_stack())<<std::endl;
+            //if(H5Eget_num(H5Eget_current_stack())>0)
+            std::string desc;
+            {
+                H5Ewalk2(H5Eget_current_stack(), H5E_WALK_UPWARD, [&](unsigned int n, const H5E_error2_t *err_desc, void *client_data) -> herr_t {
+//                std::cout<<"n="<<n<<" "<<err_desc[0].desc<<std::endl;
+                if(((std::string*)client_data)->empty())((std::string*)client_data)->assign(err_desc[0].desc, strlen(err_desc[0].desc));
+                return 0;
+            }, (void*)&desc);
+            }
+            desc="Group create failed: "+desc;
+            ThrowException(v8::Exception::SyntaxError(String::New(desc.c_str())));
+//            args.GetReturnValue().SetUndefined();
+            return scope.Close(Undefined());
+        }
+        Group* group = new Group(H5::Group((const hid_t)hid));
         group->name.assign(*group_name);
         group->Wrap(args.This());
         

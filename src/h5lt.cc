@@ -7,7 +7,7 @@ using namespace NodeHDF5;
 
 extern "C" {
 
-    static void init_hl (Handle<Object> target) {
+    static void init_lt (Handle<Object> target) {
         
         // create local scope
         HandleScope scope(v8::Isolate::GetCurrent());
@@ -17,6 +17,6 @@ extern "C" {
         
     }
     
-    NODE_MODULE(h5lt, init_hl)
+    NODE_MODULE(h5lt, init_lt)
 
 }

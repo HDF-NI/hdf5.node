@@ -38,6 +38,8 @@ namespace NodeHDF5 {
             static void Flush (const v8::FunctionCallbackInfo<Value>& args);
             static void Close (const v8::FunctionCallbackInfo<Value>& args);
             static void GetNumAttrs (const v8::FunctionCallbackInfo<Value>& args);
+            static void GetMemberNamesByCreationOrder (const v8::FunctionCallbackInfo<Value>& args);
+            static void GetChildType (const v8::FunctionCallbackInfo<Value>& args);
         
     };
     
@@ -57,6 +59,7 @@ namespace NodeHDF5 {
             static Local<Object> Instantiate (const char* path, Local<Object> file, unsigned long creationOrder = 0);
             static void Create (const v8::FunctionCallbackInfo<Value>& args);
             static void Open (const v8::FunctionCallbackInfo<Value>& args);
+            static void OpenGroup (const v8::FunctionCallbackInfo<Value>& args);
             static void Refresh (const v8::FunctionCallbackInfo<Value>& args);
             static void Flush (const v8::FunctionCallbackInfo<Value>& args);
             static void Close (const v8::FunctionCallbackInfo<Value>& args);
@@ -66,6 +69,7 @@ namespace NodeHDF5 {
             static void GetNumObjs (const v8::FunctionCallbackInfo<Value>& args);
             static void GetMemberNames (const v8::FunctionCallbackInfo<Value>& args);
             static void GetMemberNamesByCreationOrder (const v8::FunctionCallbackInfo<Value>& args);
+            static void GetChildType (const v8::FunctionCallbackInfo<Value>& args);
             
     };
 
