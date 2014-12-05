@@ -1,5 +1,7 @@
 *.sh
 *.sh~
 *.h5
+*.xml
+*.xmol
 build
 
