@@ -6,6 +6,7 @@
 #include <cstring>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <vector>
 
 #include "H5Cpp.h"
@@ -17,8 +18,14 @@ namespace NodeHDF5 {
     
     File::File (const char* path) {
         
+        bool exists=std::ifstream(path).good();
         m_file = new H5::H5File(path, H5F_ACC_RDONLY);
         gcpl = H5Pcreate(H5P_GROUP_CREATE);
+        if(exists)
+        {
+            unsigned int crt_order_flags;
+//            herr_t err = H5Pget_link_creation_order(, crt_order_flags);
+        }
         herr_t err = H5Pset_link_creation_order(gcpl, H5P_CRT_ORDER_TRACKED |
                 H5P_CRT_ORDER_INDEXED);
         if (err < 0) {
@@ -31,6 +38,8 @@ namespace NodeHDF5 {
     }
     
     File::File (const char* path, unsigned long flags) {
+        bool exists=std::ifstream(path).good();
+        //bool exists=std::experimental::filesystem::exists(path);
         m_file = new H5::H5File(path, toAccessMap[flags]);
         gcpl = H5Pcreate(H5P_GROUP_CREATE);
         herr_t err = H5Pset_link_creation_order(gcpl, H5P_CRT_ORDER_TRACKED |
@@ -382,10 +391,15 @@ namespace NodeHDF5 {
         for(index=0;index<(uint32_t)group_info.nlinks;index++)
         {
             std::string datasetTitle;
+            H5L_info_t link_buff;
+            herr_t err=H5Lget_info_by_idx(file->FileObject()->getId(), ".", H5_INDEX_NAME, H5_ITER_INC, index, &link_buff, H5P_DEFAULT);
+            if(err>=0)
+            {
+                H5_index_t index_field=(link_buff.corder_valid) ? H5_INDEX_CRT_ORDER : H5_INDEX_NAME;
             /*
              * Get size of name, add 1 for null terminator.
              */
-            ssize_t size = 1 + H5Lget_name_by_idx(file->FileObject()->getId(), ".",  H5_INDEX_NAME,
+            ssize_t size = 1 + H5Lget_name_by_idx(file->FileObject()->getId(), ".",  index_field,
                     H5_ITER_INC, index, NULL, 0, H5P_DEFAULT);
 
             /*
@@ -397,8 +411,9 @@ namespace NodeHDF5 {
              * Retrieve name, print it, and free the previously allocated
              * space.
              */
-            size = H5Lget_name_by_idx(file->FileObject()->getId(), ".",  H5_INDEX_NAME, H5_ITER_INC, index,
+            size = H5Lget_name_by_idx(file->FileObject()->getId(), ".",  index_field, H5_ITER_INC, index,
                     (char*) datasetTitle.c_str(), (size_t) size, H5P_DEFAULT);
+            }
             array->Set(index, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), datasetTitle.c_str()));
         }
         args.GetReturnValue().Set(array);

@@ -580,10 +580,16 @@ namespace NodeHDF5 {
         for(index=0;index<(uint32_t)group_info.nlinks;index++)
         {
             std::string datasetTitle;
+            H5L_info_t link_buff;
+            herr_t err=H5Lget_info_by_idx(group->m_group.getId(), ".", H5_INDEX_NAME, H5_ITER_INC, index, &link_buff, H5P_DEFAULT);
+            if(err>=0)
+            {
+//                std::cout<<"group link_buff.corder "<<link_buff.corder_valid<<" "<<link_buff.corder<<std::endl;
+                H5_index_t index_field=(link_buff.corder_valid) ? H5_INDEX_CRT_ORDER : H5_INDEX_NAME;
             /*
              * Get size of name, add 1 for null terminator.
              */
-            ssize_t size = 1 + H5Lget_name_by_idx(group->m_group.getId(), ".", H5_INDEX_CRT_ORDER,
+            ssize_t size = 1 + H5Lget_name_by_idx(group->m_group.getId(), ".", index_field,
                     H5_ITER_INC, index, NULL, 0, H5P_DEFAULT);
 
             /*
@@ -595,8 +601,9 @@ namespace NodeHDF5 {
              * Retrieve name, print it, and free the previously allocated
              * space.
              */
-            size = H5Lget_name_by_idx(group->m_group.getId(), ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, index,
+            size = H5Lget_name_by_idx(group->m_group.getId(), ".", index_field, H5_ITER_INC, index,
                     (char*) datasetTitle.c_str(), (size_t) size, H5P_DEFAULT);
+            }
             array->Set(index, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), datasetTitle.c_str()));
         }
         args.GetReturnValue().Set(array);

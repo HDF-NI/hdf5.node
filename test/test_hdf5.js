@@ -5,11 +5,6 @@ var Access = require('lib/globals.js').Access;
 var CreationOrder = require('lib/globals.js').CreationOrder;
 var H5OType = require('lib/globals.js').H5OType;
 
-var CreationOrder = {
-    H5P_CRT_ORDER_TRACKED : 1,
-    H5P_CRT_ORDER_INDEXED : 2
-};
-
 describe("testing c++ interface ",function(){
 
     describe("create an h5 and group ",function(){

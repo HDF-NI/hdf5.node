@@ -4,7 +4,7 @@
             'target_name': 'hdf5',
             'cflags!': [ '-fno-exceptions' ],
             'cflags_cc!': [ '-fno-exceptions' ],
-            'cflags': ['-fPIC', "-O4", "-std=c++11", "-fexceptions"],
+            'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
             'include_dirs': [
                 '$(HDF5_HOME)/include'
             ],
@@ -26,7 +26,7 @@
         },
         {
             'target_name': 'h5lt',
-            'cflags': ['-fPIC', "-O4", "-std=c++11", "-fexceptions"],
+            'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
             'include_dirs': [
                 '$(HDF5_HOME)/include'
             ],
@@ -47,7 +47,7 @@
         },
         {
             'target_name': 'h5tb',
-            'cflags': ['-fPIC', "-O4", "-std=c++11", "-fexceptions"],
+            'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
             'include_dirs': [
                 '$(HDF5_HOME)/include'
             ],
@@ -67,8 +67,29 @@
             }
         },
         {
+            'target_name': 'h5pt',
+            'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+            'include_dirs': [
+                '$(HDF5_HOME)/include'
+            ],
+            'sources': [
+                'src/h5pt.cc',
+                'src/h5_pt.hpp'
+            ],
+            'link_settings': {
+                'libraries': [
+                    '-lhdf5',
+                    '-lhdf5_hl',
+                    '-lhdf5_cpp'
+                ],
+                'ldflags': [
+                    '-L$(HDF5_HOME)/lib'
+                ]
+            }
+        },
+        {
             'target_name': 'h5im',
-            'cflags': ['-fPIC', "-O4", "-std=c++11", "-fexceptions"],
+            'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
             'include_dirs': [
                 '$(HDF5_HOME)/include'
             ],

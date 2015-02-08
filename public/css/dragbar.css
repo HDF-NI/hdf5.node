@@ -17,18 +17,21 @@ body,html{width:100%;height:100%;padding:0;margin:0;}
    float: left;
    position: absolute;
    height:100%;
-   overflow-y: hidden;
+   overflow:auto;
 }
 
 #dragbar{
    background-color:lightblue;
    height:100%;
    float: right;
-   width: 3px;
+   width: 5px;
    cursor: col-resize;
+   overflow:auto;
 }
 #ghostbar{
     width:3px;
+    height:100%;
+    overflow:auto;
     background-color:#000;
     opacity:0.5;
     position:absolute;

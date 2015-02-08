@@ -1,4 +1,5 @@
-A node module for reading/writing the HDF5 file format. Unlike other languages that wrap hdf5 API's this interface takes advantage of the compatibility of V8 and HDF5. The result 
+A node module for reading/writing the HDF5 file format. A koa based browser interface is being added to view and look at the h5 content. And eventually editing of, dropping data into, pulling from, charting and performing statistics on h5 file data.
+Unlike other languages that wrap hdf5 API's this interface takes advantage of the compatibility of V8 and HDF5. The result 
 is a direct map to javascript behavior with the least amount of data copying and coding tasks for the user. Hopefully you won't need to write yet another layer in your code to accomplish your goals.
 
 ```javascript
@@ -85,10 +86,9 @@ console.dir(groupTarget.[ 'Computed Heat Of Formation' ]);
 console.dir(groupTarget.Information);
 ```
 
-Currently testing with node v0.13.0-pre and V8 3.26.33
+Currently testing with node v0.13.0-pre and V8 3.28.73
 
-A legacy development for node v0.10.31 and V8 3.14.5.9 resides in ./legacy/node-v0.10.31. This probably will work for a number of v0.10.x's.
-Go into the ./legacy/node-v0.10.31 folder and with npm, node-gyp and node pointing to compatible version, compile the same as below. Then go back two folders and test using the same javascript code.  Make sure your NODE_PATH has your obj.target.
+A legacy development for node v0.10.31 and V8 3.14.5.9 resides in ./legacy/node-v0.10.31. Further development of legacy is suspended since nodejs v0.12.0 has been released.
 For example:
 
 ```bash
@@ -97,7 +97,7 @@ export NODE_PATH=/home/roger/NodeProjects/hdf5.node/build/Release/obj.target:$NO
 
 ## Dependencies
 
-+ [HDF5 C++ Library](http://www.hdfgroup.org/downloads/index.html) v5-1.8.13
++ [HDF5 C++ Library](http://www.hdfgroup.org/downloads/index.html) v5-1.8.14
         (Prior v5-1.8.x's untested yet should work)
 
 When compiling the HDF5 C++ library, be sure to use the `--enable-cxx` flag. The `binding.gyp` expects the HDF5_HOME environment variable set to your install.
@@ -110,28 +110,7 @@ effect g++.
 export HDF5_HOME=/home/roger/NodeProjects/hdf5
 node-gyp configure build
 ```
-To build a legacy version in folder legacy your script would be a modification of 
 
-```bash
-cd ./legacy/node-v0.10.31
-
-export V8_HOME=/home/roger/Software/node-v0.10.31/deps/v8
-export HDF5_HOME=/home/roger/NodeProjects/hdf5
-export NODE_PATH=`pwd`/build/Release/obj.target:`pwd`/build/Release/lib.target:$NODE_PATH
-
-export PATH=/home/roger/Software/gcc/dist/bin:$PATH
-export LD_LIBRARY_PATH=/home/roger/Software/gcc/dist/lib64:$HDF5_HOME/lib:`pwd`build/Release/obj.target:$LD_LIBRARY_PATH
-
-export FC=gfortran
-export CC=gcc
-export CXX=g++
-
-# comment out clean line for first build although it won't hurt if you choose not 
-/usr/local/bin/node-gyp clean
-/usr/local/bin/node-gyp configure --nodedir=/home/roger/Software/node-v0.10.31
-/usr/local/bin/node-gyp build
-
-```
 ## Environment Variables
 
 The path to the HDF5 shared objects must be added to the runtime library search path. 
@@ -152,25 +131,12 @@ or
 ```bash
 mocha --require should
 ```
-For legacy, run with the same tests from project home directory but have environment specify the location of the legacy *.node 
 
+To launch the view:
 ```bash
-export V8_HOME=/home/roger/Software/node-v0.10.31/deps/v8
-export HDF5_HOME=/home/roger/NodeProjects/hdf5
-export NODE_PATH=`pwd`/legacy/node-v0.10.31/build/Release/obj.target:$NODE_PATH
-
-export PATH=/home/roger/Software/gcc/dist/bin:$PATH
-export LD_LIBRARY_PATH=/home/roger/Software/gcc/dist/lib64:$HDF5_HOME/lib:$LD_LIBRARY_PATH
-
-export PATH=/home/roger/Software/node-v0.10.31-linux-x64/dist/bin:`pwd`/legacy/node-v0.10.31/node_modules/mocha/bin:$PATH
-
-mocha --require should 
-
-#To prove build tools
-node --version
-node -e "console.log(process.versions.v8)"
-
+node --harmony  ./lib/application.js 3000 "./roothaan.h5"
 ```
+will serve the interface to the h5 on port 3000.
 
 ## Experimental
 
@@ -184,7 +150,7 @@ h5lt.makeDataset();
 takes three arguments; the id of the group or file, the dataset name and the javascript array object with the data. Reading
 a dataset only needs the id of the group or file and the dataset name.  It returns a javascript array compatible with the h5 dataset properties.
 
-Currently rank 1 and 2 datasets are made or read but higher rank is being investigated.  First, all the builtin types will be supported and eventually custom data types
+Currently rank 1 and 2 datasets are made or read but higher rank is being investigated.  Reading 3 rank data. First, all the builtin types will be supported and eventually custom data types
 will be attempted.  Particularly I have a need for complex numbers yet I'm on a learning curve in javascript.
 
 The H5IM is now mostly implemented.  The palette portion remains to be implemented. 

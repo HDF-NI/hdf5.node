@@ -4,8 +4,8 @@ var fs = require('fs');
 var parseString = require('xml2js').parseString;
 var util = require('util');
 
-var hdf5 = require('hdf5').hdf5;
-var h5tb = require('hdf5').h5tb;
+var hdf5 = require('../index.js').hdf5;
+var h5tb = require('../index.js').h5tb;
 
 var Access = require('lib/globals.js').Access;
 var CreationOrder = require('lib/globals.js').CreationOrder;

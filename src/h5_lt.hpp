@@ -207,6 +207,9 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
     hsize_t theSize=bufSize;
           switch(rank)
           {
+              case 3:
+              theSize=values_dim[0]*values_dim[1]*values_dim[2];
+              break;
               case 2:
               theSize=values_dim[0]*values_dim[1];
               break;
@@ -301,6 +304,7 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 }
 //                hsize_t dims[1]={buffer->Length()};
 //                buffer->;
+                if(rank>2)std::cout<<"LZ4 "<<H5Zfilter_avail(32004)<<std::endl;
                 err=H5LTread_dataset (args[0]->ToInt32()->Value(), *dset_name, type_id, buffer->Buffer()->Externalize().Data() );
                 if(err<0)
                 {
@@ -309,8 +313,21 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                     return;
                 }
                 buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"), Number::New(v8::Isolate::GetCurrent(), rank));
-                buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim[0]));
-                if(rank>1)buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim[1]));
+                switch(rank)
+                {
+                    case 3:
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim[1]));
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim[2]));
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"), Number::New(v8::Isolate::GetCurrent(), values_dim[0]));
+                        break;
+                    case 2:
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim[0]));
+                        if(rank>1)buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim[1]));
+                        break;
+                    case 1:
+                    buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim[0]));
+                    break;
+                }
                 
         //Attributes
         uint32_t index=0;
