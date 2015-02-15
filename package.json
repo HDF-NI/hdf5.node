@@ -1,6 +1,6 @@
 {
   "name" : "hdf5",
-  "version" : "0.0.4",
+  "version" : "0.0.5",
   "description" : "Native Abstractions for hdf5 file io",
   "main" : "./index.js",
   "repository" : {
@@ -15,7 +15,6 @@
     "promise": "6.1.0",
     "co-fs" : "1.2.0",
     "xml2js" : "0.4.4",
-    "event-stream" :"3.2.1",
     "koa" : "0.14.0",
     "koa-compress" : "1.0.8",
     "koa-route" : "2.4.0",

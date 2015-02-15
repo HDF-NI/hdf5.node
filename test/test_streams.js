@@ -1,7 +1,6 @@
 var co = require('co');
 var fs = require('fs');
 var StreamTable = require('lib/stream_table.js');
-var es =  require('event-stream')
 
 var hdf5 = require('hdf5');
 var h5lt = require('h5lt');
