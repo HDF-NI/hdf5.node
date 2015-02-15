@@ -70,6 +70,21 @@ namespace NodeHDF5 {
                     type_size+=4;
                     field_types[i]=H5T_NATIVE_INT;
                 }
+                else if(table->Get(i)->IsArray())
+                {
+                    Local<v8::Array> field=Local<v8::Array>::Cast(table->Get(i));
+                    nrecords=field->Length();
+                    field_offsets[i]=type_size;
+                    size_t max=0;
+                    for(uint32_t j=0;j<nrecords;j++){
+                        size_t len=field->Get(j)->ToString()->Length ();
+                        if(max<len)max=len;
+                    }
+                    type_size+=max;
+                    hid_t string_type = H5Tcopy(H5T_C_S1);
+                    H5Tset_size(string_type, max);
+                    field_types[i]=string_type;
+                }
                 else
                 {
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
@@ -102,6 +117,15 @@ namespace NodeHDF5 {
                     Local<v8::Int32Array> field=Local<v8::Int32Array>::Cast(table->Get(i));
                     for(uint32_t j=0;j<nrecords;j++){
                         ((unsigned int*)&data[j*type_size+field_offsets[i]])[0]=field->Get(j)->ToInt32()->Value ();
+                    }
+                    
+                }
+                else if(table->Get(i)->IsArray())
+                {
+                    Local<v8::Array> field=Local<v8::Array>::Cast(table->Get(i));
+                    for(uint32_t j=0;j<nrecords;j++){
+                        String::Utf8Value value (field->Get(j)->ToString());
+                        std::memcpy(&data[j*type_size+field_offsets[i]], (*value), H5Tget_size(field_types[i]));
                     }
                     
                 }
@@ -162,7 +186,7 @@ namespace NodeHDF5 {
                 for (uint32_t i = 0; i < nfields; i++)
                 {
                     hid_t type=H5Tget_member_type(dataset_type, i);
-//                    std::cout<<" "<<field_names[i]<<" "<<type<<std::endl;
+                    std::cout<<" "<<field_names[i]<<" "<<H5Tget_class(type)<<std::endl;
                     switch(H5Tget_class(type)){
                         case H5T_FLOAT:
                             if(H5Tget_precision(type)==64)
@@ -215,6 +239,21 @@ namespace NodeHDF5 {
 //                                    std::cout<<" "<<j<<" "<<(((double*)&data[j*type_size+field_offsets[i]])[0])<<" "<<field_offsets[i]<<std::endl;
                                     
                                     buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), ((int*)&data[j*type_size+field_offsets[i]])[0]));
+                                }
+
+                                table->Set(i, buffer);
+                            }
+                            break;
+//                        case H5T_CSET_ASCII:
+                        case H5T_STRING:
+//                            if(H5Tget_sign(type)==H5T_SGN_NONE)
+                            {
+                                Local<Array> buffer = Array::New(v8::Isolate::GetCurrent(), nrecords);
+                                buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"), String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
+                                for(uint32_t j=0;j<nrecords;j++){
+//                                    std::cout<<" "<<j<<" "<<(((double*)&data[j*type_size+field_offsets[i]])[0])<<" "<<field_offsets[i]<<std::endl;
+                                    
+                                    buffer->Set(j, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), &data[j*type_size+field_offsets[i]]));
                                 }
 
                                 table->Set(i, buffer);

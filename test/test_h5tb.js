@@ -29,7 +29,7 @@ describe("testing table interface ",function(){
             group.id.should.equal(-1);
             group.create('/pmc/refinement', file);
             group.id.should.not.equal(-1);
-            var tableModel=new Array(3);
+            var tableModel=new Array(4);
             var fieldArray1=new Uint32Array(5);
             fieldArray1.name="Index";
             fieldArray1[0]=0;
@@ -54,6 +54,14 @@ describe("testing table interface ",function(){
             fieldArray3[3]=2.0;
             fieldArray3[4]=1.0;
             tableModel[2]=fieldArray3;
+            var fieldArray4=new Array(5);
+            fieldArray4.name="Residues";
+            fieldArray4[0]="ALA";
+            fieldArray4[1]="VAL";
+            fieldArray4[2]="HIS";
+            fieldArray4[3]="LEU";
+            fieldArray4[4]="HOH";
+            tableModel[3]=fieldArray4;
             h5tb.makeTable(group.id, 'Reflections', tableModel);
             }
             catch (err) {
