@@ -41,11 +41,9 @@ namespace NodeHDF5 {
             size_t type_size=0;
             for (uint32_t i = 0; i < table->Length(); i++)
             {
-            std::cout<<"table->Length() "<<table->Length()<<" "<<std::endl;
                 String::Utf8Value field_name (table->Get(i)->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(),"name"))->ToString());
                 std::string fieldName((*field_name)); 
                 std::memcpy(field_names[i], fieldName.c_str(), fieldName.length());
-            std::cout<<"table->Length() "<<field_names[i]<<" "<<std::endl;
                 if(table->Get(i)->IsFloat64Array())
                 {
                     Local<v8::Float64Array> field=Local<v8::Float64Array>::Cast(table->Get(i));

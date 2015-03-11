@@ -11,6 +11,8 @@ var Access = require('lib/globals.js').Access;
 var CreationOrder = require('lib/globals.js').CreationOrder;
 var State = require('lib/globals.js').State;
 var H5OType = require('lib/globals.js').H5OType;
+var HLType = require('lib/globals').HLType;
+var yytokentype = require('lib/globals.js').yytokentype;
 
 
 describe("testing lite interface ",function(){
@@ -45,6 +47,63 @@ describe("testing lite interface ",function(){
             buffer.rank=1;
             buffer.rows=5;
             buffer.should.match(readBuffer);
+            var readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Refractive Index');
+//            console.log(readAsBuffer.readDoubleLE(8));
+            readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
+        });
+        it("should be node::Buffer io for double le", function(){
+            try
+            {
+            var buffer=new Buffer(5*8, "binary");
+            buffer.type=yytokentype.H5T_NATIVE_DOUBLE_TOKEN;
+            buffer.writeDoubleLE(1.0, 0);
+            buffer.writeDoubleLE(2.0, 8);
+            buffer.writeDoubleLE(3.0, 16);
+            buffer.writeDoubleLE(4.0, 24);
+            buffer.writeDoubleLE(5.0, 32);
+            h5lt.makeDataset(group.id, 'Dielectric Constant', buffer);
+            var readBuffer=h5lt.readDataset(group.id, 'Dielectric Constant');
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(5);
+            buffer.rank=1;
+            buffer.rows=5;
+            
+            var readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Dielectric Constant');
+//            console.log(readAsBuffer.readDoubleLE(8));
+            readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
+            }
+            catch(err) {
+                console.dir(err.message);
+            }
+        });
+        it("should be node::Buffer io for double 2 rank data", function(){
+            try
+            {
+            var buffer=new Buffer(6*8, "binary");
+            buffer.type=yytokentype.H5T_NATIVE_DOUBLE_TOKEN;
+            buffer.writeDoubleLE(1.0, 0);
+            buffer.writeDoubleLE(2.0, 8);
+            buffer.writeDoubleLE(3.0, 16);
+            buffer.writeDoubleLE(1.0, 24);
+            buffer.writeDoubleLE(2.0, 32);
+            buffer.writeDoubleLE(3.0, 40);
+            buffer.rank=2;
+            buffer.rows=3;
+            buffer.columns=2;
+            h5lt.makeDataset(group.id, 'Two Rank', buffer);
+            var readBuffer=h5lt.readDataset(group.id, 'Two Rank');
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(6);
+            
+            var readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Two Rank');
+//            console.log(readAsBuffer.readDoubleLE(8));
+            readAsBuffer.readDoubleLE(4*8).should.equal(2.0);
+            readBuffer.rows.should.match(3);
+            readBuffer.columns.should.match(2);
+            }
+            catch(err) {
+                console.dir(err.message);
+            }
         });
         it("should be Float32Array io ", function(){
             var buffer=new Float32Array(5);
@@ -290,6 +349,7 @@ describe("testing lite interface ",function(){
             
             array[1].should.equal("1");
             var xmolDocument="";
+            groupGeometries.getDatasetType(array[1]).should.equal(HLType.HL_TYPE_LITE);
             var lastTrajectory=h5lt.readDataset(groupGeometries.id, array[1]);
             lastTrajectory.rank.should.equal(2);
             lastTrajectory.columns.should.equal(3);
@@ -297,6 +357,7 @@ describe("testing lite interface ",function(){
                 {
                     xmolDocument+=elements.length+'\n';
                     xmolDocument+=frequencyNames[frequencyIndex]+'\n';
+                    groupFrequencies.getDatasetType(frequencyNames[frequencyIndex]).should.equal(HLType.HL_TYPE_LITE);
                     var frequency=h5lt.readDataset(groupFrequencies.id, frequencyNames[frequencyIndex]);
                     for (var index = 0; index < elements.length; index++)
                     {
@@ -330,6 +391,7 @@ describe("testing lite interface ",function(){
             done();
         });
         it("Size of dataset '0' should be 186 ", function(done){
+            groupGeometries.getDatasetType('0').should.equal(HLType.HL_TYPE_LITE);
             var readBuffer=h5lt.readDataset(groupGeometries.id, '0');
             'Float64Array'.should.match(readBuffer.constructor.name);
             var length=186;

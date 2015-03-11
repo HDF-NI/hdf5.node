@@ -15,6 +15,17 @@ namespace NodeHDF5 {
     using namespace v8;
     using namespace node;
     
+enum HLType {
+    HL_TYPE_UNKNOWN = -1,      /* Unknown object type                      */
+    HL_TYPE_LITE = 0,             /* Lite dataset interface                        */
+    HL_TYPE_IMAGE = 1,           /* Image                      */
+    HL_TYPE_TABLE = 2,    /* Table   */
+    HL_TYPE_PACKET_TABLE = 3,             /* Packets       */
+    HL_TYPE_DIMENSION_SCALES = 4,             /*        */
+    HL_TYPE_OPTIMIZED_FUNCTIONS = 5,             /*        */
+    HL_TYPE_EXTENSIONS = 6             /*        */
+};
+
     class File : public ObjectWrap {
     protected:
             std::map<unsigned long, unsigned long> toAccessMap = {{0,H5F_ACC_RDONLY}, {1,H5F_ACC_RDWR}, {2,H5F_ACC_TRUNC}, {3,H5F_ACC_EXCL}, {4,H5F_ACC_DEBUG}, {5,H5F_ACC_CREAT}};
@@ -70,6 +81,7 @@ namespace NodeHDF5 {
             static void GetMemberNames (const v8::FunctionCallbackInfo<Value>& args);
             static void GetMemberNamesByCreationOrder (const v8::FunctionCallbackInfo<Value>& args);
             static void GetChildType (const v8::FunctionCallbackInfo<Value>& args);
+            static void getDatasetType (const v8::FunctionCallbackInfo<Value>& args);
             
     };
 

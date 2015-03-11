@@ -14,9 +14,10 @@ extern "C" {
         
         // initialize wrapped objects
         H5pt::Initialize(target);
+        PacketTable::Init(target);
         
     }
     
-    NODE_MODULE(h5tb, init_pt)
+    NODE_MODULE(h5pt, init_pt)
 
 }
