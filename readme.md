@@ -14,7 +14,7 @@ var file = new hdf5.File('/tmp/foo.h5', Access.ACC_RDONLY);
 var group=file.openGroup('pmc');
 ```
 
-### Datasets as javascript arrays
+### High-level datasets as javascript arrays
 To create a new h5 and put data into it,
 
 ```javascript
@@ -101,7 +101,7 @@ readDatasetAsBuffer the return is a nodejs Buffer with the shape properties set.
             readBuffer.constructor.name.should.match('Float64Array');
             
             var readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Two Rank');
- ``
+```
 
 ### High-level Tables
 ```javascript
