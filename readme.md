@@ -14,7 +14,7 @@ var file = new hdf5.File('/tmp/foo.h5', Access.ACC_RDONLY);
 var group=file.openGroup('pmc');
 ```
 
-# Datasets as javascript arrays
+### Datasets as javascript arrays
 To create a new h5 and put data into it,
 
 ```javascript
@@ -64,7 +64,7 @@ for (var frequencyIndex = 0; frequencyIndex < frequencyNames.length; frequencyIn
 }
 ```
 
-#High-level datasets as nodejs Buffer's
+### High-level datasets as nodejs Buffer's
 If a Buffer http://nodejs.org/docs/v0.12.0/api/buffer.html is filled with pure datatype(e.g. double) it can be written to h5 as a dataset.
 ```javascript
             var yytokentype = require('lib/globals.js').yytokentype;
@@ -103,7 +103,7 @@ readDatasetAsBuffer the return is a nodejs Buffer with the shape properties set.
             var readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Two Rank');
  ``
 
-# High-level Tables
+### High-level Tables
 ```javascript
             var table=new Array(4);
             var fieldArray1=new Uint32Array(5);
@@ -143,7 +143,7 @@ readDatasetAsBuffer the return is a nodejs Buffer with the shape properties set.
 ```
 A column of strings is set fixed with to the widest in the set(working on other possible solutions). The return table is equivalent
 
-# High-level Packet Tables
+### High-level Packet Tables
 This one is experimental and can only do variable length strings today(and I had a need for it)
 ```javascript
             var table=new h5pt.PacketTable(0, 5);
@@ -182,7 +182,7 @@ To read, the next method refills the record with the current packet's data and i
                 table.close();
 ```
 
-# Properties as h5 metadata attributes
+### Properties as h5 metadata attributes
 
 Attributes can be attached to Groups by flush after the properties are added to javascript group instance.  Prototype properties also get flushed.
 Because javascript has the ability to have property names with spaces via [ '' ] these readily map to h5's similar nature.
