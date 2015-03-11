@@ -10,6 +10,7 @@
 #include "hdf5.h"
 #include <H5Location.h>
 #include <H5Attribute.h>
+#include "H5PTpublic.h"
 
 namespace NodeHDF5 {
     
@@ -41,6 +42,7 @@ namespace NodeHDF5 {
         NODE_SET_PROTOTYPE_METHOD(t, "getMemberNames", GetMemberNames);
         NODE_SET_PROTOTYPE_METHOD(t, "getMemberNamesByCreationOrder", GetMemberNamesByCreationOrder);
         NODE_SET_PROTOTYPE_METHOD(t, "getChildType", GetChildType);
+        NODE_SET_PROTOTYPE_METHOD(t, "getDatasetType", getDatasetType);
         
         // initialize constructor reference
         Constructor.Reset(v8::Isolate::GetCurrent(), t);
@@ -628,6 +630,70 @@ namespace NodeHDF5 {
         // store specified child name
         String::Utf8Value child_name (args[0]->ToString());
         args.GetReturnValue().Set((uint32_t) group->m_group.childObjType(*child_name));
+        args.This()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"));
+        return;
+        
+    }
+    
+    void Group::getDatasetType (const v8::FunctionCallbackInfo<Value>& args) {
+        
+//        HandleScope scope;
+        
+        // fail out if arguments are not correct
+        if (args.Length() != 1 || !args[0]->IsString()) {
+            
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected child object's name")));
+            args.GetReturnValue().SetUndefined();
+            return;
+            
+        }
+        // unwrap group
+        Group* group = ObjectWrap::Unwrap<Group>(args.This());
+        // store specified child name
+        String::Utf8Value child_name (args[0]->ToString());
+        size_t id=args.This()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToNumber()->NumberValue();
+        HLType hlType=HLType::HL_TYPE_LITE;
+        hid_t ds = H5Dopen(id, (*child_name), H5P_DEFAULT);
+        if (ds >= 0) {
+//            if(H5PTis_valid(ds)>=0){
+//                hlType=HLType::HL_TYPE_PACKET_TABLE;
+//            }
+//            else
+            {
+                hid_t type = H5Dget_type(ds);
+                switch(H5Tget_class(type))
+                {
+                    case H5T_COMPOUND:
+                    {
+//                std::cout<<(*child_name)<<" H5Dget_type "<<H5Tget_class(type)<<" "<<H5T_COMPOUND<<std::endl;
+                        int nmembers = H5Tget_nmembers(type);
+//                        std::cout << H5Tget_nmembers(type) << " pt type=" << H5Tis_variable_str(type) << std::endl;
+                        bool variableType=true;
+                        for (int memberIndex = 0; memberIndex < nmembers; memberIndex++) {
+                            hid_t memberType = H5Tget_member_type(type, memberIndex);
+//                            std::cout<<" H5Tget_member_type "<<H5Tget_class(memberType)<<" "<<H5T_VLEN<<" "<<H5Tis_variable_str(memberType)<<std::endl;
+                            if (H5Tis_variable_str(memberType)) {
+                            } else {
+                                variableType=false;
+                            }
+                            H5Tclose(memberType);
+                        }
+                        if(variableType){
+                            hlType=HLType::HL_TYPE_PACKET_TABLE;
+                        }
+                        else {
+                            hlType=HLType::HL_TYPE_TABLE;
+                        }
+                    }
+                    break;
+                    case H5T_STRING:
+                        break;
+                }
+                if (type >= 0)H5Tclose(type);
+                H5Dclose(ds);
+            }
+        }
+        args.GetReturnValue().Set((uint32_t) hlType);
         return;
         
     }

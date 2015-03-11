@@ -1,7 +1,6 @@
 var Duplex = require('stream').Duplex;
 var inherits = require('util').inherits;
 var co = require('co');
-var Promise = require('promise');
 var fs = require('fs');
 var StreamBoiler = require('lib/stream_boiler.js');
 var BufferStream = require('lib/buffer_stream.js');

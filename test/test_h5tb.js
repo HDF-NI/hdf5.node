@@ -11,6 +11,7 @@ var Access = require('lib/globals.js').Access;
 var CreationOrder = require('lib/globals.js').CreationOrder;
 var State = require('lib/globals.js').State;
 var H5OType = require('lib/globals.js').H5OType;
+var HLType = require('lib/globals').HLType;
 
 
 describe("testing table interface ",function(){
@@ -82,12 +83,13 @@ describe("testing table interface ",function(){
         it("should be Table input ", function*(){
             try
             {
-            console.dir("open target...");
-            var groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
-            console.dir("read Reflections table...");
-            var table=h5tb.readTable(groupTarget.id, "Reflections");
-            console.dir(table);
-            groupTarget.close();
+                console.dir("open target...");
+                var groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
+                groupTarget.getDatasetType("Reflections").should.equal(HLType.HL_TYPE_TABLE);
+                console.dir("read Reflections table...");
+                var table=h5tb.readTable(groupTarget.id, "Reflections");
+                console.dir(table);
+                groupTarget.close();
             }
             catch (err) {
             console.dir(err.message);

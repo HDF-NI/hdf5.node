@@ -74,7 +74,7 @@
             ],
             'sources': [
                 'src/h5pt.cc',
-                'src/h5_pt.hpp'
+                'src/h5_pt.cc'
             ],
             'link_settings': {
                 'libraries': [
