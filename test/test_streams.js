@@ -57,19 +57,19 @@ var MainView = require('views/MainView.js');
     it("should produce table", function*() {
         try
         {
-            var file= new hdf5.File('/home/roger/Downloads/header_sample_2015-01-19/series_1_master.h5', Access.ACC_RDONLY);
-            var parent=file.openGroup("entry/data");
-            var document=h5lt.readDataset(parent.id, "data_000001");
-            console.dir("r="+document.rank);
-            var streamTable=new StreamTable(document.rows, document.columns);
-//            streamTable.pipe(process.stdout);
-//            streamTable.resume();
-                        for(var i=0;i<document.rows*document.columns;i++)
-                        {
-                            //console.dir(document[i]);
-                                streamTable.write(document[i]);
-                        }
-            streamTable.end();
+//            var file= new hdf5.File('/home/roger/Downloads/header_sample_2015-01-19/series_1_master.h5', Access.ACC_RDONLY);
+//            var parent=file.openGroup("entry/data");
+//            var document=h5lt.readDataset(parent.id, "data_000001");
+//            console.dir("r="+document.rank);
+//            var streamTable=new StreamTable(document.rows, document.columns);
+////            streamTable.pipe(process.stdout);
+////            streamTable.resume();
+//                        for(var i=0;i<document.rows*document.columns;i++)
+//                        {
+//                            //console.dir(document[i]);
+//                                streamTable.write(document[i]);
+//                        }
+//            streamTable.end();
 
         }
         catch (err) {
@@ -80,8 +80,8 @@ var MainView = require('views/MainView.js');
     it("should produce page", function*() {
         try
         {
-            var main=new MainView(this, "/home/roger/Downloads/header_sample_2015-01-19/series_1_master.h5");
-            main.pipe(process.stdout);
+//            var main=new MainView(this, "/home/roger/Downloads/header_sample_2015-01-19/series_1_master.h5");
+//            main.pipe(process.stdout);
 
         }
         catch (err) {
