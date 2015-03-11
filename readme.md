@@ -230,6 +230,9 @@ When compiling the HDF5 C++ library, be sure to use the `--enable-cxx` flag. The
 ## Compiling
 The code requires a gcc compiler supporting C++11.  The binding.gyp defines the cflags with -std=c++11.  There isn't any cxxflags that I know of but cflags in node-gyp does 
 effect g++.
+
+As a just-for-now I move H5LTparse.h from the hdf5 source to the $HDF5_HOME/include directory to use the yytokentype enumeration.
+
 ```bash
 export HDF5_HOME=/home/roger/NodeProjects/hdf5
 node-gyp configure build
