@@ -72,10 +72,8 @@ describe("testing table interface ",function(){
         it("should be Table input ", function*(){
             try
             {
-                console.dir("open target...");
 //                var groupTarget=file.openGroup('DivCon/3FVA', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
                 var groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
-                console.dir("read Events table...");
                 groupTarget.getDatasetType("Events").should.equal(HLType.HL_TYPE_PACKET_TABLE);
                 console.dir("Events "+groupTarget.getDatasetType("Events"));
                 var table=h5pt.readTable(groupTarget.id, "Events");

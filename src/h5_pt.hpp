@@ -8,7 +8,8 @@
 #include <vector>
 #include <functional>
 
-#include "hdf5.h"
+#include "file.h"
+#include "group.h"
 #include "H5PTpublic.h"
 
 namespace NodeHDF5 {

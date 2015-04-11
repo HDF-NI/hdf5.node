@@ -83,11 +83,12 @@ describe("testing table interface ",function(){
         it("should be Table input ", function*(){
             try
             {
-                console.dir("open target...");
                 var groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
                 groupTarget.getDatasetType("Reflections").should.equal(HLType.HL_TYPE_TABLE);
                 console.dir("read Reflections table...");
                 var table=h5tb.readTable(groupTarget.id, "Reflections");
+                table.length.should.equal(4);
+                table[0].length.should.equal(5);
                 console.dir(table);
                 groupTarget.close();
             }

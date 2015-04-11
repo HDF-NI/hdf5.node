@@ -1,5 +1,6 @@
 #include <node.h>
-#include "hdf5.h"
+#include "file.h"
+#include "group.h"
 
 using namespace v8;
 using namespace NodeHDF5;

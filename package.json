@@ -1,6 +1,6 @@
 {
   "name" : "hdf5",
-  "version" : "0.0.8",
+  "version" : "0.0.10",
   "description" : "Native Abstractions for hdf5 file io",
   "main" : "./index.js",
   "repository" : {
@@ -31,7 +31,7 @@
     "grunt-mocha-cli" : "1.12.0",
     "grunt-docco" : "0.3.3",
     "should" : "4.6.0",
-    "mocha-co" : "1.17.1-co.1"
+    "co-mocha" : "1.1.0"
   },
   "contributors" : [ "Ryan Cole <ryan@rycole.com> (https://github.com/ryancole/)", "Roger I Martin <mathmldashx@yahoo.com> (https://github.com/rimmartin/)" ],
   "license" : {

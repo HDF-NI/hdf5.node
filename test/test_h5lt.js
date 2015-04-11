@@ -12,7 +12,7 @@ var CreationOrder = require('lib/globals.js').CreationOrder;
 var State = require('lib/globals.js').State;
 var H5OType = require('lib/globals.js').H5OType;
 var HLType = require('lib/globals').HLType;
-var yytokentype = require('lib/globals.js').yytokentype;
+var H5Type = require('lib/globals.js').H5Type;
 
 
 describe("testing lite interface ",function(){
@@ -55,7 +55,7 @@ describe("testing lite interface ",function(){
             try
             {
             var buffer=new Buffer(5*8, "binary");
-            buffer.type=yytokentype.H5T_NATIVE_DOUBLE_TOKEN;
+            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
             buffer.writeDoubleLE(1.0, 0);
             buffer.writeDoubleLE(2.0, 8);
             buffer.writeDoubleLE(3.0, 16);
@@ -80,7 +80,7 @@ describe("testing lite interface ",function(){
             try
             {
             var buffer=new Buffer(6*8, "binary");
-            buffer.type=yytokentype.H5T_NATIVE_DOUBLE_TOKEN;
+            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
             buffer.writeDoubleLE(1.0, 0);
             buffer.writeDoubleLE(2.0, 8);
             buffer.writeDoubleLE(3.0, 16);
@@ -150,7 +150,7 @@ describe("testing lite interface ",function(){
             buffer.rows=5;
             buffer.should.match(readBuffer);
         });
-        it("flush properties to h5 ", function(){
+        it("flush properties to h5 ", function(done){
             group.getNumAttrs().should.equal(0);
             group[ 'Computed Heat of Formation' ]=100.0;
             group.flush();
@@ -168,9 +168,11 @@ describe("testing lite interface ",function(){
             group.flush();
             group.getNumAttrs().should.equal(3);
             console.dir(group.Information);
+            done();
         });
-        it("should close pmc ", function(){
+        it("should close pmc ", function(done){
             group.close();
+            done();
         });
     });
     describe("create an h5, group and some datasets ",function(){
@@ -305,9 +307,11 @@ describe("testing lite interface ",function(){
           file = new hdf5.File('./roothaan.h5', Access.ACC_RDONLY);
         });
         var groupTarget;
-        it("open of target should be >0", function(){
+        it("open of target should be >0", function(done){
             groupTarget=file.openGroup('pmcservices/sodium-icosanoate', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.id.should.not.equal(-1);
+            console.dir(groupTarget.id);
+            done();
         });
         it("getNumAttrs of groupTarget should be 3", function(){
 //            console.dir(groupTarget);

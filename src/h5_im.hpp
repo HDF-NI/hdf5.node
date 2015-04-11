@@ -6,7 +6,8 @@
 #include <memory>
 #include <iostream>
 
-#include "hdf5.h"
+#include "file.h"
+#include "group.h"
 #include "H5IMpublic.h"
 
 namespace NodeHDF5 {

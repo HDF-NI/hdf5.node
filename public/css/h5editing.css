@@ -7,3 +7,9 @@
     color: #444;
     padding: 5px;
 }
+
+table {
+    border-spacing: 5px;
+    border: 1px solid lightskyblue;
+    border-color: lightskyblue;
+}

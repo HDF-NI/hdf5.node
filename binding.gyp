@@ -16,8 +16,7 @@
             'link_settings': {
                 'libraries': [
                     '-lhdf5',
-                    '-lhdf5_hl',
-                    '-lhdf5_cpp'
+                    '-lhdf5_hl'
                 ],
                 'ldflags': [
                     '-L$(HDF5_HOME)/lib'
@@ -37,8 +36,7 @@
             'link_settings': {
                 'libraries': [
                     '-lhdf5',
-                    '-lhdf5_hl',
-                    '-lhdf5_cpp'
+                    '-lhdf5_hl'
                 ],
                 'ldflags': [
                     '-L$(HDF5_HOME)/lib'
@@ -58,8 +56,7 @@
             'link_settings': {
                 'libraries': [
                     '-lhdf5',
-                    '-lhdf5_hl',
-                    '-lhdf5_cpp'
+                    '-lhdf5_hl'
                 ],
                 'ldflags': [
                     '-L$(HDF5_HOME)/lib'
@@ -79,8 +76,7 @@
             'link_settings': {
                 'libraries': [
                     '-lhdf5',
-                    '-lhdf5_hl',
-                    '-lhdf5_cpp'
+                    '-lhdf5_hl'
                 ],
                 'ldflags': [
                     '-L$(HDF5_HOME)/lib'
@@ -100,8 +96,7 @@
             'link_settings': {
                 'libraries': [
                     '-lhdf5',
-                    '-lhdf5_hl',
-                    '-lhdf5_cpp'
+                    '-lhdf5_hl'
                 ],
                 'ldflags': [
                     '-L$(HDF5_HOME)/lib'

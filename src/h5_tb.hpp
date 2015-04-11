@@ -8,7 +8,8 @@
 #include <vector>
 #include <functional>
 
-#include "hdf5.h"
+#include "file.h"
+#include "group.h"
 #include "H5TBpublic.h"
 #include "H5Dpublic.h"
 #include "H5Tpublic.h"
@@ -90,7 +91,7 @@ namespace NodeHDF5 {
                     return;
                 }
             }
-            std::cout<<"type_size "<<type_size<<" "<<nrecords<<std::endl;
+//            std::cout<<"type_size "<<type_size<<" "<<nrecords<<std::endl;
             std::unique_ptr<char[]> data(new char[type_size*nrecords]);
             for (uint32_t i = 0; i < table->Length(); i++)
             {
@@ -168,11 +169,11 @@ namespace NodeHDF5 {
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
-            std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
+//            std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
             err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names, field_size.get(), field_offsets.get(), &type_size );
             for (unsigned int i = 0; i < nfields; i++)
             {
-                std::cout<<" "<<field_names[i]<<" "<<field_size[i]<<" "<<field_offsets[i]<<std::endl;
+//                std::cout<<" "<<field_names[i]<<" "<<field_size[i]<<" "<<field_offsets[i]<<std::endl;
 
             }
 
@@ -184,7 +185,7 @@ namespace NodeHDF5 {
                 for (uint32_t i = 0; i < nfields; i++)
                 {
                     hid_t type=H5Tget_member_type(dataset_type, i);
-                    std::cout<<" "<<field_names[i]<<" "<<H5Tget_class(type)<<std::endl;
+//                    std::cout<<" "<<field_names[i]<<" "<<H5Tget_class(type)<<std::endl;
                     switch(H5Tget_class(type)){
                         case H5T_FLOAT:
                             if(H5Tget_precision(type)==64)

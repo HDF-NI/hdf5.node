@@ -9,8 +9,8 @@
 #include <vector>
 #include <functional>
 
-#include "hdf5.h"
-#include "H5LTparse.h"
+#include "file.h"
+#include "group.h"
 #include "H5LTpublic.h"
 
 namespace NodeHDF5 {
@@ -47,12 +47,12 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
         hid_t type_id;
         size_t order;
         size_t type=args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))->ToInt32()->Value();
-        if(type==H5T_NATIVE_DOUBLE_TOKEN)
+        if(type==NODE_H5T_NATIVE_DOUBLE)
         {
             type_id=H5T_NATIVE_DOUBLE;
             order=8;
         }
-        else if(type==H5T_NATIVE_FLOAT_TOKEN)
+        else if(type==NODE_H5T_NATIVE_FLOAT)
         {
             type_id=H5T_NATIVE_FLOAT;
             order=4;
@@ -62,22 +62,22 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
     //        type_id=H5T_NATIVE_LLONG;
     //        buffer = Local<int64Array>::Cast(args[2]);
     //    }
-        else if(type==H5T_NATIVE_INT_TOKEN)
+        else if(type==NODE_H5T_NATIVE_INT)
         {
             type_id=H5T_NATIVE_INT;
             order=4;
         }
-        else if(type==H5T_NATIVE_UINT_TOKEN)
+        else if(type==NODE_H5T_NATIVE_UINT)
         {
             type_id=H5T_NATIVE_UINT;
             order=4;
         }
-//        else if(type==H5T_NATIVE_INT8_TOKEN)
+//        else if(type==NODE_H5T_NATIVE_INT8)
 //        {
 //            type_id=H5T_NATIVE_INT8;
 //            order=1;
 //        }
-//        else if(type==H5T_NATIVE_UINT8_TOKEN)
+//        else if(type==NODE_H5T_NATIVE_UINT8)
 //        {
 //            type_id=H5T_NATIVE_UINT8;
 //            order=1;
@@ -161,9 +161,9 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
                     {
                         H5Adelete_by_name(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
                     }
-                     H5::DataSpace ds(H5S_SIMPLE);
-                     const long long unsigned int currentExtent=name->ToString()->Utf8Length();
-                     ds.setExtentSimple(1, &currentExtent);
+//                     H5::DataSpace ds(H5S_SIMPLE);
+//                     const long long unsigned int currentExtent=name->ToString()->Utf8Length();
+//                     ds.setExtentSimple(1, &currentExtent);
                     H5LTset_attribute_string(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), (const char*)value.c_str());
                     
                 }
@@ -328,9 +328,9 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
                     {
                         H5Adelete_by_name(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
                     }
-                     H5::DataSpace ds(H5S_SIMPLE);
-                     const long long unsigned int currentExtent=name->ToString()->Utf8Length();
-                     ds.setExtentSimple(1, &currentExtent);
+//                     H5::DataSpace ds(H5S_SIMPLE);
+//                     const long long unsigned int currentExtent=name->ToString()->Utf8Length();
+//                     ds.setExtentSimple(1, &currentExtent);
                     H5LTset_attribute_string(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), (const char*)value.c_str());
                     
                 }

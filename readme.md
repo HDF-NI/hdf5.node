@@ -6,8 +6,7 @@ is a direct map to javascript behavior with the least amount of data copying and
 ```javascript
 var hdf5 = require('hdf5').hdf5;
 
-//This will be refactored to match the native h5 for combining
-var Access = require('lib/globals').Access;
+var Access = require('hdf5/lib/globals').Access;
 
 var file = new hdf5.File('/tmp/foo.h5', Access.ACC_RDONLY);
     
@@ -21,8 +20,7 @@ To create a new h5 and put data into it,
 var hdf5 = require('hdf5').hdf5;
 var h5lt = require('hdf5').h5lt;
 
-//This will be refactored to match the native h5 for combining
-var Access = require('lib/globals').Access;
+var Access = require('hdf5/lib/globals').Access;
 
 var file = new hdf5.File('/tmp/foo.h5', Access.ACC_TRUNC);
     
@@ -67,10 +65,10 @@ for (var frequencyIndex = 0; frequencyIndex < frequencyNames.length; frequencyIn
 ### High-level datasets as nodejs Buffer's
 If a Buffer http://nodejs.org/docs/v0.12.0/api/buffer.html is filled with pure datatype(e.g. double) it can be written to h5 as a dataset.
 ```javascript
-            var yytokentype = require('lib/globals.js').yytokentype;
+            var H5Type = require('hdf5/lib/globals.js').H5Type;
 
             var buffer=new Buffer(5*8, "binary");
-            buffer.type=yytokentype.H5T_NATIVE_DOUBLE_TOKEN;
+            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
             buffer.writeDoubleLE(1.0, 0);
             buffer.writeDoubleLE(2.0, 8);
             buffer.writeDoubleLE(3.0, 16);
@@ -80,9 +78,9 @@ If a Buffer http://nodejs.org/docs/v0.12.0/api/buffer.html is filled with pure d
 ```
 will assume the rank is one. Rank, rows, columns and sections can be set to shape the dataset.
 ```javascript
-            var yytokentype = require('lib/globals.js').yytokentype;
+            var H5Type = require('hdf5/lib/globals.js').H5Type;
             var buffer=new Buffer(6*8, "binary");
-            buffer.type=yytokentype.H5T_NATIVE_DOUBLE_TOKEN;
+            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
             buffer.writeDoubleLE(1.0, 0);
             buffer.writeDoubleLE(2.0, 8);
             buffer.writeDoubleLE(3.0, 16);
@@ -221,22 +219,27 @@ export NODE_PATH=/home/roger/NodeProjects/hdf5.node/build/Release/obj.target:$NO
 
 ## Dependencies
 
-+ [HDF5 C++ Library](http://www.hdfgroup.org/downloads/index.html) v5-1.8.14
++ [HDF5 C Library](http://www.hdfgroup.org/downloads/index.html) v5-1.8.14
         (Prior v5-1.8.x's untested yet should work)
 
-When compiling the HDF5 C++ library, be sure to use the `--enable-cxx` flag. The `binding.gyp` expects the HDF5_HOME environment variable set to your install.
+The `binding.gyp` expects the HDF5_HOME environment variable set to your install.
 
 
 ## Compiling
-The code requires a gcc compiler supporting C++11.  The binding.gyp defines the cflags with -std=c++11.  There isn't any cxxflags that I know of but cflags in node-gyp does 
+
+The code requires a gcc compiler supporting C++11.  Windows and Mac builds coming. The binding.gyp defines the cflags with -std=c++11.  There isn't any cxxflags that I know of but cflags in node-gyp does 
 effect g++.
 
-As a just-for-now I move H5LTparse.h from the hdf5 source to the $HDF5_HOME/include directory to use the yytokentype enumeration.
-
+### In a working copy of git
 ```bash
 export HDF5_HOME=/home/roger/NodeProjects/hdf5
 node-gyp configure build
 ```
+### Including as a node module
+
+The HDF5_HOME needs to be set. Then an 'npm install hdf5' will pull the version and build it for you
+in node_modules/hdf5. There is no need for the node-gyp step.
+
 
 ## Environment Variables
 
@@ -248,7 +251,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./hdf5.node/../hdf5/lib
 
 ## Running Test
 
-The tests are based on mocha
+The tests are based on co-mocha
 
 ```bash
 mocha
@@ -285,8 +288,5 @@ The H5IM is now mostly implemented.  The palette portion remains to be implement
 Attributes are refreshed from and flushed to Groups with the properties on javascript objects. More attributes will soon be possible on the file object itself and on datasets.
 
 Tables and Packet Tables have their first implementation.  Packet tables only support variable length string so far.
-
-The HDF5 C++ Library is being used for the file and group objects and metadata since some persistence on the native side is needed.  Although the c interface
-is appealing for enabling creation tracking and ordering of members of a group. Currently this property list is default for groups.
 
 Any ideas for the design of the API and interface are welcome.
