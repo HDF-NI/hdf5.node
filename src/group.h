@@ -11,18 +11,20 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
+#include "attributes.hpp"
+
 namespace NodeHDF5 {
 
     using namespace v8;
     using namespace node;
     
 
-    class Group : public ObjectWrap {
-        
+    class Group : public Attributes {
+        using Attributes::name;
+        using Attributes::id;
+        using Attributes::Refresh;
+        using Attributes::Flush;
         private:
-            std::string name;
-            hid_t id;
-            hid_t gcpl_id;
             static Persistent<FunctionTemplate> Constructor;
             static void New (const v8::FunctionCallbackInfo<Value>& args);
             
@@ -34,8 +36,8 @@ namespace NodeHDF5 {
             static void Create (const v8::FunctionCallbackInfo<Value>& args);
             static void Open (const v8::FunctionCallbackInfo<Value>& args);
             static void OpenGroup (const v8::FunctionCallbackInfo<Value>& args);
-            static void Refresh (const v8::FunctionCallbackInfo<Value>& args);
-            static void Flush (const v8::FunctionCallbackInfo<Value>& args);
+//            static void Refresh (const v8::FunctionCallbackInfo<Value>& args);
+//            static void Flush (const v8::FunctionCallbackInfo<Value>& args);
             static void Close (const v8::FunctionCallbackInfo<Value>& args);
             static void GetNumAttrs (const v8::FunctionCallbackInfo<Value>& args);
             static void GetAttributeNames (const v8::FunctionCallbackInfo<Value>& args);

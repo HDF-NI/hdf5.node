@@ -38,6 +38,11 @@ describe("testing c++ interface ",function(){
             group.getNumObjs().should.equal(1);
             group.getChildType("Trajectories").should.equal(H5OType.H5O_TYPE_GROUP);
         });
+        it("should add an attribute to the file ", function*(){
+            file.role="Target";
+            file.flush();
+            
+        });
     });
 
 });
