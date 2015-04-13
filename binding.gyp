@@ -32,7 +32,7 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++11", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions"]
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions"]
                 },
                 'include_dirs': [
                     '$(HDF5_HOME)/include'
@@ -81,7 +81,7 @@
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions"]
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions"]
                 },
                 'include_dirs': [
                     '$(HDF5_HOME)/include'
@@ -129,7 +129,7 @@
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions"]
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions"]
                 },
                 'include_dirs': [
                     '$(HDF5_HOME)/include'
@@ -177,7 +177,7 @@
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions"]
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions"]
                 },
                 'include_dirs': [
                     '$(HDF5_HOME)/include'
@@ -225,7 +225,7 @@
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions"]
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions"]
                 },
                 'include_dirs': [
                     '$(HDF5_HOME)/include'
