@@ -211,11 +211,6 @@ console.dir(groupTarget.Information);
 Currently testing with node v0.13.0-pre and V8 3.28.73
 
 A legacy development for node v0.10.31 and V8 3.14.5.9 resides in ./legacy/node-v0.10.31. Further development of legacy is suspended since nodejs v0.12.0 has been released.
-For example:
-
-```bash
-export NODE_PATH=/home/roger/NodeProjects/hdf5.node/build/Release/obj.target:$NODE_PATH
-```
 
 ## Dependencies
 
@@ -227,17 +222,19 @@ The `binding.gyp` expects the HDF5_HOME environment variable set to your install
 
 ## Compiling
 
-The code requires a gcc compiler supporting C++11.  Windows and Mac builds coming. The binding.gyp defines the cflags with -std=c++11.  There isn't any cxxflags that I know of but cflags in node-gyp does 
+The code requires a gcc compiler supporting C++11 for linux. MacOSX build target has been added.  Windows build target is coming. The binding.gyp defines the cflags with -std=c++11.  There isn't any cxxflags that I know of but cflags in node-gyp does 
 effect g++.
 
 ### In a working copy of git
 ```bash
 export HDF5_HOME=/home/roger/NodeProjects/hdf5
+export NODE_PATH=/home/roger/NodeProjects/hdf5.node/build/Release/obj.target:$NODE_PATH
 node-gyp configure build
 ```
+NODE_PATH is still used for the mocha tests.
 ### Including as a node module
 
-The HDF5_HOME needs to be set. Then an 'npm install hdf5' will pull the version and build it for you
+The HDF5_HOME needs to be set. NODE_PATH should not. Then an 'npm install hdf5' will pull the version and build it for you
 in node_modules/hdf5. There is no need for the node-gyp step.
 
 
