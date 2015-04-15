@@ -146,6 +146,66 @@ describe("testing lite interface ",function(){
             buffer.rows=5;
             buffer.should.match(readBuffer);
         });
+        it("should be Int16Array io ", function(){
+            var buffer=new Int16Array(5);
+            buffer[0]=5;
+            buffer[1]=4;
+            buffer[2]=3;
+            buffer[3]=2;
+            buffer[4]=1;
+            h5lt.makeDataset(group.id, 'Refractive Index s', buffer);
+            var readBuffer=h5lt.readDataset(group.id, 'Refractive Index s');
+            readBuffer.constructor.name.should.match('Int16Array');
+            readBuffer.length.should.match(5);
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.should.match(readBuffer);
+        });
+        it("should be Uint16Array io ", function(){
+            var buffer=new Uint16Array(5);
+            buffer[0]=5;
+            buffer[1]=4;
+            buffer[2]=3;
+            buffer[3]=2;
+            buffer[4]=1;
+            h5lt.makeDataset(group.id, 'Refractive Index us', buffer);
+            var readBuffer=h5lt.readDataset(group.id, 'Refractive Index us');
+            readBuffer.length.should.match(5);
+            readBuffer.constructor.name.should.match('Uint16Array');
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.should.match(readBuffer);
+        });
+        it("should be Int8Array io ", function(){
+            var buffer=new Int8Array(5);
+            buffer[0]=5;
+            buffer[1]=4;
+            buffer[2]=3;
+            buffer[3]=2;
+            buffer[4]=1;
+            h5lt.makeDataset(group.id, 'Refractive Index 8', buffer);
+            var readBuffer=h5lt.readDataset(group.id, 'Refractive Index 8');
+            readBuffer.constructor.name.should.match('Int8Array');
+            readBuffer.length.should.match(5);
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.should.match(readBuffer);
+        });
+        it("should be Uint8Array io ", function(){
+            var buffer=new Uint8Array(5);
+            buffer[0]=5;
+            buffer[1]=4;
+            buffer[2]=3;
+            buffer[3]=2;
+            buffer[4]=1;
+            h5lt.makeDataset(group.id, 'Refractive Index u8', buffer);
+            var readBuffer=h5lt.readDataset(group.id, 'Refractive Index u8');
+            readBuffer.length.should.match(5);
+            readBuffer.constructor.name.should.match('Uint8Array');
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.should.match(readBuffer);
+        });
         it("flush properties to h5 ", function(done){
             group.getNumAttrs().should.equal(0);
             group[ 'Computed Heat of Formation' ]=100.0;
