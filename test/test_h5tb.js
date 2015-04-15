@@ -26,9 +26,7 @@ describe("testing table interface ",function(){
         it("should be Table io ", function*(){
             try
             {
-            group=file.createGroup();
-            group.id.should.equal(-1);
-            group.create('/pmc/refinement', file);
+            group=file.createGroup('/pmc/refinement');
             group.id.should.not.equal(-1);
             var tableModel=new Array(4);
             var fieldArray1=new Uint32Array(5);

@@ -24,8 +24,7 @@ var Access = require('hdf5/lib/globals').Access;
 
 var file = new hdf5.File('/tmp/foo.h5', Access.ACC_TRUNC);
     
-var group=file.createGroup();
-group.create('pmc', file);
+var group=file.createGroup('pmc');
 var buffer=new Float64Array(5);
 buffer[0]=1.0;
 buffer[1]=2.0;
@@ -186,8 +185,7 @@ Attributes can be attached to Groups by flush after the properties are added to 
 Because javascript has the ability to have property names with spaces via [ '' ] these readily map to h5's similar nature.
 
 ```javascript
-var groupTargets=file.createGroup();
-groupTargets.create('pmcservices/sodium-icosanoate', file);
+var groupTargets=file.createGroup('pmcservices/sodium-icosanoate');
 groupTargets[ 'Computed Heat of Formation' ]=-221.78436098572274;
 groupTargets[ 'Computed Ionization Potential' ]=9.57689311885752;
 groupTargets[ 'Computed Total Energy' ]=-3573.674399276322;
