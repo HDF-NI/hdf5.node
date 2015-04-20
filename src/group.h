@@ -20,6 +20,7 @@ namespace NodeHDF5 {
     
 
     class Group : public Attributes {
+        friend class File;
         using Attributes::name;
         using Attributes::id;
         using Attributes::Refresh;

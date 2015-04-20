@@ -176,7 +176,7 @@ namespace NodeHDF5 {
                 continue;
             }
             // create group
-            std::cout<<previous_hid<<" group create  "<<trail[index]<<" in "<<parent->getFileName()<<std::endl;
+//            std::cout<<previous_hid<<" group create  "<<trail[index]<<" in "<<parent->getFileName()<<std::endl;
             hid=H5Gcreate(previous_hid, trail[index].c_str(), H5P_DEFAULT, parent->getGcpl(), H5P_DEFAULT);
             if(hid<0){
                 std::cout<<"group create error num "<<H5Eget_num(H5Eget_current_stack())<<std::endl;
@@ -198,7 +198,6 @@ namespace NodeHDF5 {
             {
                 Group* group = new Group(hid);
                 group->name.assign(trail[index].c_str());
-                std::cout<<"group->name "<<group->name<<std::endl;
                 group->Wrap(args.This());
 
                 // attach various properties
@@ -795,44 +794,49 @@ namespace NodeHDF5 {
         String::Utf8Value child_name (args[0]->ToString());
         size_t id=args.This()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToNumber()->NumberValue();
         HLType hlType=HLType::HL_TYPE_LITE;
-        hid_t ds = H5Dopen(id, (*child_name), H5P_DEFAULT);
-        if (ds >= 0) {
-//            if(H5PTis_valid(ds)>=0){
-//                hlType=HLType::HL_TYPE_PACKET_TABLE;
-//            }
-//            else
-            {
-                hid_t type = H5Dget_type(ds);
-                switch(H5Tget_class(type))
+        if(H5IMis_image(id, (*child_name))){
+            hlType=HLType::HL_TYPE_IMAGE;
+        }
+        else{
+            hid_t ds = H5Dopen(id, (*child_name), H5P_DEFAULT);
+            if (ds >= 0) {
+    //            if(H5PTis_valid(ds)>=0){
+    //                hlType=HLType::HL_TYPE_PACKET_TABLE;
+    //            }
+    //            else
                 {
-                    case H5T_COMPOUND:
+                    hid_t type = H5Dget_type(ds);
+                    switch(H5Tget_class(type))
                     {
-//                std::cout<<(*child_name)<<" H5Dget_type "<<H5Tget_class(type)<<" "<<H5T_COMPOUND<<std::endl;
-                        int nmembers = H5Tget_nmembers(type);
-//                        std::cout << H5Tget_nmembers(type) << " pt type=" << H5Tis_variable_str(type) << std::endl;
-                        bool variableType=true;
-                        for (int memberIndex = 0; memberIndex < nmembers; memberIndex++) {
-                            hid_t memberType = H5Tget_member_type(type, memberIndex);
-//                            std::cout<<" H5Tget_member_type "<<H5Tget_class(memberType)<<" "<<H5T_VLEN<<" "<<H5Tis_variable_str(memberType)<<std::endl;
-                            if (H5Tis_variable_str(memberType)) {
-                            } else {
-                                variableType=false;
+                        case H5T_COMPOUND:
+                        {
+    //                std::cout<<(*child_name)<<" H5Dget_type "<<H5Tget_class(type)<<" "<<H5T_COMPOUND<<std::endl;
+                            int nmembers = H5Tget_nmembers(type);
+    //                        std::cout << H5Tget_nmembers(type) << " pt type=" << H5Tis_variable_str(type) << std::endl;
+                            bool variableType=true;
+                            for (int memberIndex = 0; memberIndex < nmembers; memberIndex++) {
+                                hid_t memberType = H5Tget_member_type(type, memberIndex);
+    //                            std::cout<<" H5Tget_member_type "<<H5Tget_class(memberType)<<" "<<H5T_VLEN<<" "<<H5Tis_variable_str(memberType)<<std::endl;
+                                if (H5Tis_variable_str(memberType)) {
+                                } else {
+                                    variableType=false;
+                                }
+                                H5Tclose(memberType);
                             }
-                            H5Tclose(memberType);
+                            if(variableType){
+                                hlType=HLType::HL_TYPE_PACKET_TABLE;
+                            }
+                            else {
+                                hlType=HLType::HL_TYPE_TABLE;
+                            }
                         }
-                        if(variableType){
-                            hlType=HLType::HL_TYPE_PACKET_TABLE;
-                        }
-                        else {
-                            hlType=HLType::HL_TYPE_TABLE;
-                        }
-                    }
-                    break;
-                    case H5T_STRING:
                         break;
+                        case H5T_STRING:
+                            break;
+                    }
+                    if (type >= 0)H5Tclose(type);
+                    H5Dclose(ds);
                 }
-                if (type >= 0)H5Tclose(type);
-                H5Dclose(ds);
             }
         }
         args.GetReturnValue().Set((uint32_t) hlType);

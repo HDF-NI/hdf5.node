@@ -19,12 +19,8 @@ describe("testing images ",function(){
           file2 = new hdf5.File('./test/examples/hdf5.h5', Access.ACC_RDONLY);
         });
         var group;
-        it("should be -1 yet", function(){
-            group=file.createGroup();
-            group.id.should.equal(-1);
-        });
         it("should be >0 ", function(){
-            group.create('pmc', file);
+            group=file.createGroup('pmc');
             group.id.should.not.equal(-1);
         });
         it("should be an image ", function(){

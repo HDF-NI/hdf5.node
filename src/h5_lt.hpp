@@ -221,6 +221,16 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
         type_id=H5T_NATIVE_UINT;
         buffer = Local<Uint32Array>::Cast(args[2]);
     }
+    else if(args[2]->IsInt16Array())
+    {
+        type_id=H5T_NATIVE_SHORT;
+        buffer = Local<Int16Array>::Cast(args[2]);
+    }
+    else if(args[2]->IsUint16Array())
+    {
+        type_id=H5T_NATIVE_USHORT;
+        buffer = Local<Uint16Array>::Cast(args[2]);
+    }
     else if(args[2]->IsInt8Array())
     {
         type_id=H5T_NATIVE_INT8;
@@ -444,6 +454,23 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                     {
                         type_id=H5T_NATIVE_UINT;
                         buffer = Uint32Array::New(arrayBuffer, 0, theSize);
+                    }
+                    H5Tclose(t);
+                    H5Dclose(h);
+                }
+                else if(class_id==H5T_INTEGER && bufSize==2)
+                {
+                    hid_t h=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
+                    hid_t t=H5Dget_type(h);
+                    if(H5Tget_sign(H5Dget_type(h))==H5T_SGN_2)
+                    {
+                        type_id=H5T_NATIVE_SHORT;
+                        buffer = Int16Array::New(arrayBuffer, 0, theSize);
+                    }
+                    else
+                    {
+                        type_id=H5T_NATIVE_USHORT;
+                        buffer = Uint16Array::New(arrayBuffer, 0, theSize);
                     }
                     H5Tclose(t);
                     H5Dclose(h);

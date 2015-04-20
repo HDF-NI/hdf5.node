@@ -14,12 +14,8 @@ describe("testing c++ interface ",function(){
           file = new hdf5.File('./TRAAAAW128F429D538.h5', Access.ACC_TRUNC);
         });
         var group;
-        it("should be -1 yet", function*(){
-            group=file.createGroup();
-            group.id.should.equal(-1);
-        });
         it("should be >0 ", function*(){
-            group.create('pmc', file);
+            group=file.createGroup('pmc');
             group.id.should.not.equal(-1);
         });
         var groupPmc;
@@ -29,8 +25,7 @@ describe("testing c++ interface ",function(){
         });
         var xpathGroup;
         it("should be >0 ", function*(){
-            xpathGroup=file.createGroup();
-            xpathGroup.create('pmc/Trajectories', file);
+            xpathGroup=file.createGroup('pmc/Trajectories');
             xpathGroup.id.should.not.equal(-1);
         });
         it("should have one child of type group ", function*(){

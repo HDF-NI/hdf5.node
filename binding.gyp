@@ -129,6 +129,8 @@
             'target_name': 'h5tb',
             'conditions': [
             ['OS=="linux"', {
+                'cflags!': [ '-fno-exceptions' ],
+                'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
                     '$(HDF5_HOME)/include'
@@ -225,6 +227,8 @@
             'target_name': 'h5im',
             'conditions': [
             ['OS=="linux"', {
+                'cflags!': [ '-fno-exceptions' ],
+                'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
                     '$(HDF5_HOME)/include'
@@ -268,6 +272,57 @@
                 }
             }]
           ]
+        },
+        {
+            'target_name': 'h5ds',
+            'conditions': [
+            ['OS=="linux"', {
+                'cflags!': [ '-fno-exceptions' ],
+                'cflags_cc!': [ '-fno-exceptions' ],
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+                'include_dirs': [
+                    '$(HDF5_HOME)/include'
+                ],
+                'sources': [
+                    'src/h5ds.cc',
+                    'src/h5_ds.hpp'
+                ],
+                'link_settings': {
+                    'libraries': [
+                        '-lhdf5',
+                        '-lhdf5_hl'
+                    ],
+                    'ldflags': [
+                        '-L$(HDF5_HOME)/lib'
+                    ]
+                }
+            }],
+            ['OS=="win"', {
+            }],
+            ['OS=="mac"', {
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+                'xcode_settings': {
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions"]
+                },
+                'include_dirs': [
+                    '$(HDF5_HOME)/include'
+                ],
+                'sources': [
+                    'src/h5ds.cc',
+                    'src/h5_ds.hpp'
+                ],
+                'link_settings': {
+                    'libraries': [
+                        '$(HDF5_HOME)/lib/libhdf5.dylib',
+                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                    ],
+                    'ldflags': [
+                        '-L$(HDF5_HOME)/lib'
+                    ]
+                }
+            }]
+          ]
         }
+
     ]
 }

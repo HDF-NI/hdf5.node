@@ -24,12 +24,8 @@ describe("testing lite interface ",function(){
           file = new hdf5.File('./h5lt.h5', Access.ACC_TRUNC);
         });
         var group;
-        it("should be -1 yet", function(){
-            group=file.createGroup();
-            group.id.should.equal(-1);
-        });
         it("should be >0 ", function(){
-            group.create('pmc', file);
+            group=file.createGroup('pmc');
             group.id.should.not.equal(-1);
         });
         it("should be Float64Array io ", function(){
@@ -150,6 +146,66 @@ describe("testing lite interface ",function(){
             buffer.rows=5;
             buffer.should.match(readBuffer);
         });
+        it("should be Int16Array io ", function(){
+            var buffer=new Int16Array(5);
+            buffer[0]=5;
+            buffer[1]=4;
+            buffer[2]=3;
+            buffer[3]=2;
+            buffer[4]=1;
+            h5lt.makeDataset(group.id, 'Refractive Index s', buffer);
+            var readBuffer=h5lt.readDataset(group.id, 'Refractive Index s');
+            readBuffer.constructor.name.should.match('Int16Array');
+            readBuffer.length.should.match(5);
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.should.match(readBuffer);
+        });
+        it("should be Uint16Array io ", function(){
+            var buffer=new Uint16Array(5);
+            buffer[0]=5;
+            buffer[1]=4;
+            buffer[2]=3;
+            buffer[3]=2;
+            buffer[4]=1;
+            h5lt.makeDataset(group.id, 'Refractive Index us', buffer);
+            var readBuffer=h5lt.readDataset(group.id, 'Refractive Index us');
+            readBuffer.length.should.match(5);
+            readBuffer.constructor.name.should.match('Uint16Array');
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.should.match(readBuffer);
+        });
+        it("should be Int8Array io ", function(){
+            var buffer=new Int8Array(5);
+            buffer[0]=5;
+            buffer[1]=4;
+            buffer[2]=3;
+            buffer[3]=2;
+            buffer[4]=1;
+            h5lt.makeDataset(group.id, 'Refractive Index 8', buffer);
+            var readBuffer=h5lt.readDataset(group.id, 'Refractive Index 8');
+            readBuffer.constructor.name.should.match('Int8Array');
+            readBuffer.length.should.match(5);
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.should.match(readBuffer);
+        });
+        it("should be Uint8Array io ", function(){
+            var buffer=new Uint8Array(5);
+            buffer[0]=5;
+            buffer[1]=4;
+            buffer[2]=3;
+            buffer[3]=2;
+            buffer[4]=1;
+            h5lt.makeDataset(group.id, 'Refractive Index u8', buffer);
+            var readBuffer=h5lt.readDataset(group.id, 'Refractive Index u8');
+            readBuffer.length.should.match(5);
+            readBuffer.constructor.name.should.match('Uint8Array');
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.should.match(readBuffer);
+        });
         it("flush properties to h5 ", function(done){
             group.getNumAttrs().should.equal(0);
             group[ 'Computed Heat of Formation' ]=100.0;
@@ -180,20 +236,15 @@ describe("testing lite interface ",function(){
           file = new hdf5.File('./roothaan.h5', Access.ACC_TRUNC);
         });
         it("open of Geometries should be >0", function(done){
-            var groupPMCServices=file.createGroup();
-            groupPMCServices.create('pmcservices', file);
-            var groupTargets=file.createGroup();
-            groupTargets.create('pmcservices/sodium-icosanoate', file);
+            var groupPMCServices=file.createGroup('pmcservices');
+            var groupTargets=file.createGroup('pmcservices/sodium-icosanoate');
             groupTargets[ 'Computed Heat of Formation' ]=-221.78436098572274;
             groupTargets[ 'Computed Ionization Potential' ]=9.57689311885752;
             groupTargets[ 'Computed Total Energy' ]=-3573.674399276322;
             groupTargets.flush();
-            var groupDocuments=file.createGroup();
-            groupDocuments.create('pmcservices/sodium-icosanoate/Documents', file);
-            var groupFrequencyData=file.createGroup();
-            groupFrequencyData.create('pmcservices/sodium-icosanoate/Frequency Data', file);
-            var groupTrajectories=file.createGroup();
-            groupTrajectories.create('pmcservices/sodium-icosanoate/Trajectories', file);
+            var groupDocuments=file.createGroup('pmcservices/sodium-icosanoate/Documents');
+            var groupFrequencyData=file.createGroup('pmcservices/sodium-icosanoate/Frequency Data');
+            var groupTrajectories=file.createGroup('pmcservices/sodium-icosanoate/Trajectories');
             fs.readFile("./test/examples/sodium-icosanoate.xml", "ascii", function (err, data) {
             h5lt.makeDataset(groupDocuments.id, 'sodium-icosanoate.xml', data);
             });
@@ -251,8 +302,7 @@ describe("testing lite interface ",function(){
                             count=0;
                             if(firstFrequency)
                             {
-                                var groupGeometries=file.createGroup();
-                                groupGeometries.create('pmcservices/sodium-icosanoate/Trajectories/Geometries', file);
+                                var groupGeometries=file.createGroup('pmcservices/sodium-icosanoate/Trajectories/Geometries');
                                 firstTrajectory.rank=2;
                                 firstTrajectory.rows=numberOfDataLines;
                                 firstTrajectory.columns=3;
@@ -262,8 +312,7 @@ describe("testing lite interface ",function(){
                                 lastTrajectory.rows=numberOfDataLines;
                                 lastTrajectory.columns=3;
                                 h5lt.makeDataset(groupGeometries.id, '1', lastTrajectory);
-                                var groupFrequencies=file.createGroup();
-                                groupFrequencies.create('pmcservices/sodium-icosanoate/Frequency Data/Frequencies', file);
+                                var groupFrequencies=file.createGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
                                 firstFrequency=false;
                             }
                                 var groupFrequencies=file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
@@ -284,16 +333,14 @@ describe("testing lite interface ",function(){
         it("Existing group should throw exception when trying to create again ", function(done){
             try
             {
-                var groupTargets=file.createGroup();
-                groupTargets.create('pmcservices/sodium-icosanoate', file);
+                var groupTargets=file.createGroup('pmcservices/sodium-icosanoate');
             }
             catch(err) {
                 console.dir(err.message);
             }
             try
             {
-                var groupDocuments=file.createGroup();
-                groupDocuments.create('pmcservices/sodium-icosanoate/Documents', file);
+                var groupDocuments=file.createGroup('pmcservices/sodium-icosanoate/Documents');
             }
             catch(err) {
                 console.dir(err.message);

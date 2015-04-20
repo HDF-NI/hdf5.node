@@ -20,6 +20,7 @@ static void Initialize (Handle<Object> target) {
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeImage"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::make_image)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readImage"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::read_image)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "isImage"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::is_image)->GetFunction());
+        target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makePalette"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::make_palette)->GetFunction());
         
     }
 
@@ -31,15 +32,27 @@ static void make_image (const v8::FunctionCallbackInfo<Value>& args)
 //    Local<Number> buffer =  Local<Number>::Cast(args[2]);
 //    std::cout<<"planes "<<buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->ToInt32()->Value()<<std::endl;
     String::Utf8Value interlace (buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"))->ToString());
-    if(buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->ToInt32()->Value()==3)
+    herr_t err;
+    switch(buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->ToInt32()->Value())
     {
-        herr_t err=H5IMmake_image_24bit (args[0]->ToInt32()->Value(), *dset_name,  buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))->ToInt32()->Value(), buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))->ToInt32()->Value(), *interlace, (const unsigned char *)buffer->Buffer()->Externalize().Data());
-        if(err<0)
-        {
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make image 24 bit")));
-            args.GetReturnValue().SetUndefined();
-            return;
-        }
+        case 3:
+            err=H5IMmake_image_24bit (args[0]->ToInt32()->Value(), *dset_name,  buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))->ToInt32()->Value(), buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))->ToInt32()->Value(), *interlace, (const unsigned char *)buffer->Buffer()->Externalize().Data());
+            if(err<0)
+            {
+                v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make image 24 bit")));
+                args.GetReturnValue().SetUndefined();
+                return;
+            }
+            break;
+        case 1:
+            err=H5IMmake_image_8bit (args[0]->ToInt32()->Value(), *dset_name,  buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))->ToInt32()->Value(), buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))->ToInt32()->Value(), (const unsigned char *)buffer->Buffer()->Externalize().Data());
+            if(err<0)
+            {
+                v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make image 8 bit")));
+                args.GetReturnValue().SetUndefined();
+                return;
+            }
+            break;
     }
     args.GetReturnValue().SetUndefined();
 }
@@ -89,6 +102,17 @@ static void is_image (const v8::FunctionCallbackInfo<Value>& args)
     String::Utf8Value dset_name (args[1]->ToString());
     herr_t err=H5IMis_image ( args[0]->ToInt32()->Value(), *dset_name );
     args.GetReturnValue().Set(err? true:false);
+}
+
+static void make_palette (const v8::FunctionCallbackInfo<Value>& args)
+{
+
+    Local<Uint8Array> buffer =  Local<Uint8Array>::Cast(args[2]);
+    String::Utf8Value dset_name (args[1]->ToString());
+    Local<Value> rankValue=args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "size"));
+    hsize_t pal_dims[1]{rankValue->ToInt32()->Value()};
+    herr_t err=H5IMmake_palette ( args[0]->ToInt32()->Value(), *dset_name, pal_dims, (const unsigned char *)buffer->Buffer()->Externalize().Data());
+    args.GetReturnValue().SetUndefined();
 }
 
     };

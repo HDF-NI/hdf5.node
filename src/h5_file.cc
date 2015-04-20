@@ -56,13 +56,11 @@ namespace NodeHDF5 {
     File::File (const char* path, unsigned int flags) {
         bool exists=std::ifstream(path).good();
         //bool exists=std::experimental::filesystem::exists(path);
-        std::cout<<"flags "<<flags<<std::endl;
     if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
     {
             plist_id = H5Pcreate(H5P_FILE_ACCESS);
             H5Pset_deflate(plist_id, compression);
             id= H5Fcreate(path, flags, H5P_DEFAULT, plist_id);
-            std::cout<<"id "<<id<<std::endl;
             if(id<0)
             {
             std::stringstream ss;
@@ -75,7 +73,6 @@ namespace NodeHDF5 {
     else
     {
         id=H5Fopen(path, flags, H5P_DEFAULT);
-            std::cout<<exists<<" 2 id "<<id<<std::endl;
         if(id<0)
         {
         std::stringstream ss;
@@ -187,17 +184,78 @@ namespace NodeHDF5 {
     void File::CreateGroup (const v8::FunctionCallbackInfo<Value>& args) {
         
         // fail out if arguments are not correct
-//        if (args.Length() != 1 || !args[0]->IsString()) {
-//            
-//            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, callback")));
-//            args.GetReturnValue().SetUndefined();
-//            return;
-//            
-//        }
-//        
-//        String::Utf8Value group_name (args[0]->ToString());
+        if (args.Length() != 1 || !args[0]->IsString()) {
+            
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, callback")));
+            args.GetReturnValue().SetUndefined();
+            return;
+            
+        }
+        
+        String::Utf8Value group_name (args[0]->ToString());
         
         Local<Object> instance=Group::Instantiate(args.This());
+        
+        // unwrap parent object
+        File* parent = ObjectWrap::Unwrap<File>(args.This());
+        std::vector<std::string> trail;
+        std::istringstream buf(*group_name);
+        for(std::string token; getline(buf, token, '/'); )
+            if(!token.empty())trail.push_back(token);
+        hid_t previous_hid = parent->getId();
+        bool created=false;
+        for(unsigned int index=0;index<trail.size();index++)
+        {
+            //check existence of stem
+            hid_t hid=H5Gopen(previous_hid, trail[index].c_str(), H5P_DEFAULT);
+            if(hid>=0)
+            {
+                previous_hid=hid;
+                continue;
+            }
+            // create group
+//            std::cout<<previous_hid<<" group create  "<<trail[index]<<" in "<<parent->getFileName()<<std::endl;
+            hid=H5Gcreate(previous_hid, trail[index].c_str(), H5P_DEFAULT, parent->getGcpl(), H5P_DEFAULT);
+            if(hid<0){
+                std::cout<<"group create error num "<<H5Eget_num(H5Eget_current_stack())<<std::endl;
+                //if(H5Eget_num(H5Eget_current_stack())>0)
+                std::string desc;
+                {
+                    H5Ewalk2(H5Eget_current_stack(), H5E_WALK_UPWARD, [&](unsigned int n, const H5E_error2_t *err_desc, void *client_data) -> herr_t {
+    //                std::cout<<"n="<<n<<" "<<err_desc[0].desc<<std::endl;
+                    if(((std::string*)client_data)->empty())((std::string*)client_data)->assign(err_desc[0].desc, strlen(err_desc[0].desc));
+                    return 0;
+                }, (void*)&desc);
+                }
+                desc="Group create failed: "+desc;
+                v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), desc.c_str())));
+                args.GetReturnValue().SetUndefined();
+                return;
+            }
+            if(index==trail.size()-1)
+            {
+                Group* group = new Group(hid);
+                group->name.assign(trail[index].c_str());
+                instance->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->id));
+                group->Wrap(instance);
+
+                // attach various properties
+//                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->id));
+                created=true;
+            }
+            previous_hid=hid;
+        }
+        if(!created)
+        {
+            Group* group = new Group(previous_hid);
+            group->name.assign(trail[trail.size()-1].c_str());
+            instance->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->id));
+            group->Wrap(instance);
+
+            // attach various properties
+//            args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->id));
+            created=true;
+        }
         // create callback params
 //        Local<Value> argv[2] = {
 //                
