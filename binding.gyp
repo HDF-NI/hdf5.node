@@ -26,6 +26,25 @@
                 }
             }],
             ['OS=="win"', {
+                'cflags!': [ '-fno-exceptions' ],
+                'cflags_cc!': [ '-fno-exceptions' ],
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+                'include_dirs': [
+                    '%HDF5_HOME%/include',
+                    './src',
+                    'C:\Software\node-v0.12.2\src'
+                ],
+                'sources': [
+                    'src/hdf5.cc',
+                    'src/h5_file.cc',
+                    'src/h5_group.cc',
+                ],
+                'link_settings': {
+                    'libraries': [
+                        '%HDF5_HOME%/lib/hdf5.dll',
+                        '%HDF5_HOME%/lib/hdf5_hl.dll'
+                    ]
+                }
             }],
             ['OS=="mac"', {
                 'cflags!': [ '-fno-exceptions' ],
@@ -41,6 +60,10 @@
                     'src/hdf5.cc',
                     'src/h5_file.cc',
                     'src/h5_group.cc',
+                ],
+                'libraries': [
+                    '$(HDF5_HOME)/lib/libhdf5.dylib',
+                    '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
                 ],
                 'link_settings': {
                     'libraries': [
