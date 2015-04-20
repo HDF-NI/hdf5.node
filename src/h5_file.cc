@@ -56,13 +56,11 @@ namespace NodeHDF5 {
     File::File (const char* path, unsigned int flags) {
         bool exists=std::ifstream(path).good();
         //bool exists=std::experimental::filesystem::exists(path);
-        std::cout<<"flags "<<flags<<std::endl;
     if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
     {
             plist_id = H5Pcreate(H5P_FILE_ACCESS);
             H5Pset_deflate(plist_id, compression);
             id= H5Fcreate(path, flags, H5P_DEFAULT, plist_id);
-            std::cout<<"id "<<id<<std::endl;
             if(id<0)
             {
             std::stringstream ss;
@@ -75,7 +73,6 @@ namespace NodeHDF5 {
     else
     {
         id=H5Fopen(path, flags, H5P_DEFAULT);
-            std::cout<<exists<<" 2 id "<<id<<std::endl;
         if(id<0)
         {
         std::stringstream ss;
@@ -217,7 +214,7 @@ namespace NodeHDF5 {
                 continue;
             }
             // create group
-            std::cout<<previous_hid<<" group create  "<<trail[index]<<" in "<<parent->getFileName()<<std::endl;
+//            std::cout<<previous_hid<<" group create  "<<trail[index]<<" in "<<parent->getFileName()<<std::endl;
             hid=H5Gcreate(previous_hid, trail[index].c_str(), H5P_DEFAULT, parent->getGcpl(), H5P_DEFAULT);
             if(hid<0){
                 std::cout<<"group create error num "<<H5Eget_num(H5Eget_current_stack())<<std::endl;
@@ -239,7 +236,6 @@ namespace NodeHDF5 {
             {
                 Group* group = new Group(hid);
                 group->name.assign(trail[index].c_str());
-                std::cout<<"group->name "<<group->name<<std::endl;
                 instance->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->id));
                 group->Wrap(instance);
 

@@ -8,13 +8,12 @@
     "url" : "https://github.com/ryancole/hdf5.node.git"
   },
   "dependencies" : {
-    "should" : "*"
-  },
-  "devDependencies" : {
     "co" : "4.2.0",
     "promise": "6.1.0",
     "co-fs" : "1.2.0",
     "xml2js" : "0.4.4",
+    "lwip" : "0.0.6",
+    "binaryjs" : "0.2.1",
     "koa" : "0.14.0",
     "koa-compress" : "1.0.8",
     "koa-route" : "2.4.0",
@@ -32,6 +31,9 @@
     "grunt-docco" : "0.3.3",
     "should" : "4.6.0",
     "co-mocha" : "1.1.0"
+  },
+  "devDependencies" : {
+    "should" : "*"
   },
   "contributors" : [ "Ryan Cole <ryan@rycole.com> (https://github.com/ryancole/)", "Roger I Martin <mathmldashx@yahoo.com> (https://github.com/rimmartin/)" ],
   "license" : {
