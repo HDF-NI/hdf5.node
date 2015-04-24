@@ -63,120 +63,130 @@ for (var frequencyIndex = 0; frequencyIndex < frequencyNames.length; frequencyIn
 
 ### High-level datasets as nodejs Buffer's
 If a Buffer http://nodejs.org/docs/v0.12.0/api/buffer.html is filled with pure datatype(e.g. double) it can be written to h5 as a dataset.
-```javascript
-            var H5Type = require('hdf5/lib/globals.js').H5Type;
 
-            var buffer=new Buffer(5*8, "binary");
-            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
-            buffer.writeDoubleLE(1.0, 0);
-            buffer.writeDoubleLE(2.0, 8);
-            buffer.writeDoubleLE(3.0, 16);
-            buffer.writeDoubleLE(4.0, 24);
-            buffer.writeDoubleLE(5.0, 32);
-            h5lt.makeDataset(group.id, 'Dielectric Constant', buffer);
-```
-will assume the rank is one. Rank, rows, columns and sections can be set to shape the dataset.
 ```javascript
-            var H5Type = require('hdf5/lib/globals.js').H5Type;
-            var buffer=new Buffer(6*8, "binary");
-            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
-            buffer.writeDoubleLE(1.0, 0);
-            buffer.writeDoubleLE(2.0, 8);
-            buffer.writeDoubleLE(3.0, 16);
-            buffer.writeDoubleLE(1.0, 24);
-            buffer.writeDoubleLE(2.0, 32);
-            buffer.writeDoubleLE(3.0, 40);
-            buffer.rank=2;
-            buffer.rows=3;
-            buffer.columns=2;
-            h5lt.makeDataset(group.id, 'Two Rank', buffer);
+var H5Type = require('hdf5/lib/globals.js').H5Type;
+
+var buffer=new Buffer(5*8, "binary");
+buffer.type=H5Type.H5T_NATIVE_DOUBLE;
+buffer.writeDoubleLE(1.0, 0);
+buffer.writeDoubleLE(2.0, 8);
+buffer.writeDoubleLE(3.0, 16);
+buffer.writeDoubleLE(4.0, 24);
+buffer.writeDoubleLE(5.0, 32);
+h5lt.makeDataset(group.id, 'Dielectric Constant', buffer);
 ```
+
+will assume the rank is one. Rank, rows, columns and sections can be set to shape the dataset.
+
+```javascript
+var H5Type = require('hdf5/lib/globals.js').H5Type;
+var buffer=new Buffer(6*8, "binary");
+buffer.type=H5Type.H5T_NATIVE_DOUBLE;
+buffer.writeDoubleLE(1.0, 0);
+buffer.writeDoubleLE(2.0, 8);
+buffer.writeDoubleLE(3.0, 16);
+buffer.writeDoubleLE(1.0, 24);
+buffer.writeDoubleLE(2.0, 32);
+buffer.writeDoubleLE(3.0, 40);
+buffer.rank=2;
+buffer.rows=3;
+buffer.columns=2;
+h5lt.makeDataset(group.id, 'Two Rank', buffer);
+```
+
 is 3 by 2 dataset.  To read from h5 the dataset can still transfer to a javascript array or with the method
 readDatasetAsBuffer the return is a nodejs Buffer with the shape properties set.
+
 ```javascript
-            var readBuffer=h5lt.readDataset(group.id, 'Two Rank');
-            readBuffer.constructor.name.should.match('Float64Array');
-            
-            var readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Two Rank');
+var readBuffer=h5lt.readDataset(group.id, 'Two Rank');
+readBuffer.constructor.name.should.match('Float64Array');
+
+var readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Two Rank');
 ```
 
 ### High-level Tables
+
 ```javascript
-            var table=new Array(4);
-            var fieldArray1=new Uint32Array(5);
-            fieldArray1.name="Index";
-            fieldArray1[0]=0;
-            fieldArray1[1]=1;
-            fieldArray1[2]=2;
-            fieldArray1[3]=3;
-            fieldArray1[4]=4;
-            table[0]=fieldArray1;
-            var fieldArray2=new Float64Array(5);
-            fieldArray2.name="Count Up";
-            fieldArray2[0]=1.0;
-            fieldArray2[1]=2.0;
-            fieldArray2[2]=3.0;
-            fieldArray2[3]=4.0;
-            fieldArray2[4]=5.0;
-            table[1]=fieldArray2;
-            var fieldArray3=new Float64Array(5);
-            fieldArray3.name="Count Down";
-            fieldArray3[0]=5.0;
-            fieldArray3[1]=4.0;
-            fieldArray3[2]=3.0;
-            fieldArray3[3]=2.0;
-            fieldArray3[4]=1.0;
-            table[2]=fieldArray3;
-            var fieldArray4=new Array(5);
-            fieldArray4.name="Residues";
-            fieldArray4[0]="ALA";
-            fieldArray4[1]="VAL";
-            fieldArray4[2]="HIS";
-            fieldArray4[3]="LEU";
-            fieldArray4[4]="HOH";
-            table[3]=fieldArray4;
-            h5tb.makeTable(group.id, 'Reflections', table);
-            var readTable=h5tb.readTable(group.id, "Reflections");
+var table=new Array(4);
+var fieldArray1=new Uint32Array(5);
+fieldArray1.name="Index";
+fieldArray1[0]=0;
+fieldArray1[1]=1;
+fieldArray1[2]=2;
+fieldArray1[3]=3;
+fieldArray1[4]=4;
+table[0]=fieldArray1;
+var fieldArray2=new Float64Array(5);
+fieldArray2.name="Count Up";
+fieldArray2[0]=1.0;
+fieldArray2[1]=2.0;
+fieldArray2[2]=3.0;
+fieldArray2[3]=4.0;
+fieldArray2[4]=5.0;
+table[1]=fieldArray2;
+var fieldArray3=new Float64Array(5);
+fieldArray3.name="Count Down";
+fieldArray3[0]=5.0;
+fieldArray3[1]=4.0;
+fieldArray3[2]=3.0;
+fieldArray3[3]=2.0;
+fieldArray3[4]=1.0;
+table[2]=fieldArray3;
+var fieldArray4=new Array(5);
+fieldArray4.name="Residues";
+fieldArray4[0]="ALA";
+fieldArray4[1]="VAL";
+fieldArray4[2]="HIS";
+fieldArray4[3]="LEU";
+fieldArray4[4]="HOH";
+table[3]=fieldArray4;
+h5tb.makeTable(group.id, 'Reflections', table);
+var readTable=h5tb.readTable(group.id, "Reflections");
 ```
+
 A column of strings is set fixed with to the widest in the set(working on other possible solutions). The return table is equivalent
 
 ### High-level Packet Tables
-This one is experimental and can only do variable length strings today(and I had a need for it)
-```javascript
-            var table=new h5pt.PacketTable(0, 5);
-            table.record=new Object();
-            table.record[ "Set" ]="Single Point";
-            table.record[ "Date Time" ]="Mon Nov 24 13:10:44 2014";
-            table.record[ "Name" ]="Temperature";
-            table.record[ "Value" ]="37.4";
-            table.record[ "Units" ]="Celcius";
-            h5pt.makeTable(group.id, 'Events', table);
-            table.record[ "Set" ]="Single Point";
-            table.record[ "Date Time" ]="Mon Nov 24 13:20:45 2014";
-            table.record[ "Name" ]="Temperature";
-            table.record[ "Value" ]="37.3";
-            table.record[ "Units" ]="Celcius";
-            table.append();
-            table.record[ "Set" ]="Single Point";
-            table.record[ "Date Time" ]="Mon Nov 24 13:20:46 2014";
-            table.record[ "Name" ]="Temperature";
-            table.record[ "Value" ]="37.5";
-            table.record[ "Units" ]="Celcius";
-            table.append();
-            table.close();
 
+This one is experimental and can only do variable length strings today(and I had a need for it)
+
+```javascript
+var table=new h5pt.PacketTable(0, 5);
+table.record=new Object();
+table.record[ "Set" ]="Single Point";
+table.record[ "Date Time" ]="Mon Nov 24 13:10:44 2014";
+table.record[ "Name" ]="Temperature";
+table.record[ "Value" ]="37.4";
+table.record[ "Units" ]="Celcius";
+h5pt.makeTable(group.id, 'Events', table);
+table.record[ "Set" ]="Single Point";
+table.record[ "Date Time" ]="Mon Nov 24 13:20:45 2014";
+table.record[ "Name" ]="Temperature";
+table.record[ "Value" ]="37.3";
+table.record[ "Units" ]="Celcius";
+table.append();
+table.record[ "Set" ]="Single Point";
+table.record[ "Date Time" ]="Mon Nov 24 13:20:46 2014";
+table.record[ "Name" ]="Temperature";
+table.record[ "Value" ]="37.5";
+table.record[ "Units" ]="Celcius";
+table.append();
+table.close();
 ```
+
 after the initial make the representative table object can do further appends.  The close is important for the h5.
 To read, the next method refills the record with the current packet's data and is ready for the subsequent packet until it returns a false.
+
 ```javascript
-                var table=h5pt.readTable(groupTarget.id, "Events");
-                for (var name in table.record) {
-                    console.dir(name);
-                }
-                while(table.next()){
-                    console.dir(table.record[ "Set" ]+" "+table.record[ "Date Time" ]+" "+table.record[ "Name" ]+" "+table.record[ "Value" ]+" "+table.record[ "Units" ]);
-                }
-                table.close();
+var table=h5pt.readTable(groupTarget.id, "Events");
+for (var name in table.record) {
+    console.dir(name);
+}
+while(table.next()){
+    console.dir(table.record[ "Set" ]+" "+table.record[ "Date Time" ]+" "+table.record[ "Name" ]+" "+table.record[ "Value" ]+" "+table.record[ "Units" ]);
+}
+table.close();
 ```
 
 ### Properties as h5 metadata attributes
@@ -224,12 +234,15 @@ The code requires a gcc compiler supporting C++11 for linux. MacOSX build target
 effect g++.
 
 ### In a working copy of git
+
 ```bash
 export HDF5_HOME=/home/roger/NodeProjects/hdf5
 export NODE_PATH=/home/roger/NodeProjects/hdf5.node/build/Release/obj.target:$NODE_PATH
 node-gyp configure build
 ```
+
 NODE_PATH is still used for the mocha tests.
+
 ### Including as a node module
 
 The HDF5_HOME needs to be set. NODE_PATH should not. Then an 'npm install hdf5' will pull the version and build it for you
@@ -251,6 +264,7 @@ The tests are based on co-mocha
 ```bash
 mocha
 ```
+
 or
 
 ```bash
@@ -258,9 +272,11 @@ mocha --require should
 ```
 
 To launch the view:
+
 ```bash
 node --harmony  ./lib/application.js 3000 "./roothaan.h5"
 ```
+
 will serve the interface to the h5 on port 3000.
 
 ## Experimental
