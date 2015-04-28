@@ -1,15 +1,17 @@
-A node module for reading/writing the HDF5 file format. A koa based browser interface is being added to view and look at the h5 content. And eventually editing of, dropping data into, pulling from, 
-charting and performing statistics on h5 file data.  The interface is now showing tables and string based packet tables.
+A node module for reading/writing the HDF5 file format. The koa based browser interface is a reference app for viewing, modifying and looking at h5 content. Eventually provide editing, charting and performing statistics on h5 file data.  
+The interface is now showing images, datasets column tables and string based packet tables. Basic group operations are becoming available with right-click on a node.  Hovering on a group shows attributes in a tooltip hoever stil looking for 
+a good mechanism to add and edit attributes.  Images can be dropped on the main panel after selecting a group and will be stored stored at the equivalent place in the h5.  More HDFView functionality to accomplish in browser style.  Experiments 
+to use https://ethercalc.net/ are being attempted; there is an upper limit to practical data going from h5 into a spreadsheet and other mechanism may need to be provided.  It has some charting yet that may need addressed with a d3 of threejs approach.
+
 Unlike other languages that wrap hdf5 API's this interface takes advantage of the compatibility of V8 and HDF5. The result 
 is a direct map to javascript behavior with the least amount of data copying and coding tasks for the user. Hopefully you won't need to write yet another layer in your code to accomplish your goals.
 
+The node::Buffer and streaming are being investigated so native hdf5 data's next destination is client browser window or client in general.
 ```javascript
 var hdf5 = require('hdf5').hdf5;
 
 var Access = require('hdf5/lib/globals').Access;
-
 var file = new hdf5.File('/tmp/foo.h5', Access.ACC_RDONLY);
-    
 var group=file.openGroup('pmc');
 ```
 
@@ -105,6 +107,28 @@ readBuffer.constructor.name.should.match('Float64Array');
 var readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Two Rank');
 ```
 
+### High-level Images
+
+Currently the image subclass is "IMAGE_TRUECOLOR".  The rest of the spec[http://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html is coming.  Need test examples.
+Image data sent to and from html5's canvas 2d context putImageData and getImageData are compatible with IMAGE_TRUECOLOR" with 4 planes and pixel interlacing.
+At this point I experimented with binaryjs for data transfer to html5 canvas yet underlying mechanism can do binary.  However this provided streams that worked 
+and handles node::Buffer's. Although eventually streaming from the native side may replace this.  The image data is handled without any particular image processing 
+library server side so you can choose which one you prefer depending on application. For the html5 interface the image format is handled by the canvas and 
+window.URL.createObjectURL(file) in the drop zone.
+
+```javascript
+var buffer=h5im.readImage(parent.id, name);
+buffer.width, buffer.height, buffer.planes
+
+var image = Buffer.concat(buffers);
+image.interlace="INTERLACE_PIXEL" or "INTERLACE_PLANE";
+image.planes=4;
+image.width=meta.width;
+image.height=meta.height;
+h5im.makeImage(group.id, name, image);
+```
+
+
 ### High-level Tables
 
 ```javascript
@@ -146,6 +170,24 @@ var readTable=h5tb.readTable(group.id, "Reflections");
 ```
 
 A column of strings is set fixed with to the widest in the set(working on other possible solutions). The return table is equivalent
+
+            h5tb.makeTable(id, name, table model)
+            h5tb.readTable(id, name)
+            h5tb.appendRecords(id, name, table model)
+            h5tb.writeRecords(id, name, start, table model)
+            h5tb.readRecords(id, name, start, nrecords)
+            h5tb.deleteRecord(id, name, start, nrecords)
+            h5tb.insertRecord(id, name, start, table model)
+            h5tb.writeFieldsName(id, name, start, table model);
+            h5tb.writeFieldsIndex(id, name, 0, table model, column index array)
+            h5tb.readFieldsName(id, name, start, nrecords, column name array)
+            h5tb.readFieldsIndex(id, name, start, nrecords, column index array)
+            h5tb.getTableInfo(id, 'Reflections')
+            h5tb.getFieldInfo(id, 'Reflections')
+            h5tb.deleteField(id, name, field name)
+            h5tb.insertField(id, name, start, table model)
+            h5tb.addRecordsFrom(id, source name, start1, nrecords, destination name, start2)
+            h5tb.combineTables(id1, name1, id2, name2, destination name)
 
 ### High-level Packet Tables
 
@@ -189,6 +231,15 @@ while(table.next()){
 table.close();
 ```
 
+### Dimension Scales
+
+to be implemented
+
+### High-level Functions for Region References, Hyperslabs, and Bit-fields
+
+Looking at this.  It does require a separate download and install because it is not a part of the standard hdf5 distribution.
+
+
 ### Properties as h5 metadata attributes
 
 Attributes can be attached to Groups by flush after the properties are added to javascript group instance.  Prototype properties also get flushed.
@@ -216,7 +267,8 @@ console.dir(groupTarget.Information);
 
 ## Status
 
-Currently testing with node v0.13.0-pre and V8 3.28.73
+Currently testing with node v0.12.0 and V8 3.28.73.  Builds on Ubuntu 14_04, CentOS 6 and MacOSX 10.7.  Working on getting access to a 10.10 version to solve later build issues. And setting up a windows work environment for VS2013 [any knowledge about node-gyp on these platforms would be much appreciated] 
+Resources leaks are being found when the h5 file is closed.  When found they are being eliminated.  Error handling component is being investigated; how to best leverage V8 and node from the native side.
 
 A legacy development for node v0.10.31 and V8 3.14.5.9 resides in ./legacy/node-v0.10.31. Further development of legacy is suspended since nodejs v0.12.0 has been released.
 
@@ -268,7 +320,7 @@ mocha
 or
 
 ```bash
-mocha --require should
+mocha --require should  --require co-mocha
 ```
 
 To launch the view:
@@ -277,27 +329,11 @@ To launch the view:
 node --harmony  ./lib/application.js 3000 "./roothaan.h5"
 ```
 
-will serve the interface to the h5 on port 3000.
+will serve the interface to the h5 on port 3000. If the h5 doesn't exist it will be created and the interface
+ can then add groups and content/images can be dragged and dropped while being displayed and stored back in the h5.
 
 ## Experimental
 
-While still very experimental, the compatibility of node/v8 is now being explored for the [High-level HDF5 Interfaces](http://www.hdfgroup.org/HDF5/doc/HL/).  Since the javascript objects have
-dimensions and type available the argument list is short to the native side. For example:
-
-```javascript
-h5lt.makeDataset();
-```
-
-takes three arguments; the id of the group or file, the dataset name and the javascript array object or nodejs Buffer with the data. Reading
-a dataset only needs the id of the group or file and the dataset name.  readDataset returns a javascript array compatible with the h5 dataset properties while readDatasetAsBuffer
-returns a nodejs Buffer.  This buffer is not chunked yet but it is being explored to go into nodejs streams.
-
-Currently rank 1, 2 and 3 datasets are made or read but higher rank is being investigated.  First, all the builtin types will be supported and eventually custom data types
-will be attempted.  Particularly I have a need for complex numbers yet I'm on a learning curve in javascript.
-
-The H5IM is now mostly implemented.  The palette portion remains to be implemented. 
-Attributes are refreshed from and flushed to Groups with the properties on javascript objects. More attributes will soon be possible on the file object itself and on datasets.
-
-Tables and Packet Tables have their first implementation.  Packet tables only support variable length string so far.
+the h5im is being designed to meet the Image Spec 1.2 http://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html
 
 Any ideas for the design of the API and interface are welcome.

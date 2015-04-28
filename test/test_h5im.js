@@ -14,7 +14,7 @@ describe("testing images ",function(){
         var file2;
         var res;
         var image;
-        before(function(){
+        before(function*(){
           file = new hdf5.File('./h5im.h5', Access.ACC_TRUNC);
           file2 = new hdf5.File('./test/examples/hdf5.h5', Access.ACC_RDONLY);
         });
@@ -45,6 +45,19 @@ describe("testing images ",function(){
         });
         it("make image  ", function(){
             h5im.makeImage(group.id, 'hdf_logo.jpg', image);
+        });
+        var imageAgain;
+        it("again image width should be 48 ", function(){
+            imageAgain=h5im.readImage(group.id, 'hdf_logo.jpg');
+            imageAgain.width.should.equal(48);
+        });
+        it("again make image  ", function(){
+            h5im.makeImage(group.id, 'repeat.jpg', imageAgain);
+        });
+        after(function *(){
+            group.close();
+          file.close();
+          file2.close();
         });
 
 

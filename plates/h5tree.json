@@ -1,6 +1,14 @@
 {
     "core" : {
-    "data" : ${h5treedata} },
+    "data" : ${h5treedata},
+    'check_callback' : function(o, n, p, i, m) {
+            if(m && m.dnd && m.pos !== 'i') { return false; }
+            if(o === "move_node" || o === "copy_node") {
+                    if(this.get_node(n).parent === this.get_node(p).id) { return false; }
+            }
+            return true;
+    }
+    },
     "contextmenu" : {
             "items" : function(node) {
                     var tmp = $.jstree.defaults.contextmenu.items();
@@ -16,7 +24,7 @@
                                             inst.create_node(obj, { type : "default" }, "last", function (new_node) {
                                                     setTimeout(function () { inst.edit(new_node); },0);
                                             });
-                                    }
+							                                    }
                             },
                             "create_file" : {
                                     "label"				: "Dataset",
@@ -33,8 +41,9 @@
                                     "action"			: function (data) {
                                             var inst = $.jstree.reference(data.reference),
                                                     obj = inst.get_node(data.reference);
-                                            inst.create_node(obj, { type : "attribute" }, "last", function (new_node) {
-                                                    setTimeout(function () { inst.edit(new_node); },0);
+                                            var names = $('#h5tree').jstree(true).get_path(obj,'/',false);
+                                            $.post("/create_attribute/"+encodeURIComponent(names), function(returnedData) {
+
                                             });
                                     }
                             }

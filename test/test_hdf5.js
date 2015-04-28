@@ -13,30 +13,34 @@ describe("testing c++ interface ",function(){
         before(function*(){
           file = new hdf5.File('./TRAAAAW128F429D538.h5', Access.ACC_TRUNC);
         });
-        var group;
         it("should be >0 ", function*(){
-            group=file.createGroup('pmc');
+            var group=file.createGroup('pmc');
             group.id.should.not.equal(-1);
+            group.close();
         });
-        var groupPmc;
         it("reopen of pmc should be >0", function*(){
-            groupPmc=file.openGroup('pmc');
+            var groupPmc=file.openGroup('pmc');
             groupPmc.id.should.not.equal(-1);
+            groupPmc.close();
         });
-        var xpathGroup;
         it("should be >0 ", function*(){
-            xpathGroup=file.createGroup('pmc/Trajectories');
+            var xpathGroup=file.createGroup('pmc/Trajectories');
             xpathGroup.id.should.not.equal(-1);
+            xpathGroup.close();
         });
         it("should have one child of type group ", function*(){
             var group=file.openGroup('pmc');
             group.getNumObjs().should.equal(1);
             group.getChildType("Trajectories").should.equal(H5OType.H5O_TYPE_GROUP);
+            group.close();
         });
         it("should add an attribute to the file ", function*(){
             file.role="Target";
             file.flush();
-            
+
+        });
+        after(function*(){
+          file.close();
         });
     });
 

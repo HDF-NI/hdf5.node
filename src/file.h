@@ -91,6 +91,7 @@ enum H5T {
     class File : public Attributes {
         using Attributes::name;
         using Attributes::id;
+        using Attributes::gcpl_id;
         using Attributes::Refresh;
         using Attributes::Flush;
     protected:
@@ -118,6 +119,8 @@ enum H5T {
             static void OpenGroup (const v8::FunctionCallbackInfo<Value>& args);
 //            static void Refresh (const v8::FunctionCallbackInfo<Value>& args);
 //            static void Flush (const v8::FunctionCallbackInfo<Value>& args);
+            static void Move (const v8::FunctionCallbackInfo<Value>& args);
+            static void Delete (const v8::FunctionCallbackInfo<Value>& args);
             static void Close (const v8::FunctionCallbackInfo<Value>& args);
             static void GetNumAttrs (const v8::FunctionCallbackInfo<Value>& args);
             static void GetMemberNamesByCreationOrder (const v8::FunctionCallbackInfo<Value>& args);

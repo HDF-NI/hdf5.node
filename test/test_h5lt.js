@@ -235,7 +235,7 @@ describe("testing lite interface ",function(){
         before(function(){
           file = new hdf5.File('./roothaan.h5', Access.ACC_TRUNC);
         });
-        it("open of Geometries should be >0", function(done){
+        it("open of Geometries should be >0", function(){
             var groupPMCServices=file.createGroup('pmcservices');
             var groupTargets=file.createGroup('pmcservices/sodium-icosanoate');
             groupTargets[ 'Computed Heat of Formation' ]=-221.78436098572274;
@@ -247,6 +247,9 @@ describe("testing lite interface ",function(){
             var groupTrajectories=file.createGroup('pmcservices/sodium-icosanoate/Trajectories');
             fs.readFile("./test/examples/sodium-icosanoate.xml", "ascii", function (err, data) {
             h5lt.makeDataset(groupDocuments.id, 'sodium-icosanoate.xml', data);
+            groupTrajectories.close();
+            groupFrequencyData.close();
+            groupDocuments.close();
             });
             fs.readFile("./test/examples/sodium-icosanoate.xmol", "ascii", function (err, data) {
                 var count=0;
@@ -313,39 +316,50 @@ describe("testing lite interface ",function(){
                                 lastTrajectory.columns=3;
                                 h5lt.makeDataset(groupGeometries.id, '1', lastTrajectory);
                                 var groupFrequencies=file.createGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
+                                groupGeometries.close();
+                                groupFrequencies.close();
                                 firstFrequency=false;
                             }
                                 var groupFrequencies=file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
-                                groupFrequencies.open('pmcservices/sodium-icosanoate/Frequency Data/Frequencies', file);
+//                                groupFrequencies.open('pmcservices/sodium-icosanoate/Frequency Data/Frequencies', file);
                                 frequency.rank=2;
                                 frequency.rows=numberOfDataLines;
                                 frequency.columns=3;
                                 h5lt.makeDataset(groupFrequencies.id, title, frequency);
                                 state=State.COUNT;
+                                groupFrequencies.close();
                             }
                             });
                             break;
                     }
                 });
             });
-            done();
+            groupTargets.close();
+            groupPMCServices.close();
         });
         it("Existing group should throw exception when trying to create again ", function(done){
             try
             {
                 var groupTargets=file.createGroup('pmcservices/sodium-icosanoate');
+                groupTargets.close();
             }
             catch(err) {
+                err.message.should.equal("");
                 console.dir(err.message);
             }
             try
             {
                 var groupDocuments=file.createGroup('pmcservices/sodium-icosanoate/Documents');
+                groupDocuments.close();
             }
             catch(err) {
+                err.message.should.equal("");
                 console.dir(err.message);
             }
             done();
+        });
+        after(function(){
+          file.close();
         });
     });
     describe("create an xmol with frequency pulled from h5 ",function(){
@@ -418,8 +432,11 @@ describe("testing lite interface ",function(){
                 xmolDocument.length.should.equal(1435803);
                 fs.writeFile('sodium-icosanoate.xmol', xmolDocument, [flag='w'])
                 fs.writeFile('sodium-icosanoate.xml', xmlDocument, [flag='w'])
-//                groupGeometries.close();
+                groupGeometries.close();
+                groupFrequencies.close();
+                groupTarget.close();
             });
+            groupDocuments.close();
             done();
         });
         var groupGeometries;
@@ -449,6 +466,7 @@ describe("testing lite interface ",function(){
             length.should.match(readBuffer.length);
             var value=2.9;
             value.should.match(readBuffer.Dipole);
+            groupGeometries.close();
             done();
         });
         it("getNumAttrs of file should be 3", function(){
@@ -457,6 +475,9 @@ describe("testing lite interface ",function(){
             file.refresh();
 //            console.dir(file);
 
+        });
+        after(function(){
+          file.close();
         });
     });
     

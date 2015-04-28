@@ -17,6 +17,63 @@
   <script type="text/javascript" src="js/dragbar.js"></script>
   </head>
 <body><div id="sidebar"><span id="position"></span><div id="dragbar"></div><div id="h5tree"></div><script src="js/jsTree/libs/jquery-2.1.1.js"></script><script src="js/jsTree/libs/jquery.json.min.js"></script><script src="js/jsTree/jstree.js"></script><script>${h5tree}</script></div>
-      <div id="main"> editors/spreadsheets here </div><!--script src="js/bootstrap.min.js"></script-->
+      <div id="main" dropzone="copy file:image/png file:image/gif file:image/jpeg file:text/csv" ondrop="dropHandler(event, this)"> editors/spreadsheets here or select a group and drop content here </div>
+      <script type="text/javascript" src="js/binary.min.js"></script>
+      <script>
+window.addEventListener("dragover",function(e){
+  e = e || event;
+  e.preventDefault();
+},false);
+window.addEventListener("drop",function(e){
+  e = e || event;
+  e.preventDefault();
+},false);
+
+var internalDNDType = 'landing';
+
+  function dropHandler(event, element) {
+    //var data = event.dataTransfer.getData(internalDNDType);
+   var dataItems = event.dataTransfer.items;
+   for (var i = 0; i < dataItems.length; i += 1) {
+       if ((dataItems[i].kind === 'file') && (dataItems[i].type.match('^image/'))) {
+        var photoplate = document.createElement("CANVAS");
+        photoplate.id="photoplate";
+        photoplate.draggable=true;
+        var context = photoplate.getContext("2d");
+       var img = new Image();
+         img.onload = function () {
+             photoplate.width=img.width;
+             photoplate.height=img.height;
+             context.drawImage(img, 0, 0);
+         }
+       var file=dataItems[i].getAsFile();
+       img.src = window.URL.createObjectURL(file);
+        while (element.firstChild) {
+          element.removeChild(element.firstChild);
+        }
+
+         element.appendChild(photoplate);
+        var selectedNode=$('#h5tree').jstree(true).get_selected(true);
+        var names = $('#h5tree').jstree(true).get_path(selectedNode[selectedNode.length-1],'/',false);
+        $('#h5tree').jstree(true).create_node(selectedNode[selectedNode.length-1], file.name, "last", function(e, data){});
+        $('#h5tree').jstree(true).open_node(selectedNode[selectedNode.length-1]);
+        names+="/"+file.name;
+        $.post("/make_image/"+encodeURIComponent(names), function(returnedData) {
+
+        var client = new BinaryClient('ws://localhost:9001/binary-store-image');
+        client.on('open', function(){
+            var stream = client.send(context.getImageData(0,0,img.width,img.height).data, {name: file.name, width: img.width, height: img.height, size: 4*img.width*img.height});
+        });
+        });
+        
+     }
+     else if ((dataItems[i].kind === 'file') && (dataItems[i].type.match('^text/csv'))) {
+         
+     }
+   }
+//    event.target.appendChild(li);
+  }
+</script>
+
 </body>
 </html>
