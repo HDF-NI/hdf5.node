@@ -1,6 +1,6 @@
 {
   "name" : "hdf5",
-  "version" : "0.0.13",
+  "version" : "0.0.14",
   "description" : "Native Abstractions for hdf5 file io",
   "main" : "./index.js",
   "repository" : {
@@ -8,31 +8,20 @@
     "url" : "https://github.com/ryancole/hdf5.node.git"
   },
   "dependencies" : {
-    "co" : "4.2.0",
-    "co-fs" : "1.2.0",
-    "xml2js" : "0.4.4",
+    "co" : "4.5.2",
+    "xml2js" : "0.4.8",
     "ws" : "0.7.1",
     "binaryjs" : "0.2.1",
-    "koa" : "0.14.0",
-    "koa-compress" : "1.0.8",
-    "koa-route" : "2.4.0",
-    "koa-static" : "1.4.8",
-    "koa-views" : "2.1.2",
-    "koa-jade" : "0.3.1",
+    "koa" : "0.19.1",
+    "koa-route" : "2.4.1",
+    "koa-static" : "1.4.9",
     "unirest" : "0.4.0"
   },
   "devDependencies" : {
-    "mathjs" : "1.2.0",
-    "ethercalc" : "0.20150120.0",
-    "grunt" : "0.4.5",
-    "grunt-contrib-jshint" : "0.10.0",
-    "grunt-contrib-nodeunit" : "0.4.1",
-    "grunt-contrib-uglify" : "0.7.0",
-    "grunt-mocha-cli" : "1.12.0",
-    "grunt-docco" : "0.3.3",
-    "should" : "4.6.0",
+    "mathjs" : "1.6.0",
+    "ethercalc" : "0.20150421.1",
     "co-mocha" : "1.1.0",
-    "should" : "*"
+    "should" : ""
   },
   "contributors" : [ "Ryan Cole <ryan@rycole.com> (https://github.com/ryancole/)", "Roger I Martin <mathmldashx@yahoo.com> (https://github.com/rimmartin/)" ],
   "license" : {

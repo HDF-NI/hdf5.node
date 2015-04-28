@@ -1,12 +1,13 @@
-A node module for reading/writing the HDF5 file format. The koa based browser interface is a reference app for viewing, modifying and looking at h5 content. Eventually provide editing, charting and performing statistics on h5 file data.  
-The interface is now showing images, datasets column tables and string based packet tables. Basic group operations are becoming available with right-click on a node.  Hovering on a group shows attributes in a tooltip hoever stil looking for 
-a good mechanism to add and edit attributes.  Images can be dropped on the main panel after selecting a group and will be stored stored at the equivalent place in the h5.  More HDFView functionality to accomplish in browser style.  Experiments 
-to use https://ethercalc.net/ are being attempted; there is an upper limit to practical data going from h5 into a spreadsheet and other mechanism may need to be provided.  It has some charting yet that may need addressed with a d3 of threejs approach.
+A node module for reading/writing the HDF5 file format. The koa based browser interface is a reference app for viewing, modifying and looking at h5 content. Eventually it will provide for editing, charting and performing statistics on h5 file data.  
+The interface is now showing images, datasets, column tables and string based packet tables. Basic group operations are becoming available with right-click on a node.  Hovering on a group shows attributes in a tooltip however stil looking for 
+a good mechanism to add, copy and edit attributes.  Images can be dropped on the main panel after selecting a group and will be stored at the equivalent place in the h5.  Learning how to accomplish more HDFView functionality in browser style.  
+Experimenting with https://ethercalc.net/ as an editor; there is an upper limit to practical data going from h5 into a spreadsheet and other mechanism may need to be provided.  It has some charting yet that may need addressed with a d3 or threejs approach.
 
 Unlike other languages that wrap hdf5 API's this interface takes advantage of the compatibility of V8 and HDF5. The result 
-is a direct map to javascript behavior with the least amount of data copying and coding tasks for the user. Hopefully you won't need to write yet another layer in your code to accomplish your goals.
+is a direct map to javascript behavior with the least amount of data copying and coding tasks for the user. Hopefully you 
+won't need to write yet another layer in your code to accomplish your goals.
 
-The node::Buffer and streaming are being investigated so native hdf5 data's next destination is client browser window or client in general.
+The node::Buffer and streams are being investigated so native hdf5 data's only destination is client browser window or client in general.
 ```javascript
 var hdf5 = require('hdf5').hdf5;
 
@@ -169,7 +170,7 @@ h5tb.makeTable(group.id, 'Reflections', table);
 var readTable=h5tb.readTable(group.id, "Reflections");
 ```
 
-A column of strings is set fixed with to the widest in the set(working on other possible solutions). The return table is equivalent
+A column of strings is set fixed width to the widest in the set(working on other possible solutions). The return table is equivalent
 
             h5tb.makeTable(id, name, table model)
             h5tb.readTable(id, name)
@@ -316,24 +317,21 @@ The tests are based on co-mocha
 ```bash
 mocha
 ```
-
 or
-
 ```bash
 mocha --require should  --require co-mocha
 ```
 
 To launch the view:
-
 ```bash
 node --harmony  ./lib/application.js 3000 "./roothaan.h5"
 ```
-
 will serve the interface to the h5 on port 3000. If the h5 doesn't exist it will be created and the interface
  can then add groups and content/images can be dragged and dropped while being displayed and stored back in the h5.
 
 ## Experimental
 
-the h5im is being designed to meet the Image Spec 1.2 http://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html
+The h5im is being designed to meet the Image Spec 1.2 http://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html
+
 
 Any ideas for the design of the API and interface are welcome.
