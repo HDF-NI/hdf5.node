@@ -28,8 +28,21 @@ describe("testing c++ interface ",function(){
             xpathGroup.id.should.not.equal(-1);
             xpathGroup.close();
         });
+        it("initial should be >0 ", function*(){
+            var xpathGroup=file.createGroup('pmc/Trajectories/0');
+            xpathGroup.id.should.not.equal(-1);
+            xpathGroup.close();
+        });
+        it("move should be 1 ", function*(){
+            var stemGroup=file.createGroup('pmc/Trajectories');
+            stemGroup.move("0", stemGroup,id, "1");
+            stemGroup.close();
+        });
+        it("move should be 1 ", function*(){
+            file.move("pmc", file.id, "pmcservices");
+        });
         it("should have one child of type group ", function*(){
-            var group=file.openGroup('pmc');
+            var group=file.openGroup('pmcservices');
             group.getNumObjs().should.equal(1);
             group.getChildType("Trajectories").should.equal(H5OType.H5O_TYPE_GROUP);
             group.close();

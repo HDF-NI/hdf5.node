@@ -321,9 +321,9 @@ namespace NodeHDF5 {
 
     void File::Move (const v8::FunctionCallbackInfo<Value>& args) {
         // fail out if arguments are not correct
-        if (args.Length() !=1) {
+        if (args.Length() !=3) {
             
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group")));
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest id, dest name")));
             args.GetReturnValue().SetUndefined();
             return;
             
@@ -331,10 +331,12 @@ namespace NodeHDF5 {
         
         // unwrap group
         File* file = ObjectWrap::Unwrap<File>(args.This());
-        Group* otherGroup = ObjectWrap::Unwrap<Group>(args[0]->ToObject());
-        herr_t err=H5Lmove(file->id, file->name.c_str(), otherGroup->id, otherGroup->name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+        String::Utf8Value group_name (args[0]->ToString());
+        String::Utf8Value dest_name (args[2]->ToString());
+        herr_t err=H5Lmove(file->id, *group_name, args[1]->ToUint32()->IntegerValue(), *dest_name, H5P_DEFAULT, H5P_DEFAULT);
         if (err < 0) {
-            std::string errStr="Failed move link to , " + otherGroup->name + " with return: " + std::to_string(err) + ".\n";
+            std::string str(*dest_name);
+            std::string errStr="Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
             args.GetReturnValue().SetUndefined();
             return;

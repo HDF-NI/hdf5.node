@@ -102,14 +102,14 @@ namespace NodeHDF5 {
                             continue;
                         }
                         else{
-                           std::string msg="Group"+trail[index]+" doesn't exist";
+                           std::string msg="Group "+trail[index]+" doesn't exist";
                            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str())));
                            args.GetReturnValue().SetUndefined();
                            return;
                         }
                     }
                     else{
-                           std::string msg="Group"+trail[index]+" doesn't exist";
+                           std::string msg="Group "+trail[index]+" doesn't exist";
                            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str())));
                            args.GetReturnValue().SetUndefined();
                            return;
@@ -388,9 +388,9 @@ namespace NodeHDF5 {
     
     void Group::Move (const v8::FunctionCallbackInfo<Value>& args) {
         // fail out if arguments are not correct
-        if (args.Length() !=2) {
+        if (args.Length() !=3) {
             
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src group, dest group")));
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest group, dest name")));
             args.GetReturnValue().SetUndefined();
             return;
             
@@ -398,12 +398,13 @@ namespace NodeHDF5 {
         
         // unwrap group
         Group* group = ObjectWrap::Unwrap<Group>(args.This());
-        Group* sourceGroup = ObjectWrap::Unwrap<Group>(args[0]->ToObject());
-        Group* destinationGroup = ObjectWrap::Unwrap<Group>(args[1]->ToObject());
-        std::cout<<sourceGroup->name<<" "<<destinationGroup->name<<std::endl;
-        herr_t err=H5Lmove(sourceGroup->id, sourceGroup->name.c_str(), group->id, destinationGroup->name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+        String::Utf8Value group_name (args[0]->ToString());
+        String::Utf8Value dest_name (args[2]->ToString());
+        std::cout<<*group_name<<" "<<*dest_name<<std::endl;
+        herr_t err=H5Lmove(group->id, *group_name, args[1]->ToUint32()->IntegerValue(), *dest_name, H5P_DEFAULT, H5P_DEFAULT);
         if (err < 0) {
-            std::string errStr="Failed move link to , " + destinationGroup->name + " with return: " + std::to_string(err) + ".\n";
+            std::string str(*dest_name);
+            std::string errStr="Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
             args.GetReturnValue().SetUndefined();
             return;

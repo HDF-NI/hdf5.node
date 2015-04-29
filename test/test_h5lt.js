@@ -305,6 +305,7 @@ describe("testing lite interface ",function(){
                             count=0;
                             if(firstFrequency)
                             {
+                                try{
                                 var groupGeometries=file.createGroup('pmcservices/sodium-icosanoate/Trajectories/Geometries');
                                 firstTrajectory.rank=2;
                                 firstTrajectory.rows=numberOfDataLines;
@@ -319,6 +320,10 @@ describe("testing lite interface ",function(){
                                 groupGeometries.close();
                                 groupFrequencies.close();
                                 firstFrequency=false;
+                                }
+                                catch(err){
+                                    console.dir("what? "+err.message);
+                                }
                             }
                                 var groupFrequencies=file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
 //                                groupFrequencies.open('pmcservices/sodium-icosanoate/Frequency Data/Frequencies', file);

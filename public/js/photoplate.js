@@ -2,7 +2,7 @@
         var context = canvas.getContext("2d");
 
     // connect to the same host this was served from
-    var client = new BinaryClient('ws://localhost:9000/binary-load-image');
+    var client = new BinaryClient('ws://'+window.location.hostname+':9000/binary-load-image');
 
      // Received new stream from server!
      client.on('stream', function(stream, meta){    

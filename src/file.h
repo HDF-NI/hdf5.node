@@ -85,7 +85,9 @@ enum H5T {
      NODE_H5T_ARRAY = 310,
      NODE_H5T_VLEN = 311,
      NODE_STRING = 312,
-     NODE_NUMBER = 313
+     NODE_NUMBER = 313,
+     NODE_H5T_NATIVE_INT8 = 314,
+     NODE_H5T_NATIVE_UINT8 = 315
 };
 
     class File : public Attributes {

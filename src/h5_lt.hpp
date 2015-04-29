@@ -47,46 +47,42 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
         hid_t type_id;
         size_t order;
         size_t type=args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))->ToInt32()->Value();
-        if(type==NODE_H5T_NATIVE_DOUBLE)
-        {
-            type_id=H5T_NATIVE_DOUBLE;
-            order=8;
-        }
-        else if(type==NODE_H5T_NATIVE_FLOAT)
-        {
-            type_id=H5T_NATIVE_FLOAT;
-            order=4;
-        }
-    //    else if(args[2]->IsInt64Array())
-    //    {
-    //        type_id=H5T_NATIVE_LLONG;
-    //        buffer = Local<int64Array>::Cast(args[2]);
-    //    }
-        else if(type==NODE_H5T_NATIVE_INT)
-        {
-            type_id=H5T_NATIVE_INT;
-            order=4;
-        }
-        else if(type==NODE_H5T_NATIVE_UINT)
-        {
-            type_id=H5T_NATIVE_UINT;
-            order=4;
-        }
-//        else if(type==NODE_H5T_NATIVE_INT8)
-//        {
-//            type_id=H5T_NATIVE_INT8;
-//            order=1;
-//        }
-//        else if(type==NODE_H5T_NATIVE_UINT8)
-//        {
-//            type_id=H5T_NATIVE_UINT8;
-//            order=1;
-//        }
-        else
-        {
+        switch(type){
+            case NODE_H5T_NATIVE_DOUBLE:
+                type_id=H5T_NATIVE_DOUBLE;
+                order=8;
+                break;
+            case NODE_H5T_NATIVE_FLOAT:
+                type_id=H5T_NATIVE_FLOAT;
+                order=4;
+                break;
+            case NODE_H5T_NATIVE_INT:
+                type_id=H5T_NATIVE_INT;
+                order=4;
+                break;
+            case NODE_H5T_NATIVE_UINT:
+                type_id=H5T_NATIVE_UINT;
+                order=4;
+            case NODE_H5T_NATIVE_SHORT:
+                type_id=H5T_NATIVE_SHORT;
+                order=2;
+                break;
+            case NODE_H5T_NATIVE_USHORT:
+                type_id=H5T_NATIVE_USHORT;
+                order=2;
+            case NODE_H5T_NATIVE_INT8:
+                type_id=H5T_NATIVE_INT8;
+                order=1;
+                break;
+            case NODE_H5T_NATIVE_UINT8:
+                type_id=H5T_NATIVE_UINT8;
+                order=1;
+                break;
+            default:
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
             args.GetReturnValue().SetUndefined();
             return;
+            break;
         }
         int rank=1;
         if(args[2]->ToObject()->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank")))
@@ -650,18 +646,26 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
                 if(class_id==H5T_FLOAT && bufSize==8)
                 {
                     type_id=H5T_NATIVE_DOUBLE;
-//                    buffer = Float64Array::New(arrayBuffer, 0, theSize);
                 }
                 else if(class_id==H5T_FLOAT && bufSize==4)
                 {
                     type_id=H5T_NATIVE_FLOAT;
-//                    buffer = Float32Array::New(arrayBuffer, 0, theSize);
                 }
-//                else if(class_id==H5T_INTEGER && bufSize==8)
-//                {
-//                    type_id=H5T_NATIVE_LLONG;
-//                    buffer = int64Array::New(arrayBuffer, 0, (size_t)values_dim[0]);
-//                }
+                else if(class_id==H5T_INTEGER && bufSize==8)
+                {
+                    hid_t h=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
+                    hid_t t=H5Dget_type(h);
+                    if(H5Tget_sign(H5Dget_type(h))==H5T_SGN_2)
+                    {
+                        type_id=H5T_NATIVE_LLONG;
+                    }
+                    else
+                    {
+                        type_id=H5T_NATIVE_ULONG;
+                    }
+                    H5Tclose(t);
+                    H5Dclose(h);
+                }
                 else if(class_id==H5T_INTEGER && bufSize==4)
                 {
                     hid_t h=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
@@ -669,12 +673,25 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
                     if(H5Tget_sign(H5Dget_type(h))==H5T_SGN_2)
                     {
                         type_id=H5T_NATIVE_INT;
-//                        buffer = Int32Array::New(arrayBuffer, 0, theSize);
                     }
                     else
                     {
                         type_id=H5T_NATIVE_UINT;
-//                        buffer = Uint32Array::New(arrayBuffer, 0, theSize);
+                    }
+                    H5Tclose(t);
+                    H5Dclose(h);
+                }
+                else if(class_id==H5T_INTEGER && bufSize==2)
+                {
+                    hid_t h=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
+                    hid_t t=H5Dget_type(h);
+                    if(H5Tget_sign(H5Dget_type(h))==H5T_SGN_2)
+                    {
+                        type_id=H5T_NATIVE_SHORT;
+                    }
+                    else
+                    {
+                        type_id=H5T_NATIVE_USHORT;
                     }
                     H5Tclose(t);
                     H5Dclose(h);
@@ -686,12 +703,10 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
                     if(H5Tget_sign(H5Dget_type(h))==H5T_SGN_2)
                     {
                         type_id=H5T_NATIVE_INT8;
-//                        buffer = Int8Array::New(arrayBuffer, 0, theSize);
                     }
                     else
                     {
                         type_id=H5T_NATIVE_UINT8;
-//                        buffer = Uint8Array::New(arrayBuffer, 0, theSize);
                     }
                     H5Tclose(t);
                     H5Dclose(h);

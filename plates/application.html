@@ -60,14 +60,68 @@ var internalDNDType = 'landing';
         names+="/"+file.name;
         $.post("/make_image/"+encodeURIComponent(names), function(returnedData) {
 
-        var client = new BinaryClient('ws://localhost:9001/binary-store-image');
+        var client = new BinaryClient('ws://'+window.location.hostname+':9001/binary-store-image');
         client.on('open', function(){
-            var stream = client.send(context.getImageData(0,0,img.width,img.height).data, {name: file.name, width: img.width, height: img.height, size: 4*img.width*img.height});
+            var stream = client.createStream({name: file.name, width: img.width, height: img.height, size: 4*img.width*img.height});
+            stream.write(context.getImageData(0,0,img.width,img.height).data);
+            stream.end();
+            
         });
         });
         
      }
      else if ((dataItems[i].kind === 'file') && (dataItems[i].type.match('^text/csv'))) {
+        var csvTable = document.createElement("TABLE");
+        csvTable.id="csv";
+        csvTable.draggable=true;
+        while (element.firstChild) {
+          element.removeChild(element.firstChild);
+        }
+        var file=dataItems[i].getAsFile();
+        var reader = new FileReader();
+        reader.onload=(function(theFile) {
+			return function(e) {
+		    var columns=0;
+                    //break the lines apart
+                    var lines = e.target.result.split('\n');
+                    var rowType='th';
+                    for(var j = 0; j<lines.length; j++){
+                            if(lines[j] != ""){
+                                    var tableRow = csvTable.appendChild(document.createElement('tr'));
+                                    //split the rows at the cellTerminator character
+                                    var information = lines[j].split(",");
+                                    columns=information.length;
+                                    for(var k = 0; k < information.length; k++){
+                                            //append the cell to the row
+                                            var cell = tableRow.appendChild(document.createElement(rowType));
+                                            cell.appendChild(document.createTextNode(information[k]));
+                                    }
+                                    rowType='td';
+                            }
+                            else{
+                                
+                            }
+
+                    }
+        var selectedNode=$('#h5tree').jstree(true).get_selected(true);
+        var names = $('#h5tree').jstree(true).get_path(selectedNode[selectedNode.length-1],'/',false);
+        $('#h5tree').jstree(true).create_node(selectedNode[selectedNode.length-1], file.name, "last", function(e, data){});
+        $('#h5tree').jstree(true).open_node(selectedNode[selectedNode.length-1]);
+        names+="/"+file.name;
+        $.post("/make_table/"+encodeURIComponent(names), function(returnedData) {
+
+        var client = new BinaryClient('ws://'+window.location.hostname+':9001/binary-store-table');
+        client.on('open', function(){
+            var stream = client.createStream({name: file.name, rows: lines.length, columns: columns});
+            stream.write(e.target.result);
+            stream.end();
+        });
+        });
+			
+			};
+		  })(file);
+        reader.readAsText(file);
+         element.appendChild(csvTable);
          
      }
    }
