@@ -5,19 +5,18 @@
   <link rel="stylesheet" type="text/css" href="js/jsTree/themes/default/style.min.css" />
   <link rel="stylesheet" href="css/dragbar.css"/>
   <link rel="stylesheet" href="css/h5editing.css"/>
-  <!--link href="css/bootstrap.min.css" rel="stylesheet"-->
   <!-- 2 load the theme CSS file -->
   <script type="text/javascript" src="js/jsTree/libs/jquery-2.1.1.min.js"></script>
   <!--script type="text/javascript" src="js/jsTree/libs/jquery.cookie.js"></script-->
   <script type="text/javascript" src="js/jquery-ui-1.11.2/jquery-ui.js"></script>
-  <script type="text/javascript" src="js/modernizr-latest.js"></script>
+  <!--script type="text/javascript" src="js/modernizr-latest.js"></script-->
   <!--script type="text/javascript">
   var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   </script-->
   <script type="text/javascript" src="js/dragbar.js"></script>
   </head>
 <body><div id="sidebar"><span id="position"></span><div id="dragbar"></div><div id="h5tree"></div><script src="js/jsTree/libs/jquery-2.1.1.js"></script><script src="js/jsTree/libs/jquery.json.min.js"></script><script src="js/jsTree/jstree.js"></script><script>${h5tree}</script></div>
-      <div id="main" dropzone="copy file:image/png file:image/gif file:image/jpeg file:text/csv" ondrop="dropHandler(event, this)"> editors/spreadsheets here or select a group and drop content here </div>
+    <div id="main" dropzone="copy file:image/png file:image/gif file:image/jpeg file:text/csv" ondragstart="dragStartHandler(event, this)" ondrag="dragHandler(event, this)" ondragend="dragEndHandler(event, this)" ondrop="dropHandler(event, this)"> editors/spreadsheets here or select a group and drop content here </div>
       <script type="text/javascript" src="js/binary.min.js"></script>
       <script>
 window.addEventListener("dragover",function(e){
@@ -29,16 +28,42 @@ window.addEventListener("drop",function(e){
   e.preventDefault();
 },false);
 
-var internalDNDType = 'landing';
+function dragStartHandler(ev, element) {
+    console.log("dragStartHandler "+ev.target.id);
+  ev.target.style.opacity = '0.4';  // this / e.target is the source node.
+  ev.dataTransfer.effectAllowed = "copyMove";
+  var dataURL = ev.target.toDataURL();
+        console.log(element.id);
+  var fileName=$('.jstree-clicked').text();
+        console.log(fileName);
+  ev.dataTransfer.setData( "DownloadURL", 'image/png:' +fileName+":"+dataURL);
+  ev.dataTransfer.setData("text/x-moz-url", dataURL);
+  ev.dataTransfer.setData("application/x-moz-file-promise-url", dataURL);
+  ev.dataTransfer.setData("application/x-moz-file-promise-dest-filename", fileName);
+  ev.dataTransfer.mozSetDataAt('application/x-moz-file-promise',
+                  new dataProvider(),
+                  0, Components.interfaces.nsISupports);
+}
+
+function dragHandler(ev, element) {
+    //console.log(ev.target.id);
+    //ev.dataTransfer.setData("text", ev.target.id);
+    //ev.preventDefault();
+}
+
+function dragEndHandler(ev, element) {
+    console.log("dragEndHandler "+ev.target.id);
+  ev.target.style.opacity = '1.0';  // this / e.target is the source node.
+  ev.preventDefault();
+}
+
 
   function dropHandler(event, element) {
-    //var data = event.dataTransfer.getData(internalDNDType);
    var dataItems = event.dataTransfer.items;
    for (var i = 0; i < dataItems.length; i += 1) {
        if ((dataItems[i].kind === 'file') && (dataItems[i].type.match('^image/'))) {
         var photoplate = document.createElement("CANVAS");
         photoplate.id="photoplate";
-        photoplate.draggable=true;
         var context = photoplate.getContext("2d");
        var img = new Image();
          img.onload = function () {
@@ -52,7 +77,10 @@ var internalDNDType = 'landing';
           element.removeChild(element.firstChild);
         }
 
-         element.appendChild(photoplate);
+        var divEditor=document.createElement("DIV");
+        divEditor.id="editor";
+        divEditor.appendChild(photoplate);
+        element.appendChild(divEditor);
         var selectedNode=$('#h5tree').jstree(true).get_selected(true);
         var names = $('#h5tree').jstree(true).get_path(selectedNode[selectedNode.length-1],'/',false);
         $('#h5tree').jstree(true).create_node(selectedNode[selectedNode.length-1], file.name, "last", function(e, data){});
@@ -62,9 +90,9 @@ var internalDNDType = 'landing';
 
         var client = new BinaryClient('ws://'+window.location.hostname+':9001/binary-store-image');
         client.on('open', function(){
-            var stream = client.createStream({name: file.name, width: img.width, height: img.height, size: 4*img.width*img.height});
-            stream.write(context.getImageData(0,0,img.width,img.height).data);
-            stream.end();
+            var stream = client.send(context.getImageData(0,0,img.width,img.height).data, {name: file.name, width: img.width, height: img.height, size: 4*img.width*img.height});
+            //stream.write(context.getImageData(0,0,img.width,img.height).data);
+            //stream.end();
             
         });
         });
@@ -127,6 +155,48 @@ var internalDNDType = 'landing';
    }
 //    event.target.appendChild(li);
   }
+  
+function dataProvider(){} 
+
+dataProvider.prototype = {
+  QueryInterface : function(iid) {
+    if (iid.equals(Components.interfaces.nsIFlavorDataProvider)
+                  || iid.equals(Components.interfaces.nsISupports))
+      return this;
+    throw Components.results.NS_NOINTERFACE;
+  },
+  getFlavorData : function(aTransferable, aFlavor, aData, aDataLen) {
+    if (aFlavor == 'application/x-moz-file-promise') {
+  
+       var urlPrimitive = {};
+       var dataSize = {};
+  
+       aTransferable.getTransferData('application/x-moz-file-promise-url', urlPrimitive, dataSize);
+       var url = urlPrimitive.value.QueryInterface(Components.interfaces.nsISupportsString).data;
+       console.log("URL file orignal is = " + url);
+      
+       var namePrimitive = {};
+       aTransferable.getTransferData('application/x-moz-file-promise-dest-filename', namePrimitive, dataSize);
+       var name = namePrimitive.value.QueryInterface(Components.interfaces.nsISupportsString).data;
+  
+       console.log("target filename is = " + name);
+  
+       var dirPrimitive = {};
+       aTransferable.getTransferData('application/x-moz-file-promise-dir', dirPrimitive, dataSize);
+       var dir = dirPrimitive.value.QueryInterface(Components.interfaces.nsILocalFile);
+  
+       console.log("target folder is = " + dir.path);
+  
+       var file = Cc['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile);
+       file.initWithPath(dir.path);
+       file.appendRelativePath(name);
+  
+       console.log("output final path is =" + file.path);
+  
+       // now you can write or copy the file yourself...
+    } 
+  }
+}
 </script>
 
 </body>

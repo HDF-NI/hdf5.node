@@ -9,6 +9,7 @@
 }
 #editor {
        cursor: move;
+    overflow-x:auto;
 }
 
 table {

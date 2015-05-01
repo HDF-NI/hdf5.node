@@ -1,4 +1,5 @@
 var creating=false;
+var cutting=false;
 $(function () {
     $('#h5tree').jstree(${treedata}).on('delete_node.jstree', function (e, data) {
                                     var names = $('#h5tree').jstree(true).get_path(data.node,'/',false);
@@ -25,22 +26,31 @@ $(function () {
                                     creating=false;
 				})
 				.on('move_node.jstree', function (e, data) {
+                                    console.log(data.old_parent);
                                     var names = $('#h5tree').jstree(true).get_path(data.node,'/',false);
-                                    $.post("/move_node/"+encodeURIComponent(names), function(returnedData) {
+                                    var old_names = $('#h5tree').jstree(true).get_path(data.old_parent,'/',false);
+                                    console.log(old_names);
+                                    $.post("/move_node/"+encodeURIComponent(names+"["+old_names+"]"), function(returnedData) {
 
                                     });
 				})
+				.on('cut_node.jstree', function (e, data) {
+                                    var names = $('#h5tree').jstree(true).get_path(data.node,'/',false);
+                                    //$.post("/cut_node/"+encodeURIComponent(names), function(returnedData) {
+                                    //});
+                                    cutting=true;
+				})
 				.on('copy_node.jstree', function (e, data) {
                                     var names = $('#h5tree').jstree(true).get_path(data.node,'/',false);
-                                    $.post("/copy_node/"+encodeURIComponent(names), function(returnedData) {
+                                    //$.post("/copy_node/"+encodeURIComponent(names), function(returnedData) {
 
-                                    });
+//                                    });
 				})
 				.on('paste_node.jstree', function (e, data) {
                                     var names = $('#h5tree').jstree(true).get_path(data.node,'/',false);
                                     $.post("/paste_node/"+encodeURIComponent(names), function(returnedData) {
-
                                     });
+                                        cutting=false;
 				})
 				.on('changed.jstree', function (e, data) {
 					if(data && data.selected && data.selected.length) {
