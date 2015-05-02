@@ -42,6 +42,8 @@ future: true
 
 # Exclude non-site files
 exclude: ['bin', 'README.md']
+    
+hdf5_id: the group or file id location.  Every group and the file return with an id attribute
 
 # Use the redcarpet Markdown renderer
 markdown: redcarpet
