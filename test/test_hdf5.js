@@ -38,7 +38,7 @@ describe("testing c++ interface ",function(){
             stemGroup.move("0", stemGroup,id, "1");
             stemGroup.close();
         });
-        it("move should be 1 ", function*(){
+        it("move should be pmcservices ", function*(){
             file.move("pmc", file.id, "pmcservices");
         });
         it("should have one child of type group ", function*(){

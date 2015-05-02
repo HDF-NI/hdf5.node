@@ -8,6 +8,8 @@ is a direct map to javascript behavior with the least amount of data copying and
 won't need to write yet another layer in your code to accomplish your goals.
 
 The node::Buffer and streams are being investigated so native hdf5 data's only destination is client browser window or client in general.
+
+API documentation is available at http://ryancole.github.io/hdf5.node
 ```javascript
 var hdf5 = require('hdf5').hdf5;
 
