@@ -7,7 +7,8 @@ title: "HDF5 Docs"
 
 ```bash
 npm install hdf5
-```  
+```
+ 
 Because this project has native code look at [Install & Setup]({{ site.baseurl }}/ref/install-setup.html) for the details.
 
 
