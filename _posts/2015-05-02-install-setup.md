@@ -10,8 +10,6 @@ date: 2015-05-02 12:02:34
 Currently testing with node v0.12.0 and V8 3.28.73.  Builds on Ubuntu 14_04, CentOS 6 and MacOSX 10.7.  Working on getting access to a 10.10 version to solve later build issues. And setting up a windows work environment for VS2013 [any knowledge about node-gyp on these platforms would be much appreciated] 
 Resources leaks are being found when the h5 file is closed.  When found they are being eliminated.  Error handling component is being investigated; how to best leverage V8 and node from the native side.
 
-A legacy development for node v0.10.31 and V8 3.14.5.9 resides in ./legacy/node-v0.10.31. Further development of legacy is suspended since nodejs v0.12.0 has been released.
-
 ## Dependencies
 
 + [HDF5 C Library](http://www.hdfgroup.org/downloads/index.html) v5-1.8.14
@@ -54,10 +52,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./hdf5.node/../hdf5/lib
 The tests are based on co-mocha
 
 ```bash
-mocha
-```
-or
-```bash
 mocha --require should  --require co-mocha
 ```
+
 
