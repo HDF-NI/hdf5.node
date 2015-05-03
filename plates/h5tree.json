@@ -2,6 +2,7 @@
     "core" : {
     "data" : ${h5treedata},
     'check_callback' : function(o, n, p, i, m) {
+            if(o === "delete_node") { return confirm("Are you sure you want to delete?"); }
             if(m && m.dnd && m.pos !== 'i') { return false; }
             if(o === "move_node" || o === "copy_node") {
                     if(this.get_node(n).parent === this.get_node(p).id) { return false; }

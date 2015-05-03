@@ -14,7 +14,7 @@ API documentation is available at http://ryancole.github.io/hdf5.node
 ```bash
 npm install hdf5
 ```
-http://ryancole.github.io/hdf5.node/doc/install-setup.html for te native requirements and details.
+http://ryancole.github.io/hdf5.node/doc/install-setup.html for the native requirements and details.
 
 ```javascript
 var hdf5 = require('hdf5').hdf5;

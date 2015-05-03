@@ -45,9 +45,11 @@ $(function () {
                                     //$.post("/copy_node/"+encodeURIComponent(names), function(returnedData) {
 
 //                                    });
+                                      cutting=false;
 				})
 				.on('paste_node.jstree', function (e, data) {
                                     var names = $('#h5tree').jstree(true).get_path(data.node,'/',false);
+                                    if(cutting===true)names+="#cut"
                                     $.post("/paste_node/"+encodeURIComponent(names), function(returnedData) {
                                     });
                                         cutting=false;
