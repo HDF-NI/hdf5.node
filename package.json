@@ -1,6 +1,6 @@
 {
   "name" : "hdf5",
-  "version" : "0.0.14",
+  "version" : "0.0.15",
   "description" : "Native Abstractions for hdf5 file io",
   "main" : "./index.js",
   "repository" : {
