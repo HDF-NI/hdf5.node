@@ -16,6 +16,7 @@ $(function () {
                                     $.post("/create_node/"+encodeURIComponent(names), function(returnedData) {
 
                                     });
+                                        $('#h5tree').jstree(true).set_type(data.node, "group");
                                     }
                                     else{
                                         names+="["+data.old+"]";
@@ -59,6 +60,7 @@ $(function () {
 						$.get('?operation=get_content&id=' + data.selected.join(':'), function (d) {
 							if(d && typeof d.type !== 'undefined') {
 //								$('#data .content').hide();
+console.log(d.type);
 								switch(d.type) {
 									case 'text':
 									case 'txt':

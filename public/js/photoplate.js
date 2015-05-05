@@ -3,7 +3,8 @@
 
     // connect to the same host this was served from
     var client = new BinaryClient('ws://'+window.location.hostname+':9000/binary-load-image');
-
+    
+    client.on('error',function (error ) {console.log(error);});
      // Received new stream from server!
      client.on('stream', function(stream, meta){    
        var imageData=context.createImageData(canvas.width, canvas.height);

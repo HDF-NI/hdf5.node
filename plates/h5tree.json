@@ -49,13 +49,29 @@
                                     }
                             }
                     };
-                    //if(this.get_type(node) === "file") {
-                    //        delete tmp.create;
-                    //}
+                    if(this.get_type(node) != "group") {
+                            delete tmp.create;
+                    }
                     return tmp;
             }
     },
-    "plugins" : [
-    "contextmenu", "dnd"
+    "types" : {
+      "default" : {
+        "icon" : "/img/text.gif"
+      },
+      "group" : {
+        "icon" : "/img/folderclose.gif"
+      },
+      "image" : {
+        "icon" : "/img/image.gif"
+      },
+      "table" : {
+        "icon" : "/img/table.gif"
+      },
+      "dataset" : {
+        "icon" : "/img/dataset.gif"
+      }
+    },"plugins" : [
+    "contextmenu", "dnd", "types"
     ]
 }
