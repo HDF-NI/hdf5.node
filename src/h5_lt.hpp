@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cstring>
 #include <vector>
+#include <map>
 #include <functional>
 
 #include "file.h"
@@ -15,7 +16,129 @@
 
 namespace NodeHDF5 {
 
+    static std::map<H5T, hid_t> toTypeMap{
+                                     {NODE_H5T_STD_I8BE,H5T_STD_I8BE},
+                                     {NODE_H5T_STD_I8LE,H5T_STD_I8LE},
+                                     {NODE_H5T_STD_I16BE,H5T_STD_I16BE},
+                                     {NODE_H5T_STD_I16LE,H5T_STD_I16LE},
+                                     {NODE_H5T_STD_I32BE,H5T_STD_I32BE},
+                                     {NODE_H5T_STD_I32LE,H5T_STD_I32LE},
+                                     {NODE_H5T_STD_I64BE,H5T_STD_I64BE},
+                                     {NODE_H5T_STD_I64LE,H5T_STD_I64LE},
+                                     {NODE_H5T_STD_U8BE,H5T_STD_U8BE},
+                                     {NODE_H5T_STD_U8LE,H5T_STD_U8LE},
+                                     {NODE_H5T_STD_U16BE,H5T_STD_U16BE},
+                                     {NODE_H5T_STD_U16LE,H5T_STD_U16LE},
+                                     {NODE_H5T_STD_U32BE,H5T_STD_U32BE},
+                                     {NODE_H5T_STD_U32LE,H5T_STD_U32LE},
+                                     {NODE_H5T_STD_U64BE,H5T_STD_U64BE},
+                                     {NODE_H5T_STD_U64LE,H5T_STD_U64LE},
+                                     {NODE_H5T_NATIVE_CHAR,H5T_NATIVE_CHAR},
+                                     {NODE_H5T_NATIVE_SCHAR,H5T_NATIVE_SCHAR},
+                                     {NODE_H5T_NATIVE_UCHAR,H5T_NATIVE_UCHAR},
+                                     {NODE_H5T_NATIVE_SHORT,H5T_NATIVE_SHORT},
+                                     {NODE_H5T_NATIVE_USHORT,H5T_NATIVE_USHORT},
+                                     {NODE_H5T_NATIVE_INT,H5T_NATIVE_INT},
+                                     {NODE_H5T_NATIVE_UINT,H5T_NATIVE_UINT},
+                                     {NODE_H5T_NATIVE_LONG,H5T_NATIVE_LONG},
+                                     {NODE_H5T_NATIVE_ULONG,H5T_NATIVE_ULONG},
+                                     {NODE_H5T_NATIVE_LLONG,H5T_NATIVE_LLONG},
+                                     {NODE_H5T_NATIVE_ULLONG,H5T_NATIVE_ULLONG},
+                                     {NODE_H5T_IEEE_F32BE,H5T_IEEE_F32BE},
+                                     {NODE_H5T_IEEE_F32LE,H5T_IEEE_F32LE},
+                                     {NODE_H5T_IEEE_F64BE,H5T_IEEE_F64BE},
+                                     {NODE_H5T_IEEE_F64LE,H5T_IEEE_F64LE},
+                                     {NODE_H5T_NATIVE_FLOAT,H5T_NATIVE_FLOAT},
+                                     {NODE_H5T_NATIVE_DOUBLE,H5T_NATIVE_DOUBLE},
+                                     {NODE_H5T_NATIVE_LDOUBLE,H5T_NATIVE_LDOUBLE},
+                                     {NODE_H5T_STRING,H5T_STRING},
+                                     //{NODE_STRSIZE,STRSIZE},
+                                     //{NODE_STRPAD,STRPAD},
+                                     //{NODE_CSET,CSET},
+                                     //{NODE_CTYPE,CTYPE},
+                                     {NODE_H5T_VARIABLE,H5T_VARIABLE},
+                                     {NODE_H5T_STR_NULLTERM,H5T_STR_NULLTERM},
+                                     {NODE_H5T_STR_NULLPAD,H5T_STR_NULLPAD},
+                                     {NODE_H5T_STR_SPACEPAD,H5T_STR_SPACEPAD},
+                                     {NODE_H5T_CSET_ASCII,H5T_CSET_ASCII},
+                                     {NODE_H5T_CSET_UTF8,H5T_CSET_UTF8},
+                                     {NODE_H5T_C_S1,H5T_C_S1},
+                                     {NODE_H5T_FORTRAN_S1,H5T_FORTRAN_S1},
+                                     {NODE_H5T_OPAQUE,H5T_OPAQUE},
+                                     //{NODE_OPQ_SIZE,OPQ_SIZE},
+                                     //{NODE_OPQ_TAG,OPQ_TAG},
+                                     {NODE_H5T_COMPOUND,H5T_COMPOUND},
+                                     {NODE_H5T_ENUM,H5T_ENUM},
+                                     {NODE_H5T_ARRAY,H5T_ARRAY},
+                                     {NODE_H5T_VLEN,H5T_VLEN},
+                                     //{NODE_STRING,STRING},
+                                     //{NODE_NUMBER,NUMBER},
+                                     {NODE_H5T_NATIVE_INT8,H5T_NATIVE_INT8},
+                                     {NODE_H5T_NATIVE_UINT8,H5T_NATIVE_UINT8}};
+
+    static std::map<hid_t, H5T> toEnumMap{
+                                     {H5T_STD_I8BE,NODE_H5T_STD_I8BE},
+                                     {H5T_STD_I8LE,NODE_H5T_STD_I8LE},
+                                     {H5T_STD_I16BE,NODE_H5T_STD_I16BE},
+                                     {H5T_STD_I16LE,NODE_H5T_STD_I16LE},
+                                     {H5T_STD_I32BE,NODE_H5T_STD_I32BE},
+                                     {H5T_STD_I32LE,NODE_H5T_STD_I32LE},
+                                     {H5T_STD_I64BE,NODE_H5T_STD_I64BE},
+                                     {H5T_STD_I64LE,NODE_H5T_STD_I64LE},
+                                     {H5T_STD_U8BE,NODE_H5T_STD_U8BE},
+                                     {H5T_STD_U8LE,NODE_H5T_STD_U8LE},
+                                     {H5T_STD_U16BE,NODE_H5T_STD_U16BE},
+                                     {H5T_STD_U16LE,NODE_H5T_STD_U16LE},
+                                     {H5T_STD_U32BE,NODE_H5T_STD_U32BE},
+                                     {H5T_STD_U32LE,NODE_H5T_STD_U32LE},
+                                     {H5T_STD_U64BE,NODE_H5T_STD_U64BE},
+                                     {H5T_STD_U64LE,NODE_H5T_STD_U64LE},
+                                     {H5T_NATIVE_CHAR,NODE_H5T_NATIVE_CHAR},
+                                     {H5T_NATIVE_SCHAR,NODE_H5T_NATIVE_SCHAR},
+                                     {H5T_NATIVE_UCHAR,NODE_H5T_NATIVE_UCHAR},
+                                     {H5T_NATIVE_SHORT,NODE_H5T_NATIVE_SHORT},
+                                     {H5T_NATIVE_USHORT,NODE_H5T_NATIVE_USHORT},
+                                     {H5T_NATIVE_INT,NODE_H5T_NATIVE_INT},
+                                     {H5T_NATIVE_UINT,NODE_H5T_NATIVE_UINT},
+                                     {H5T_NATIVE_LONG,NODE_H5T_NATIVE_LONG},
+                                     {H5T_NATIVE_ULONG,NODE_H5T_NATIVE_ULONG},
+                                     {H5T_NATIVE_LLONG,NODE_H5T_NATIVE_LLONG},
+                                     {H5T_NATIVE_ULLONG,NODE_H5T_NATIVE_ULLONG},
+                                     {H5T_IEEE_F32BE,NODE_H5T_IEEE_F32BE},
+                                     {H5T_IEEE_F32LE,NODE_H5T_IEEE_F32LE},
+                                     {H5T_IEEE_F64BE,NODE_H5T_IEEE_F64BE},
+                                     {H5T_IEEE_F64LE,NODE_H5T_IEEE_F64LE},
+                                     {H5T_NATIVE_FLOAT,NODE_H5T_NATIVE_FLOAT},
+                                     {H5T_NATIVE_DOUBLE,NODE_H5T_NATIVE_DOUBLE},
+                                     {H5T_NATIVE_LDOUBLE,NODE_H5T_NATIVE_LDOUBLE},
+                                     {H5T_STRING,NODE_H5T_STRING},
+                                     //{STRSIZE,NODE_STRSIZE},
+                                     //{STRPAD,NODE_STRPAD},
+                                     //{CSET,NODE_CSET},
+                                     //{CTYPE,NODE_CTYPE},
+                                     {H5T_VARIABLE,NODE_H5T_VARIABLE},
+                                     {H5T_STR_NULLTERM,NODE_H5T_STR_NULLTERM},
+                                     {H5T_STR_NULLPAD,NODE_H5T_STR_NULLPAD},
+                                     {H5T_STR_SPACEPAD,NODE_H5T_STR_SPACEPAD},
+                                     {H5T_CSET_ASCII,NODE_H5T_CSET_ASCII},
+                                     {H5T_CSET_UTF8,NODE_H5T_CSET_UTF8},
+                                     {H5T_C_S1,NODE_H5T_C_S1},
+                                     {H5T_FORTRAN_S1,NODE_H5T_FORTRAN_S1},
+                                     {H5T_OPAQUE,NODE_H5T_OPAQUE},
+                                     //{NODE_OPQ_SIZE,OPQ_SIZE},
+                                     //{NODE_OPQ_TAG,OPQ_TAG},
+                                     {H5T_COMPOUND,NODE_H5T_COMPOUND},
+                                     {H5T_ENUM,NODE_H5T_ENUM},
+                                     {H5T_ARRAY,NODE_H5T_ARRAY},
+                                     {H5T_VLEN,NODE_H5T_VLEN},
+                                     //{STRING,NODE_STRING},
+                                     //{NUMBER,NODE_NUMBER},
+                                     {H5T_NATIVE_INT8,NODE_H5T_NATIVE_INT8},
+                                     {H5T_NATIVE_UINT8,NODE_H5T_NATIVE_UINT8}};
+
     class H5lt {
+    protected:
+
     public:
     static void Initialize (Handle<Object> target) {
         
@@ -44,46 +167,7 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 return;
             }
         }
-        hid_t type_id;
-        size_t order;
-        size_t type=args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))->ToInt32()->Value();
-        switch(type){
-            case NODE_H5T_NATIVE_DOUBLE:
-                type_id=H5T_NATIVE_DOUBLE;
-                order=8;
-                break;
-            case NODE_H5T_NATIVE_FLOAT:
-                type_id=H5T_NATIVE_FLOAT;
-                order=4;
-                break;
-            case NODE_H5T_NATIVE_INT:
-                type_id=H5T_NATIVE_INT;
-                order=4;
-                break;
-            case NODE_H5T_NATIVE_UINT:
-                type_id=H5T_NATIVE_UINT;
-                order=4;
-            case NODE_H5T_NATIVE_SHORT:
-                type_id=H5T_NATIVE_SHORT;
-                order=2;
-                break;
-            case NODE_H5T_NATIVE_USHORT:
-                type_id=H5T_NATIVE_USHORT;
-                order=2;
-            case NODE_H5T_NATIVE_INT8:
-                type_id=H5T_NATIVE_INT8;
-                order=1;
-                break;
-            case NODE_H5T_NATIVE_UINT8:
-                type_id=H5T_NATIVE_UINT8;
-                order=1;
-                break;
-            default:
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
-            args.GetReturnValue().SetUndefined();
-            return;
-            break;
-        }
+        hid_t type_id=toTypeMap[(H5T)args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))->ToInt32()->Value()];
         int rank=1;
         if(args[2]->ToObject()->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank")))
         {
@@ -95,7 +179,7 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
         switch(rank)
         {
             case 1:
-                dims[0]={node::Buffer::Length(args[2])/order};
+                dims[0]={node::Buffer::Length(args[2])/H5Tget_precision(type_id)};
                 break;
             case 3:
                 dims[2]=(hsize_t)args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->ToInt32()->Value();
@@ -637,96 +721,29 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
                 args.GetReturnValue().Set(node::Buffer::New(v8::Isolate::GetCurrent(), buffer.c_str(), theSize));
             }
                 break;
-            default:
-        
-          hid_t type_id;
+            case H5T_INTEGER:
+            case H5T_FLOAT:
+            case H5T_BITFIELD:
+            {
+                
+                hid_t h=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
+                hid_t t=H5Dget_type(h);
+                hid_t type_id=H5Tget_native_type(t,H5T_DIR_ASCEND);
                 v8::Local<v8::Object> buffer=node::Buffer::New(v8::Isolate::GetCurrent(),bufSize*theSize);
-//              Local<ArrayBuffer> arrayBuffer=ArrayBuffer::New(v8::Isolate::GetCurrent(), bufSize*theSize);
-//                Local<TypedArray> buffer;
-                if(class_id==H5T_FLOAT && bufSize==8)
-                {
-                    type_id=H5T_NATIVE_DOUBLE;
-                }
-                else if(class_id==H5T_FLOAT && bufSize==4)
-                {
-                    type_id=H5T_NATIVE_FLOAT;
-                }
-                else if(class_id==H5T_INTEGER && bufSize==8)
-                {
-                    hid_t h=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
-                    hid_t t=H5Dget_type(h);
-                    if(H5Tget_sign(H5Dget_type(h))==H5T_SGN_2)
-                    {
-                        type_id=H5T_NATIVE_LLONG;
-                    }
-                    else
-                    {
-                        type_id=H5T_NATIVE_ULONG;
-                    }
-                    H5Tclose(t);
-                    H5Dclose(h);
-                }
-                else if(class_id==H5T_INTEGER && bufSize==4)
-                {
-                    hid_t h=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
-                    hid_t t=H5Dget_type(h);
-                    if(H5Tget_sign(H5Dget_type(h))==H5T_SGN_2)
-                    {
-                        type_id=H5T_NATIVE_INT;
-                    }
-                    else
-                    {
-                        type_id=H5T_NATIVE_UINT;
-                    }
-                    H5Tclose(t);
-                    H5Dclose(h);
-                }
-                else if(class_id==H5T_INTEGER && bufSize==2)
-                {
-                    hid_t h=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
-                    hid_t t=H5Dget_type(h);
-                    if(H5Tget_sign(H5Dget_type(h))==H5T_SGN_2)
-                    {
-                        type_id=H5T_NATIVE_SHORT;
-                    }
-                    else
-                    {
-                        type_id=H5T_NATIVE_USHORT;
-                    }
-                    H5Tclose(t);
-                    H5Dclose(h);
-                }
-                else if(class_id==H5T_INTEGER && bufSize==1)
-                {
-                    hid_t h=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
-                    hid_t t=H5Dget_type(h);
-                    if(H5Tget_sign(H5Dget_type(h))==H5T_SGN_2)
-                    {
-                        type_id=H5T_NATIVE_INT8;
-                    }
-                    else
-                    {
-                        type_id=H5T_NATIVE_UINT8;
-                    }
-                    H5Tclose(t);
-                    H5Dclose(h);
-                }
-                else
-                {
-                          v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
-                          args.GetReturnValue().SetUndefined();
-                          return;
-                }
-//                hsize_t dims[1]={buffer->Length()};
-//                buffer->;
                 if(rank>2)std::cout<<"LZ4 "<<H5Zfilter_avail(32004)<<std::endl;
                 err=H5LTread_dataset (args[0]->ToInt32()->Value(), *dset_name, type_id, (char*)node::Buffer::Data(buffer) );
                 if(err<0)
                 {
+                    H5Tclose(t);
+                    H5Dclose(h);
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset")));
                     args.GetReturnValue().SetUndefined();
                     return;
                 }
+                
+                buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"), Int32::New(v8::Isolate::GetCurrent(), toEnumMap[type_id]));
+                    H5Tclose(t);
+                    H5Dclose(h);
                 buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"), Number::New(v8::Isolate::GetCurrent(), rank));
                 switch(rank)
                 {
@@ -796,6 +813,12 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
                 
                 //
                 args.GetReturnValue().Set(buffer);
+            }
+                break;
+            default:
+                            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
+                            args.GetReturnValue().SetUndefined();
+                            return;
                 break;
         }
 }
