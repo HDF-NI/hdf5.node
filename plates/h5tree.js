@@ -2,7 +2,9 @@ var creating=false;
 var cutting=false;
 $(function () {
     $('#h5tree').jstree(${treedata}).on('delete_node.jstree', function (e, data) {
-                                    var names = $('#h5tree').jstree(true).get_path(data.node,'/',false);
+                                    var branch = $('#h5tree').jstree(true).get_path(data.node);
+                                    branch.shift();
+                                    var names=branch.join("/");
                                     $.post("/delete_node/"+encodeURIComponent(names), function(returnedData) {
 
                                     });
@@ -11,7 +13,9 @@ $(function () {
                                     creating=true;
 				})
 				.on('rename_node.jstree', function (e, data) {
-                                    var names = $('#h5tree').jstree(true).get_path(data.node,'/',false);
+                                    var branch = $('#h5tree').jstree(true).get_path(data.node);
+                                    branch.shift();
+                                    var names=branch.join("/");
                                     if(creating){
                                     $.post("/create_node/"+encodeURIComponent(names), function(returnedData) {
 
@@ -28,28 +32,38 @@ $(function () {
 				})
 				.on('move_node.jstree', function (e, data) {
                                     console.log(data.old_parent);
-                                    var names = $('#h5tree').jstree(true).get_path(data.node,'/',false);
-                                    var old_names = $('#h5tree').jstree(true).get_path(data.old_parent,'/',false);
+                                    var branch = $('#h5tree').jstree(true).get_path(data.node);
+                                    branch.shift();
+                                    var names=branch.join("/");
+                                    var old_branch = $('#h5tree').jstree(true).get_path(data.old_parent);
+                                    old_branch.shift();
+                                    var old_names=old_branch.join("/");
                                     console.log(old_names);
                                     $.post("/move_node/"+encodeURIComponent(names+"["+old_names+"]"), function(returnedData) {
 
                                     });
 				})
 				.on('cut_node.jstree', function (e, data) {
-                                    var names = $('#h5tree').jstree(true).get_path(data.node,'/',false);
+                                    var branch = $('#h5tree').jstree(true).get_path(data.node);
+                                    branch.shift();
+                                    var names=branch.join("/");
                                     //$.post("/cut_node/"+encodeURIComponent(names), function(returnedData) {
                                     //});
                                     cutting=true;
 				})
 				.on('copy_node.jstree', function (e, data) {
-                                    var names = $('#h5tree').jstree(true).get_path(data.node,'/',false);
+                                    var branch = $('#h5tree').jstree(true).get_path(data.node);
+                                    branch.shift();
+                                    var names=branch.join("/");
                                     //$.post("/copy_node/"+encodeURIComponent(names), function(returnedData) {
 
 //                                    });
                                       cutting=false;
 				})
 				.on('paste_node.jstree', function (e, data) {
-                                    var names = $('#h5tree').jstree(true).get_path(data.node,'/',false);
+                                    var branch = $('#h5tree').jstree(true).get_path(data.node);
+                                    branch.shift();
+                                    var names=branch.join("/");
                                     if(cutting===true)names+="#cut"
                                     $.post("/paste_node/"+encodeURIComponent(names), function(returnedData) {
                                     });
@@ -97,12 +111,16 @@ console.log(d.type);
 					}
         });
     $('#h5tree').on('select_node.jstree', function (e, data) {
-        var names = $('#h5tree').jstree(true).get_path(data.node,'/',false);
+        var branch = $('#h5tree').jstree(true).get_path(data.node);
+        branch.shift();
+        var names=branch.join("/");
         if(names)
         $.get("/h5editors/"+encodeURIComponent(names), function(data) {if(data.length>0)$('#main').html(data);});
     });
     $('#h5tree').on('hover_node.jstree',function(e,data){
-        var names = $('#h5tree').jstree(true).get_path(data.node,'/',false);
+        var branch = $('#h5tree').jstree(true).get_path(data.node);
+        branch.shift();
+        var names=branch.join("/");
         names+="#attributes";
         $.get("/h5editors/"+encodeURIComponent(names), function(returnedData) {
             $("#"+data.node.id).prop('title', returnedData);

@@ -83,7 +83,9 @@ function dragEndHandler(ev, element) {
         divEditor.id="editor";
         divEditor.appendChild(photoplate);
         element.appendChild(divEditor);
-        var names = $('#h5tree').jstree(true).get_path(selectedNode[selectedNode.length-1],'/',false);
+        var branch = $('#h5tree').jstree(true).get_path(selectedNode[selectedNode.length-1]);
+        branch.shift();
+        var names=branch.join("/");
         $('#h5tree').jstree(true).create_node(selectedNode[selectedNode.length-1], file.name, "last", function(e, data){
             $('#h5tree').jstree(true).set_type(selectedNode[selectedNode.length-1].children[selectedNode[selectedNode.length-1].children.length-1],"image");
         });
@@ -134,7 +136,9 @@ function dragEndHandler(ev, element) {
                             }
 
                     }
-        var names = $('#h5tree').jstree(true).get_path(selectedNode[selectedNode.length-1],'/',false);
+        var branch = $('#h5tree').jstree(true).get_path(selectedNode[selectedNode.length-1]);
+        branch.shift();
+        var names=branch.join("/");
         $('#h5tree').jstree(true).create_node(selectedNode[selectedNode.length-1], file.name, "last", function(e, data){
             $('#h5tree').jstree(true).set_type(selectedNode[selectedNode.length-1].children[selectedNode[selectedNode.length-1].children.length-1],"table");
         });
