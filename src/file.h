@@ -24,9 +24,10 @@ enum HLType {
     HL_TYPE_IMAGE = 1,           /* Image                      */
     HL_TYPE_TABLE = 2,    /* Table   */
     HL_TYPE_PACKET_TABLE = 3,             /* Packets       */
-    HL_TYPE_DIMENSION_SCALES = 4,             /*        */
-    HL_TYPE_OPTIMIZED_FUNCTIONS = 5,             /*        */
-    HL_TYPE_EXTENSIONS = 6             /*        */
+    HL_TYPE_TEXT = 4,
+    HL_TYPE_DIMENSION_SCALES = 5,             /*        */
+    HL_TYPE_OPTIMIZED_FUNCTIONS = 6,             /*        */
+    HL_TYPE_EXTENSIONS = 7             /*        */
 };
 
 enum H5T {
@@ -100,7 +101,7 @@ enum H5T {
             //std::map<unsigned long, unsigned long> toAccessMap = {{0,H5F_ACC_RDONLY}, {1,H5F_ACC_RDWR}, {2,H5F_ACC_TRUNC}, {3,H5F_ACC_EXCL}, {4,H5F_ACC_DEBUG}, {5,H5F_ACC_CREAT}};
             hid_t plist_id, gcpl, dtpl_id, dapl_id, dcpl_id;
             
-            int compression = 0;
+            unsigned int compression = 0;
             bool error=false;
 
         public:

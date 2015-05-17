@@ -52,6 +52,7 @@ namespace NodeHDF5 {
             static void GetMemberNamesByCreationOrder (const v8::FunctionCallbackInfo<Value>& args);
             static void GetChildType (const v8::FunctionCallbackInfo<Value>& args);
             static void getDatasetType (const v8::FunctionCallbackInfo<Value>& args);
+            static void getFilters (const v8::FunctionCallbackInfo<Value>& args);
             
         protected:
             hsize_t getNumObjs();

@@ -114,15 +114,32 @@ console.log(d.type);
         var branch = $('#h5tree').jstree(true).get_path(data.node);
         branch.shift();
         var names=branch.join("/");
-        if(names)
-        $.get("/h5editors/"+encodeURIComponent(names), function(data) {if(data.length>0)$('#main').html(data);});
+        if(names){
+            switch($('#h5tree').jstree(true).get_type(data.node)){
+                case "dataset":
+                $.get("/dataset_h5editors/"+encodeURIComponent(names), function(data) {if(data.length>0)$('#main').html(data);});
+                    break;
+                case "image":
+                $.get("/image_h5editors/"+encodeURIComponent(names), function(data) {if(data.length>0)$('#main').html(data);});
+                    break;
+                case "table":
+                $.get("/table_h5editors/"+encodeURIComponent(names), function(data) {if(data.length>0)$('#main').html(data);});
+                    break;
+                case "packets":
+                $.get("/packets_h5editors/"+encodeURIComponent(names), function(data) {if(data.length>0)$('#main').html(data);});
+                    break;
+                case "text":
+                $.get("/text_h5editors/"+encodeURIComponent(names), function(data) {if(data.length>0)$('#main').html(data);});
+                    break;
+            }
+        }
     });
     $('#h5tree').on('hover_node.jstree',function(e,data){
         var branch = $('#h5tree').jstree(true).get_path(data.node);
         branch.shift();
         var names=branch.join("/");
-        names+="#attributes";
-        $.get("/h5editors/"+encodeURIComponent(names), function(returnedData) {
+//        names+="#attributes";
+        $.get("/attribute_h5editors/"+encodeURIComponent(names), function(returnedData) {
             $("#"+data.node.id).prop('title', returnedData);
         });
     });

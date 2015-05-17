@@ -68,6 +68,12 @@
       "table" : {
         "icon" : "/img/table.gif"
       },
+      "packets" : {
+        "icon" : "/img/table.gif"
+      },
+      "text" : {
+        "icon" : "/img/text.gif"
+      },
       "dataset" : {
         "icon" : "/img/dataset.gif"
       }

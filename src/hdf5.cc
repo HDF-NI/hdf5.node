@@ -1,6 +1,7 @@
 #include <node.h>
 #include "file.h"
 #include "group.h"
+#include "filters.hpp"
 
 using namespace v8;
 using namespace NodeHDF5;
@@ -14,6 +15,7 @@ extern "C" {
         
         // initialize wrapped objects
         File::Initialize(target);
+        Filters::Init(target);
         
         // initialize wrapped object factories
         Group::Initialize();

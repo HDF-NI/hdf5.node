@@ -9,13 +9,14 @@
   },
   "dependencies" : {
     "co" : "4.5.2",
-    "xml2js" : "0.4.8",
     "ws" : "0.7.1",
     "binaryjs" : "0.2.1",
     "koa" : "0.19.1",
     "koa-route" : "2.4.1",
     "koa-static" : "1.4.9",
-    "unirest" : "0.4.0"
+    "unirest" : "0.4.0",
+    "xml2js" : "0.4.8",
+    "require-dir" : "0.3.0"
   },
   "devDependencies" : {
     "mathjs" : "1.6.0",

@@ -8,6 +8,7 @@
 
 #include "file.h"
 #include "group.h"
+#include "filters.hpp"
 #include "H5LTpublic.h"
 #include "H5PTpublic.h"
 #include "H5Lpublic.h"
@@ -15,9 +16,10 @@
 namespace NodeHDF5 {
     
     using namespace v8;
+
+    Persistent<FunctionTemplate> Filters::Constructor;
     
     Group::Group(hid_t id) : Attributes(id) {
-//        m_group.setId(id);
     }
     
     Persistent<FunctionTemplate> Group::Constructor;
@@ -45,6 +47,7 @@ namespace NodeHDF5 {
         NODE_SET_PROTOTYPE_METHOD(t, "getMemberNamesByCreationOrder", GetMemberNamesByCreationOrder);
         NODE_SET_PROTOTYPE_METHOD(t, "getChildType", GetChildType);
         NODE_SET_PROTOTYPE_METHOD(t, "getDatasetType", getDatasetType);
+        NODE_SET_PROTOTYPE_METHOD(t, "getFilters", getFilters);
         
         // initialize constructor reference
         Constructor.Reset(v8::Isolate::GetCurrent(), t);
@@ -804,6 +807,11 @@ namespace NodeHDF5 {
                         }
                         break;
                         case H5T_STRING:
+//                            std::cout<<"HL_TYPE_TEXT "<<*child_name<<std::endl;
+                            hlType=HLType::HL_TYPE_TEXT;
+                            break;
+                        default:
+//                            std::cout<<"default "<<H5Tget_class(type)<<std::endl;
                             break;
                     }
                     if (type >= 0)H5Tclose(type);
@@ -813,6 +821,27 @@ namespace NodeHDF5 {
         }
         args.GetReturnValue().Set((uint32_t) hlType);
         return;
+        
+    }
+    
+    void Group::getFilters (const v8::FunctionCallbackInfo<Value>& args) {
+        
+//        HandleScope scope;
+        
+        // fail out if arguments are not correct
+        if (args.Length() != 1 || !args[0]->IsString()) {
+            
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected dataset name")));
+            args.GetReturnValue().SetUndefined();
+            return;
+            
+        }
+        String::Utf8Value dset_name (args[0]->ToString());
+        // unwrap group
+        Group* group = ObjectWrap::Unwrap<Group>(args.This());
+        std::string name(*dset_name);
+            v8::Local<v8::Object>&& filters = Filters::Instantiate(group->id, name);
+            args.GetReturnValue().Set(filters);
         
     }
     

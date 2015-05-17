@@ -25,7 +25,6 @@ namespace NodeHDF5 {
         if(!exists && id<0)
         {
             plist_id = H5Pcreate(H5P_FILE_ACCESS);
-            H5Pset_deflate(plist_id, compression);
             id= H5Fcreate(path, H5F_ACC_RDONLY, H5P_DEFAULT, plist_id);            
             if(id<0)
             {
@@ -61,7 +60,6 @@ namespace NodeHDF5 {
     if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
     {
             plist_id = H5Pcreate(H5P_FILE_ACCESS);
-            H5Pset_deflate(plist_id, compression);
             id= H5Fcreate(path, flags, H5P_DEFAULT, plist_id);
             if(id<0)
             {

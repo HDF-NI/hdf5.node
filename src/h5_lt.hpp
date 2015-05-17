@@ -14,6 +14,52 @@
 #include "group.h"
 #include "H5LTpublic.h"
 
+static herr_t
+H5LT_make_dataset_numerical( hid_t loc_id,
+                            const char *dset_name,
+                            int rank,
+                            const hsize_t *dims,
+                            hid_t tid,
+                            hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id,
+                            const void *data )
+{
+    hid_t   did = -1, sid = -1;
+
+    /* check the arguments */
+    if (dset_name == NULL) 
+      return -1;
+
+    /* Create the data space for the dataset. */
+    if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
+        return -1;
+
+    /* Create the dataset. */
+    if((did = H5Dcreate2(loc_id, dset_name, tid, sid, lcpl_id, dcpl_id, dapl_id)) < 0)
+        goto out;
+
+    /* Write the dataset only if there is data to write */
+    if(data)
+        if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+            goto out;
+
+    /* End access to the dataset and release resources used by it. */
+    if(H5Dclose(did) < 0)
+        return -1;
+
+    /* Terminate access to the data space. */
+    if(H5Sclose(sid) < 0)
+        return -1;
+
+    return 0;
+
+out:
+    H5E_BEGIN_TRY {
+        H5Dclose(did);
+        H5Sclose(sid);
+    } H5E_END_TRY;
+    return -1;
+}
+
 namespace NodeHDF5 {
 
     static std::map<H5T, hid_t> toTypeMap{
@@ -175,11 +221,12 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
             rank=rankValue->ToInt32()->Value();
     //        std::cout<<"has rank "<<rank<<std::endl;
         }
+         std::cout<<" b len "<<node::Buffer::Length(args[2])<<" "<<H5Tget_size(type_id)<<std::endl;
         hsize_t dims[rank];
         switch(rank)
         {
             case 1:
-                dims[0]={node::Buffer::Length(args[2])/H5Tget_precision(type_id)};
+                dims[0]={node::Buffer::Length(args[2])/H5Tget_size(type_id)};
                 break;
             case 3:
                 dims[2]=(hsize_t)args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->ToInt32()->Value();
@@ -193,13 +240,42 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
             return;
                 break;
         }
-        herr_t err=H5LTmake_dataset (args[0]->ToInt32()->Value(), *dset_name, rank, dims, type_id, node::Buffer::Data(args[2]));
+        unsigned int compression=0;
+        if(args.Length() == 4){
+             Local<Array> names=args[3]->ToObject()->GetOwnPropertyNames();
+             for(uint32_t index=0;index<names->Length();index++){
+                 names->CloneElementAt(index);
+                String::Utf8Value _name (names->Get(index));
+                std::string name(*_name);
+                if(name.compare("compression")==0){
+                     compression=args[3]->ToObject()->Get(names->Get(index))->Uint32Value();
+                }
+             }
+        }
+        hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
+        if(compression>0){
+                herr_t err=H5Pset_deflate(dcpl, compression );
+                if (err < 0) {
+                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set zip filter")));
+                    args.GetReturnValue().SetUndefined();
+                    return;
+                }
+                err=H5Pset_chunk(dcpl, rank, dims);
+                if (err < 0) {
+                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
+                    args.GetReturnValue().SetUndefined();
+                    return;
+                }
+        }
+        herr_t err=H5LT_make_dataset_numerical (args[0]->ToInt32()->Value(), *dset_name, rank, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, node::Buffer::Data(args[2]));
         if(err<0)
         {
+            H5Pclose(dcpl);
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
             args.GetReturnValue().SetUndefined();
             return;
         }
+        H5Pclose(dcpl);
         
     //Atributes
         v8::Local<v8::Array> propertyNames=args[2]->ToObject()->GetPropertyNames();
@@ -337,39 +413,126 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
     if(rank==1)
     {
         hsize_t dims[1]={buffer->Length()};
-        herr_t err=H5LTmake_dataset (args[0]->ToInt32()->Value(), *dset_name, rank, dims, type_id, buffer->Buffer()->Externalize().Data() );
+        unsigned int compression=0;
+        if(args.Length() == 4){
+             Local<Array> names=args[3]->ToObject()->GetOwnPropertyNames();
+             for(uint32_t index=0;index<names->Length();index++){
+                 names->CloneElementAt(index);
+                String::Utf8Value _name (names->Get(index));
+                std::string name(*_name);
+                if(name.compare("compression")==0){
+                     compression=args[3]->ToObject()->Get(names->Get(index))->Uint32Value();
+                }
+             }
+        }
+        hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
+        if(compression>0){
+                herr_t err=H5Pset_deflate(dcpl, compression );
+                if (err < 0) {
+                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set zip filter")));
+                    args.GetReturnValue().SetUndefined();
+                    return;
+                }
+                err=H5Pset_chunk(dcpl, rank, dims);
+                if (err < 0) {
+                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
+                    args.GetReturnValue().SetUndefined();
+                    return;
+                }
+        }
+        herr_t err=H5LT_make_dataset_numerical (args[0]->ToInt32()->Value(), *dset_name, rank, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data() );
         if(err<0)
         {
+            H5Pclose(dcpl);
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
             args.GetReturnValue().SetUndefined();
             return;
         }
+        H5Pclose(dcpl);
     }
     else if(rank==2)
     {
 //        Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value();
 //        Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value();
         hsize_t dims[2]={(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value()};
-        herr_t err=H5LTmake_dataset (args[0]->ToInt32()->Value(), *dset_name, rank, dims, type_id, buffer->Buffer()->Externalize().Data() );
+        unsigned int compression=0;
+        if(args.Length() == 4){
+             Local<Array> names=args[3]->ToObject()->GetOwnPropertyNames();
+             for(uint32_t index=0;index<names->Length();index++){
+                 names->CloneElementAt(index);
+                String::Utf8Value _name (names->Get(index));
+                std::string name(*_name);
+                if(name.compare("compression")==0){
+                     compression=args[3]->ToObject()->Get(names->Get(index))->Uint32Value();
+                }
+             }
+        }
+        hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
+        if(compression>0){
+                herr_t err=H5Pset_deflate(dcpl, compression );
+                if (err < 0) {
+                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set zip filter")));
+                    args.GetReturnValue().SetUndefined();
+                    return;
+                }
+                err=H5Pset_chunk(dcpl, rank, dims);
+                if (err < 0) {
+                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
+                    args.GetReturnValue().SetUndefined();
+                    return;
+                }
+        }
+        herr_t err=H5LT_make_dataset_numerical (args[0]->ToInt32()->Value(), *dset_name, rank, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data() );
         if(err<0)
         {
+            H5Pclose(dcpl);
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
             args.GetReturnValue().SetUndefined();
             return;
         }
+        H5Pclose(dcpl);
     }
     else if(rank==3)
     {
 //        Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value();
 //        Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value();
         hsize_t dims[3]={(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value(),  (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->ToInt32()->Value()};
-        herr_t err=H5LTmake_dataset (args[0]->ToInt32()->Value(), *dset_name, rank, dims, type_id, buffer->Buffer()->Externalize().Data() );
+        unsigned int compression=0;
+        if(args.Length() == 4){
+             Local<Array> names=args[3]->ToObject()->GetOwnPropertyNames();
+             for(uint32_t index=0;index<names->Length();index++){
+                 names->CloneElementAt(index);
+                String::Utf8Value _name (names->Get(index));
+                std::string name(*_name);
+                if(name.compare("compression")==0){
+                     compression=args[3]->ToObject()->Get(names->Get(index))->Uint32Value();
+                }
+             }
+        }
+        hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
+        if(compression>0){
+                herr_t err=H5Pset_deflate(dcpl, compression );
+                if (err < 0) {
+                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set zip filter")));
+                    args.GetReturnValue().SetUndefined();
+                    return;
+                }
+                err=H5Pset_chunk(dcpl, rank, dims);
+                if (err < 0) {
+                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
+                    args.GetReturnValue().SetUndefined();
+                    return;
+                }
+        }
+        herr_t err=H5LT_make_dataset_numerical (args[0]->ToInt32()->Value(), *dset_name, rank, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data() );
         if(err<0)
         {
+            H5Pclose(dcpl);
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
             args.GetReturnValue().SetUndefined();
             return;
         }
+        H5Pclose(dcpl);
     }
     else
     {
@@ -580,7 +743,6 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 }
 //                hsize_t dims[1]={buffer->Length()};
 //                buffer->;
-                if(rank>2)std::cout<<"LZ4 "<<H5Zfilter_avail(32004)<<std::endl;
                 err=H5LTread_dataset (args[0]->ToInt32()->Value(), *dset_name, type_id, buffer->Buffer()->Externalize().Data() );
                 if(err<0)
                 {
@@ -730,7 +892,6 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
                 hid_t t=H5Dget_type(h);
                 hid_t type_id=H5Tget_native_type(t,H5T_DIR_ASCEND);
                 v8::Local<v8::Object> buffer=node::Buffer::New(v8::Isolate::GetCurrent(),bufSize*theSize);
-                if(rank>2)std::cout<<"LZ4 "<<H5Zfilter_avail(32004)<<std::endl;
                 err=H5LTread_dataset (args[0]->ToInt32()->Value(), *dset_name, type_id, (char*)node::Buffer::Data(buffer) );
                 if(err<0)
                 {

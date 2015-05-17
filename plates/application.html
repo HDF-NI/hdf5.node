@@ -5,18 +5,18 @@
   <link rel="stylesheet" type="text/css" href="js/jsTree/themes/default/style.min.css" />
   <link rel="stylesheet" href="css/dragbar.css"/>
   <link rel="stylesheet" href="css/h5editing.css"/>
+  <link rel="stylesheet" href="css/nv.d3.css"/>
   <!-- 2 load the theme CSS file -->
   <script type="text/javascript" src="js/jsTree/libs/jquery-2.1.1.min.js"></script>
   <!--script type="text/javascript" src="js/jsTree/libs/jquery.cookie.js"></script-->
   <script type="text/javascript" src="js/jquery-ui-1.11.2/jquery-ui.js"></script>
-  <!--script type="text/javascript" src="js/modernizr-latest.js"></script-->
-  <!--script type="text/javascript">
-  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-  </script-->
   <script type="text/javascript" src="js/dragbar.js"></script>
   </head>
 <body><div id="sidebar"><span id="position"></span><div id="dragbar"></div><div id="h5tree"></div><script src="js/jsTree/libs/jquery-2.1.1.js"></script><script src="js/jsTree/libs/jquery.json.min.js"></script><script src="js/jsTree/jstree.js"></script><script>${h5tree}</script></div>
-    <div id="main" dropzone="copy file:image/png file:image/gif file:image/jpeg file:text/csv" ondragstart="dragStartHandler(event, this)" ondrag="dragHandler(event, this)" ondragend="dragEndHandler(event, this)" ondrop="dropHandler(event, this)"> editors/spreadsheets here or select a group and drop content here </div>
+    <!--div id="main" dropzone="copy file:image/png file:image/gif file:image/jpeg file:text/csv" ondragstart="dragStartHandler(event, this)" ondrag="dragHandler(event, this)" ondragend="dragEndHandler(event, this)" ondrop="dropHandler(event, this)"-->
+    <div id="main">
+        <div id="editor" dropzone="copy file:image/png file:image/gif file:image/jpeg file:text/csv" ondragstart="dragStartHandler(event, this)" ondrag="dragHandler(event, this)" ondragend="dragEndHandler(event, this)" ondrop="dropHandler(event, this)">editors/spreadsheets here or select a group and drop content here </div>
+        </div>
       <script type="text/javascript" src="js/binary.min.js"></script>
       <script>
 window.addEventListener("dragover",function(e){
