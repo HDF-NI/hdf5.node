@@ -7,7 +7,7 @@ date: 2015-05-02 12:02:34
 
 ## Status
 
-Currently testing with node v0.12.0 and V8 3.28.73.  Builds on Ubuntu 14_04, CentOS 6 and MacOSX 10.7.  Working on getting access to a 10.10 version to solve later build issues. And setting up a windows work environment for VS2013 [any knowledge about node-gyp on these platforms would be much appreciated] 
+Currently testing with node v0.12.0 and V8 3.28.73.  Builds on Ubuntu 14_04, CentOS 6 and MacOSX 10.7. For MacOSX be sure to use a c++11 compatible compiler. Setting up a windows work environment for VS2013 [any knowledge about node-gyp on windows would be much appreciated] 
 Resources leaks are being found when the h5 file is closed.  When found they are being eliminated.  Error handling component is being investigated; how to best leverage V8 and node from the native side.
 
 ## Dependencies
