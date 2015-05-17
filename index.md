@@ -9,7 +9,7 @@ title: "HDF5 Docs"
 npm install hdf5
 ```
  
-Because this project has native code look at [Install & Setup]({{ site.baseurl }}/ref/install-setup.html) for the details.
+Because this project has native code look at [Install & Setup]({{ site.baseurl }}/doc/install-setup.html) for the details.
 
 
 
