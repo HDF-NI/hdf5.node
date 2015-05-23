@@ -3,6 +3,7 @@
 #include <uv.h>
 #include <node.h>
 
+#include <functional>
 #include <memory>
 #include <iostream>
 
@@ -157,7 +158,35 @@ static void iterate_scales (const v8::FunctionCallbackInfo<Value>& args)
 {
 
     String::Utf8Value dset_name (args[1]->ToString());
-    args.GetReturnValue().SetUndefined();
+    int rank;
+    H5LTget_dataset_ndims (args[0]->ToInt32()->Value(), *dset_name, &rank);
+    hid_t did=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT);
+    int idx=args[2]->ToInt32()->Value();
+        v8::Persistent<v8::Function> callback;
+        const unsigned argc = 2;
+        callback.Reset(v8::Isolate::GetCurrent(), args[3].As<Function>());
+        std::function<herr_t(hid_t did, unsigned int dim, hid_t dsid, void *visitor_data)> f=[&](hid_t did, unsigned int dim, hid_t dsid, void *visitor_data){
+        v8::Local<v8::Value> argv[argc] = { v8::Int32::New(v8::Isolate::GetCurrent(), dim),v8:: String::NewFromUtf8(v8::Isolate::GetCurrent(), "success") };
+        v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), argc, argv);
+            return (herr_t)0;
+        };
+        v8::Local<v8::Function> func=v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback);
+    herr_t err=H5DSiterate_scales( did, (unsigned int)rank, &idx, [&](hid_t did, unsigned int dim, hid_t dsid, void *visitor_data) -> herr_t {
+        v8::Local<v8::Value> argv[argc] = { v8::Int32::New(v8::Isolate::GetCurrent(), dim),v8:: String::NewFromUtf8(v8::Isolate::GetCurrent(), "success") };
+        std::cout<<"iter "<<std::endl;
+//        ((v8::Local<v8::Function>*)visitor_data)[0]->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), argc, argv);
+        return (herr_t)0;
+    }, &func);
+    if(err<0){
+        H5Dclose(did);
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed iterating through  scale indices")));
+        args.GetReturnValue().SetUndefined();
+        return;
+        
+    }
+//        callback.Reset();
+    H5Dclose(did);
+        args.GetReturnValue().SetUndefined();
 }
 
 static void set_label (const v8::FunctionCallbackInfo<Value>& args)
@@ -193,7 +222,8 @@ static void get_label (const v8::FunctionCallbackInfo<Value>& args)
 
     String::Utf8Value dset_name (args[1]->ToString());
     hid_t did=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT);
-    size_t size=H5DSget_label(did, args[2]->ToInt32()->Value(), NULL, NULL);
+    size_t size=0;
+    size=H5DSget_label(did, args[2]->ToInt32()->Value(), NULL, size);
     std::string name(size+1, '\0');
     size=H5DSget_label(did, args[2]->ToInt32()->Value(), (char*)name.c_str(), size+1);
     args.GetReturnValue().Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name.c_str()));
@@ -213,7 +243,8 @@ static void get_scale_name (const v8::FunctionCallbackInfo<Value>& args)
 
     String::Utf8Value dset_name (args[1]->ToString());
     hid_t did=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT);
-    size_t size=H5DSget_scale_name(did, NULL, NULL);
+    size_t size=0;
+    size=H5DSget_scale_name(did, NULL, size);
     std::string name(size+1, '\0');
     size=H5DSget_scale_name(did, (char*)name.c_str(), size+1);
     args.GetReturnValue().Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name.c_str()));

@@ -41,7 +41,9 @@ namespace NodeHDF5 {
             static void Create (const v8::FunctionCallbackInfo<Value>& args);
             static void Open (const v8::FunctionCallbackInfo<Value>& args);
             static void OpenGroup (const v8::FunctionCallbackInfo<Value>& args);
+            static void Copy (const v8::FunctionCallbackInfo<Value>& args);
             static void Move (const v8::FunctionCallbackInfo<Value>& args);
+            static void Link (const v8::FunctionCallbackInfo<Value>& args);
             static void Delete (const v8::FunctionCallbackInfo<Value>& args);
             static void Close (const v8::FunctionCallbackInfo<Value>& args);
             static void GetNumAttrs (const v8::FunctionCallbackInfo<Value>& args);
@@ -52,6 +54,7 @@ namespace NodeHDF5 {
             static void GetMemberNamesByCreationOrder (const v8::FunctionCallbackInfo<Value>& args);
             static void GetChildType (const v8::FunctionCallbackInfo<Value>& args);
             static void getDatasetType (const v8::FunctionCallbackInfo<Value>& args);
+            static void getDatasetAttributes (const v8::FunctionCallbackInfo<Value>& args);
             static void getFilters (const v8::FunctionCallbackInfo<Value>& args);
             
         protected:

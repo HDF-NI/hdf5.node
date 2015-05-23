@@ -55,20 +55,27 @@ $(function () {
                                     var branch = $('#h5tree').jstree(true).get_path(data.node);
                                     branch.shift();
                                     var names=branch.join("/");
-                                    //$.post("/copy_node/"+encodeURIComponent(names), function(returnedData) {
+                                    console.log("hit copy node ");
+                                    var old_branch = $('#h5tree').jstree(true).get_path(data.old_parent);
+                                    old_branch.shift();
+                                    var old_names=old_branch.join("/");
+                                    console.log(old_names);
+                                    $.post("/copy_node/"+encodeURIComponent(names+"["+old_names+"]"), function(returnedData) {
 
-//                                    });
+                                    });
                                       cutting=false;
 				})
-				.on('paste_node.jstree', function (e, data) {
-                                    var branch = $('#h5tree').jstree(true).get_path(data.node);
-                                    branch.shift();
-                                    var names=branch.join("/");
-                                    if(cutting===true)names+="#cut"
-                                    $.post("/paste_node/"+encodeURIComponent(names), function(returnedData) {
-                                    });
-                                        cutting=false;
-				})
+//				.on('paste.jstree', function (e, data) {
+//                                    console.log("hit paste "+data.mode);
+//                                    var branch = data.node;
+//                                    branch.shift();
+//                                    var names=branch.join("/");
+//                                    console.log("hit paste "+cutting);
+//                                    if(cutting===true)names+="#cut";
+//                                    $.post("/paste_node/"+encodeURIComponent(names), function(returnedData) {
+//                                    });
+//                                        cutting=false;
+//				})
 				.on('changed.jstree', function (e, data) {
 					if(data && data.selected && data.selected.length) {
 						$.get('?operation=get_content&id=' + data.selected.join(':'), function (d) {
@@ -139,7 +146,7 @@ console.log(d.type);
         branch.shift();
         var names=branch.join("/");
 //        names+="#attributes";
-        $.get("/attribute_h5editors/"+encodeURIComponent(names), function(returnedData) {
+        $.get("/attributes_h5editors/"+encodeURIComponent(names), function(returnedData) {
             $("#"+data.node.id).prop('title', returnedData);
         });
     });
