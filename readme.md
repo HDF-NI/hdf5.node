@@ -6,12 +6,12 @@ won't need to write yet another layer in your code to accomplish your goals.
 
 The node::Buffer and streams are being investigated so native hdf5 data's only destination is client browser window or client in general.
 
-API documentation is available at http://ryancole.github.io/hdf5.node
+API documentation is available at <a href="http://ryancole.github.io/hdf5.node">http://ryancole.github.io/hdf5.node</a>
 
 ```bash
 npm install hdf5
 ```
-http://ryancole.github.io/hdf5.node/doc/install-setup.html for the native requirements and details.
+<a href="http://ryancole.github.io/hdf5.node/doc/install-setup.html">http://ryancole.github.io/hdf5.node/doc/install-setup.html</a> for the native requirements and details.
 
 ```javascript
 var hdf5 = require('hdf5').hdf5;
@@ -49,6 +49,6 @@ Testing addons for custom views/editing or multiviews of the same data.  Impleme
 
 ## Experimental
 
-The h5im namespace is being designed to meet the Image Spec 1.2 http://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html
+The h5im namespace is being designed to meet the Image Spec 1.2 <a href="http://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html">http://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html</a>
 
 Any ideas for the design of the API and interface are welcome.
