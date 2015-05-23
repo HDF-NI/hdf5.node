@@ -30,3 +30,25 @@ console.dir(groupTarget.[ 'Computed Heat Of Formation' ]);
 console.dir(groupTarget.Information);
 ```
 
+For the attributes on datasets a representative object can be obtained from Group.prototype.**getDatasetAttributes** with the attributes on as properties.
+Since h5 attributes can be arrays they are returned in javascript Array's.  So need to check the constructor for Array.
+
+```javascript
+var group=file.openGroup('pmc/refinement');
+var attrs=group.getDatasetAttributes("Data");
+var attrText="";
+Object.getOwnPropertyNames(attrs).forEach(function(val, idx, array) {
+    if(val!="id"){
+        if(attrs[val].constructor.name===Array){
+            attrText+=val+" :  ";
+            for(var mIndex=0;mIndex<attrs[val].Length();mIndex++){
+                attrText+=attrs[val][mIndex];
+                if(mIndex<attrs[val].Length()-1)attrText+=",";
+            }
+        }
+        else{
+            attrText+=val+" :  "+attrs[val]+"\n";
+        }
+    }
+});
+```
