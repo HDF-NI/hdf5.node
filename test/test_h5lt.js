@@ -485,5 +485,65 @@ describe("testing lite interface ",function(){
           file.close();
         });
     });
+    describe("create dataset and extract subset",function(){
+        var file;
+        before(function(){
+          file = new hdf5.File('./roothaan.h5', Access.ACC_RDWR);
+        });
+        it("should be node::Buffer io for double 2 rank data", function(){
+            try
+            {
+            var group=file.openGroup('pmcservices');
+            var buffer=new Buffer(8*10*8, "binary");
+            buffer.rank=2;
+            buffer.rows=8;
+            buffer.columns=10;
+            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
+            for (j = 0; j < buffer.columns; j++) {
+            	for (i = 0; i < buffer.rows; i++){
+                        if (j< (buffer.columns/2))
+                            buffer.writeDoubleLE(1.0, 8*(i*buffer.columns+j));
+                        else
+                           buffer.writeDoubleLE(2.0, 8*(i*buffer.columns+j));
+                }
+            }
+            
+            h5lt.makeDataset(group.id, 'Waldo', buffer);
+            var subsetBuffer=new Buffer(3*4*8, "binary");
+            subsetBuffer.rank=2;
+            subsetBuffer.rows=3;
+            subsetBuffer.columns=4;
+            subsetBuffer.type=H5Type.H5T_NATIVE_DOUBLE;
+            for (j = 0; j < subsetBuffer.columns; j++) {
+            	for (i = 0; i < subsetBuffer.rows; i++){
+                            subsetBuffer.writeDoubleLE(5.0, 8*(i*subsetBuffer.columns+j));
+                }
+            }
+            
+            h5lt.writeDataset(group.id, 'Waldo', subsetBuffer, {start: [1,2], stride: [1,1], count: [3,4]});
+            var readBuffer=h5lt.readDataset(group.id, 'Waldo');
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(8*10);
+            readBuffer.rows.should.match(8);
+            readBuffer.columns.should.match(10);
+            
+            var readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Waldo', {start: [3,4], stride: [1,1], count: [2,2]});
+            console.dir(readAsBuffer.length);
+            readAsBuffer.readDoubleLE(0*8).should.equal(5.0);
+            readAsBuffer.readDoubleLE(1*8).should.equal(5.0);
+            readAsBuffer.readDoubleLE(2*8).should.equal(1.0);
+            readAsBuffer.readDoubleLE(3*8).should.equal(2.0);
+            //readAsBuffer.rows.should.match(2);
+            //readAsBuffer.columns.should.match(2);
+            group.close();
+            }
+            catch(err) {
+                console.dir(err.message);
+            }
+        });
+        after(function(){
+          file.close();
+        });
+    });
     
 });

@@ -28,7 +28,8 @@ Mostly implemented (missing H5DSiterate_scales[ found a way to make callback fun
 
 ### High-level Functions for Region References, Hyperslabs, and Bit-fields
 
-Looking at https://www.hdfgroup.org/projects/jpss/documentation/HL/RM/index.html.  It does require a separate download and install because it is not a part of the standard hdf5 distribution.
+Writing an interface based on the standard hdf5 library.  Currently you can write and read a subset from a two rank dataset. Other ranks may work yet are untested.
+See tutorial <a href="http://ryancole.github.io/hdf5.node/tut/subset_tutorial.html">http://ryancole.github.io/hdf5.node/tut/subset_tutorial.html</a> for example applied to node Buffers.
 
 ### Filters and Compression
 
