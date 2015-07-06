@@ -545,5 +545,44 @@ describe("testing lite interface ",function(){
           file.close();
         });
     });
+    describe("varlen char arrays",function(){
+        var file;
+        before(function(){
+          file = new hdf5.File('./roothaan.h5', Access.ACC_RDWR);
+        });
+        it("create array of varlen's", function(){
+            try
+            {
+            var group=file.createGroup('pmcservices/Quotes');
+            var quotes=new Array(7);
+            quotes[0]="Never put off till tomorrow what may be done day after tomorrow just as well.\0";
+            quotes[1]="I have never let my schooling interfere with my education";
+            quotes[2]="Reader, suppose you were an idiot. And suppose you were a member of Congress. But I repeat myself.";
+            quotes[3]="Substitute 'damn' every time you're inclined to write 'very;' your editor will delete it and the writing will be just as it should be.";
+            quotes[4]="Don’t go around saying the world owes you a living. The world owes you nothing. It was here first.";
+            quotes[5]="Loyalty to country ALWAYS. Loyalty to government, when it deserves it.";
+            quotes[6]="What would men be without women? Scarce, sir...mighty scarce.";
+            h5lt.makeDataset(group.id, "Mark Twain", quotes);
+            group.close();
+            file.close();
+            file = new hdf5.File('./roothaan.h5', Access.ACC_RDWR);
+            group=file.openGroup('pmcservices/Quotes');
+            var array=h5lt.readDataset(group.id, 'Mark Twain');
+            console.dir(array.length);
+            if(array.constructor.name==='Array'){
+                for(var mIndex=0;mIndex<array.length;mIndex++){
+                    console.dir(array[mIndex]);
+                }
+            }
+            group.close();
+            }
+            catch(err) {
+                console.dir(err.message);
+            }
+        });
+        after(function(){
+          file.close();
+        });
+    });
     
 });

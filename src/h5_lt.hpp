@@ -352,6 +352,48 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
         }
         return;
     }
+    else if(args[2]->IsArray())
+    {
+        hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
+        Local<v8::Array> array=Local<v8::Array>::Cast(args[2]);
+        int rank=1;
+        hsize_t countSpace[rank];
+        countSpace[0]=1;
+        hsize_t count[rank];
+        count[0]=array->Length();
+        hid_t memspace_id = H5Screate_simple (rank, countSpace, NULL);
+        hid_t type_id = H5Tcopy(H5T_C_S1);
+        H5Tset_size(type_id, H5T_VARIABLE);
+        hid_t arraytype_id =H5Tarray_create( type_id,  rank, count );
+        hid_t did = H5Dcreate(args[0]->ToInt32()->Value(), *dset_name, arraytype_id, memspace_id, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        std::unique_ptr<char*> vl(new char*[array->Length()]);
+        for(unsigned int arrayIndex=0;arrayIndex<array->Length();arrayIndex++){
+            String::Utf8Value buffer (array->Get(arrayIndex)->ToString());
+            std::string s(*buffer);
+            //std::cout<<s<<std::endl;
+            vl.get()[arrayIndex]=new char[s.length()+1];
+            std::strncpy(vl.get()[arrayIndex], s.c_str(), s.length()+1);
+            
+        }
+            //if(arrayIndex==0){
+        std::cout<<"write the data "<<(vl.get())<<std::endl;
+        herr_t err=H5Dwrite( did, arraytype_id, memspace_id, H5S_ALL, H5P_DEFAULT, vl.get() );
+        std::cout<<"wrote the data "<<err<<std::endl;
+        if(err<0)
+        {
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make var len dataset")));
+            args.GetReturnValue().SetUndefined();
+            return;
+        }
+            //}
+        H5Tclose(arraytype_id);
+        H5Tclose(type_id);
+        H5Dclose(did);
+        H5Sclose(memspace_id);
+        H5Pclose(dcpl);
+        args.GetReturnValue().SetUndefined();
+        return;
+    }
     hid_t type_id;
     Local<TypedArray> buffer;
     if(args[2]->IsFloat64Array())
@@ -1007,6 +1049,56 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
         //std::cout<<"rank "<<rank<<" "<<bufSize<<" "<<values_dim[0]<<" "<<class_id<<std::endl;
         switch(class_id)
         { 
+            case H5T_ARRAY:
+            {
+                std::cout<<"hit H5T_ARRAY "<<(*dset_name)<<std::endl;
+                hid_t did=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
+                hid_t t=H5Dget_type(did);
+                hid_t type_id=H5Tget_native_type(t,H5T_DIR_ASCEND);
+                hid_t dataspace_id=H5S_ALL;
+                hid_t memspace_id=H5S_ALL;
+                hid_t basetype_id=H5Tget_super(type_id);
+                if(!H5Tis_variable_str(basetype_id)){
+                    H5Tclose(t);
+                    H5Tclose(type_id);
+                    H5Tclose(basetype_id);
+                    H5Dclose(did);
+                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported base datatype under class H5T_ARRAY.")));
+                    args.GetReturnValue().SetUndefined();
+                    return;
+                    
+                }
+                std::cout<<H5Tis_variable_str(basetype_id)<<" "<<basetype_id<<" H5T_C_S1 "<<H5T_C_S1<<" "<<H5Tis_variable_str(type_id)<<std::endl;
+                int arrayRank=H5Tget_array_ndims(type_id);
+                hsize_t arrayDims[arrayRank];
+                int arrayLength=H5Tget_array_dims(type_id, arrayDims);
+                std::unique_ptr<char*> vl(new char*[arrayDims[0]]);
+                std::cout<<"H5Dread "<<(*dset_name)<<std::endl;
+                err = H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, vl.get());
+                std::cout<<"H5Dread "<<(err)<<" "<<arrayDims[0]<<std::endl;
+                if(err<0)
+                {
+                        //H5Sclose (memspace_id);
+                        //H5Sclose (dataspace_id);
+                    H5Tclose(t);
+                    H5Dclose(did);
+                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read array dataset")));
+                    args.GetReturnValue().SetUndefined();
+                    return;
+                }
+                Local<Array> array=Array::New(v8::Isolate::GetCurrent(), arrayDims[0]);
+                for(unsigned int arrayIndex=0;arrayIndex<arrayDims[0];arrayIndex++){
+                    std::string s(vl.get()[arrayIndex]);
+                    std::cout<<arrayIndex<<" "<<(s)<<" "<<std::strlen(vl.get()[arrayIndex])<<std::endl;
+                    array->Set(arrayIndex, String::NewFromUtf8(v8::Isolate::GetCurrent(), vl.get()[arrayIndex],String::kNormalString, std::strlen(vl.get()[arrayIndex])));
+                }
+                //H5Sclose (memspace_id);
+                //H5Sclose (dataspace_id);
+                H5Tclose(t);
+                H5Dclose(did);
+                args.GetReturnValue().Set(array);
+            }
+            break;
             case H5T_STRING:
             {
                 std::string buffer(theSize+1, 0);
