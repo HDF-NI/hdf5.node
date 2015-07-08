@@ -1005,7 +1005,14 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
 
 static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
 {
+    // fail out if arguments are not correct
+    if (args.Length() !=2 || !args[0]->IsUint32() || !args[1]->IsString()) {
 
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+        args.GetReturnValue().SetUndefined();
+        return;
+
+    }
     String::Utf8Value dset_name (args[1]->ToString());
     size_t bufSize = 0;
     H5T_class_t class_id;
@@ -1051,7 +1058,7 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
         { 
             case H5T_ARRAY:
             {
-                std::cout<<"hit H5T_ARRAY "<<(*dset_name)<<std::endl;
+                //std::cout<<"hit H5T_ARRAY "<<(*dset_name)<<std::endl;
                 hid_t did=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
                 hid_t t=H5Dget_type(did);
                 hid_t type_id=H5Tget_native_type(t,H5T_DIR_ASCEND);
@@ -1068,14 +1075,12 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                     return;
                     
                 }
-                std::cout<<H5Tis_variable_str(basetype_id)<<" "<<basetype_id<<" H5T_C_S1 "<<H5T_C_S1<<" "<<H5Tis_variable_str(type_id)<<std::endl;
+                //std::cout<<H5Tis_variable_str(basetype_id)<<" "<<basetype_id<<" H5T_C_S1 "<<H5T_C_S1<<" "<<H5Tis_variable_str(type_id)<<std::endl;
                 int arrayRank=H5Tget_array_ndims(type_id);
                 hsize_t arrayDims[arrayRank];
                 int arrayLength=H5Tget_array_dims(type_id, arrayDims);
                 std::unique_ptr<char*> vl(new char*[arrayDims[0]]);
-                std::cout<<"H5Dread "<<(*dset_name)<<std::endl;
                 err = H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, vl.get());
-                std::cout<<"H5Dread "<<(err)<<" "<<arrayDims[0]<<std::endl;
                 if(err<0)
                 {
                         //H5Sclose (memspace_id);
@@ -1089,7 +1094,7 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 Local<Array> array=Array::New(v8::Isolate::GetCurrent(), arrayDims[0]);
                 for(unsigned int arrayIndex=0;arrayIndex<arrayDims[0];arrayIndex++){
                     std::string s(vl.get()[arrayIndex]);
-                    std::cout<<arrayIndex<<" "<<(s)<<" "<<std::strlen(vl.get()[arrayIndex])<<std::endl;
+                    //std::cout<<arrayIndex<<" "<<(s)<<" "<<std::strlen(vl.get()[arrayIndex])<<std::endl;
                     array->Set(arrayIndex, String::NewFromUtf8(v8::Isolate::GetCurrent(), vl.get()[arrayIndex],String::kNormalString, std::strlen(vl.get()[arrayIndex])));
                 }
                 //H5Sclose (memspace_id);
@@ -1101,16 +1106,43 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
             break;
             case H5T_STRING:
             {
-                std::string buffer(theSize+1, 0);
-                err=H5LTread_dataset_string (args[0]->ToInt32()->Value(), *dset_name,  (char*)buffer.c_str());
-                if(err<0)
-                {
-                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset into string")));
-                    args.GetReturnValue().SetUndefined();
-                    return;
+                hid_t did=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
+                hid_t t=H5Dget_type(did);
+                hid_t type_id=H5Tget_native_type(t,H5T_DIR_ASCEND);
+                if(H5Tis_variable_str(type_id)){
+                    hid_t dataspace_id=H5S_ALL;
+                    hid_t memspace_id=H5S_ALL;
+                    hid_t basetype_id=H5Tget_super(type_id);
+                    size_t nalloc;
+                    H5Tencode(type_id, NULL, &nalloc);
+                    std::unique_ptr<char*> tbuffer(new char*[values_dim[0]]);
+                    H5Tencode(type_id, tbuffer.get(), &nalloc);
+                    H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, tbuffer.get());
+                    std::string str(tbuffer.get()[2]);
+                    Local<Array> array=Array::New(v8::Isolate::GetCurrent(), values_dim[0]);
+                    for(unsigned int arrayIndex=0;arrayIndex<values_dim[0];arrayIndex++){
+                        std::string s(tbuffer.get()[arrayIndex]);
+                        //std::cout<<arrayIndex<<" "<<(s)<<" "<<std::strlen(tbuffer.get()[arrayIndex])<<std::endl;
+                        array->Set(arrayIndex, String::NewFromUtf8(v8::Isolate::GetCurrent(), tbuffer.get()[arrayIndex],String::kNormalString, std::strlen(tbuffer.get()[arrayIndex])));
+                    }
+                    args.GetReturnValue().Set(array);
+                        H5Tclose(basetype_id);
+                    }
+                else{
+                    std::string buffer(theSize+1, 0);
+                    err=H5LTread_dataset_string (args[0]->ToInt32()->Value(), *dset_name,  (char*)buffer.c_str());
+                    if(err<0)
+                    {
+                        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset into string")));
+                        args.GetReturnValue().SetUndefined();
+                        return;
+                    }
+    //                std::cout<<"c side\n"<<buffer<<std::endl;
+                    args.GetReturnValue().Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), buffer.c_str(), String::kNormalString, theSize));
                 }
-//                std::cout<<"c side\n"<<buffer<<std::endl;
-                args.GetReturnValue().Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), buffer.c_str(), String::kNormalString, theSize));
+                H5Tclose(t);
+                H5Tclose(type_id);
+                H5Dclose(did);
             }
                 break;
             default:

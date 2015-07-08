@@ -555,7 +555,7 @@ describe("testing lite interface ",function(){
             {
             var group=file.createGroup('pmcservices/Quotes');
             var quotes=new Array(7);
-            quotes[0]="Never put off till tomorrow what may be done day after tomorrow just as well.\0";
+            quotes[0]="Never put off till tomorrow what may be done day after tomorrow just as well.";
             quotes[1]="I have never let my schooling interfere with my education";
             quotes[2]="Reader, suppose you were an idiot. And suppose you were a member of Congress. But I repeat myself.";
             quotes[3]="Substitute 'damn' every time you're inclined to write 'very;' your editor will delete it and the writing will be just as it should be.";
@@ -575,6 +575,32 @@ describe("testing lite interface ",function(){
                 }
             }
             group.close();
+            }
+            catch(err) {
+                console.dir(err.message);
+            }
+        });
+        after(function(){
+          file.close();
+        });
+    });
+    describe("varlen chars",function(){
+        var file;
+        before(function(){
+          file = new hdf5.File('./test/examples/nba.h5', Access.ACC_RDWR);
+        });
+        it("read varlen's", function(){
+            try
+            {
+            //group=file.openGroup('pmcservices/Quotes');
+            var array=h5lt.readDataset(file.id, 'player');
+            console.dir(array.length);
+            if(array.constructor.name==='Array'){
+                for(var mIndex=0;mIndex<array.length;mIndex++){
+                    console.dir(array[mIndex]);
+                }
+            }
+            //group.close();
             }
             catch(err) {
                 console.dir(err.message);
