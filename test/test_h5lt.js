@@ -235,7 +235,7 @@ describe("testing lite interface ",function(){
         before(function(){
           file = new hdf5.File('./roothaan.h5', Access.ACC_TRUNC);
         });
-        it("open of Geometries should be >0", function(done){
+        it("open of Geometries should be >0", function(){
             var groupPMCServices=file.createGroup('pmcservices');
             var groupTargets=file.createGroup('pmcservices/sodium-icosanoate');
             groupTargets[ 'Computed Heat of Formation' ]=-221.78436098572274;
@@ -247,6 +247,9 @@ describe("testing lite interface ",function(){
             var groupTrajectories=file.createGroup('pmcservices/sodium-icosanoate/Trajectories');
             fs.readFile("./test/examples/sodium-icosanoate.xml", "ascii", function (err, data) {
             h5lt.makeDataset(groupDocuments.id, 'sodium-icosanoate.xml', data);
+            groupTrajectories.close();
+            groupFrequencyData.close();
+            groupDocuments.close();
             });
             fs.readFile("./test/examples/sodium-icosanoate.xmol", "ascii", function (err, data) {
                 var count=0;
@@ -302,6 +305,7 @@ describe("testing lite interface ",function(){
                             count=0;
                             if(firstFrequency)
                             {
+                                try{
                                 var groupGeometries=file.createGroup('pmcservices/sodium-icosanoate/Trajectories/Geometries');
                                 firstTrajectory.rank=2;
                                 firstTrajectory.rows=numberOfDataLines;
@@ -313,39 +317,54 @@ describe("testing lite interface ",function(){
                                 lastTrajectory.columns=3;
                                 h5lt.makeDataset(groupGeometries.id, '1', lastTrajectory);
                                 var groupFrequencies=file.createGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
+                                groupGeometries.close();
+                                groupFrequencies.close();
                                 firstFrequency=false;
+                                }
+                                catch(err){
+                                    console.dir("what? "+err.message);
+                                }
                             }
                                 var groupFrequencies=file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
-                                groupFrequencies.open('pmcservices/sodium-icosanoate/Frequency Data/Frequencies', file);
+//                                groupFrequencies.open('pmcservices/sodium-icosanoate/Frequency Data/Frequencies', file);
                                 frequency.rank=2;
                                 frequency.rows=numberOfDataLines;
                                 frequency.columns=3;
                                 h5lt.makeDataset(groupFrequencies.id, title, frequency);
                                 state=State.COUNT;
+                                groupFrequencies.close();
                             }
                             });
                             break;
                     }
                 });
             });
-            done();
+            groupTargets.close();
+            groupPMCServices.close();
         });
         it("Existing group should throw exception when trying to create again ", function(done){
             try
             {
                 var groupTargets=file.createGroup('pmcservices/sodium-icosanoate');
+                groupTargets.close();
             }
             catch(err) {
+                err.message.should.equal("");
                 console.dir(err.message);
             }
             try
             {
                 var groupDocuments=file.createGroup('pmcservices/sodium-icosanoate/Documents');
+                groupDocuments.close();
             }
             catch(err) {
+                err.message.should.equal("");
                 console.dir(err.message);
             }
             done();
+        });
+        after(function(){
+          file.close();
         });
     });
     describe("create an xmol with frequency pulled from h5 ",function(){
@@ -418,8 +437,11 @@ describe("testing lite interface ",function(){
                 xmolDocument.length.should.equal(1435803);
                 fs.writeFile('sodium-icosanoate.xmol', xmolDocument, [flag='w'])
                 fs.writeFile('sodium-icosanoate.xml', xmlDocument, [flag='w'])
-//                groupGeometries.close();
+                groupGeometries.close();
+                groupFrequencies.close();
+                groupTarget.close();
             });
+            groupDocuments.close();
             done();
         });
         var groupGeometries;
@@ -449,6 +471,7 @@ describe("testing lite interface ",function(){
             length.should.match(readBuffer.length);
             var value=2.9;
             value.should.match(readBuffer.Dipole);
+            groupGeometries.close();
             done();
         });
         it("getNumAttrs of file should be 3", function(){
@@ -457,6 +480,134 @@ describe("testing lite interface ",function(){
             file.refresh();
 //            console.dir(file);
 
+        });
+        after(function(){
+          file.close();
+        });
+    });
+    describe("create dataset and extract subset",function(){
+        var file;
+        before(function(){
+          file = new hdf5.File('./roothaan.h5', Access.ACC_RDWR);
+        });
+        it("should be node::Buffer io for double 2 rank data", function(){
+            try
+            {
+            var group=file.openGroup('pmcservices');
+            var buffer=new Buffer(8*10*8, "binary");
+            buffer.rank=2;
+            buffer.rows=8;
+            buffer.columns=10;
+            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
+            for (j = 0; j < buffer.columns; j++) {
+            	for (i = 0; i < buffer.rows; i++){
+                        if (j< (buffer.columns/2))
+                            buffer.writeDoubleLE(1.0, 8*(i*buffer.columns+j));
+                        else
+                           buffer.writeDoubleLE(2.0, 8*(i*buffer.columns+j));
+                }
+            }
+            
+            h5lt.makeDataset(group.id, 'Waldo', buffer);
+            var subsetBuffer=new Buffer(3*4*8, "binary");
+            subsetBuffer.rank=2;
+            subsetBuffer.rows=3;
+            subsetBuffer.columns=4;
+            subsetBuffer.type=H5Type.H5T_NATIVE_DOUBLE;
+            for (j = 0; j < subsetBuffer.columns; j++) {
+            	for (i = 0; i < subsetBuffer.rows; i++){
+                            subsetBuffer.writeDoubleLE(5.0, 8*(i*subsetBuffer.columns+j));
+                }
+            }
+            
+            h5lt.writeDataset(group.id, 'Waldo', subsetBuffer, {start: [1,2], stride: [1,1], count: [3,4]});
+            var readBuffer=h5lt.readDataset(group.id, 'Waldo');
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(8*10);
+            readBuffer.rows.should.match(8);
+            readBuffer.columns.should.match(10);
+            
+            var readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Waldo', {start: [3,4], stride: [1,1], count: [2,2]});
+            console.dir(readAsBuffer.length);
+            readAsBuffer.readDoubleLE(0*8).should.equal(5.0);
+            readAsBuffer.readDoubleLE(1*8).should.equal(5.0);
+            readAsBuffer.readDoubleLE(2*8).should.equal(1.0);
+            readAsBuffer.readDoubleLE(3*8).should.equal(2.0);
+            //readAsBuffer.rows.should.match(2);
+            //readAsBuffer.columns.should.match(2);
+            group.close();
+            }
+            catch(err) {
+                console.dir(err.message);
+            }
+        });
+        after(function(){
+          file.close();
+        });
+    });
+    describe("varlen char arrays",function(){
+        var file;
+        before(function(){
+          file = new hdf5.File('./roothaan.h5', Access.ACC_RDWR);
+        });
+        it("create array of varlen's", function(){
+            try
+            {
+            var group=file.createGroup('pmcservices/Quotes');
+            var quotes=new Array(7);
+            quotes[0]="Never put off till tomorrow what may be done day after tomorrow just as well.";
+            quotes[1]="I have never let my schooling interfere with my education";
+            quotes[2]="Reader, suppose you were an idiot. And suppose you were a member of Congress. But I repeat myself.";
+            quotes[3]="Substitute 'damn' every time you're inclined to write 'very;' your editor will delete it and the writing will be just as it should be.";
+            quotes[4]="Don’t go around saying the world owes you a living. The world owes you nothing. It was here first.";
+            quotes[5]="Loyalty to country ALWAYS. Loyalty to government, when it deserves it.";
+            quotes[6]="What would men be without women? Scarce, sir...mighty scarce.";
+            h5lt.makeDataset(group.id, "Mark Twain", quotes);
+            group.close();
+            file.close();
+            file = new hdf5.File('./roothaan.h5', Access.ACC_RDWR);
+            group=file.openGroup('pmcservices/Quotes');
+            var array=h5lt.readDataset(group.id, 'Mark Twain');
+            console.dir(array.length);
+            if(array.constructor.name==='Array'){
+                for(var mIndex=0;mIndex<array.length;mIndex++){
+                    console.dir(array[mIndex]);
+                }
+            }
+            group.close();
+            }
+            catch(err) {
+                console.dir(err.message);
+            }
+        });
+        after(function(){
+          file.close();
+        });
+    });
+    describe("varlen chars",function(){
+        var file;
+        before(function(){
+          file = new hdf5.File('./test/examples/nba.h5', Access.ACC_RDWR);
+        });
+        it("read varlen's", function(){
+            try
+            {
+            //group=file.openGroup('pmcservices/Quotes');
+            var array=h5lt.readDataset(file.id, 'player');
+            console.dir(array.length);
+            if(array.constructor.name==='Array'){
+                for(var mIndex=0;mIndex<array.length;mIndex++){
+                    console.dir(array[mIndex]);
+                }
+            }
+            //group.close();
+            }
+            catch(err) {
+                console.dir(err.message);
+            }
+        });
+        after(function(){
+          file.close();
         });
     });
     

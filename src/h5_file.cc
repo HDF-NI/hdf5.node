@@ -12,6 +12,8 @@
 #include "file.h"
 #include "group.h"
 
+#include "H5Lpublic.h"
+
 namespace NodeHDF5 {
     
     using namespace v8;
@@ -23,7 +25,6 @@ namespace NodeHDF5 {
         if(!exists && id<0)
         {
             plist_id = H5Pcreate(H5P_FILE_ACCESS);
-            H5Pset_deflate(plist_id, compression);
             id= H5Fcreate(path, H5F_ACC_RDONLY, H5P_DEFAULT, plist_id);            
             if(id<0)
             {
@@ -59,7 +60,6 @@ namespace NodeHDF5 {
     if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
     {
             plist_id = H5Pcreate(H5P_FILE_ACCESS);
-            H5Pset_deflate(plist_id, compression);
             id= H5Fcreate(path, flags, H5P_DEFAULT, plist_id);
             if(id<0)
             {
@@ -76,7 +76,7 @@ namespace NodeHDF5 {
         if(id<0)
         {
         std::stringstream ss;
-        ss << "Failed to create file, with return: " << id << ".\n";
+        ss << "Failed to open file, "<<path<<" and flags "<<flags<<" with return: " << id << ".\n";
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
         error=true;
         return;
@@ -118,6 +118,8 @@ namespace NodeHDF5 {
         NODE_SET_PROTOTYPE_METHOD(t, "openGroup", OpenGroup);
         NODE_SET_PROTOTYPE_METHOD(t, "getNumAttrs", GetNumAttrs);
         NODE_SET_PROTOTYPE_METHOD(t, "refresh", Refresh);
+        NODE_SET_PROTOTYPE_METHOD(t, "move", Move);
+        NODE_SET_PROTOTYPE_METHOD(t, "delete", Delete);
         NODE_SET_PROTOTYPE_METHOD(t, "flush", Flush);
         NODE_SET_PROTOTYPE_METHOD(t, "close", Close);
         NODE_SET_PROTOTYPE_METHOD(t, "getMemberNamesByCreationOrder", GetMemberNamesByCreationOrder);
@@ -199,6 +201,7 @@ namespace NodeHDF5 {
         // unwrap parent object
         File* parent = ObjectWrap::Unwrap<File>(args.This());
         std::vector<std::string> trail;
+        std::vector<hid_t> hidPath;
         std::istringstream buf(*group_name);
         for(std::string token; getline(buf, token, '/'); )
             if(!token.empty())trail.push_back(token);
@@ -207,15 +210,18 @@ namespace NodeHDF5 {
         for(unsigned int index=0;index<trail.size();index++)
         {
             //check existence of stem
-            hid_t hid=H5Gopen(previous_hid, trail[index].c_str(), H5P_DEFAULT);
-            if(hid>=0)
-            {
-                previous_hid=hid;
-                continue;
+            if(H5Lexists(previous_hid, trail[index].c_str(), H5P_DEFAULT )){
+                hid_t hid=H5Gopen(previous_hid, trail[index].c_str(), H5P_DEFAULT);
+                if(hid>=0)
+                {
+                    if(index<trail.size()-1)hidPath.push_back(hid);
+                    previous_hid=hid;
+                    continue;
+                }
             }
             // create group
 //            std::cout<<previous_hid<<" group create  "<<trail[index]<<" in "<<parent->getFileName()<<std::endl;
-            hid=H5Gcreate(previous_hid, trail[index].c_str(), H5P_DEFAULT, parent->getGcpl(), H5P_DEFAULT);
+            hid_t hid=H5Gcreate(previous_hid, trail[index].c_str(), H5P_DEFAULT, parent->getGcpl(), H5P_DEFAULT);
             if(hid<0){
                 std::cout<<"group create error num "<<H5Eget_num(H5Eget_current_stack())<<std::endl;
                 //if(H5Eget_num(H5Eget_current_stack())>0)
@@ -232,10 +238,20 @@ namespace NodeHDF5 {
                 args.GetReturnValue().SetUndefined();
                 return;
             }
+            if(index<trail.size()-1)hidPath.push_back(hid);
             if(index==trail.size()-1)
             {
                 Group* group = new Group(hid);
                 group->name.assign(trail[index].c_str());
+                group->gcpl_id=H5Pcreate(H5P_GROUP_CREATE);
+                herr_t err = H5Pset_link_creation_order(group->gcpl_id, args[2]->ToUint32()->IntegerValue());
+                if (err < 0) {
+                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+                    args.GetReturnValue().SetUndefined();
+                    return;
+                }
+                for (std::vector<hid_t>::iterator it = hidPath.begin() ; it != hidPath.end(); ++it)
+                    group->hidPath.push_back(*it);
                 instance->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->id));
                 group->Wrap(instance);
 
@@ -249,6 +265,15 @@ namespace NodeHDF5 {
         {
             Group* group = new Group(previous_hid);
             group->name.assign(trail[trail.size()-1].c_str());
+            group->gcpl_id=H5Pcreate(H5P_GROUP_CREATE);
+            herr_t err = H5Pset_link_creation_order(group->gcpl_id, args[2]->ToUint32()->IntegerValue());
+            if (err < 0) {
+                v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+                args.GetReturnValue().SetUndefined();
+                return;
+            }
+            for (std::vector<hid_t>::iterator it = hidPath.begin() ; it != hidPath.end(); ++it)
+                group->hidPath.push_back(*it);
             instance->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->id));
             group->Wrap(instance);
 
@@ -287,211 +312,52 @@ namespace NodeHDF5 {
         String::Utf8Value group_name (args[0]->ToString());
         
         Local<Object> instance=Group::Instantiate(*group_name, args.This(), args[1]->ToUint32()->Uint32Value());
-        // create callback params
-//        Local<Value> argv[2] = {
-//                
-//                Local<Value>::New(v8::Isolate::GetCurrent(), Null(v8::Isolate::GetCurrent())),
-//                Local<Value>::New(v8::Isolate::GetCurrent(), Group::Instantiate(*group_name, args.This()))
-//                
-//        };
-        
-        // execute callback
-//        Local<Function> callback = Local<Function>::Cast(args[1]);
-//        callback->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), 2, argv);
-        
         args.GetReturnValue().Set(instance);
         return;
         
     }
 
-//    void File::Refresh (const v8::FunctionCallbackInfo<Value>& args) {
-//        
-//        // fail out if arguments are not correct
-//        if (args.Length() >0 ) {
-//            
-//            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
-//            args.GetReturnValue().SetUndefined();
-//            return;
-//            
-//        }
-//        
-//        // unwrap file object
-//        File* file = ObjectWrap::Unwrap<File>(args.This());
-//        hsize_t index=0;
-//        std::vector<std::string> holder;
-//        H5Aiterate(file->id,H5_INDEX_NAME, H5_ITER_INC, &index, [&](hid_t loc, const char* attr_name, const H5A_info_t* ainfo, void *operator_data) -> herr_t {
-//            ((std::vector<std::string>*)operator_data)->push_back(attr_name);
-//            return 0;
-//        }, &holder);
-//        for(index=0;index<(uint32_t)file->getNumAttrs();index++)
-//        {
-//        hid_t attr_id = H5Aopen(file->id, holder[index].c_str(), H5P_DEFAULT);
-//        hid_t attr_type=H5Aget_type(attr_id);
-//        switch(H5Tget_class(attr_type))
-//        {
-//            case H5T_INTEGER:
-//                long long intValue;
-//                H5Aread(attr_id, attr_type, &intValue);
-//                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), Int32::New(v8::Isolate::GetCurrent(), intValue));
-//                break;
-//            case H5T_FLOAT:
-//                double value;
-//                H5Aread(attr_id, attr_type, &value);
-//                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), Number::New(v8::Isolate::GetCurrent(), value));
-//                break;
-//            case H5T_STRING:
-//            {
-//                std::string strValue(H5Aget_storage_size(attr_id),'\0');
-//                H5Aread(attr_id, attr_type, (void*)strValue.c_str());
-//                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str()));
-//            }
-//                break;
-//            case H5T_NO_CLASS:
-//            default:
-////                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
-////                    args.GetReturnValue().SetUndefined();
-//                    return;
-//                break;
-//        }
-//        H5Tclose(attr_type);
-//        H5Aclose(attr_id);
-//        }
-//        
-//        return;
-//        
-//    }
-//    
-//    void File::Flush (const v8::FunctionCallbackInfo<Value>& args) {
-//        
-//        // fail out if arguments are not correct
-//        if (args.Length() >0 ) {
-//            
-//            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
-//            args.GetReturnValue().SetUndefined();
-//            return;
-//            
-//        }
-//        
-//         // unwrap file object
-//        File* file = ObjectWrap::Unwrap<File>(args.This());
-//        v8::Local<v8::Array> propertyNames=args.This()->GetPropertyNames();
-//        std::cout<<(*String::Utf8Value(args.This()->GetConstructorName()))<<" PropertyNames "<<propertyNames->Length()<<std::endl;
-//        for(unsigned int index=0;index<propertyNames->Length();index++)
-//        {
-//             v8::Local<v8::Value> name=propertyNames->Get (index);
-//             if(!args.This()->Get(name)->IsFunction() && strncmp("id",(*String::Utf8Value(name->ToString())), 2)!=0)
-//             {
-//                std::cout<<index<<" "<<name->IsString()<<std::endl;
-//                std::cout<<index<<" "<<(*String::Utf8Value(name->ToString()))<<std::endl;
-//                htri_t attrExists=H5Aexists(file->id, *String::Utf8Value(name->ToString()));
-//                if(args.This()->Get(name)->IsUint32())
-//                {
-//                    uint32_t value=args.This()->Get(name)->ToUint32()->Uint32Value();
-//                    if(attrExists)
-//                    {
-//                        H5Adelete(file->id, *String::Utf8Value(name->ToString()));
-//                    }
-//                    hid_t attr_type=H5Tcopy(H5T_NATIVE_UINT);
-//                    hid_t attr_space=H5Screate( H5S_SCALAR ); 
-//                    hid_t attr_id=H5Acreate2(file->id, *String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
-//                    if(attr_id<0)
-//                    {
-//                        H5Sclose(attr_space);
-//                        H5Tclose(attr_type);
-//                        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
-//                        args.GetReturnValue().SetUndefined();
-//                        return;
-//                        
-//                    }
-//                    H5Awrite(attr_id, attr_type, &value);
-//                    H5Sclose(attr_space);
-//                    H5Tclose(attr_type);
-//                    H5Aclose(attr_id);
-//                    
-//                }
-//                else if(args.This()->Get(name)->IsInt32())
-//                {
-//                    int32_t value=args.This()->Get(name)->ToInt32()->Int32Value();
-//                    if(attrExists)
-//                    {
-//                        H5Adelete(file->id, *String::Utf8Value(name->ToString()));
-//                    }
-//                    hid_t attr_type=H5Tcopy(H5T_NATIVE_INT);
-//                    hid_t attr_space=H5Screate( H5S_SCALAR ); 
-//                    hid_t attr_id=H5Acreate2(file->id, *String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
-//                    if(attr_id<0)
-//                    {
-//                        H5Sclose(attr_space);
-//                        H5Tclose(attr_type);
-//                        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
-//                        args.GetReturnValue().SetUndefined();
-//                        return;
-//                        
-//                    }
-//                    H5Awrite(attr_id, attr_type, &value);
-//                    H5Sclose(attr_space);
-//                    H5Tclose(attr_type);
-//                    H5Aclose(attr_id);
-//                    
-//                }
-//                else if(args.This()->Get(name)->IsNumber())
-//                {
-//                    double value=args.This()->Get(name)->ToNumber()->NumberValue();
-//                    if(attrExists)
-//                    {
-//                        H5Adelete(file->id, *String::Utf8Value(name->ToString()));
-//                    }
-//                    hid_t attr_type=H5Tcopy(H5T_NATIVE_DOUBLE);
-//                    hid_t attr_space=H5Screate( H5S_SCALAR ); 
-//                    hid_t attr_id=H5Acreate2(file->id, *String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
-//                    if(attr_id<0)
-//                    {
-//                        H5Sclose(attr_space);
-//                        H5Tclose(attr_type);
-//                        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
-//                        args.GetReturnValue().SetUndefined();
-//                        return;
-//                        
-//                    }
-//                    H5Awrite(attr_id, attr_type, &value);
-//                    H5Sclose(attr_space);
-//                    H5Tclose(attr_type);
-//                    H5Aclose(attr_id);
-//                    
-//                }
-//                else if(args.This()->Get(name)->IsString())
-//                {
-//                    std::string value((*String::Utf8Value(args.This()->Get(name)->ToString())));
-//                    if(attrExists)
-//                    {
-//                        H5Adelete(file->id, *String::Utf8Value(name->ToString()));
-//                    }
-//                    hid_t attr_type=H5Tcopy(H5T_C_S1);
-//                    H5Tset_size(attr_type, std::strlen(*String::Utf8Value(name->ToString())));
-//                    hid_t attr_space=H5Screate( H5S_SCALAR ); 
-//                    hid_t attr_id=H5Acreate2(file->id, *String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
-//                    if(attr_id<0)
-//                    {
-//                        H5Sclose(attr_space);
-//                        H5Tclose(attr_type);
-//                        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
-//                        args.GetReturnValue().SetUndefined();
-//                        return;
-//                        
-//                    }
-//                    H5Awrite(attr_id, attr_type, value.c_str());
-//                    H5Sclose(attr_space);
-//                    H5Tclose(attr_type);
-//                    H5Aclose(attr_id);
-//                    
-//                }
-//             }
-//        }
-//        H5Fflush(file->id, H5F_SCOPE_GLOBAL);
-//        return;
-//        
-//    }
-    
+    void File::Move (const v8::FunctionCallbackInfo<Value>& args) {
+        // fail out if arguments are not correct
+        if (args.Length() !=3) {
+            
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest id, dest name")));
+            args.GetReturnValue().SetUndefined();
+            return;
+            
+        }
+        
+        // unwrap group
+        File* file = ObjectWrap::Unwrap<File>(args.This());
+        String::Utf8Value group_name (args[0]->ToString());
+        String::Utf8Value dest_name (args[2]->ToString());
+        herr_t err=H5Lmove(file->id, *group_name, args[1]->ToUint32()->IntegerValue(), *dest_name, H5P_DEFAULT, H5P_DEFAULT);
+        if (err < 0) {
+            std::string str(*dest_name);
+            std::string errStr="Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            args.GetReturnValue().SetUndefined();
+            return;
+        }
+    }
+
+    void File::Delete (const v8::FunctionCallbackInfo<Value>& args) {
+        // fail out if arguments are not correct
+        if (args.Length() !=1 || !args[0]->IsString()) {
+            
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group name")));
+            args.GetReturnValue().SetUndefined();
+            return;
+            
+        }
+        
+        // unwrap group
+        File* file = ObjectWrap::Unwrap<File>(args.This());
+        // delete specified group name
+        String::Utf8Value group_name (args[0]->ToString());
+        H5Ldelete(file->id, (*group_name), H5P_DEFAULT);
+    }
+
     void File::Close (const v8::FunctionCallbackInfo<Value>& args) {
         
         // fail out if arguments are not correct
@@ -505,6 +371,63 @@ namespace NodeHDF5 {
         
         // unwrap file object
         File* file = ObjectWrap::Unwrap<File>(args.This());
+        H5Pclose(file->gcpl);
+        ssize_t size = 0;
+        if (H5Fget_obj_count(file->id, H5F_OBJ_FILE) == 1) {
+            if ((size = H5Fget_obj_count(file->id, H5F_OBJ_GROUP)) > 0) {
+                std::unique_ptr < hid_t[] > groupList(new hid_t[size]);
+                H5Fget_obj_ids(file->id, H5F_OBJ_GROUP, size, groupList.get());
+                std::stringstream ss;
+                ss << "H5 has not closed all groups: " << H5Fget_obj_count(file->id, H5F_OBJ_GROUP) << " H5F_OBJ_GROUPs OPEN" << std::endl;
+                for (int i = 0; i < (int) size; i++) {
+                    std::unique_ptr<char[] > buffer(new char [1024]);
+                    H5Iget_name(groupList[i], buffer.get(), 1024);
+                    ss << groupList[i] << " " << buffer.get() << std::endl;
+                }
+                std::cout<<ss.str()<<std::endl;
+    //                    throw PersistenceException(ss.str());
+            }
+            if ((size = H5Fget_obj_count(file->id, H5F_OBJ_ATTR)) > 0) {
+                std::unique_ptr < hid_t[] > groupList(new hid_t[size]);
+                H5Fget_obj_ids(file->id, H5F_OBJ_ATTR, size, groupList.get());
+                std::stringstream ss;
+                ss << "H5 has not closed all attributes: " << H5Fget_obj_count(file->id, H5F_OBJ_ATTR) << " H5F_OBJ_ATTRs OPEN" << std::endl;
+                for (int i = 0; i < (int) size; i++) {
+                    std::unique_ptr<char[] > buffer(new char [1024]);
+                    H5Iget_name(groupList[i], buffer.get(), 1024);
+                    ss << groupList[i] << " " << buffer.get() << std::endl;
+                }
+                std::cout<<ss.str()<<std::endl;
+    //                    throw PersistenceException(ss.str());
+            }
+            if ((size = H5Fget_obj_count(file->id, H5F_OBJ_DATASET)) > 0) {
+                std::unique_ptr < hid_t[] > groupList(new hid_t[size]);
+                H5Fget_obj_ids(file->id, H5F_OBJ_DATASET, size, groupList.get());
+                std::stringstream ss;
+                ss << "H5 has not closed all datasets" << H5Fget_obj_count(file->id, H5F_OBJ_DATASET) << " H5F_OBJ_DATASETs OPEN" << std::endl;
+                for (int i = 0; i < (int) size; i++) {
+                    std::unique_ptr<char[] > buffer(new char [1024]);
+                    H5Iget_name(groupList[i], buffer.get(), 1024);
+                    ss << groupList[i] << " " << buffer.get() << std::endl;
+                }
+                std::cout<<ss.str()<<std::endl;
+    //                    throw PersistenceException(ss.str());
+            }
+
+            if ((size = H5Fget_obj_count(file->id, H5F_OBJ_DATATYPE)) > 0) {
+                std::unique_ptr < hid_t[] > groupList(new hid_t[size]);
+                H5Fget_obj_ids(file->id, H5F_OBJ_DATATYPE, size, groupList.get());
+                std::stringstream ss;
+                ss << "H5 has not closed all datatypes" << H5Fget_obj_count(file->id, H5F_OBJ_DATATYPE) << " H5F_OBJ_DATATYPEs OPEN" << std::endl;
+                for (int i = 0; i < (int) size; i++) {
+                    std::unique_ptr<char[] > buffer(new char [1024]);
+                    H5Iget_name(groupList[i], buffer.get(), 1024);
+                    ss << groupList[i] << " " << buffer.get() << std::endl;
+                }
+                std::cout<<ss.str()<<std::endl;
+    //                    throw PersistenceException(ss.str());
+            }
+        }
         H5Fclose(file->id);
         
         return;

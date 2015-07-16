@@ -23,8 +23,12 @@ namespace NodeHDF5 {
         friend class File;
         using Attributes::name;
         using Attributes::id;
+        using Attributes::gcpl_id;
         using Attributes::Refresh;
         using Attributes::Flush;
+    protected:
+        std::vector<hid_t> hidPath;
+
         private:
             static Persistent<FunctionTemplate> Constructor;
             static void New (const v8::FunctionCallbackInfo<Value>& args);
@@ -37,8 +41,10 @@ namespace NodeHDF5 {
             static void Create (const v8::FunctionCallbackInfo<Value>& args);
             static void Open (const v8::FunctionCallbackInfo<Value>& args);
             static void OpenGroup (const v8::FunctionCallbackInfo<Value>& args);
-//            static void Refresh (const v8::FunctionCallbackInfo<Value>& args);
-//            static void Flush (const v8::FunctionCallbackInfo<Value>& args);
+            static void Copy (const v8::FunctionCallbackInfo<Value>& args);
+            static void Move (const v8::FunctionCallbackInfo<Value>& args);
+            static void Link (const v8::FunctionCallbackInfo<Value>& args);
+            static void Delete (const v8::FunctionCallbackInfo<Value>& args);
             static void Close (const v8::FunctionCallbackInfo<Value>& args);
             static void GetNumAttrs (const v8::FunctionCallbackInfo<Value>& args);
             static void GetAttributeNames (const v8::FunctionCallbackInfo<Value>& args);
@@ -48,6 +54,8 @@ namespace NodeHDF5 {
             static void GetMemberNamesByCreationOrder (const v8::FunctionCallbackInfo<Value>& args);
             static void GetChildType (const v8::FunctionCallbackInfo<Value>& args);
             static void getDatasetType (const v8::FunctionCallbackInfo<Value>& args);
+            static void getDatasetAttributes (const v8::FunctionCallbackInfo<Value>& args);
+            static void getFilters (const v8::FunctionCallbackInfo<Value>& args);
             
         protected:
             hsize_t getNumObjs();

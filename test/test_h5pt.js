@@ -22,11 +22,10 @@ describe("testing table interface ",function(){
         before(function*(){
           file = new hdf5.File('./h5pt.h5', Access.ACC_TRUNC);
         });
-        var group;
         it("should be Table io ", function*(){
             try
             {
-            group=file.createGroup('/pmc/refinement');
+            var group=file.createGroup('pmc/refinement');
             group.id.should.not.equal(-1);
             var table=new h5pt.PacketTable(0, 5);
             table.record=new Object();
@@ -49,13 +48,13 @@ describe("testing table interface ",function(){
             table.record[ "Units" ]="Celcius";
             table.append();
             table.close();
+            group.close();
             }
             catch (err) {
             console.dir(err.message);
             }
         });
         it("should close pmc/refinement ", function*(){
-            group.close();
             file.close();
         });
     });

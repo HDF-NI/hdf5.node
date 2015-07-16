@@ -1,4 +1,5 @@
 build
+.c9
 .lock-wscript
 /node_modules/
 /legacy/node-v0.10.31/node_modules/

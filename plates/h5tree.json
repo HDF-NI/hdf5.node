@@ -1,6 +1,15 @@
 {
     "core" : {
-    "data" : ${h5treedata} },
+    "data" : ${h5treedata},
+    'check_callback' : function(o, n, p, i, m) {
+            if(o === "delete_node") { return confirm("Are you sure you want to delete?"); }
+            if(m && m.dnd && m.pos !== 'i') { return false; }
+            if(o === "move_node" || o === "copy_node") {
+                    if(this.get_node(n).parent === this.get_node(p).id) { return false; }
+            }
+            return true;
+    }
+    },
     "contextmenu" : {
             "items" : function(node) {
                     var tmp = $.jstree.defaults.contextmenu.items();
@@ -16,7 +25,7 @@
                                             inst.create_node(obj, { type : "default" }, "last", function (new_node) {
                                                     setTimeout(function () { inst.edit(new_node); },0);
                                             });
-                                    }
+							                                    }
                             },
                             "create_file" : {
                                     "label"				: "Dataset",
@@ -33,19 +42,42 @@
                                     "action"			: function (data) {
                                             var inst = $.jstree.reference(data.reference),
                                                     obj = inst.get_node(data.reference);
-                                            inst.create_node(obj, { type : "attribute" }, "last", function (new_node) {
-                                                    setTimeout(function () { inst.edit(new_node); },0);
+                                            var names = $('#h5tree').jstree(true).get_path(obj,'/',false);
+                                            $.post("/create_attribute/"+encodeURIComponent(names), function(returnedData) {
+
                                             });
                                     }
                             }
                     };
-                    //if(this.get_type(node) === "file") {
-                    //        delete tmp.create;
-                    //}
+                    if(this.get_type(node) != "group") {
+                            delete tmp.create;
+                    }
                     return tmp;
             }
     },
-    "plugins" : [
-    "contextmenu", "dnd"
+    "types" : {
+      "default" : {
+        "icon" : "/img/text.gif"
+      },
+      "group" : {
+        "icon" : "/img/folderclose.gif"
+      },
+      "image" : {
+        "icon" : "/img/image.gif"
+      },
+      "table" : {
+        "icon" : "/img/table.gif"
+      },
+      "packets" : {
+        "icon" : "/img/table.gif"
+      },
+      "text" : {
+        "icon" : "/img/text.gif"
+      },
+      "dataset" : {
+        "icon" : "/img/dataset.gif"
+      }
+    },"plugins" : [
+    "contextmenu", "dnd", "types"
     ]
 }

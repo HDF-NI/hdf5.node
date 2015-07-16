@@ -15,7 +15,7 @@ namespace NodeHDF5{
     protected:
             std::string name;
             hid_t id;
-            hid_t gcpl_id;
+            hid_t gcpl_id=0;
     public:
         Attributes() {};
         Attributes(hid_t id) : id (id) {};
