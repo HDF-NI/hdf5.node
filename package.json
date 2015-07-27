@@ -1,6 +1,6 @@
 {
   "name" : "hdf5",
-  "version" : "0.0.18",
+  "version" : "0.0.19",
   "description" : "Native Abstractions for hdf5 file io",
   "main" : "./index.js",
   "repository" : {
@@ -16,14 +16,27 @@
     "koa-static" : "1.4.9",
     "unirest" : "0.4.0",
     "xml2js" : "0.4.8",
-    "require-dir" : "0.3.0"
+    "require-dir" : "0.3.0",
+    "node-pre-gyp": "0.6.8"
   },
+    "bundledDependencies":["node-pre-gyp"],
   "devDependencies" : {
     "mathjs" : "1.6.0",
     "ethercalc" : "0.20150421.1",
     "co-mocha" : "1.1.0",
-    "should" : ""
+    "should" : "",
+    "aws-sdk": "2.1.39"
   },
+    "scripts": {
+        "install": "node-pre-gyp install --fallback-to-build",
+        "prebuild": "node-pre-gyp rebuild && node-pre-gyp package"
+    },
+    "binary": {
+        "module_name": "hdf5",
+        "module_path": "./lib/binding/",
+        "host": "https://hdf5.node.s3-us-west-2.amazonaws.com",
+        "remote_path": "./v{version}"
+    },    
   "contributors" : [ "Ryan Cole <ryan@rycole.com> (https://github.com/ryancole/)", "Roger I Martin <mathmldashx@yahoo.com> (https://github.com/rimmartin/)" ],
   "license" : {
     "type" : "mit"

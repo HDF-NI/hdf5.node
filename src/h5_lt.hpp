@@ -1118,7 +1118,6 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                     std::unique_ptr<char*> tbuffer(new char*[values_dim[0]]);
                     H5Tencode(type_id, tbuffer.get(), &nalloc);
                     H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, tbuffer.get());
-                    std::string str(tbuffer.get()[2]);
                     Local<Array> array=Array::New(v8::Isolate::GetCurrent(), values_dim[0]);
                     for(unsigned int arrayIndex=0;arrayIndex<values_dim[0];arrayIndex++){
                         std::string s(tbuffer.get()[arrayIndex]);
