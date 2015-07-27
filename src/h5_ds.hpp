@@ -166,13 +166,13 @@ static void iterate_scales (const v8::FunctionCallbackInfo<Value>& args)
         const unsigned argc = 2;
         callback.Reset(v8::Isolate::GetCurrent(), args[3].As<Function>());
         std::function<herr_t(hid_t did, unsigned int dim, hid_t dsid, void *visitor_data)> f=[&](hid_t did, unsigned int dim, hid_t dsid, void *visitor_data){
-        v8::Local<v8::Value> argv[argc] = { v8::Int32::New(v8::Isolate::GetCurrent(), dim),v8:: String::NewFromUtf8(v8::Isolate::GetCurrent(), "success") };
+        v8::Local<v8::Value> argv[2] = { v8::Int32::New(v8::Isolate::GetCurrent(), dim),v8:: String::NewFromUtf8(v8::Isolate::GetCurrent(), "success") };
         v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), argc, argv);
             return (herr_t)0;
         };
         v8::Local<v8::Function> func=v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback);
     herr_t err=H5DSiterate_scales( did, (unsigned int)rank, &idx, [&](hid_t did, unsigned int dim, hid_t dsid, void *visitor_data) -> herr_t {
-        v8::Local<v8::Value> argv[argc] = { v8::Int32::New(v8::Isolate::GetCurrent(), dim),v8:: String::NewFromUtf8(v8::Isolate::GetCurrent(), "success") };
+        v8::Local<v8::Value> argv[2] = { v8::Int32::New(v8::Isolate::GetCurrent(), dim),v8:: String::NewFromUtf8(v8::Isolate::GetCurrent(), "success") };
         std::cout<<"iter "<<std::endl;
 //        ((v8::Local<v8::Function>*)visitor_data)[0]->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), argc, argv);
         return (herr_t)0;

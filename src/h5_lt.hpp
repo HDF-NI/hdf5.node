@@ -224,17 +224,17 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
             rank=rankValue->ToInt32()->Value();
     //        std::cout<<"has rank "<<rank<<std::endl;
         }
-        hsize_t dims[rank];
+        std::unique_ptr<hsize_t> dims(new hsize_t[rank]);
         switch(rank)
         {
             case 1:
-                dims[0]={node::Buffer::Length(args[2])/H5Tget_size(type_id)};
+                dims.get()[0]={node::Buffer::Length(args[2])/H5Tget_size(type_id)};
                 break;
             case 3:
-                dims[2]=(hsize_t)args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->ToInt32()->Value();
+                dims.get()[2]=(hsize_t)args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->ToInt32()->Value();
             case 2:
-                dims[1]=(hsize_t)args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value();
-                dims[0]=(hsize_t)args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value();
+                dims.get()[1]=(hsize_t)args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value();
+                dims.get()[0]=(hsize_t)args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value();
                 break;
             default:
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported rank")));
@@ -262,14 +262,14 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
                     args.GetReturnValue().SetUndefined();
                     return;
                 }
-                err=H5Pset_chunk(dcpl, rank, dims);
+                err=H5Pset_chunk(dcpl, rank, dims.get());
                 if (err < 0) {
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
                     args.GetReturnValue().SetUndefined();
                     return;
                 }
         }
-        herr_t err=H5LT_make_dataset_numerical (args[0]->ToInt32()->Value(), *dset_name, rank, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, node::Buffer::Data(args[2]));
+        herr_t err=H5LT_make_dataset_numerical (args[0]->ToInt32()->Value(), *dset_name, rank, dims.get(), type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, node::Buffer::Data(args[2]));
         if(err<0)
         {
             H5Pclose(dcpl);
@@ -357,14 +357,14 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
         hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
         Local<v8::Array> array=Local<v8::Array>::Cast(args[2]);
         int rank=1;
-        hsize_t countSpace[rank];
-        countSpace[0]=1;
-        hsize_t count[rank];
-        count[0]=array->Length();
-        hid_t memspace_id = H5Screate_simple (rank, countSpace, NULL);
+    std::unique_ptr<hsize_t> countSpace(new hsize_t[rank]);
+        countSpace.get()[0]=1;
+    std::unique_ptr<hsize_t> count(new hsize_t[rank]);
+        count.get()[0]=array->Length();
+        hid_t memspace_id = H5Screate_simple (rank, countSpace.get(), NULL);
         hid_t type_id = H5Tcopy(H5T_C_S1);
         H5Tset_size(type_id, H5T_VARIABLE);
-        hid_t arraytype_id =H5Tarray_create( type_id,  rank, count );
+        hid_t arraytype_id =H5Tarray_create( type_id,  rank, count.get() );
         hid_t did = H5Dcreate(args[0]->ToInt32()->Value(), *dset_name, arraytype_id, memspace_id, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         std::unique_ptr<char*> vl(new char*[array->Length()]);
         for(unsigned int arrayIndex=0;arrayIndex<array->Length();arrayIndex++){
@@ -671,8 +671,8 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
         args.GetReturnValue().SetUndefined();
         return;
     }
-    hsize_t values_dim[rank];
-    err=H5LTget_dataset_info(args[0]->ToInt32()->Value(), *dset_name, values_dim, &class_id, &bufSize);
+    std::unique_ptr<hsize_t> values_dim(new hsize_t[rank]);
+    err=H5LTget_dataset_info(args[0]->ToInt32()->Value(), *dset_name, values_dim.get(), &class_id, &bufSize);
     if(err<0)
     {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset info")));
@@ -681,9 +681,9 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
     }
     hsize_t theSize=bufSize;
     bool subsetOn=false;
-    hsize_t start[rank];
-    hsize_t stride[rank];
-    hsize_t count[rank];
+    std::unique_ptr<hsize_t> start(new hsize_t[rank]);
+    std::unique_ptr<hsize_t> stride(new hsize_t[rank]);
+    std::unique_ptr<hsize_t> count(new hsize_t[rank]);
     if(args.Length() == 4){
          Local<Array> names=args[3]->ToObject()->GetOwnPropertyNames();
          for(uint32_t index=0;index<names->Length();index++){
@@ -693,19 +693,19 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
             if(name.compare("start")==0){
                 Local<Object> starts=args[3]->ToObject()->Get(names->Get(index))->ToObject();
                 for(unsigned int arrayIndex=0;arrayIndex<starts->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length"))->ToObject()->Uint32Value();arrayIndex++){
-                    start[arrayIndex]=starts->Get(arrayIndex)->Uint32Value();
+                    start.get()[arrayIndex]=starts->Get(arrayIndex)->Uint32Value();
                 }
             }
             else if(name.compare("stride")==0){
                 Local<Object> strides=args[3]->ToObject()->Get(names->Get(index))->ToObject();
                 for(unsigned int arrayIndex=0;arrayIndex<strides->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length"))->ToObject()->Uint32Value();arrayIndex++){
-                    stride[arrayIndex]=strides->Get(arrayIndex)->Uint32Value();
+                    stride.get()[arrayIndex]=strides->Get(arrayIndex)->Uint32Value();
                 }
             }
             else if(name.compare("count")==0){
                  Local<Object> counts=args[3]->ToObject()->Get(names->Get(index))->ToObject();
                 for(unsigned int arrayIndex=0;arrayIndex<counts->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length"))->ToObject()->Uint32Value();arrayIndex++){
-                    count[arrayIndex]=counts->Get(arrayIndex)->Uint32Value();
+                    count.get()[arrayIndex]=counts->Get(arrayIndex)->Uint32Value();
                 }
                 subsetOn=true;
             }
@@ -735,10 +735,10 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
         hid_t dataspace_id=H5S_ALL;
         hid_t memspace_id=H5S_ALL;
         if(subsetOn){
-            memspace_id = H5Screate_simple (rank, count, NULL);
+            memspace_id = H5Screate_simple (rank, count.get(), NULL);
             dataspace_id = H5Dget_space (did);
-            herr_t  err = H5Sselect_hyperslab (dataspace_id, H5S_SELECT_SET, start,
-                                          stride, count, NULL);
+            herr_t  err = H5Sselect_hyperslab (dataspace_id, H5S_SELECT_SET, start.get(),
+                                          stride.get(), count.get(), NULL);
             if(err<0)
             {
                 if(subsetOn){
@@ -905,10 +905,10 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
         hid_t dataspace_id=H5S_ALL;
         hid_t memspace_id=H5S_ALL;
         if(subsetOn){
-            memspace_id = H5Screate_simple (rank, count, NULL);
+            memspace_id = H5Screate_simple (rank, count.get(), NULL);
             dataspace_id = H5Dget_space (did);
-            herr_t  err = H5Sselect_hyperslab (dataspace_id, H5S_SELECT_SET, start,
-                                          stride, count, NULL);
+            herr_t  err = H5Sselect_hyperslab (dataspace_id, H5S_SELECT_SET, start.get(),
+                                          stride.get(), count.get(), NULL);
             if(err<0)
             {
                 if(subsetOn){
@@ -1024,8 +1024,8 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
         args.GetReturnValue().SetUndefined();
         return;
     }
-    hsize_t values_dim[rank];
-    err=H5LTget_dataset_info(args[0]->ToInt32()->Value(), *dset_name, values_dim, &class_id, &bufSize);
+    std::unique_ptr<hsize_t> values_dim(new hsize_t[rank]);
+    err=H5LTget_dataset_info(args[0]->ToInt32()->Value(), *dset_name, values_dim.get(), &class_id, &bufSize);
     if(err<0)
     {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset info")));
@@ -1036,13 +1036,13 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
           switch(rank)
           {
               case 3:
-              theSize=values_dim[0]*values_dim[1]*values_dim[2];
+              theSize=values_dim.get()[0]*values_dim.get()[1]*values_dim.get()[2];
               break;
               case 2:
-              theSize=values_dim[0]*values_dim[1];
+              theSize=values_dim.get()[0]*values_dim.get()[1];
               break;
               case 1:
-                  theSize=values_dim[0];
+                  theSize=values_dim.get()[0];
                   break;
               case 0:
                   theSize=bufSize;
@@ -1077,9 +1077,9 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 }
                 //std::cout<<H5Tis_variable_str(basetype_id)<<" "<<basetype_id<<" H5T_C_S1 "<<H5T_C_S1<<" "<<H5Tis_variable_str(type_id)<<std::endl;
                 int arrayRank=H5Tget_array_ndims(type_id);
-                hsize_t arrayDims[arrayRank];
-                int arrayLength=H5Tget_array_dims(type_id, arrayDims);
-                std::unique_ptr<char*> vl(new char*[arrayDims[0]]);
+                std::unique_ptr<hsize_t> arrayDims(new hsize_t[arrayRank]);
+                int arrayLength=H5Tget_array_dims(type_id, arrayDims.get());
+                std::unique_ptr<char*> vl(new char*[arrayDims.get()[0]]);
                 err = H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, vl.get());
                 if(err<0)
                 {
@@ -1091,8 +1091,8 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                     args.GetReturnValue().SetUndefined();
                     return;
                 }
-                Local<Array> array=Array::New(v8::Isolate::GetCurrent(), arrayDims[0]);
-                for(unsigned int arrayIndex=0;arrayIndex<arrayDims[0];arrayIndex++){
+                Local<Array> array=Array::New(v8::Isolate::GetCurrent(), arrayDims.get()[0]);
+                for(unsigned int arrayIndex=0;arrayIndex<arrayDims.get()[0];arrayIndex++){
                     std::string s(vl.get()[arrayIndex]);
                     //std::cout<<arrayIndex<<" "<<(s)<<" "<<std::strlen(vl.get()[arrayIndex])<<std::endl;
                     array->Set(arrayIndex, String::NewFromUtf8(v8::Isolate::GetCurrent(), vl.get()[arrayIndex],String::kNormalString, std::strlen(vl.get()[arrayIndex])));
@@ -1115,11 +1115,11 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                     hid_t basetype_id=H5Tget_super(type_id);
                     size_t nalloc;
                     H5Tencode(type_id, NULL, &nalloc);
-                    std::unique_ptr<char*> tbuffer(new char*[values_dim[0]]);
+                    std::unique_ptr<char*> tbuffer(new char*[values_dim.get()[0]]);
                     H5Tencode(type_id, tbuffer.get(), &nalloc);
                     H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, tbuffer.get());
-                    Local<Array> array=Array::New(v8::Isolate::GetCurrent(), values_dim[0]);
-                    for(unsigned int arrayIndex=0;arrayIndex<values_dim[0];arrayIndex++){
+                    Local<Array> array=Array::New(v8::Isolate::GetCurrent(), values_dim.get()[0]);
+                    for(unsigned int arrayIndex=0;arrayIndex<values_dim.get()[0];arrayIndex++){
                         std::string s(tbuffer.get()[arrayIndex]);
                         //std::cout<<arrayIndex<<" "<<(s)<<" "<<std::strlen(tbuffer.get()[arrayIndex])<<std::endl;
                         array->Set(arrayIndex, String::NewFromUtf8(v8::Isolate::GetCurrent(), tbuffer.get()[arrayIndex],String::kNormalString, std::strlen(tbuffer.get()[arrayIndex])));
@@ -1234,16 +1234,16 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 switch(rank)
                 {
                     case 3:
-                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim[1]));
-                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim[2]));
-                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"), Number::New(v8::Isolate::GetCurrent(), values_dim[0]));
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
                         break;
                     case 2:
-                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim[0]));
-                        if(rank>1)buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim[1]));
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+                        if(rank>1)buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
                         break;
                     case 1:
-                    buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim[0]));
+                    buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
                     break;
                 }
                 
@@ -1324,8 +1324,8 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
         args.GetReturnValue().SetUndefined();
         return;
     }
-    hsize_t values_dim[rank];
-    err=H5LTget_dataset_info(args[0]->ToInt32()->Value(), *dset_name, values_dim, &class_id, &bufSize);
+    std::unique_ptr<hsize_t> values_dim(new hsize_t[rank]);
+    err=H5LTget_dataset_info(args[0]->ToInt32()->Value(), *dset_name, values_dim.get(), &class_id, &bufSize);
     if(err<0)
     {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset info")));
@@ -1334,9 +1334,9 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
     }
     hsize_t theSize=bufSize;
     bool subsetOn=false;
-    hsize_t start[rank];
-    hsize_t stride[rank];
-    hsize_t count[rank];
+    std::unique_ptr<hsize_t> start(new hsize_t[rank]);
+    std::unique_ptr<hsize_t> stride(new hsize_t[rank]);
+    std::unique_ptr<hsize_t> count(new hsize_t[rank]);
     if(args.Length() == 3){
          Local<Array> names=args[2]->ToObject()->GetOwnPropertyNames();
          for(uint32_t index=0;index<names->Length();index++){
@@ -1346,19 +1346,19 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
             if(name.compare("start")==0){
                 Local<Object> starts=args[2]->ToObject()->Get(names->Get(index))->ToObject();
                 for(unsigned int arrayIndex=0;arrayIndex<starts->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length"))->ToObject()->Uint32Value();arrayIndex++){
-                    start[arrayIndex]=starts->Get(arrayIndex)->Uint32Value();
+                    start.get()[arrayIndex]=starts->Get(arrayIndex)->Uint32Value();
                 }
             }
             else if(name.compare("stride")==0){
                 Local<Object> strides=args[2]->ToObject()->Get(names->Get(index))->ToObject();
                 for(unsigned int arrayIndex=0;arrayIndex<strides->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length"))->ToObject()->Uint32Value();arrayIndex++){
-                    stride[arrayIndex]=strides->Get(arrayIndex)->Uint32Value();
+                    stride.get()[arrayIndex]=strides->Get(arrayIndex)->Uint32Value();
                 }
             }
             else if(name.compare("count")==0){
                  Local<Object> counts=args[2]->ToObject()->Get(names->Get(index))->ToObject();
                 for(unsigned int arrayIndex=0;arrayIndex<counts->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length"))->ToObject()->Uint32Value();arrayIndex++){
-                    count[arrayIndex]=counts->Get(arrayIndex)->Uint32Value();
+                    count.get()[arrayIndex]=counts->Get(arrayIndex)->Uint32Value();
                 }
                 subsetOn=true;
             }
@@ -1367,13 +1367,13 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
           switch(rank)
           {
               case 3:
-              theSize=values_dim[0]*values_dim[1]*values_dim[2];
+              theSize=values_dim.get()[0]*values_dim.get()[1]*values_dim.get()[2];
               break;
               case 2:
-              theSize=values_dim[0]*values_dim[1];
+              theSize=values_dim.get()[0]*values_dim.get()[1];
               break;
               case 1:
-                  theSize=values_dim[0];
+                  theSize=values_dim.get()[0];
                   break;
               case 0:
                   theSize=bufSize;
@@ -1413,13 +1413,10 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
                 hid_t dataspace_id=H5S_ALL;
                 hid_t memspace_id=H5S_ALL;
                 if(subsetOn){
-                    memspace_id = H5Screate_simple (rank, count, NULL);
+                    memspace_id = H5Screate_simple (rank, count.get(), NULL);
                     dataspace_id = H5Dget_space (did);
-            std::cout<<"H5Sselect_hyperslab start "<<(start[0])<<" "<<(start[1])<<std::endl;
-            std::cout<<"H5Sselect_hyperslab stride "<<(stride[0])<<" "<<(stride[1])<<std::endl;
-            std::cout<<"H5Sselect_hyperslab count "<<(count[0])<<" "<<(count[1])<<std::endl;
-                    herr_t  err = H5Sselect_hyperslab (dataspace_id, H5S_SELECT_SET, start,
-                                                  stride, count, NULL);
+                    herr_t  err = H5Sselect_hyperslab (dataspace_id, H5S_SELECT_SET, start.get(),
+                                                  stride.get(), count.get(), NULL);
             std::cout<<"H5Sselect_hyperslab err "<<(err)<<std::endl;
                     if(err<0)
                     {
@@ -1434,7 +1431,7 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
                     }
                     theSize=1;
                     for(unsigned int rankIndex=0;rankIndex<rank;rankIndex++){
-                        theSize*=count[rankIndex];
+                        theSize*=count.get()[rankIndex];
                     }
                 }
                 v8::Local<v8::Object> buffer=node::Buffer::New(v8::Isolate::GetCurrent(),bufSize*theSize);
@@ -1467,16 +1464,16 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
                 switch(rank)
                 {
                     case 3:
-                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim[1]));
-                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim[2]));
-                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"), Number::New(v8::Isolate::GetCurrent(), values_dim[0]));
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
                         break;
                     case 2:
-                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim[0]));
-                        if(rank>1)buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim[1]));
+                        buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+                        if(rank>1)buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
                         break;
                     case 1:
-                    buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim[0]));
+                    buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
                     break;
                 }
                 

@@ -51,6 +51,13 @@
                             [
                                 '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
                             ]
+                        },
+                        'VCLinkerTool':
+                        {
+                            'AdditionalOptions': 
+                            [
+                                '/FORCE:MULTIPLE'
+                            ]
                         }
                     }
                 }
@@ -140,6 +147,13 @@
                             [
                                 '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
                             ]
+                        },
+                        'VCLinkerTool':
+                        {
+                            'AdditionalOptions': 
+                            [
+                                '/FORCE:MULTIPLE'
+                            ]
                         }
                     }
                 }
@@ -224,6 +238,13 @@
                             [
                                 '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
                             ]
+                        },
+                        'VCLinkerTool':
+                        {
+                            'AdditionalOptions': 
+                            [
+                                '/FORCE:MULTIPLE'
+                            ]
                         }
                     }
                 }
@@ -305,6 +326,13 @@
                             'AdditionalOptions': 
                             [
                                 '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
+                            ]
+                        },
+                        'VCLinkerTool':
+                        {
+                            'AdditionalOptions': 
+                            [
+                                '/FORCE:MULTIPLE'
                             ]
                         }
                     }
@@ -390,6 +418,13 @@
                             [
                                 '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
                             ]
+                        },
+                        'VCLinkerTool':
+                        {
+                            'AdditionalOptions': 
+                            [
+                                '/FORCE:MULTIPLE'
+                            ]
                         }
                     }
                 }
@@ -473,6 +508,13 @@
                             'AdditionalOptions': 
                             [
                                 '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
+                            ]
+                        },
+                        'VCLinkerTool':
+                        {
+                            'AdditionalOptions': 
+                            [
+                                '/FORCE:MULTIPLE'
                             ]
                         }
                     }
