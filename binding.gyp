@@ -26,23 +26,39 @@
                 }
             }],
             ['OS=="win"', {
-                'cflags!': [ '-fno-exceptions' ],
-                'cflags_cc!': [ '-fno-exceptions' ],
-                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
-                    '%HDF5_HOME%/include',
+                    '$(HDF5_HOME)/include',
+                    './win/include',
                     './src',
-                    'C:\Software\node-v0.12.2\src'
+                    'C:/Software/node-v0.12.7/src',
+                    'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
                     'src/hdf5.cc',
                     'src/h5_file.cc',
                     'src/h5_group.cc',
                 ],
+                'msbuild_toolset': 'v120',
+                "configurations": {
+                            "Release": {
+                    'msvs_settings':
+                    {
+                        'VCCLCompilerTool':
+                        {
+                            'RuntimeLibrary': 2,        # shared release
+                            'ExceptionHandling': 1,     # /EHsc
+                            'AdditionalOptions': 
+                            [
+                                '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
+                            ]
+                        }
+                    }
+                }
+                },
                 'link_settings': {
                     'libraries': [
-                        '%HDF5_HOME%/lib/hdf5.dll',
-                        '%HDF5_HOME%/lib/hdf5_hl.dll'
+                        '$(HDF5_HOME)/lib/hdf5.lib',
+                        '$(HDF5_HOME)/lib/hdf5_hl.lib'
                     ]
                 }
             }],
@@ -62,13 +78,13 @@
                     'src/h5_group.cc',
                 ],
                 'libraries': [
-                    '$(HDF5_HOME)/lib/libhdf5.dylib',
-                    '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                    '$(HDF5_HOME)/bin/libhdf5.dylib',
+                    '$(HDF5_HOME)/bin/libhdf5_hl.dylib'
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/libhdf5.dylib',
-                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                        '$(HDF5_HOME)/bin/libhdf5.dylib',
+                        '$(HDF5_HOME)/bin/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
                         '-L$(HDF5_HOME)/lib'
@@ -100,6 +116,40 @@
                 }
             }],
             ['OS=="win"', {
+                'include_dirs': [
+                    '$(HDF5_HOME)/include',
+                    './win/include',
+                    './src',
+                    'C:/Software/node-v0.12.7/src',
+                    'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
+                ],
+                'sources': [
+                    'src/h5lt.cc',
+                    'src/h5_lt.hpp'
+                ],
+                'msbuild_toolset': 'v120',
+                "configurations": {
+                            "Release": {
+                    'msvs_settings':
+                    {
+                        'VCCLCompilerTool':
+                        {
+                            'RuntimeLibrary': 2,        # shared release
+                            'ExceptionHandling': 1,     # /EHsc
+                            'AdditionalOptions': 
+                            [
+                                '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
+                            ]
+                        }
+                    }
+                }
+                },
+                'link_settings': {
+                    'libraries': [
+                        '$(HDF5_HOME)/lib/hdf5.lib',
+                        '$(HDF5_HOME)/lib/hdf5_hl.lib'
+                    ],
+                }
             }],
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
@@ -115,8 +165,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/libhdf5.dylib',
-                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                        '$(HDF5_HOME)/bin/libhdf5.dylib',
+                        '$(HDF5_HOME)/bin/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
                         '-L$(HDF5_HOME)/lib'
@@ -150,6 +200,40 @@
                 }
             }],
             ['OS=="win"', {
+                'include_dirs': [
+                    '$(HDF5_HOME)/include',
+                    './win/include',
+                    './src',
+                    'C:/Software/node-v0.12.7/src',
+                    'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
+                ],
+                'sources': [
+                    'src/h5tb.cc',
+                    'src/h5_tb.hpp'
+                ],
+                'msbuild_toolset': 'v120',
+                "configurations": {
+                            "Release": {
+                    'msvs_settings':
+                    {
+                        'VCCLCompilerTool':
+                        {
+                            'RuntimeLibrary': 2,        # shared release
+                            'ExceptionHandling': 1,     # /EHsc
+                            'AdditionalOptions': 
+                            [
+                                '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
+                            ]
+                        }
+                    }
+                }
+                },
+                'link_settings': {
+                    'libraries': [
+                        '$(HDF5_HOME)/lib/hdf5.lib',
+                        '$(HDF5_HOME)/lib/hdf5_hl.lib'
+                    ],
+                }
             }],
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
@@ -165,8 +249,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/libhdf5.dylib',
-                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                        '$(HDF5_HOME)/bin/libhdf5.dylib',
+                        '$(HDF5_HOME)/bin/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
                         '-L$(HDF5_HOME)/lib'
@@ -198,6 +282,40 @@
                 }
             }],
             ['OS=="win"', {
+                'include_dirs': [
+                    '$(HDF5_HOME)/include',
+                    './win/include',
+                    './src',
+                    'C:/Software/node-v0.12.7/src',
+                    'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
+                ],
+                'sources': [
+                    'src/h5pt.cc',
+                    'src/h5_pt.cc'
+                ],
+                'msbuild_toolset': 'v120',
+                "configurations": {
+                            "Release": {
+                    'msvs_settings':
+                    {
+                        'VCCLCompilerTool':
+                        {
+                            'RuntimeLibrary': 2,        # shared release
+                            'ExceptionHandling': 1,     # /EHsc
+                            'AdditionalOptions': 
+                            [
+                                '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
+                            ]
+                        }
+                    }
+                }
+                },
+                'link_settings': {
+                    'libraries': [
+                        '$(HDF5_HOME)/lib/hdf5.lib',
+                        '$(HDF5_HOME)/lib/hdf5_hl.lib'
+                    ],
+                }
             }],
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
@@ -213,8 +331,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/libhdf5.dylib',
-                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                        '$(HDF5_HOME)/bin/libhdf5.dylib',
+                        '$(HDF5_HOME)/bin/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
                         '-L$(HDF5_HOME)/lib'
@@ -248,6 +366,40 @@
                 }
             }],
             ['OS=="win"', {
+                'include_dirs': [
+                    '$(HDF5_HOME)/include',
+                    './win/include',
+                    './src',
+                    'C:/Software/node-v0.12.7/src',
+                    'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
+                ],
+                'sources': [
+                    'src/h5im.cc',
+                    'src/h5_im.hpp'
+                ],
+                'msbuild_toolset': 'v120',
+                "configurations": {
+                            "Release": {
+                    'msvs_settings':
+                    {
+                        'VCCLCompilerTool':
+                        {
+                            'RuntimeLibrary': 2,        # shared release
+                            'ExceptionHandling': 1,     # /EHsc
+                            'AdditionalOptions': 
+                            [
+                                '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
+                            ]
+                        }
+                    }
+                }
+                },
+                'link_settings': {
+                    'libraries': [
+                        '$(HDF5_HOME)/lib/hdf5.lib',
+                        '$(HDF5_HOME)/lib/hdf5_hl.lib'
+                    ],
+                }
             }],
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
@@ -263,8 +415,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/libhdf5.dylib',
-                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                        '$(HDF5_HOME)/bin/libhdf5.dylib',
+                        '$(HDF5_HOME)/bin/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
                         '-L$(HDF5_HOME)/lib'
@@ -298,6 +450,40 @@
                 }
             }],
             ['OS=="win"', {
+                'include_dirs': [
+                    '$(HDF5_HOME)/include',
+                    './win/include',
+                    './src',
+                    'C:/Software/node-v0.12.7/src',
+                    'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
+                ],
+                'sources': [
+                    'src/h5ds.cc',
+                    'src/h5_ds.hpp'
+                ],
+                'msbuild_toolset': 'v120',
+                "configurations": {
+                            "Release": {
+                    'msvs_settings':
+                    {
+                        'VCCLCompilerTool':
+                        {
+                            'RuntimeLibrary': 2,        # shared release
+                            'ExceptionHandling': 1,     # /EHsc
+                            'AdditionalOptions': 
+                            [
+                                '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
+                            ]
+                        }
+                    }
+                }
+                },
+                'link_settings': {
+                    'libraries': [
+                        '$(HDF5_HOME)/lib/hdf5.lib',
+                        '$(HDF5_HOME)/lib/hdf5_hl.lib'
+                    ],
+                }
             }],
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
@@ -313,8 +499,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/libhdf5.dylib',
-                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                        '$(HDF5_HOME)/bin/libhdf5.dylib',
+                        '$(HDF5_HOME)/bin/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
                         '-L$(HDF5_HOME)/lib'
