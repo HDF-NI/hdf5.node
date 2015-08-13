@@ -209,7 +209,7 @@ namespace NodeHDF5 {
             return std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>(nrecords, type_size, std::move(field_offsets), std::move(field_sizes), std::move(field_types), std::move(data));
         }
         
-        static void prepareTable(hsize_t nrecords, hsize_t nfields, std::unique_ptr<int[]> field_indices, size_t type_size, hid_t& dataset, hid_t& dataset_type, char* field_names[], std::unique_ptr<size_t[]> field_offsets, std::unique_ptr<char[]> data, Local<v8::Array>& table){
+        static void prepareTable(hsize_t nrecords, hsize_t nfields, std::unique_ptr<int[]> field_indices, size_t type_size, hid_t& dataset, hid_t& dataset_type, char** field_names, std::unique_ptr<size_t[]> field_offsets, std::unique_ptr<char[]> data, Local<v8::Array>& table){
                 for (uint32_t i = 0; i < nfields; i++)
                 {
                     hid_t type=H5Tget_member_type(dataset_type, field_indices[i]);
@@ -356,21 +356,20 @@ namespace NodeHDF5 {
             }
             String::Utf8Value table_name (args[1]->ToString());
             Local<v8::Array> table=Local<v8::Array>::Cast(args[2]);
-            char* field_names[table->Length()];
-//            char** field_names= (char**) HDmalloc( sizeof(char*) * (size_t)nfields );
+            std::unique_ptr<char*> field_names(new char*[table->Length()]);
             for (unsigned int i = 0; i < table->Length(); i++)
             {
-                field_names[i] = (char*) malloc( sizeof(char) * 255 );
-                std::memset ( field_names[i], 0, 255 );
+                field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
+                std::memset ( field_names.get()[i], 0, 255 );
                 String::Utf8Value field_name (table->Get(i)->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(),"name"))->ToString());
                 std::string fieldName((*field_name)); 
-                std::memcpy(field_names[i], fieldName.c_str(), fieldName.length());
+                std::memcpy(field_names.get()[i], fieldName.c_str(), fieldName.length());
             }
             try{
                 std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&& data=prepareData(table);
                 hsize_t chunk_size = 10;
                 int *fill_data = NULL;
-                herr_t err=H5TBmake_table( (*table_name), args[0]->ToInt32()->Value(), (*table_name), table->Length(), std::get<0>(data), std::get<1>(data), (const char**)field_names, std::get<2>(data).get(), std::get<4>(data).get(), chunk_size, fill_data, 0, (const void*)std::get<5>(data).get());
+                herr_t err=H5TBmake_table( (*table_name), args[0]->ToInt32()->Value(), (*table_name), table->Length(), std::get<0>(data), std::get<1>(data), (const char**)field_names.get(), std::get<2>(data).get(), std::get<4>(data).get(), chunk_size, fill_data, 0, (const void*)std::get<5>(data).get());
                 if (err < 0) {
                     std::string tableName(*table_name);
                     std::string errStr="Failed making table , " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
@@ -384,11 +383,6 @@ namespace NodeHDF5 {
                     args.GetReturnValue().SetUndefined();
                     return;
                 
-            }
-//            /* release */
-            for (unsigned int i = 0; i < table->Length(); i++)
-            {
-                free ( field_names[i] );
             }
         }
         
@@ -413,17 +407,16 @@ namespace NodeHDF5 {
                 args.GetReturnValue().SetUndefined();
                 return;
             }
-            char* field_names[nfields];
-//            char** field_names= (char**) HDmalloc( sizeof(char*) * (size_t)nfields );
+            std::unique_ptr<char*> field_names(new char*[nfields]);
             for (unsigned int i = 0; i < nfields; i++)
             {
-                field_names[i] = (char*) malloc( sizeof(char) * 255 );
+                field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
             }
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
 //            std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
-            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names, field_size.get(), field_offsets.get(), &type_size );
+            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
                 if (err < 0) {
                     std::string tableName(*table_name);
                     std::string errStr="Failed getting field info , " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
@@ -454,7 +447,7 @@ namespace NodeHDF5 {
                 hid_t dataset_type=H5Dget_type(dataset );
                 v8::Local< v8::Array > 	table=v8::Array::New (v8::Isolate::GetCurrent(), nfields);
                 try{
-                prepareTable(nrecords, nfields, std::move(field_indices), type_size, dataset, dataset_type, field_names, std::move(field_offsets), std::move(data), table);
+                prepareTable(nrecords, nfields, std::move(field_indices), type_size, dataset, dataset_type, field_names.get(), std::move(field_offsets), std::move(data), table);
                 }
                 catch(std::exception& ex){
                             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
@@ -463,11 +456,6 @@ namespace NodeHDF5 {
                 }
                 H5Tclose(dataset_type);
                 H5Dclose(dataset);
-            /* release */
-            for (unsigned int i = 0; i < nfields; i++)
-            {
-                free ( field_names[i] );
-            }
                 args.GetReturnValue().Set(table);
             
         }
@@ -555,17 +543,17 @@ namespace NodeHDF5 {
                 args.GetReturnValue().SetUndefined();
                 return;
             }
-            char* field_names[nfields];
+            std::unique_ptr<char*> field_names(new char*[nfields]);
 //            char** field_names= (char**) HDmalloc( sizeof(char*) * (size_t)nfields );
             for (unsigned int i = 0; i < nfields; i++)
             {
-                field_names[i] = (char*) malloc( sizeof(char) * 255 );
+                field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
             }
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
 //            std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
-            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names, field_size.get(), field_offsets.get(), &type_size );
+            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             std::unique_ptr<int[]> field_indices(new int[nfields]);
             for (unsigned int i = 0; i < nfields; i++)
             {
@@ -580,7 +568,7 @@ namespace NodeHDF5 {
                 hid_t dataset_type=H5Dget_type(dataset );
                 v8::Local< v8::Array > 	table=v8::Array::New (v8::Isolate::GetCurrent(), nfields);
                 try{
-                prepareTable(args[3]->ToInt32()->Value(), nfields, std::move(field_indices), type_size, dataset, dataset_type, field_names, std::move(field_offsets), std::move(data), table);
+                prepareTable(args[3]->ToInt32()->Value(), nfields, std::move(field_indices), type_size, dataset, dataset_type, field_names.get(), std::move(field_offsets), std::move(data), table);
                 }
                 catch(std::exception& ex){
                             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
@@ -589,11 +577,6 @@ namespace NodeHDF5 {
                 }
                 H5Tclose(dataset_type);
                 H5Dclose(dataset);
-            /* release */
-            for (unsigned int i = 0; i < nfields; i++)
-            {
-                free ( field_names[i] );
-            }
                 args.GetReturnValue().Set(table);
             
         }
@@ -662,17 +645,17 @@ namespace NodeHDF5 {
             }
             String::Utf8Value table_name (args[1]->ToString());
             Local<v8::Array> table=Local<v8::Array>::Cast(args[3]);
-            char* model_field_names[table->Length()];
+            std::unique_ptr<char*> model_field_names(new char*[table->Length()]);
 //            char** field_names= (char**) HDmalloc( sizeof(char*) * (size_t)nfields );
             std::string fieldNames="";
             for (unsigned int i = 0; i < table->Length(); i++)
             {
-                model_field_names[i] = (char*) malloc( sizeof(char) * 255 );
-                std::memset ( model_field_names[i], 0, 255 );
+                model_field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
+                std::memset ( model_field_names.get()[i], 0, 255 );
                 String::Utf8Value field_name (table->Get(i)->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(),"name"))->ToString());
                 std::string fieldName((*field_name));
                 fieldNames+=fieldName;
-                std::memcpy(model_field_names[i], fieldName.c_str(), fieldName.length());
+                std::memcpy(model_field_names.get()[i], fieldName.c_str(), fieldName.length());
                 if(i<table->Length()-1)fieldNames+=",";
             }
             hsize_t nfields;
@@ -685,17 +668,16 @@ namespace NodeHDF5 {
                 args.GetReturnValue().SetUndefined();
                 return;
             }
-            char* field_names[nfields];
-//            char** field_names= (char**) HDmalloc( sizeof(char*) * (size_t)nfields );
+            std::unique_ptr<char*> field_names(new char*[nfields]);
             for (unsigned int i = 0; i < nfields; i++)
             {
-                field_names[i] = (char*) malloc( sizeof(char) * 255 );
-                std::memset ( field_names[i], 0, 255 );
+                field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
+                std::memset ( field_names.get()[i], 0, 255 );
             }
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
-            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names, field_size.get(), field_offsets.get(), &type_size );
+            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             try{
                 std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&& data=prepareData(table);
                 
@@ -713,11 +695,6 @@ namespace NodeHDF5 {
                     args.GetReturnValue().SetUndefined();
                     return;
                 
-            }
-            /* release */
-            for (unsigned int i = 0; i < nfields; i++)
-            {
-                free ( field_names[i] );
             }
             args.GetReturnValue().SetUndefined();
             return;
@@ -751,17 +728,17 @@ namespace NodeHDF5 {
                 args.GetReturnValue().SetUndefined();
                 return;
             }
-            char* field_names[nfields];
+            std::unique_ptr<char*> field_names(new char*[nfields]);
 //            char** field_names= (char**) HDmalloc( sizeof(char*) * (size_t)nfields );
             for (unsigned int i = 0; i < nfields; i++)
             {
-                field_names[i] = (char*) malloc( sizeof(char) * 255 );
-                std::memset ( field_names[i], 0, 255 );
+                field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
+                std::memset ( field_names.get()[i], 0, 255 );
             }
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
-            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names, field_size.get(), field_offsets.get(), &type_size );
+            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             try{
                 std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&& data=prepareData(table);
                 
@@ -779,11 +756,6 @@ namespace NodeHDF5 {
                     args.GetReturnValue().SetUndefined();
                     return;
                 
-            }
-            /* release */
-            for (unsigned int i = 0; i < nfields; i++)
-            {
-                free ( field_names[i] );
             }
             args.GetReturnValue().SetUndefined();
             return;
@@ -812,29 +784,29 @@ namespace NodeHDF5 {
             }
             Local<v8::Array> indices=Local<v8::Array>::Cast(args[4]);
             std::string fieldNames="";
-            char* model_field_names[indices->Length()];
+            std::unique_ptr<char*> model_field_names(new char*[indices->Length()]);
             for (unsigned int i = 0; i < indices->Length(); i++)
             {
                 String::Utf8Value field_name (indices->Get(i)->ToString());
                 std::string fieldName((*field_name));
-                model_field_names[i] = (char*) malloc( sizeof(char) * 255 );
-                std::memset ( model_field_names[i], 0, 255 );
-                std::strcpy(model_field_names[i],fieldName.c_str());
+                model_field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
+                std::memset ( model_field_names.get()[i], 0, 255 );
+                std::strcpy(model_field_names.get()[i],fieldName.c_str());
                 fieldNames.append(fieldName);
                 if(i<indices->Length()-1)fieldNames.append(",");
             }
-            char* field_names[nfields];
+            std::unique_ptr<char*> field_names(new char*[nfields]);
 //            char** field_names= (char**) HDmalloc( sizeof(char*) * (size_t)nfields );
             for (unsigned int i = 0; i < nfields; i++)
             {
-                field_names[i] = (char*) malloc( sizeof(char) * 255 );
-                std::memset ( field_names[i], 0, 255 );
+                field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
+                std::memset ( field_names.get()[i], 0, 255 );
             }
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
 //            std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
-            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names, field_size.get(), field_offsets.get(), &type_size );
+            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             std::unique_ptr<size_t[]> model_field_size(new size_t[indices->Length()]);
             std::unique_ptr<size_t[]> model_field_offsets(new size_t[indices->Length()]);
             size_t model_type_size=0;
@@ -850,9 +822,8 @@ namespace NodeHDF5 {
                 std::string fieldName((*field_name));
                 for (unsigned int i = 0; !hit && i < nfields; i++)
                 {
-//                    std::cout<<" "<<field_names[i]<<" "<<field_size[i]<<" "<<field_offsets[i]<<std::endl;
                         hid_t type=H5Tget_member_type(dataset_type, i);
-                    if(fieldName.compare(field_names[i])==0){
+                    if(fieldName.compare(field_names.get()[i])==0){
                         model_field_offsets[j]=model_type_size;
                         model_field_size[j]=H5Tget_size(type);
                         model_size+=field_size[i];
@@ -880,7 +851,7 @@ namespace NodeHDF5 {
                 dataset = H5Dopen(args[0]->ToInt32()->Value(), (*table_name), H5P_DEFAULT);
                 dataset_type=H5Dget_type(dataset );
                 try{
-                    prepareTable(args[3]->ToInt32()->Value(), indices->Length(), std::move(field_indices), model_type_size, dataset, dataset_type, model_field_names, std::move(model_field_offsets), std::move(data), table);
+                    prepareTable(args[3]->ToInt32()->Value(), indices->Length(), std::move(field_indices), model_type_size, dataset, dataset_type, model_field_names.get(), std::move(model_field_offsets), std::move(data), table);
                 }
                 catch(std::exception& ex){
                             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
@@ -889,11 +860,6 @@ namespace NodeHDF5 {
                 }
                 H5Tclose(dataset_type);
                 H5Dclose(dataset);
-            /* release */
-            for (unsigned int i = 0; i < nfields; i++)
-            {
-                free ( field_names[i] );
-            }
                 args.GetReturnValue().Set(table);
         }
         
@@ -920,26 +886,25 @@ namespace NodeHDF5 {
             }
             Local<v8::Array> indices=Local<v8::Array>::Cast(args[4]);
             std::string fieldNames="";
-            char* model_field_names[indices->Length()];
+            std::unique_ptr<char*> model_field_names(new char*[indices->Length()]);
             std::unique_ptr<int[]> field_indices(new int[indices->Length()]);
             for (unsigned int i = 0; i < indices->Length(); i++)
             {
                 field_indices[i]=indices->Get(i)->ToUint32()->Value();
-                model_field_names[i] = (char*) malloc( sizeof(char) * 255 );
-                std::memset ( model_field_names[i], 0, 255 );
+                model_field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
+                std::memset ( model_field_names.get()[i], 0, 255 );
             }
-            char* field_names[nfields];
-//            char** field_names= (char**) HDmalloc( sizeof(char*) * (size_t)nfields );
+            std::unique_ptr<char*> field_names(new char*[nfields]);
             for (unsigned int i = 0; i < nfields; i++)
             {
-                field_names[i] = (char*) malloc( sizeof(char) * 255 );
-                std::memset ( field_names[i], 0, 255 );
+                field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
+                std::memset ( field_names.get()[i], 0, 255 );
             }
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
 //            std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
-            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names, field_size.get(), field_offsets.get(), &type_size );
+            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             std::unique_ptr<size_t[]> model_field_size(new size_t[indices->Length()]);
             std::unique_ptr<size_t[]> model_field_offsets(new size_t[indices->Length()]);
             size_t model_type_size=0;
@@ -952,13 +917,12 @@ namespace NodeHDF5 {
                 bool hit=false;
                 for (unsigned int i = 0; !hit && i < nfields; i++)
                 {
-//                    std::cout<<" "<<field_names[i]<<" "<<field_size[i]<<" "<<field_offsets[i]<<std::endl;
                         hid_t type=H5Tget_member_type(dataset_type, i);
                     if(field_indices[j]==i){
-                        std::string fieldName(field_names[i]);
+                        std::string fieldName(field_names.get()[i]);
                         fieldName+=fieldName;
                         if(j < indices->Length()-1)fieldName.append(",");
-                        std::strcpy( model_field_names[j], field_names[i]);
+                        std::strcpy( model_field_names.get()[j], field_names.get()[i]);
                         model_field_offsets[j]=model_type_size;
                         model_field_size[j]=H5Tget_size(type);
 //                    std::cout<<"hit "<<model_size<<" "<<model_type_offset<<" "<<H5Tget_size(type)<<std::endl;
@@ -986,7 +950,7 @@ namespace NodeHDF5 {
                 dataset = H5Dopen(args[0]->ToInt32()->Value(), (*table_name), H5P_DEFAULT);
                 dataset_type=H5Dget_type(dataset );
                 try{
-                    prepareTable(args[3]->ToInt32()->Value(), indices->Length(), std::move(field_indices), model_type_size, dataset, dataset_type, model_field_names, std::move(model_field_offsets), std::move(data), table);
+                    prepareTable(args[3]->ToInt32()->Value(), indices->Length(), std::move(field_indices), model_type_size, dataset, dataset_type, model_field_names.get(), std::move(model_field_offsets), std::move(data), table);
                 }
                 catch(std::exception& ex){
                             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
@@ -995,11 +959,6 @@ namespace NodeHDF5 {
                 }
                 H5Tclose(dataset_type);
                 H5Dclose(dataset);
-            /* release */
-            for (unsigned int i = 0; i < nfields; i++)
-            {
-                free ( field_names[i] );
-            }
                 args.GetReturnValue().Set(table);
         }
         
@@ -1138,22 +1097,21 @@ namespace NodeHDF5 {
             hsize_t nfields;
             hsize_t nrecords;
             H5TBget_table_info(args[0]->ToInt32()->Value(), (*table_name), &nfields, &nrecords);
-            char* field_names[nfields];
-//            char** field_names= (char**) HDmalloc( sizeof(char*) * (size_t)nfields );
+            std::unique_ptr<char*> field_names(new char*[nfields]);
             for (unsigned int i = 0; i < nfields; i++)
             {
-                field_names[i] = (char*) malloc( sizeof(char) * 255 );
+                field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
             }
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
 //            std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
-            herr_t err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names, field_size.get(), field_offsets.get(), &type_size );
+            herr_t err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), nfields);
             for (unsigned int i = 0; i < nfields; i++)
             {
-                array->Set(i, String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
-                free ( field_names[i] );
+                array->Set(i, String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names.get()[i]));
+                //free ( field_names[i] );
             }
             args.GetReturnValue().Set(array);
         }

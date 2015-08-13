@@ -75,6 +75,9 @@ describe("testing dimension scale interface ",function(){
             h5ds.getLabel(group.id, 'Data', 1).should.equal("");
             h5ds.setLabel(group.id, 'Data', 1, "y");
             h5ds.getLabel(group.id, 'Data', 1).should.equal("y");
+            h5ds.iterateScale(group.id, 'Data', 1, function(r, status){
+                console.dir("status: "+status);
+            });
             group.close();
             }
             catch (err) {
@@ -97,6 +100,40 @@ describe("testing dimension scale interface ",function(){
             try
             {
                 var group=file.openGroup('pmc/refinement');
+                var attrs=group.getDatasetAttributes("Data");
+                var attrText="";
+                Object.getOwnPropertyNames(attrs).forEach(function(val, idx, array) {
+                    if(val!="id"){
+                        if(attrs[val].constructor.name===Array){
+                            attrText+=val+" :  ";
+                            for(var mIndex=0;mIndex<attrs[val].Length();mIndex++){
+                                attrText+=attrs[val][mIndex];
+                                if(mIndex<attrs[val].Length()-1)attrText+=",";
+                            }
+                        }
+                        else{
+                            attrText+=val+" :  "+attrs[val]+"\n";
+                        }
+                    }
+                });
+                console.dir(attrText);
+                attrs=group.getDatasetAttributes("X(dim)");
+                attrText="";
+                Object.getOwnPropertyNames(attrs).forEach(function(val, idx, array) {
+                    if(val!="id"){
+                        if(attrs[val].constructor.name===Array){
+                            attrText+=val+" :  ";
+                            for(var mIndex=0;mIndex<attrs[val].Length();mIndex++){
+                                attrText+=attrs[val][mIndex];
+                                if(mIndex<attrs[val].Length()-1)attrText+=",";
+                            }
+                        }
+                        else{
+                            attrText+=val+" :  "+attrs[val]+"\n";
+                        }
+                    }
+                });
+                console.dir(attrText);
                 group.close();
             }
             catch (err) {
