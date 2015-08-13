@@ -9,7 +9,7 @@ The node::Buffer and streams are being investigated so native hdf5 data's only d
 API documentation is available at <a href="http://ryancole.github.io/hdf5.node">http://ryancole.github.io/hdf5.node</a>
 
 ```bash
-npm install hdf5
+npm install hdf5 --fallback-to-build
 ```
 <a href="http://ryancole.github.io/hdf5.node/doc/install-setup.html">http://ryancole.github.io/hdf5.node/doc/install-setup.html</a> for the native requirements and details.
 
