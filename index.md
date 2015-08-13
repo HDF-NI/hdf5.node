@@ -6,7 +6,7 @@ title: "HDF5 Docs"
 ## Get Started
 
 ```bash
-npm install hdf5
+npm install hdf5 --fallback-to-build
 ```
  
 Because this project has native code look at [Install & Setup]({{ site.baseurl }}/doc/install-setup.html) for the details.
