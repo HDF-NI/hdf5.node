@@ -8,24 +8,25 @@
     "url" : "https://github.com/ryancole/hdf5.node.git"
   },
   "dependencies" : {
-    "co" : "4.5.2",
-    "ws" : "0.7.1",
+    "co" : "4.6.0",
+    "ws" : "0.7.2",
     "binaryjs" : "0.2.1",
-    "koa" : "0.19.1",
-    "koa-route" : "2.4.1",
+    "koa" : "0.21.0",
+    "koa-route" : "2.4.2",
     "koa-static" : "1.4.9",
-    "unirest" : "0.4.0",
-    "xml2js" : "0.4.8",
+    "unirest" : "0.4.2",
+    "xml2js" : "0.4.10",
     "require-dir" : "0.3.0",
-    "node-pre-gyp": "0.6.8"
+    "node-pre-gyp": "0.6.9"
   },
     "bundledDependencies":["node-pre-gyp"],
   "devDependencies" : {
-    "mathjs" : "1.6.0",
-    "ethercalc" : "0.20150421.1",
-    "co-mocha" : "1.1.0",
+    "mathjs" : "2.1.1",
+    "ethercalc" : "0.20150603.1",
+    "mocha" : "2.2.5",
+    "co-mocha" : "1.1.2",
     "should" : "",
-    "aws-sdk": "2.1.39"
+    "aws-sdk": "2.1.45"
   },
     "scripts": {
         "install": "node-pre-gyp install --fallback-to-build",

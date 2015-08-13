@@ -85,13 +85,13 @@
                     'src/h5_group.cc',
                 ],
                 'libraries': [
-                    '$(HDF5_HOME)/bin/libhdf5.dylib',
-                    '$(HDF5_HOME)/bin/libhdf5_hl.dylib'
+                    '$(HDF5_HOME)/lib/libhdf5.dylib',
+                    '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/bin/libhdf5.dylib',
-                        '$(HDF5_HOME)/bin/libhdf5_hl.dylib'
+                        '$(HDF5_HOME)/lib/libhdf5.dylib',
+                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
                         '-L$(HDF5_HOME)/lib'
@@ -179,8 +179,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/bin/libhdf5.dylib',
-                        '$(HDF5_HOME)/bin/libhdf5_hl.dylib'
+                        '$(HDF5_HOME)/lib/libhdf5.dylib',
+                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
                         '-L$(HDF5_HOME)/lib'
@@ -270,8 +270,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/bin/libhdf5.dylib',
-                        '$(HDF5_HOME)/bin/libhdf5_hl.dylib'
+                        '$(HDF5_HOME)/lib/libhdf5.dylib',
+                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
                         '-L$(HDF5_HOME)/lib'
@@ -359,8 +359,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/bin/libhdf5.dylib',
-                        '$(HDF5_HOME)/bin/libhdf5_hl.dylib'
+                        '$(HDF5_HOME)/lib/libhdf5.dylib',
+                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
                         '-L$(HDF5_HOME)/lib'
@@ -450,8 +450,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/bin/libhdf5.dylib',
-                        '$(HDF5_HOME)/bin/libhdf5_hl.dylib'
+                        '$(HDF5_HOME)/lib/libhdf5.dylib',
+                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
                         '-L$(HDF5_HOME)/lib'
@@ -542,8 +542,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/bin/libhdf5.dylib',
-                        '$(HDF5_HOME)/bin/libhdf5_hl.dylib'
+                        '$(HDF5_HOME)/lib/libhdf5.dylib',
+                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
                         '-L$(HDF5_HOME)/lib'
