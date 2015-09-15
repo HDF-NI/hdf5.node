@@ -16,7 +16,7 @@ npm install --fallback-to-build
 
 ## Dependencies
 
-+ [HDF5 C Library](http://www.hdfgroup.org/downloads/index.html) v5-1.8.14
++ [HDF5 C Library](http://www.hdfgroup.org/downloads/index.html) v5-1.8.15-patch1
         (Prior v5-1.8.x's untested yet should work)
 
 
