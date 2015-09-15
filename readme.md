@@ -1,3 +1,7 @@
+
+Note: release v0.0.20 is for prebuilts with hdf5-1.8.15-patch1. If you want hdf5-1.8.14
+stay with v0.0.19.
+
 A node module for reading, writing, viewing and editing the HDF5 file format. 
 
 Unlike other languages that wrap hdf5 API's this interface takes advantage of the compatibility of V8 and HDF5. The result 

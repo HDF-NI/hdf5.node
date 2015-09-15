@@ -35,7 +35,7 @@ describe("testing c++ interface ",function(){
         });
         it("move should be 1 ", function*(){
             var stemGroup=file.createGroup('pmc/Trajectories');
-            stemGroup.move("0", stemGroup,id, "1");
+            stemGroup.move("0", stemGroup.id, "1");
             stemGroup.close();
         });
         it("move should be pmcservices ", function*(){
