@@ -281,7 +281,7 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
         
     //Atributes
         v8::Local<v8::Array> propertyNames=args[2]->ToObject()->GetPropertyNames();
-        for(unsigned int index=args[2]->ToObject()->GetIndexedPropertiesExternalArrayDataLength();index<propertyNames->Length();index++)
+        for(unsigned int index=propertyNames->Length();index<propertyNames->Length();index++)
         {
              v8::Local<v8::Value> name=propertyNames->Get (index);
              if(!args[2]->ToObject()->Get(name)->IsFunction() && !args[2]->ToObject()->Get(name)->IsArray() && strncmp("id",(*String::Utf8Value(name->ToString())), 2)!=0 && strncmp("rank",(*String::Utf8Value(name->ToString())), 4)!=0 && strncmp("rows",(*String::Utf8Value(name->ToString())), 4)!=0 && strncmp("columns",(*String::Utf8Value(name->ToString())), 7)!=0 && strncmp("buffer",(*String::Utf8Value(name->ToString())), 6)!=0)
@@ -587,7 +587,7 @@ static void make_dataset (const v8::FunctionCallbackInfo<Value>& args)
     
     //Atributes
         v8::Local<v8::Array> propertyNames=buffer->GetPropertyNames();
-        for(unsigned int index=buffer->GetIndexedPropertiesExternalArrayDataLength();index<propertyNames->Length();index++)
+        for(unsigned int index=buffer->Length();index<propertyNames->Length();index++)
         {
              v8::Local<v8::Value> name=propertyNames->Get (index);
              if(!buffer->Get(name)->IsFunction() && !buffer->Get(name)->IsArray() && strncmp("id",(*String::Utf8Value(name->ToString())), 2)!=0 && strncmp("rank",(*String::Utf8Value(name->ToString())), 4)!=0 && strncmp("rows",(*String::Utf8Value(name->ToString())), 4)!=0 && strncmp("columns",(*String::Utf8Value(name->ToString())), 7)!=0 && strncmp("buffer",(*String::Utf8Value(name->ToString())), 6)!=0)
@@ -1399,7 +1399,7 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
                 }
 //                std::cout<<"c side\n"<<buffer<<std::endl;
 //                args.GetReturnValue().Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), buffer.c_str(), String::kNormalString, theSize));
-                args.GetReturnValue().Set(node::Buffer::New(v8::Isolate::GetCurrent(), buffer.c_str(), theSize));
+                args.GetReturnValue().Set(node::Buffer::New(v8::Isolate::GetCurrent(), (char*)buffer.c_str(), theSize).ToLocalChecked());
             }
                 break;
             case H5T_INTEGER:
@@ -1434,7 +1434,7 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
                         theSize*=count.get()[rankIndex];
                     }
                 }
-                v8::Local<v8::Object> buffer=node::Buffer::New(v8::Isolate::GetCurrent(),bufSize*theSize);
+                v8::Local<v8::Object> buffer=node::Buffer::New(v8::Isolate::GetCurrent(),bufSize*theSize).ToLocalChecked();
                 err = H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, (char*)node::Buffer::Data(buffer));
                 //err=H5LTread_dataset (args[0]->ToInt32()->Value(), *dset_name, type_id, (char*)node::Buffer::Data(buffer) );
                 if(err<0)

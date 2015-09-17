@@ -101,7 +101,7 @@ static void read_image (const v8::FunctionCallbackInfo<Value>& args)
         args.GetReturnValue().SetUndefined();
         return;
     }
-    v8::Local<v8::Object> buffer=node::Buffer::New(v8::Isolate::GetCurrent(), (const char*)contentBuffer.get(), planes*width*height);
+    v8::Local<v8::Object> buffer=node::Buffer::New(v8::Isolate::GetCurrent(), (char*)contentBuffer.get(), planes*width*height).ToLocalChecked();
     buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"), Number::New(v8::Isolate::GetCurrent(), width));
     buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"), Number::New(v8::Isolate::GetCurrent(), height));
     buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"), Number::New(v8::Isolate::GetCurrent(), planes));

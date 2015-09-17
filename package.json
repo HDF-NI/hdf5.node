@@ -39,9 +39,7 @@
         "remote_path": "./v{version}"
     },    
   "contributors" : [ "Ryan Cole <ryan@rycole.com> (https://github.com/ryancole/)", "Roger I Martin <mathmldashx@yahoo.com> (https://github.com/rimmartin/)" ],
-  "license" : {
-    "type" : "mit"
-  },
+  "license" : "MIT",
   "keywords" : [ ],
   "bugs" : {
     "url" : "null"
