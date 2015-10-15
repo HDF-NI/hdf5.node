@@ -1,6 +1,6 @@
 {
   "name" : "hdf5",
-  "version" : "0.0.20",
+  "version" : "0.1.0",
   "description" : "Native Abstractions for hdf5 file io",
   "main" : "./index.js",
   "repository" : {
@@ -17,16 +17,16 @@
     "unirest" : "0.4.2",
     "xml2js" : "0.4.12",
     "require-dir" : "0.3.0",
-    "node-pre-gyp": "0.6.10"
+    "node-pre-gyp": "0.6.11"
   },
     "bundledDependencies":["node-pre-gyp"],
   "devDependencies" : {
-    "mathjs" : "2.2.0",
+    "mathjs" : "2.3.0",
     "ethercalc" : "0.20150603.1",
-    "mocha" : "2.3.2",
+    "mocha" : "2.3.3",
     "co-mocha" : "1.1.2",
     "should" : "",
-    "aws-sdk": "2.2.0"
+    "aws-sdk": "2.2.5"
   },
     "scripts": {
         "install": "node-pre-gyp install --fallback-to-build",
@@ -42,6 +42,6 @@
   "license" : "MIT",
   "keywords" : [ ],
   "bugs" : {
-    "url" : "null"
+    "url" : "https://github.com/ryancole/hdf5.node/issues"
   }
 }

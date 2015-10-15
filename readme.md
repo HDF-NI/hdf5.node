@@ -1,3 +1,5 @@
+Note: release v0.1.0 s buit with nodejs v4.2.1. If you want nodejs v0.12.x then stay with  release v0.0.20. npm will continue with
+nodejs v4.x.x line and any fixes or features needed by prior versions will be from github branches.
 
 Note: release v0.0.20 is for prebuilts with hdf5-1.8.15-patch1. If you want hdf5-1.8.14
 stay with v0.0.19.
