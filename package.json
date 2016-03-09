@@ -1,47 +1,42 @@
 {
-  "name" : "hdf5",
-  "version" : "0.1.0",
-  "description" : "Native Abstractions for hdf5 file io",
-  "main" : "./index.js",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/ryancole/hdf5.node.git"
+  "name": "hdf5",
+  "version": "0.2.0",
+  "description": "Native Abstractions for hdf5 file io",
+  "main": "./index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ryancole/hdf5.node.git"
   },
-  "dependencies" : {
-    "co" : "4.6.0",
-    "ws" : "0.8.0",
-    "binaryjs" : "0.2.1",
-    "koa" : "1.0.0",
-    "koa-route" : "2.4.2",
-    "koa-static" : "1.4.9",
-    "unirest" : "0.4.2",
-    "xml2js" : "0.4.12",
-    "require-dir" : "0.3.0",
+  "dependencies": {
     "node-pre-gyp": "0.6.11"
   },
-    "bundledDependencies":["node-pre-gyp"],
-  "devDependencies" : {
-    "mathjs" : "2.3.0",
-    "ethercalc" : "0.20150603.1",
-    "mocha" : "2.3.3",
-    "co-mocha" : "1.1.2",
-    "should" : "",
-    "aws-sdk": "2.2.5"
+  "bundledDependencies": [
+    "node-pre-gyp"
+  ],
+  "devDependencies": {
+    "co-mocha": "^1.1.2",
+    "mocha": "2.3.3",
+    "should": "*",
+    "xml2js": "*"
   },
-    "scripts": {
-        "install": "node-pre-gyp install --fallback-to-build",
-        "prebuild": "node-pre-gyp rebuild && node-pre-gyp package"
-    },
-    "binary": {
-        "module_name": "hdf5",
-        "module_path": "./lib/binding/",
-        "host": "https://hdf5.node.s3-us-west-2.amazonaws.com",
-        "remote_path": "./v{version}"
-    },    
-  "contributors" : [ "Ryan Cole <ryan@rycole.com> (https://github.com/ryancole/)", "Roger I Martin <mathmldashx@yahoo.com> (https://github.com/rimmartin/)" ],
-  "license" : "MIT",
-  "keywords" : [ ],
-  "bugs" : {
-    "url" : "https://github.com/ryancole/hdf5.node/issues"
+  "scripts": {
+    "install": "./node_modules/.bin/node-pre-gyp install --fallback-to-build",
+    "prebuild": "./node_modules/.bin/node-pre-gyp rebuild && ./node_modules/.bin/node-pre-gyp package",
+    "test": "mocha test"
+  },
+  "binary": {
+    "module_name": "hdf5",
+    "module_path": "./lib/binding/",
+    "host": "https://hdf5.node.s3-us-west-2.amazonaws.com",
+    "remote_path": "./v{version}"
+  },
+  "contributors": [
+    "Ryan Cole <ryan@rycole.com> (https://github.com/ryancole/)",
+    "Roger I Martin <mathmldashx@yahoo.com> (https://github.com/rimmartin/)"
+  ],
+  "license": "MIT",
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/ryancole/hdf5.node/issues"
   }
 }

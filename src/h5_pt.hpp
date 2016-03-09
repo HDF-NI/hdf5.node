@@ -3,7 +3,7 @@
 #include <uv.h>
 #include <node.h>
 
-#include <iostream>
+//#include <iostream>
 #include <cstring>
 #include <vector>
 #include <functional>
@@ -43,7 +43,7 @@ namespace NodeHDF5 {
             v8::Handle<v8::Value> argv[argc] = {Uint32::New(v8::Isolate::GetCurrent(), packetId),
                 Uint32::New(v8::Isolate::GetCurrent(), nmembers)};
             //            v8::Local<v8::FunctionTemplate> cons = v8::Local<v8::FunctionTemplate>::New(isolate, Constructor);
-            //        std::cout<<"NewInstance "<<std::endl;
+            //        //std::cout<<"NewInstance "<<std::endl;
             return v8::Local<v8::FunctionTemplate>::New(v8::Isolate::GetCurrent(), Constructor)->GetFunction()->NewInstance(argc, argv);
 
         }
@@ -55,7 +55,7 @@ namespace NodeHDF5 {
         };
 
         ~PacketTable() {
-            //          std::cout<<"closing pt "<<std::endl;
+            //          //std::cout<<"closing pt "<<std::endl;
             //          H5PTclose(packetTableID);
         };
 
@@ -70,7 +70,7 @@ namespace NodeHDF5 {
             obj->Wrap(args.This());
             args.GetReturnValue().Set(args.This());
             //        } else {
-            //        std::cout<<"PacketTable::New plain"<<std::endl;
+            //        //std::cout<<"PacketTable::New plain"<<std::endl;
             //          // Invoked as plain function `MyObject(...)`, turn into construct call.
             //          const int argc = 1;
             //          v8::Local<v8::Value> argv[argc] = { args[0] };
@@ -111,7 +111,7 @@ namespace NodeHDF5 {
                     obj->p_data[index] = new char[std::strlen(*record_value) + 1];
                 std::strcpy(obj->p_data[index], *record_value);
             }
-            herr_t err = H5PTappend(obj->packetTableID, (hsize_t) 1, obj->p_data.get());
+            /*herr_t err = */H5PTappend(obj->packetTableID, (hsize_t) 1, obj->p_data.get());
             for (unsigned int index = 0; index < obj->nmembers; index++) {
                 delete obj->p_data[index];
             }

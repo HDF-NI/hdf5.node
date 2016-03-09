@@ -3,7 +3,7 @@
 #include <uv.h>
 #include <node.h>
 
-#include <iostream>
+//#include <iostream>
 #include <cstring>
 #include <vector>
 #include <functional>
@@ -62,13 +62,13 @@ namespace NodeHDF5 {
             //        if (args.IsConstructCall()) {
             // Invoked as constructor: `new MyObject(...)`
             hid_t value = args[0]->IsUndefined() ? -1 : args[0]->ToInt32()->Value();
-            
+
             std::string name = args[1]->IsUndefined() ? std::string("") : std::string(*v8::String::Utf8Value (args[1]->ToString()));
             Filters* obj = new Filters(value, name);
             obj->Wrap(args.This());
             args.GetReturnValue().Set(args.This());
             //        } else {
-            //        std::cout<<"Filters::New plain"<<std::endl;
+            //        //std::cout<<"Filters::New plain"<<std::endl;
             //          // Invoked as plain function `MyObject(...)`, turn into construct call.
             //          const int argc = 1;
             //          v8::Local<v8::Value> argv[argc] = { args[0] };
@@ -81,7 +81,7 @@ namespace NodeHDF5 {
             v8::Isolate* isolate = v8::Isolate::GetCurrent();
             v8::HandleScope scope(isolate);
 
-            Filters* obj = ObjectWrap::Unwrap<Filters>(args.This());
+            //Filters* obj = ObjectWrap::Unwrap<Filters>(args.This());
 
             args.GetReturnValue().Set((H5Zfilter_avail(args[0]->ToInt32()->Value())) ? true : false);
         }
@@ -95,7 +95,7 @@ namespace NodeHDF5 {
                 H5Dclose(did);
                 args.GetReturnValue().Set(Int32::New(v8::Isolate::GetCurrent(), n));
         }
-        
+
         static void getFilter(const v8::FunctionCallbackInfo<v8::Value>& args) {
         }
 

@@ -1,4 +1,9 @@
 {
+    "variables": {
+        "hdf5_home_linux": "/usr/local",
+        "hdf5_home_win": "C:/Software/hdf5",
+        "hdf5_home_mac": "/usr/local"
+    },
     'targets': [
         {
             'target_name': 'hdf5',
@@ -8,7 +13,7 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
-                    '$(HDF5_HOME)/include'
+                    '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
                     'src/hdf5.cc',
@@ -21,13 +26,13 @@
                         '-lhdf5_hl'
                     ],
                     'ldflags': [
-                        '-L$(HDF5_HOME)/lib'
+                        '-L<(hdf5_home_linux)/lib'
                     ]
                 }
             }],
             ['OS=="win"', {
                 'include_dirs': [
-                    '$(HDF5_HOME)/include',
+                    '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
                     'C:/Software/node-v0.12.7/src',
@@ -47,14 +52,14 @@
                         {
                             'RuntimeLibrary': 2,        # shared release
                             'ExceptionHandling': 1,     # /EHsc
-                            'AdditionalOptions': 
+                            'AdditionalOptions':
                             [
                                 '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
                             ]
                         },
                         'VCLinkerTool':
                         {
-                            'AdditionalOptions': 
+                            'AdditionalOptions':
                             [
                                 '/FORCE:MULTIPLE'
                             ]
@@ -64,20 +69,22 @@
                 },
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/hdf5.lib',
-                        '$(HDF5_HOME)/lib/hdf5_hl.lib'
+                        '<(hdf5_home_win)/lib/hdf5.lib',
+                        '<(hdf5_home_win)/lib/hdf5_hl.lib'
                     ]
                 }
             }],
             ['OS=="mac"', {
                 'cflags!': [ '-fno-exceptions' ],
                 'cflags_cc!': [ '-fno-exceptions' ],
-                'cflags': ['-fPIC', "-O4", "-std=c++11", "-fexceptions"],
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions","-v"]
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions","-v", "-stdlib=libc++", "-Werror"],
+                    'OTHER_LDFLAGS': [],
+                    'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
                 'include_dirs': [
-                    '$(HDF5_HOME)/include'
+                    '<(hdf5_home_mac)/include'
                 ],
                 'sources': [
                     'src/hdf5.cc',
@@ -85,16 +92,16 @@
                     'src/h5_group.cc',
                 ],
                 'libraries': [
-                    '$(HDF5_HOME)/lib/libhdf5.dylib',
-                    '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                    '<(hdf5_home_mac)/lib/libhdf5.dylib',
+                    '<(hdf5_home_mac)/lib/libhdf5_hl.dylib'
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/libhdf5.dylib',
-                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                        '<(hdf5_home_mac)/lib/libhdf5.dylib',
+                        '<(hdf5_home_mac)/lib/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
-                        '-L$(HDF5_HOME)/lib'
+                        '-L<(hdf5_home_mac)/lib'
                     ]
                 }
             }]
@@ -106,7 +113,7 @@
             ['OS=="linux"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
-                    '$(HDF5_HOME)/include'
+                    '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
                     'src/h5lt.cc',
@@ -118,13 +125,13 @@
                         '-lhdf5_hl'
                     ],
                     'ldflags': [
-                        '-L$(HDF5_HOME)/lib'
+                        '-L<(hdf5_home_linux)/lib'
                     ]
                 }
             }],
             ['OS=="win"', {
                 'include_dirs': [
-                    '$(HDF5_HOME)/include',
+                    '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
                     'C:/Software/node-v0.12.7/src',
@@ -143,14 +150,14 @@
                         {
                             'RuntimeLibrary': 2,        # shared release
                             'ExceptionHandling': 1,     # /EHsc
-                            'AdditionalOptions': 
+                            'AdditionalOptions':
                             [
                                 '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
                             ]
                         },
                         'VCLinkerTool':
                         {
-                            'AdditionalOptions': 
+                            'AdditionalOptions':
                             [
                                 '/FORCE:MULTIPLE'
                             ]
@@ -160,18 +167,20 @@
                 },
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/hdf5.lib',
-                        '$(HDF5_HOME)/lib/hdf5_hl.lib'
+                        '<(hdf5_home_win)/lib/hdf5.lib',
+                        '<(hdf5_home_win)/lib/hdf5_hl.lib'
                     ],
                 }
             }],
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions","-v"]
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions","-v", "-stdlib=libc++", "-Werror"],
+                    'OTHER_LDFLAGS': [],
+                    'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
                 'include_dirs': [
-                    '$(HDF5_HOME)/include'
+                    '<(hdf5_home_mac)/include'
                 ],
                 'sources': [
                     'src/h5lt.cc',
@@ -179,11 +188,11 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/libhdf5.dylib',
-                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                        '<(hdf5_home_mac)/lib/libhdf5.dylib',
+                        '<(hdf5_home_mac)/lib/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
-                        '-L$(HDF5_HOME)/lib'
+                        '-L<(hdf5_home_mac)/lib'
                     ]
                 }
             }]
@@ -197,7 +206,7 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
-                    '$(HDF5_HOME)/include'
+                    '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
                     'src/h5tb.cc',
@@ -209,13 +218,13 @@
                         '-lhdf5_hl'
                     ],
                     'ldflags': [
-                        '-L$(HDF5_HOME)/lib'
+                        '-L<(hdf5_home_linux)/lib'
                     ]
                 }
             }],
             ['OS=="win"', {
                 'include_dirs': [
-                    '$(HDF5_HOME)/include',
+                    '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
                     'C:/Software/node-v0.12.7/src',
@@ -234,14 +243,14 @@
                         {
                             'RuntimeLibrary': 2,        # shared release
                             'ExceptionHandling': 1,     # /EHsc
-                            'AdditionalOptions': 
+                            'AdditionalOptions':
                             [
                                 '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
                             ]
                         },
                         'VCLinkerTool':
                         {
-                            'AdditionalOptions': 
+                            'AdditionalOptions':
                             [
                                 '/FORCE:MULTIPLE'
                             ]
@@ -251,18 +260,20 @@
                 },
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/hdf5.lib',
-                        '$(HDF5_HOME)/lib/hdf5_hl.lib'
+                        '<(hdf5_home_win)/lib/hdf5.lib',
+                        '<(hdf5_home_win)/lib/hdf5_hl.lib'
                     ],
                 }
             }],
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions","-v"]
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions","-v", "-stdlib=libc++", "-Werror"],
+                    'OTHER_LDFLAGS': [],
+                    'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
                 'include_dirs': [
-                    '$(HDF5_HOME)/include'
+                    '<(hdf5_home_mac)/include'
                 ],
                 'sources': [
                     'src/h5tb.cc',
@@ -270,11 +281,11 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/libhdf5.dylib',
-                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                        '<(hdf5_home_mac)/lib/libhdf5.dylib',
+                        '<(hdf5_home_mac)/lib/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
-                        '-L$(HDF5_HOME)/lib'
+                        '-L<(hdf5_home_mac)/lib'
                     ]
                 }
             }]
@@ -286,7 +297,7 @@
             ['OS=="linux"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
-                    '$(HDF5_HOME)/include'
+                    '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
                     'src/h5pt.cc',
@@ -298,13 +309,13 @@
                         '-lhdf5_hl'
                     ],
                     'ldflags': [
-                        '-L$(HDF5_HOME)/lib'
+                        '-L<(hdf5_home_linux)/lib'
                     ]
                 }
             }],
             ['OS=="win"', {
                 'include_dirs': [
-                    '$(HDF5_HOME)/include',
+                    '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
                     'C:/Software/node-v0.12.7/src',
@@ -323,14 +334,14 @@
                         {
                             'RuntimeLibrary': 2,        # shared release
                             'ExceptionHandling': 1,     # /EHsc
-                            'AdditionalOptions': 
+                            'AdditionalOptions':
                             [
                                 '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
                             ]
                         },
                         'VCLinkerTool':
                         {
-                            'AdditionalOptions': 
+                            'AdditionalOptions':
                             [
                                 '/FORCE:MULTIPLE'
                             ]
@@ -340,18 +351,20 @@
                 },
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/hdf5.lib',
-                        '$(HDF5_HOME)/lib/hdf5_hl.lib'
+                        '<(hdf5_home_win)/lib/hdf5.lib',
+                        '<(hdf5_home_win)/lib/hdf5_hl.lib'
                     ],
                 }
             }],
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions","-v"]
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions","-v", "-stdlib=libc++", "-Werror"],
+                    'OTHER_LDFLAGS': [],
+                    'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
                 'include_dirs': [
-                    '$(HDF5_HOME)/include'
+                    '<(hdf5_home_mac)/include'
                 ],
                 'sources': [
                     'src/h5pt.cc',
@@ -359,11 +372,11 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/libhdf5.dylib',
-                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                        '<(hdf5_home_mac)/lib/libhdf5.dylib',
+                        '<(hdf5_home_mac)/lib/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
-                        '-L$(HDF5_HOME)/lib'
+                        '-L<(hdf5_home_mac)/lib'
                     ]
                 }
             }]
@@ -377,7 +390,7 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
-                    '$(HDF5_HOME)/include'
+                    '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
                     'src/h5im.cc',
@@ -389,13 +402,13 @@
                         '-lhdf5_hl'
                     ],
                     'ldflags': [
-                        '-L$(HDF5_HOME)/lib'
+                        '-L<(hdf5_home_linux)/lib'
                     ]
                 }
             }],
             ['OS=="win"', {
                 'include_dirs': [
-                    '$(HDF5_HOME)/include',
+                    '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
                     'C:/Software/node-v0.12.7/src',
@@ -414,14 +427,14 @@
                         {
                             'RuntimeLibrary': 2,        # shared release
                             'ExceptionHandling': 1,     # /EHsc
-                            'AdditionalOptions': 
+                            'AdditionalOptions':
                             [
                                 '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
                             ]
                         },
                         'VCLinkerTool':
                         {
-                            'AdditionalOptions': 
+                            'AdditionalOptions':
                             [
                                 '/FORCE:MULTIPLE'
                             ]
@@ -431,18 +444,20 @@
                 },
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/hdf5.lib',
-                        '$(HDF5_HOME)/lib/hdf5_hl.lib'
+                        '<(hdf5_home_win)/lib/hdf5.lib',
+                        '<(hdf5_home_win)/lib/hdf5_hl.lib'
                     ],
                 }
             }],
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions", "-v"]
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-v", "-stdlib=libc++", "-Werror"],
+                    'OTHER_LDFLAGS': [],
+                    'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
                 'include_dirs': [
-                    '$(HDF5_HOME)/include'
+                    '<(hdf5_home_mac)/include'
                 ],
                 'sources': [
                     'src/h5im.cc',
@@ -450,11 +465,11 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/libhdf5.dylib',
-                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                        '<(hdf5_home_mac)/lib/libhdf5.dylib',
+                        '<(hdf5_home_mac)/lib/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
-                        '-L$(HDF5_HOME)/lib'
+                        '-L<(hdf5_home_mac)/lib'
                     ]
                 }
             }]
@@ -468,7 +483,7 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
-                    '$(HDF5_HOME)/include'
+                    '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
                     'src/h5ds.cc',
@@ -480,13 +495,13 @@
                         '-lhdf5_hl'
                     ],
                     'ldflags': [
-                        '-L$(HDF5_HOME)/lib'
+                        '-L<(hdf5_home_linux)/lib'
                     ]
                 }
             }],
             ['OS=="win"', {
                 'include_dirs': [
-                    '$(HDF5_HOME)/include',
+                    '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
                     'C:/Software/node-v0.12.7/src',
@@ -505,14 +520,14 @@
                         {
                             'RuntimeLibrary': 2,        # shared release
                             'ExceptionHandling': 1,     # /EHsc
-                            'AdditionalOptions': 
+                            'AdditionalOptions':
                             [
                                 '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
                             ]
                         },
                         'VCLinkerTool':
                         {
-                            'AdditionalOptions': 
+                            'AdditionalOptions':
                             [
                                 '/FORCE:MULTIPLE'
                             ]
@@ -522,19 +537,19 @@
                 },
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/hdf5.lib',
-                        '$(HDF5_HOME)/lib/hdf5_hl.lib'
+                        '<(hdf5_home_win)/lib/hdf5.lib',
+                        '<(hdf5_home_win)/lib/hdf5_hl.lib'
                     ],
                 }
             }],
             ['OS=="mac"', {
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O4", "-std=c++11", "-fexceptions", "-v"],
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-v", "-stdlib=libc++", "-Werror"],
                     'OTHER_LDFLAGS': [],
-                    'MAXOSX_DEPLOYMENT_TARGET': '10.10'
+                    'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
                 'include_dirs': [
-                    '$(HDF5_HOME)/include'
+                    '<(hdf5_home_mac)/include'
                 ],
                 'sources': [
                     'src/h5ds.cc',
@@ -542,16 +557,16 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '$(HDF5_HOME)/lib/libhdf5.dylib',
-                        '$(HDF5_HOME)/lib/libhdf5_hl.dylib'
+                        '<(hdf5_home_mac)/lib/libhdf5.dylib',
+                        '<(hdf5_home_mac)/lib/libhdf5_hl.dylib'
                     ],
                     'ldflags': [
-                        '-L$(HDF5_HOME)/lib'
+                        '-L<(hdf5_home_mac)/lib'
                     ]
                 }
             }]
           ]
-        },
+        } ,
         {
             "target_name": "action_after_build",
             "type": "none",
@@ -562,7 +577,7 @@
               "destination": "<(module_path)"
             }
             ]
-        }        
+        }
 
     ]
 }

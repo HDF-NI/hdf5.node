@@ -1,10 +1,10 @@
 
-#include <iostream>
+//#include <iostream>
 
 #include <node.h>
 #include <string>
 #include <cstring>
-#include <iostream>
+//#include <iostream>
 #include <sstream>
 #include <fstream>
 #include <vector>
@@ -15,17 +15,17 @@
 #include "H5Lpublic.h"
 
 namespace NodeHDF5 {
-    
+
     using namespace v8;
-    
+
     File::File (const char* path) {
-        
+
         bool exists=std::ifstream(path).good();
         if(exists)id=H5Fopen(path, H5F_ACC_RDONLY, H5P_DEFAULT);
         if(!exists && id<0)
         {
             plist_id = H5Pcreate(H5P_FILE_ACCESS);
-            id= H5Fcreate(path, H5F_ACC_RDONLY, H5P_DEFAULT, plist_id);            
+            id= H5Fcreate(path, H5F_ACC_RDONLY, H5P_DEFAULT, plist_id);
             if(id<0)
             {
             std::stringstream ss;
@@ -39,7 +39,7 @@ namespace NodeHDF5 {
         gcpl = H5Pcreate(H5P_GROUP_CREATE);
         if(exists)
         {
-            unsigned int crt_order_flags;
+            //unsigned int crt_order_flags;
 //            herr_t err = H5Pget_link_creation_order(, crt_order_flags);
         }
         herr_t err = H5Pset_link_creation_order(gcpl, H5P_CRT_ORDER_TRACKED |
@@ -51,11 +51,11 @@ namespace NodeHDF5 {
             error=true;
             return;
         }
-        
+
     }
-    
+
     File::File (const char* path, unsigned int flags) {
-        bool exists=std::ifstream(path).good();
+        //bool exists=std::ifstream(path).good();
         //bool exists=std::experimental::filesystem::exists(path);
     if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
     {
@@ -81,7 +81,7 @@ namespace NodeHDF5 {
         error=true;
         return;
         }
-        
+
     }
 //        m_file = new H5::H5File(id);
         gcpl = H5Pcreate(H5P_GROUP_CREATE);
@@ -93,21 +93,21 @@ namespace NodeHDF5 {
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
             return;
         }
-        
+
     }
-    
+
     File::~File () {
-        
+
         H5Fclose(id);
-        
+
     }
-    
+
     Persistent<FunctionTemplate> File::Constructor;
-    
+
     void File::Initialize (Handle<Object> target) {
-        
+
         HandleScope scope(v8::Isolate::GetCurrent());
-        
+
         // instantiate constructor function template
         Local<FunctionTemplate> t = FunctionTemplate::New(v8::Isolate::GetCurrent(), New);
         t->SetClassName(String::NewFromUtf8(v8::Isolate::GetCurrent(), "File"));
@@ -127,31 +127,31 @@ namespace NodeHDF5 {
 //        Local<Function> f=t->GetFunction();
         // append this function to the target object
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "File"), t->GetFunction());
-        
+
     }
-    
+
     void File::New (const v8::FunctionCallbackInfo<Value>& args) {
-        
+
 //        HandleScope scope;
-        
+
         // fail out if arguments are not correct
         if (args.Length() <1 || !args[0]->IsString()) {
-            
+
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected file path")));
             args.GetReturnValue().SetUndefined();
             return;
-            
+
         }
-        
+
         String::Utf8Value path (args[0]->ToString());
-        
+
         // fail out if file is not valid hdf5
         if (args.Length() <2 && !H5Fis_hdf5(*path)) {
-            
+
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "file is not hdf5 format")));
             args.GetReturnValue().SetUndefined();
             return;
-            
+
         }
         // create hdf file object
         File* f;
@@ -162,14 +162,14 @@ namespace NodeHDF5 {
         if(f->error)return;
         // extend target object with file
         f->Wrap(args.This());
-        
+
         // attach various properties
         args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "path"), String::NewFromUtf8(v8::Isolate::GetCurrent(), f->name.c_str()));
         hsize_t file_size;
         herr_t ret_value = H5Fget_filesize(f->id, &file_size);
         if (ret_value < 0)
         {
-            std::cout<<f->id<<" H5Fget_filesize "<<file_size<<std::endl;
+            //std::cout<<f->id<<" H5Fget_filesize "<<file_size<<std::endl;
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "H5Fget_filesize failed")));
             args.GetReturnValue().SetUndefined();
             return;
@@ -178,26 +178,26 @@ namespace NodeHDF5 {
         args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "freeSpace"), Number::New(v8::Isolate::GetCurrent(), H5Fget_freespace(f->id)));
         args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "objectCount"), Number::New(v8::Isolate::GetCurrent(), H5Fget_obj_count(f->id, H5F_OBJ_ALL)));
         args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), f->id));
-        
+
         return;
-        
+
     }
-    
+
     void File::CreateGroup (const v8::FunctionCallbackInfo<Value>& args) {
-        
+
         // fail out if arguments are not correct
         if (args.Length() != 1 || !args[0]->IsString()) {
-            
+
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, callback")));
             args.GetReturnValue().SetUndefined();
             return;
-            
+
         }
-        
+
         String::Utf8Value group_name (args[0]->ToString());
-        
+
         Local<Object> instance=Group::Instantiate(args.This());
-        
+
         // unwrap parent object
         File* parent = ObjectWrap::Unwrap<File>(args.This());
         std::vector<std::string> trail;
@@ -220,15 +220,15 @@ namespace NodeHDF5 {
                 }
             }
             // create group
-//            std::cout<<previous_hid<<" group create  "<<trail[index]<<" in "<<parent->getFileName()<<std::endl;
+//            //std::cout<<previous_hid<<" group create  "<<trail[index]<<" in "<<parent->getFileName()<<std::endl;
             hid_t hid=H5Gcreate(previous_hid, trail[index].c_str(), H5P_DEFAULT, parent->getGcpl(), H5P_DEFAULT);
             if(hid<0){
-                std::cout<<"group create error num "<<H5Eget_num(H5Eget_current_stack())<<std::endl;
+                //std::cout<<"group create error num "<<H5Eget_num(H5Eget_current_stack())<<std::endl;
                 //if(H5Eget_num(H5Eget_current_stack())>0)
                 std::string desc;
                 {
-                    H5Ewalk2(H5Eget_current_stack(), H5E_WALK_UPWARD, [&](unsigned int n, const H5E_error2_t *err_desc, void *client_data) -> herr_t {
-    //                std::cout<<"n="<<n<<" "<<err_desc[0].desc<<std::endl;
+                    H5Ewalk2(H5Eget_current_stack(), H5E_WALK_UPWARD, [](unsigned int n, const H5E_error2_t *err_desc, void *client_data) -> herr_t {
+    //                //std::cout<<"n="<<n<<" "<<err_desc[0].desc<<std::endl;
                     if(((std::string*)client_data)->empty())((std::string*)client_data)->assign(err_desc[0].desc, strlen(err_desc[0].desc));
                     return 0;
                 }, (void*)&desc);
@@ -283,50 +283,50 @@ namespace NodeHDF5 {
         }
         // create callback params
 //        Local<Value> argv[2] = {
-//                
+//
 //                Local<Value>::New(v8::Isolate::GetCurrent(), Null(v8::Isolate::GetCurrent())),
 //                Local<Value>::New(v8::Isolate::GetCurrent(), instance)
-//                
+//
 //        };
 ////        instance->
 //        // execute callback
 //        Local<Function> callback = Local<Function>::Cast(args[1]);
 //        callback->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), 2, argv);
-        
+
         args.GetReturnValue().Set(instance);
         return;
-        
+
     }
-    
+
     void File::OpenGroup (const v8::FunctionCallbackInfo<Value>& args) {
-        
+
         // fail out if arguments are not correct
         if (args.Length() < 1 || args.Length() >2 || !args[0]->IsString()) {
-            
+
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
             args.GetReturnValue().SetUndefined();
             return;
-            
+
         }
-        
+
         String::Utf8Value group_name (args[0]->ToString());
-        
+
         Local<Object> instance=Group::Instantiate(*group_name, args.This(), args[1]->ToUint32()->Uint32Value());
         args.GetReturnValue().Set(instance);
         return;
-        
+
     }
 
     void File::Move (const v8::FunctionCallbackInfo<Value>& args) {
         // fail out if arguments are not correct
         if (args.Length() !=3) {
-            
+
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest id, dest name")));
             args.GetReturnValue().SetUndefined();
             return;
-            
+
         }
-        
+
         // unwrap group
         File* file = ObjectWrap::Unwrap<File>(args.This());
         String::Utf8Value group_name (args[0]->ToString());
@@ -344,13 +344,13 @@ namespace NodeHDF5 {
     void File::Delete (const v8::FunctionCallbackInfo<Value>& args) {
         // fail out if arguments are not correct
         if (args.Length() !=1 || !args[0]->IsString()) {
-            
+
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group name")));
             args.GetReturnValue().SetUndefined();
             return;
-            
+
         }
-        
+
         // unwrap group
         File* file = ObjectWrap::Unwrap<File>(args.This());
         // delete specified group name
@@ -359,16 +359,16 @@ namespace NodeHDF5 {
     }
 
     void File::Close (const v8::FunctionCallbackInfo<Value>& args) {
-        
+
         // fail out if arguments are not correct
         if (args.Length() >0 ) {
-            
+
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
             args.GetReturnValue().SetUndefined();
             return;
-            
+
         }
-        
+
         // unwrap file object
         File* file = ObjectWrap::Unwrap<File>(args.This());
         H5Pclose(file->gcpl);
@@ -384,7 +384,7 @@ namespace NodeHDF5 {
                     H5Iget_name(groupList[i], buffer.get(), 1024);
                     ss << groupList[i] << " " << buffer.get() << std::endl;
                 }
-                std::cout<<ss.str()<<std::endl;
+                //std::cout<<ss.str()<<std::endl;
     //                    throw PersistenceException(ss.str());
             }
             if ((size = H5Fget_obj_count(file->id, H5F_OBJ_ATTR)) > 0) {
@@ -397,7 +397,7 @@ namespace NodeHDF5 {
                     H5Iget_name(groupList[i], buffer.get(), 1024);
                     ss << groupList[i] << " " << buffer.get() << std::endl;
                 }
-                std::cout<<ss.str()<<std::endl;
+                //std::cout<<ss.str()<<std::endl;
     //                    throw PersistenceException(ss.str());
             }
             if ((size = H5Fget_obj_count(file->id, H5F_OBJ_DATASET)) > 0) {
@@ -410,7 +410,7 @@ namespace NodeHDF5 {
                     H5Iget_name(groupList[i], buffer.get(), 1024);
                     ss << groupList[i] << " " << buffer.get() << std::endl;
                 }
-                std::cout<<ss.str()<<std::endl;
+                //std::cout<<ss.str()<<std::endl;
     //                    throw PersistenceException(ss.str());
             }
 
@@ -424,35 +424,35 @@ namespace NodeHDF5 {
                     H5Iget_name(groupList[i], buffer.get(), 1024);
                     ss << groupList[i] << " " << buffer.get() << std::endl;
                 }
-                std::cout<<ss.str()<<std::endl;
+                //std::cout<<ss.str()<<std::endl;
     //                    throw PersistenceException(ss.str());
             }
         }
         H5Fclose(file->id);
-        
+
         return;
-        
+
     }
-    
+
     void File::GetNumAttrs (const v8::FunctionCallbackInfo<Value>& args) {
-        
+
 //        HandleScope scope;
-        
+
         // fail out if arguments are not correct
 //        if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
-//            
+//
 //            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file")));
 //            args.GetReturnValue().SetUndefined();
 //            return;
-//            
+//
 //        }
-        
+
         // unwrap file object
         File* file = ObjectWrap::Unwrap<File>(args.This());
-        
+
         args.GetReturnValue().Set(file->getNumAttrs());
         return;
-        
+
     }
 
     hsize_t File::getNumObjs()
@@ -465,7 +465,7 @@ namespace NodeHDF5 {
        }
        return (ginfo.nlinks);
     }
-    
+
     int File::getNumAttrs()
     {
        H5O_info_t oinfo;    /* Object info */
@@ -520,21 +520,21 @@ namespace NodeHDF5 {
         delete []name_C;
         return (name);
     }
-    
+
     void File::GetMemberNamesByCreationOrder (const v8::FunctionCallbackInfo<Value>& args) {
-        
+
 //        HandleScope scope;
-        
+
         // unwrap file
         File* file = ObjectWrap::Unwrap<File>(args.This());
         Local<Array> array=Array::New(v8::Isolate::GetCurrent(), file->getNumObjs());
         uint32_t index=0;
         std::vector<std::string> holder;
-//        std::cout<<"group_name "<<group->name<std::endl;
+//        //std::cout<<"group_name "<<group->name<std::endl;
 //        String::Utf8Value group_name (group->name);
-//            std::cout<<"group_name "<<(*group_name)<<std::endl;
+//            //std::cout<<"group_name "<<(*group_name)<<std::endl;
 //        group->m_group.iterateElems("Geometries", &index, [&](hid_t group_id, const char * member_name, void *operator_data) -> herr_t {
-//            std::cout<<" "<<(*member_name)<<std::endl;
+//            //std::cout<<" "<<(*member_name)<<std::endl;
 //            ((std::vector<std::string>*)operator_data)->push_back(std::string(member_name));
 //            return 0;
 //        }, &holder);
@@ -575,20 +575,20 @@ namespace NodeHDF5 {
         }
         args.GetReturnValue().Set(array);
         return;
-        
+
     }
-    
+
     void File::GetChildType (const v8::FunctionCallbackInfo<Value>& args) {
-        
+
 //        HandleScope scope;
-        
+
         // fail out if arguments are not correct
         if (args.Length() != 1 || !args[0]->IsString()) {
-            
+
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected child object's name")));
             args.GetReturnValue().SetUndefined();
             return;
-            
+
         }
         // unwrap group
         File* file = ObjectWrap::Unwrap<File>(args.This());
@@ -596,7 +596,7 @@ namespace NodeHDF5 {
         String::Utf8Value child_name (args[0]->ToString());
         args.GetReturnValue().Set((uint32_t) file->childObjType(*child_name));
         return;
-        
+
     }
-    
+
 };
