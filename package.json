@@ -29,15 +29,15 @@
     "aws-sdk": "2.2.5"
   },
     "scripts": {
-        "install": "node-pre-gyp install --fallback-to-build",
-        "prebuild": "node-pre-gyp rebuild && node-pre-gyp package"
+        "install": "./node_modules/.bin/node-pre-gyp install --fallback-to-build",
+        "prebuild": "./node_modules/.bin/node-pre-gyp rebuild && ./node_modules/.bin/node-pre-gyp package"
     },
     "binary": {
         "module_name": "hdf5",
         "module_path": "./lib/binding/",
         "host": "https://hdf5.node.s3-us-west-2.amazonaws.com",
         "remote_path": "./v{version}"
-    },    
+    },
   "contributors" : [ "Ryan Cole <ryan@rycole.com> (https://github.com/ryancole/)", "Roger I Martin <mathmldashx@yahoo.com> (https://github.com/rimmartin/)" ],
   "license" : "MIT",
   "keywords" : [ ],
