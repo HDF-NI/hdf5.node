@@ -6,3 +6,4 @@ build
 /nbproject/private/
 /lib/binding/
 .c9/
+*.h5
