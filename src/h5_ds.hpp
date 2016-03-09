@@ -5,7 +5,7 @@
 
 #include <functional>
 #include <memory>
-#include <iostream>
+//#include <iostream>
 
 #include "file.h"
 #include "group.h"
@@ -16,7 +16,7 @@ namespace NodeHDF5 {
     class H5ds {
     public:
 static void Initialize (Handle<Object> target) {
-        
+
         // append this function to the target object
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "setScale"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::set_scale)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "attachScale"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::attach_scale)->GetFunction());
@@ -28,7 +28,7 @@ static void Initialize (Handle<Object> target) {
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "getLabel"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::get_label)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "getScaleName"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::get_scale_name)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "getNumberOfScales"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::get_num_scales)->GetFunction());
-        
+
     }
 
 static void set_scale (const v8::FunctionCallbackInfo<Value>& args)
@@ -51,7 +51,7 @@ static void set_scale (const v8::FunctionCallbackInfo<Value>& args)
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed setting dimension scale")));
         args.GetReturnValue().SetUndefined();
         return;
-        
+
     }
     H5Dclose(did);
     args.GetReturnValue().SetUndefined();
@@ -79,7 +79,7 @@ static void attach_scale (const v8::FunctionCallbackInfo<Value>& args)
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed attaching dimension scale")));
         args.GetReturnValue().SetUndefined();
         return;
-        
+
     }
     H5Dclose(dsid);
     H5Dclose(did);
@@ -108,7 +108,7 @@ static void detach_scale (const v8::FunctionCallbackInfo<Value>& args)
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed attaching dimension scale")));
         args.GetReturnValue().SetUndefined();
         return;
-        
+
     }
     H5Dclose(dsid);
     H5Dclose(did);
@@ -171,10 +171,9 @@ static void iterate_scales (const v8::FunctionCallbackInfo<Value>& args)
             return (herr_t)0;
         };
         v8::Local<v8::Function> func=v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback);
-    herr_t err=H5DSiterate_scales( did, (unsigned int)rank, &idx, [&](hid_t did, unsigned int dim, hid_t dsid, void *visitor_data) -> herr_t {
+    herr_t err=H5DSiterate_scales( did, (unsigned int)rank, &idx, [](hid_t did, unsigned int dim, hid_t dsid, void *visitor_data) -> herr_t {
         v8::Local<v8::Value> argv[2] = { v8::Int32::New(v8::Isolate::GetCurrent(), dim),v8:: String::NewFromUtf8(v8::Isolate::GetCurrent(), "success") };
-        std::cout<<"iter "<<std::endl;
-//        ((v8::Local<v8::Function>*)visitor_data)[0]->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), argc, argv);
+        ((v8::Local<v8::Function>*)visitor_data)[0]->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), argc, argv);
         return (herr_t)0;
     }, &func);
     if(err<0){
@@ -182,7 +181,7 @@ static void iterate_scales (const v8::FunctionCallbackInfo<Value>& args)
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed iterating through  scale indices")));
         args.GetReturnValue().SetUndefined();
         return;
-        
+
     }
 //        callback.Reset();
     H5Dclose(did);
@@ -203,7 +202,7 @@ static void set_label (const v8::FunctionCallbackInfo<Value>& args)
     String::Utf8Value dset_name (args[1]->ToString());
     hid_t did=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT);
     std::string label(*String::Utf8Value(args[3]->ToString()));
-    herr_t err=H5DSset_label(did, args[2]->ToInt32()->Value(), (char*)label.c_str());
+    /*herr_t err=*/H5DSset_label(did, args[2]->ToInt32()->Value(), (char*)label.c_str());
     H5Dclose(did);
     args.GetReturnValue().SetUndefined();
 }

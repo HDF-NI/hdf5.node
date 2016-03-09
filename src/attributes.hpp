@@ -36,7 +36,7 @@ namespace NodeHDF5{
             Attributes* group = ObjectWrap::Unwrap<Attributes>(args.This());
             hsize_t index=0;
             std::vector<std::string> holder;
-            H5Aiterate(group->id,H5_INDEX_NAME, H5_ITER_INC, &index, [&](hid_t loc, const char* attr_name, const H5A_info_t* ainfo, void *operator_data) -> herr_t {
+            H5Aiterate(group->id,H5_INDEX_NAME, H5_ITER_INC, &index, [](hid_t loc, const char* attr_name, const H5A_info_t* ainfo, void *operator_data) -> herr_t {
                 ((std::vector<std::string>*)operator_data)->push_back(attr_name);
                 return 0;
             }, &holder);
@@ -80,9 +80,9 @@ namespace NodeHDF5{
             return;
 
         };
-    
+
         static void Flush (const v8::FunctionCallbackInfo<v8::Value>& args) {
-        
+
         // fail out if arguments are not correct
             if (args.Length() >0 ) {
 
@@ -101,8 +101,8 @@ namespace NodeHDF5{
                  v8::Local<v8::Value> name=propertyNames->Get (index);
                  if(!args.This()->Get(name)->IsFunction() && strncmp("id",(*v8::String::Utf8Value(name->ToString())), 2)!=0)
                  {
-    //                std::cout<<index<<" "<<name->IsString()<<std::endl;
-    //                std::cout<<index<<" "<<(*v8::String::Utf8Value(name->ToString()))<<std::endl;
+    //                //std::cout<<index<<" "<<name->IsString()<<std::endl;
+    //                //std::cout<<index<<" "<<(*v8::String::Utf8Value(name->ToString()))<<std::endl;
                     htri_t attrExists=H5Aexists(group->id, *v8::String::Utf8Value(name->ToString()));
                     if(args.This()->Get(name)->IsUint32())
                     {
@@ -112,7 +112,7 @@ namespace NodeHDF5{
                             H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
                         }
                         hid_t attr_type=H5Tcopy(H5T_NATIVE_UINT);
-                        hid_t attr_space=H5Screate( H5S_SCALAR ); 
+                        hid_t attr_space=H5Screate( H5S_SCALAR );
                         hid_t attr_id=H5Acreate2(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
                         if(attr_id<0)
                         {
@@ -137,7 +137,7 @@ namespace NodeHDF5{
                             H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
                         }
                         hid_t attr_type=H5Tcopy(H5T_NATIVE_INT);
-                        hid_t attr_space=H5Screate( H5S_SCALAR ); 
+                        hid_t attr_space=H5Screate( H5S_SCALAR );
                         hid_t attr_id=H5Acreate2(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
                         if(attr_id<0)
                         {
@@ -163,7 +163,7 @@ namespace NodeHDF5{
                             H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
                         }
                         hid_t attr_type=H5Tcopy(H5T_NATIVE_DOUBLE);
-                        hid_t attr_space=H5Screate( H5S_SCALAR ); 
+                        hid_t attr_space=H5Screate( H5S_SCALAR );
                         hid_t attr_id=H5Acreate2(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
                         if(attr_id<0)
                         {
@@ -189,7 +189,7 @@ namespace NodeHDF5{
                         }
                         hid_t attr_type=H5Tcopy(H5T_C_S1);
                         H5Tset_size(attr_type, std::strlen(value.c_str()));
-                        hid_t attr_space=H5Screate( H5S_SCALAR ); 
+                        hid_t attr_space=H5Screate( H5S_SCALAR );
                         hid_t attr_id=H5Acreate2(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
                         if(attr_id<0)
                         {
@@ -213,7 +213,7 @@ namespace NodeHDF5{
             return;
 
         };
-        
+
     protected:
         virtual int getNumAttrs() = 0;
     };

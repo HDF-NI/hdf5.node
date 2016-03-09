@@ -5,7 +5,7 @@
 #include <node_buffer.h>
 
 #include <memory>
-#include <iostream>
+//#include <iostream>
 
 #include "file.h"
 #include "group.h"
@@ -16,13 +16,13 @@ namespace NodeHDF5 {
     class H5im {
     public:
 static void Initialize (Handle<Object> target) {
-        
+
         // append this function to the target object
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeImage"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::make_image)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readImage"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::read_image)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "isImage"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::is_image)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makePalette"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::make_palette)->GetFunction());
-        
+
     }
 
 static void make_image (const v8::FunctionCallbackInfo<Value>& args)
@@ -31,7 +31,7 @@ static void make_image (const v8::FunctionCallbackInfo<Value>& args)
     String::Utf8Value dset_name (args[1]->ToString());
     Local<v8::Object> buffer =  args[2]->ToObject();
 //    Local<Number> buffer =  Local<Number>::Cast(args[2]);
-//    std::cout<<"planes "<<buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->ToInt32()->Value()<<std::endl;
+//    //std::cout<<"planes "<<buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->ToInt32()->Value()<<std::endl;
     String::Utf8Value interlace (buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"))->ToString());
     herr_t err;
             hsize_t dims[3]={(hsize_t) buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->ToInt32()->Value()};
@@ -49,7 +49,7 @@ static void make_image (const v8::FunctionCallbackInfo<Value>& args)
             H5LTset_attribute_string(args[0]->ToInt32()->Value(), *dset_name, "INTERLACE_MODE", "INTERLACE_PIXEL");
 //                hid_t dataset = H5Dopen(args[0]->ToInt32()->Value(), (*table_name), H5P_DEFAULT);
 //                H5Dclose(dataset);
-            
+
 //    switch(buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->ToInt32()->Value())
 //    {
 //        case 4:
@@ -125,8 +125,8 @@ static void make_palette (const v8::FunctionCallbackInfo<Value>& args)
     Local<Uint8Array> buffer =  Local<Uint8Array>::Cast(args[2]);
     String::Utf8Value dset_name (args[1]->ToString());
     Local<Value> rankValue=args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "size"));
-    hsize_t pal_dims[1]{rankValue->ToInt32()->Value()};
-    herr_t err=H5IMmake_palette ( args[0]->ToInt32()->Value(), *dset_name, pal_dims, (const unsigned char *)buffer->Buffer()->Externalize().Data());
+    hsize_t pal_dims[1] { static_cast<hsize_t>(rankValue->ToInt32()->Value()) };
+    /*herr_t err=*/H5IMmake_palette ( args[0]->ToInt32()->Value(), *dset_name, pal_dims, (const unsigned char *)buffer->Buffer()->Externalize().Data());
     args.GetReturnValue().SetUndefined();
 }
 

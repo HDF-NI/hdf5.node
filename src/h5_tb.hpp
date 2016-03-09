@@ -3,7 +3,7 @@
 #include <uv.h>
 #include <node.h>
 
-#include <iostream>
+//#include <iostream>
 #include <cstring>
 #include <vector>
 #include <functional>
@@ -134,7 +134,7 @@ namespace NodeHDF5 {
                     throw std::invalid_argument("unsupported data type");
                 }
             }
-//            std::cout<<"type_size "<<type_size<<" "<<nrecords<<std::endl;
+//            //std::cout<<"type_size "<<type_size<<" "<<nrecords<<std::endl;
             std::unique_ptr<char[]> data(new char[type_size*nrecords]);
             for (uint32_t i = 0; i < table->Length(); i++)
             {
@@ -144,7 +144,7 @@ namespace NodeHDF5 {
                     for(uint32_t j=0;j<nrecords;j++){
                         ((double*)&data[j*type_size+field_offsets[i]])[0]=field->Get(j)->ToNumber()->Value ();
                     }
-                    
+
                 }
                 else if(table->Get(i)->IsUint32Array())
                 {
@@ -152,7 +152,7 @@ namespace NodeHDF5 {
                     for(uint32_t j=0;j<nrecords;j++){
                         ((unsigned int*)&data[j*type_size+field_offsets[i]])[0]=field->Get(j)->ToUint32()->Value ();
                     }
-                    
+
                 }
                 else if(table->Get(i)->IsInt32Array())
                 {
@@ -160,7 +160,7 @@ namespace NodeHDF5 {
                     for(uint32_t j=0;j<nrecords;j++){
                         ((unsigned int*)&data[j*type_size+field_offsets[i]])[0]=field->Get(j)->ToInt32()->Value ();
                     }
-                    
+
                 }
                 else if(table->Get(i)->IsUint16Array())
                 {
@@ -168,7 +168,7 @@ namespace NodeHDF5 {
                     for(uint32_t j=0;j<nrecords;j++){
                         ((unsigned short*)&data[j*type_size+field_offsets[i]])[0]=field->Get(j)->ToInteger()->Value ();
                     }
-                    
+
                 }
                 else if(table->Get(i)->IsInt16Array())
                 {
@@ -176,7 +176,7 @@ namespace NodeHDF5 {
                     for(uint32_t j=0;j<nrecords;j++){
                         ((unsigned short*)&data[j*type_size+field_offsets[i]])[0]=field->Get(j)->ToInteger()->Value ();
                     }
-                    
+
                 }
                 else if(table->Get(i)->IsUint8Array())
                 {
@@ -184,7 +184,7 @@ namespace NodeHDF5 {
                     for(uint32_t j=0;j<nrecords;j++){
                         ((unsigned char*)&data[j*type_size+field_offsets[i]])[0]=field->Get(j)->ToInteger()->Value ();
                     }
-                    
+
                 }
                 else if(table->Get(i)->IsInt8Array())
                 {
@@ -192,7 +192,7 @@ namespace NodeHDF5 {
                     for(uint32_t j=0;j<nrecords;j++){
                         ((unsigned char*)&data[j*type_size+field_offsets[i]])[0]=field->Get(j)->ToInteger()->Value ();
                     }
-                    
+
                 }
                 else if(table->Get(i)->IsArray())
                 {
@@ -201,19 +201,19 @@ namespace NodeHDF5 {
                         String::Utf8Value value (field->Get(j)->ToString());
                         std::memcpy(&data[j*type_size+field_offsets[i]], (*value), H5Tget_size(field_types[i]));
                     }
-                    
+
                 }
-                
+
             }
-            
+
             return std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>(nrecords, type_size, std::move(field_offsets), std::move(field_sizes), std::move(field_types), std::move(data));
         }
-        
+
         static void prepareTable(hsize_t nrecords, hsize_t nfields, std::unique_ptr<int[]> field_indices, size_t type_size, hid_t& dataset, hid_t& dataset_type, char** field_names, std::unique_ptr<size_t[]> field_offsets, std::unique_ptr<char[]> data, Local<v8::Array>& table){
                 for (uint32_t i = 0; i < nfields; i++)
                 {
                     hid_t type=H5Tget_member_type(dataset_type, field_indices[i]);
-//                    std::cout<<" "<<field_names[i]<<" "<<H5Tget_class(type)<<std::endl;
+//                    //std::cout<<" "<<field_names[i]<<" "<<H5Tget_class(type)<<std::endl;
                     switch(H5Tget_class(type)){
                         case H5T_FLOAT:
                             if(H5Tget_precision(type)==64)
@@ -222,8 +222,8 @@ namespace NodeHDF5 {
                                 Local<Float64Array> buffer = Float64Array::New(arrayBuffer, 0, nrecords);
                                 buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"), String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
                                 for(uint32_t j=0;j<nrecords;j++){
-//                                    std::cout<<" "<<j<<" "<<(((double*)&data[j*type_size+field_offsets[i]])[0])<<" "<<field_offsets[i]<<std::endl;
-                                    
+//                                    //std::cout<<" "<<j<<" "<<(((double*)&data[j*type_size+field_offsets[i]])[0])<<" "<<field_offsets[i]<<std::endl;
+
                                     buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), ((double*)&data[j*type_size+field_offsets[i]])[0]));
                                 }
 
@@ -235,8 +235,8 @@ namespace NodeHDF5 {
                                 Local<Float32Array> buffer = Float32Array::New(arrayBuffer, 0, nrecords);
                                 buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"), String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
                                 for(uint32_t j=0;j<nrecords;j++){
-//                                    std::cout<<" "<<j<<" "<<(((double*)&data[j*type_size+field_offsets[i]])[0])<<" "<<field_offsets[i]<<std::endl;
-                                    
+//                                    //std::cout<<" "<<j<<" "<<(((double*)&data[j*type_size+field_offsets[i]])[0])<<" "<<field_offsets[i]<<std::endl;
+
                                     buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), ((double*)&data[j*type_size+field_offsets[i]])[0]));
                                 }
 
@@ -327,7 +327,7 @@ namespace NodeHDF5 {
                                 Local<Array> buffer = Array::New(v8::Isolate::GetCurrent(), nrecords);
                                 buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"), String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
                                 for(uint32_t j=0;j<nrecords;j++){
-//                                    std::cout<<" "<<j<<" "<<(((double*)&data[j*type_size+field_offsets[i]])[0])<<" "<<field_offsets[i]<<std::endl;
+//                                    //std::cout<<" "<<j<<" "<<(((double*)&data[j*type_size+field_offsets[i]])[0])<<" "<<field_offsets[i]<<std::endl;
                                     std::string cell(&data[j*type_size+field_offsets[i]], H5Tget_size(type));
                                     buffer->Set(j, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), cell.c_str()));
                                 }
@@ -341,9 +341,9 @@ namespace NodeHDF5 {
                     }
                     H5Tclose(type);
                 }
-            
+
         }
-        
+
         static void make_table (const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -362,7 +362,7 @@ namespace NodeHDF5 {
                 field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
                 std::memset ( field_names.get()[i], 0, 255 );
                 String::Utf8Value field_name (table->Get(i)->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(),"name"))->ToString());
-                std::string fieldName((*field_name)); 
+                std::string fieldName((*field_name));
                 std::memcpy(field_names.get()[i], fieldName.c_str(), fieldName.length());
             }
             try{
@@ -382,10 +382,10 @@ namespace NodeHDF5 {
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
                     args.GetReturnValue().SetUndefined();
                     return;
-                
+
             }
         }
-        
+
         static void read_table (const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -415,7 +415,7 @@ namespace NodeHDF5 {
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
-//            std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
+//            //std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
             err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
                 if (err < 0) {
                     std::string tableName(*table_name);
@@ -430,10 +430,10 @@ namespace NodeHDF5 {
             {
                 dst_size+=field_size[i];
                 field_indices[i]=i;
-//                std::cout<<" "<<field_names[i]<<" "<<field_size[i]<<" "<<field_offsets[i]<<std::endl;
+//                //std::cout<<" "<<field_names[i]<<" "<<field_size[i]<<" "<<field_offsets[i]<<std::endl;
 
             }
-//            std::cout<<dst_size<<" "<<type_size<<" nrecords "<<nrecords<<std::endl;
+//            //std::cout<<dst_size<<" "<<type_size<<" nrecords "<<nrecords<<std::endl;
             std::unique_ptr<char[]> data(new char[type_size*nrecords]);
             err=H5TBread_table (args[0]->ToInt32()->Value(), (*table_name), type_size,  field_offsets.get(), field_size.get(),  (void*) data.get() );
                 if (err < 0) {
@@ -457,9 +457,9 @@ namespace NodeHDF5 {
                 H5Tclose(dataset_type);
                 H5Dclose(dataset);
                 args.GetReturnValue().Set(table);
-            
+
         }
-        
+
         static void append_records(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -487,10 +487,10 @@ namespace NodeHDF5 {
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
                     args.GetReturnValue().SetUndefined();
                     return;
-                
+
             }
         }
-        
+
         static void write_records(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -518,10 +518,10 @@ namespace NodeHDF5 {
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
                     args.GetReturnValue().SetUndefined();
                     return;
-                
+
             }
         }
-        
+
         static void read_records(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -552,13 +552,13 @@ namespace NodeHDF5 {
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
-//            std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
+//            //std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
             err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             std::unique_ptr<int[]> field_indices(new int[nfields]);
             for (unsigned int i = 0; i < nfields; i++)
             {
                 field_indices[i]=i;
-//                std::cout<<" "<<field_names[i]<<" "<<field_size[i]<<" "<<field_offsets[i]<<std::endl;
+//                //std::cout<<" "<<field_names[i]<<" "<<field_size[i]<<" "<<field_offsets[i]<<std::endl;
 
             }
 
@@ -578,9 +578,9 @@ namespace NodeHDF5 {
                 H5Tclose(dataset_type);
                 H5Dclose(dataset);
                 args.GetReturnValue().Set(table);
-            
+
         }
-        
+
         static void delete_record(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -601,7 +601,7 @@ namespace NodeHDF5 {
                 return;
             }
         }
-        
+
         static void insert_record(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -629,10 +629,10 @@ namespace NodeHDF5 {
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
                     args.GetReturnValue().SetUndefined();
                     return;
-                
+
             }
         }
-        
+
         static void write_fields_name(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -680,7 +680,7 @@ namespace NodeHDF5 {
             err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             try{
                 std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&& data=prepareData(table);
-                
+
                 herr_t err=H5TBwrite_fields_name (args[0]->ToInt32()->Value(), (*table_name), (const char*)fieldNames.c_str(), args[2]->ToInt32()->Value(), std::get<0>(data), std::get<1>(data), std::get<2>(data).get(), std::get<3>(data).get(), (const void*)std::get<5>(data).get() );
                 if (err < 0) {
                     std::string tableName(*table_name);
@@ -694,12 +694,12 @@ namespace NodeHDF5 {
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
                     args.GetReturnValue().SetUndefined();
                     return;
-                
+
             }
             args.GetReturnValue().SetUndefined();
             return;
         }
-        
+
         static void write_fields_index(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -741,7 +741,7 @@ namespace NodeHDF5 {
             err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             try{
                 std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&& data=prepareData(table);
-                
+
                 herr_t err=H5TBwrite_fields_index (args[0]->ToInt32()->Value(), (*table_name), table->Length(), field_indices.get(), args[2]->ToInt32()->Value(), std::get<0>(data), std::get<1>(data), std::get<2>(data).get(), std::get<3>(data).get(), (const void*)std::get<5>(data).get() );
                 if (err < 0) {
                     std::string tableName(*table_name);
@@ -755,12 +755,12 @@ namespace NodeHDF5 {
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
                     args.GetReturnValue().SetUndefined();
                     return;
-                
+
             }
             args.GetReturnValue().SetUndefined();
             return;
         }
-        
+
         static void read_fields_name(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -805,7 +805,7 @@ namespace NodeHDF5 {
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
-//            std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
+//            //std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
             err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             std::unique_ptr<size_t[]> model_field_size(new size_t[indices->Length()]);
             std::unique_ptr<size_t[]> model_field_offsets(new size_t[indices->Length()]);
@@ -862,7 +862,7 @@ namespace NodeHDF5 {
                 H5Dclose(dataset);
                 args.GetReturnValue().Set(table);
         }
-        
+
         static void read_fields_index(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -903,7 +903,7 @@ namespace NodeHDF5 {
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
-//            std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
+//            //std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
             err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             std::unique_ptr<size_t[]> model_field_size(new size_t[indices->Length()]);
             std::unique_ptr<size_t[]> model_field_offsets(new size_t[indices->Length()]);
@@ -918,14 +918,14 @@ namespace NodeHDF5 {
                 for (unsigned int i = 0; !hit && i < nfields; i++)
                 {
                         hid_t type=H5Tget_member_type(dataset_type, i);
-                    if(field_indices[j]==i){
+                    if(field_indices[j]==static_cast<int>(i)){
                         std::string fieldName(field_names.get()[i]);
                         fieldName+=fieldName;
                         if(j < indices->Length()-1)fieldName.append(",");
                         std::strcpy( model_field_names.get()[j], field_names.get()[i]);
                         model_field_offsets[j]=model_type_size;
                         model_field_size[j]=H5Tget_size(type);
-//                    std::cout<<"hit "<<model_size<<" "<<model_type_offset<<" "<<H5Tget_size(type)<<std::endl;
+//                    //std::cout<<"hit "<<model_size<<" "<<model_type_offset<<" "<<H5Tget_size(type)<<std::endl;
                         model_size+=field_size[i];
                         model_type_size+=H5Tget_size(type);
                         model_type_offset+=H5Tget_size(type);
@@ -961,7 +961,7 @@ namespace NodeHDF5 {
                 H5Dclose(dataset);
                 args.GetReturnValue().Set(table);
         }
-        
+
         static void delete_field(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -983,7 +983,7 @@ namespace NodeHDF5 {
                 return;
             }
         }
-        
+
         static void add_records_from(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -996,7 +996,7 @@ namespace NodeHDF5 {
             }
             String::Utf8Value table_name1 (args[1]->ToString());
             String::Utf8Value table_name2 (args[4]->ToString());
-            std::cout<<args[0]->ToInt32()->Value()<<" "<<(*table_name1)<<" "<<args[2]->ToInt32()->Value()<<" "<<args[3]->ToInt32()->Value()<<" "<<(*table_name2)<<" "<<args[5]->ToInt32()->Value()<<std::endl;
+            //std::cout<<args[0]->ToInt32()->Value()<<" "<<(*table_name1)<<" "<<args[2]->ToInt32()->Value()<<" "<<args[3]->ToInt32()->Value()<<" "<<(*table_name2)<<" "<<args[5]->ToInt32()->Value()<<std::endl;
             herr_t err=H5TBadd_records_from (args[0]->ToInt32()->Value(), (*table_name1),args[2]->ToInt32()->Value(), args[3]->ToInt32()->Value(), (*table_name2), args[5]->ToInt32()->Value());
             if (err < 0) {
                 std::string tableName(*table_name1);
@@ -1006,7 +1006,7 @@ namespace NodeHDF5 {
                 return;
             }
         }
-        
+
         static void combine_tables(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -1029,7 +1029,7 @@ namespace NodeHDF5 {
                 return;
             }
         }
-        
+
         static void insert_field(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -1059,10 +1059,10 @@ namespace NodeHDF5 {
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
                     args.GetReturnValue().SetUndefined();
                     return;
-                
+
             }
         }
-        
+
         static void get_table_info(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -1082,7 +1082,7 @@ namespace NodeHDF5 {
             obj->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "nrecords"),  Uint32::New(v8::Isolate::GetCurrent(), nrecords));
             args.GetReturnValue().Set(obj);
         }
-        
+
         static void get_field_info(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
@@ -1105,8 +1105,8 @@ namespace NodeHDF5 {
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
-//            std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
-            herr_t err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
+//            //std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
+            /*herr_t err=*/H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), nfields);
             for (unsigned int i = 0; i < nfields; i++)
             {
@@ -1115,6 +1115,6 @@ namespace NodeHDF5 {
             }
             args.GetReturnValue().Set(array);
         }
-        
+
     };
 }
