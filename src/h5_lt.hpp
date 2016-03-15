@@ -210,6 +210,56 @@ namespace NodeHDF5 {
         return options->Get(name)->Uint32Value();
     }
 
+    static unsigned int get_chunk_size(Handle<Object> options) {
+        if(options.IsEmpty()) {
+            return 0;
+        }
+
+        auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "chunkSize"));
+
+        if(!options->HasOwnProperty(name)) {
+            return 0;
+        }
+
+        return options->Get(name)->Uint32Value();
+    }
+
+    // TODO: permit other that square geometry
+    static bool configure_chunked_layout(const hid_t &dcpl, const unsigned int &size, const int &rank, const hsize_t *ds_dim) {
+        herr_t err;
+        if(!size) {
+            err = H5Pset_chunk(dcpl, rank, ds_dim);
+            if(err) {
+                v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
+                return false;
+            }
+
+            return true;
+        }
+
+        std::unique_ptr<hsize_t> dims(new hsize_t[rank]);
+        for(int i=0; i<rank; ++i) {
+            dims.get()[i] = size;
+        }
+        err = H5Pset_chunk(dcpl, rank, dims.get());
+        if(err) {
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
+            return false;
+        }
+
+        return true;
+    }
+
+    static bool configure_compresion(const hid_t &dcpl, const unsigned int &compression) {
+        herr_t err=H5Pset_deflate(dcpl, compression );
+        if (err < 0) {
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set zip filter")));
+            return false;
+        }
+
+        return true;
+    }
+
 static void make_dataset_from_buffer(const int32_t &group_id, const char *dset_name, Handle<Object> buffer, Handle<Object> options) {
     Local<Value> encodingValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding"));
     String::Utf8Value encoding (encodingValue->ToString());
@@ -249,19 +299,20 @@ static void make_dataset_from_buffer(const int32_t &group_id, const char *dset_n
             break;
     }
     unsigned int compression= get_compression(options);
+    unsigned int chunk_size = get_chunk_size(options);
     hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
     if(compression>0){
-            herr_t err=H5Pset_deflate(dcpl, compression );
-            if (err < 0) {
-                v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set zip filter")));
-                return;
-            }
-            err=H5Pset_chunk(dcpl, rank, dims.get());
-            if (err < 0) {
-                v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
-                return;
-            }
+        if(!configure_compresion(dcpl, compression)) {
+            return;
+        }
     }
+
+    if(compression>0 || chunk_size > 0) {
+        if(!configure_chunked_layout(dcpl, chunk_size, rank, dims.get())) {
+            return;
+        }
+    }
+
     herr_t err=H5LT_make_dataset_numerical (group_id, dset_name, rank, dims.get(), type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, node::Buffer::Data(buffer));
     if(err<0)
     {
@@ -344,19 +395,22 @@ static void make_dataset_from_typed_array(const int32_t &group_id, const char *d
     {
         hsize_t dims[1]={buffer->Length()};
         unsigned int compression= get_compression(options);
+        unsigned int chunk_size = get_chunk_size(options);
+
         hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
+
         if(compression>0){
-                herr_t err=H5Pset_deflate(dcpl, compression );
-                if (err < 0) {
-                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set zip filter")));
-                    return;
-                }
-                err=H5Pset_chunk(dcpl, rank, dims);
-                if (err < 0) {
-                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
-                    return;
-                }
+            if(!configure_compresion(dcpl, compression)) {
+                return;
+            }
         }
+
+        if(compression>0 || chunk_size > 0) {
+            if(!configure_chunked_layout(dcpl, chunk_size, rank, dims)) {
+                return;
+            }
+        }
+
         herr_t err=H5LT_make_dataset_numerical (group_id, dset_name, rank, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data() );
         if(err<0)
         {
@@ -372,19 +426,22 @@ static void make_dataset_from_typed_array(const int32_t &group_id, const char *d
 //        Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value();
         hsize_t dims[2]={(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value()};
         unsigned int compression= get_compression(options);
+        unsigned int chunk_size = get_chunk_size(options);
+
         hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
+
         if(compression>0){
-                herr_t err=H5Pset_deflate(dcpl, compression );
-                if (err < 0) {
-                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set zip filter")));
-                    return;
-                }
-                err=H5Pset_chunk(dcpl, rank, dims);
-                if (err < 0) {
-                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
-                    return;
-                }
+            if(!configure_compresion(dcpl, compression)) {
+                return;
+            }
         }
+
+        if(compression>0 || chunk_size > 0) {
+            if(!configure_chunked_layout(dcpl, chunk_size, rank, dims)) {
+                return;
+            }
+        }
+
         herr_t err=H5LT_make_dataset_numerical (group_id, dset_name, rank, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data() );
         if(err<0)
         {
@@ -400,19 +457,22 @@ static void make_dataset_from_typed_array(const int32_t &group_id, const char *d
 //        Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value();
         hsize_t dims[3]={(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value(),  (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->ToInt32()->Value()};
         unsigned int compression= get_compression(options);
+        unsigned int chunk_size = get_chunk_size(options);
+
         hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
+
         if(compression>0){
-                herr_t err=H5Pset_deflate(dcpl, compression );
-                if (err < 0) {
-                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set zip filter")));
-                    return;
-                }
-                err=H5Pset_chunk(dcpl, rank, dims);
-                if (err < 0) {
-                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
-                    return;
-                }
+            if(!configure_compresion(dcpl, compression)) {
+                return;
+            }
         }
+
+        if(compression>0 || chunk_size > 0) {
+            if(!configure_chunked_layout(dcpl, chunk_size, rank, dims)) {
+                return;
+            }
+        }
+
         herr_t err=H5LT_make_dataset_numerical (group_id, dset_name, rank, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data() );
         if(err<0)
         {
