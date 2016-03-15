@@ -116,8 +116,7 @@
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
-                    'src/h5lt.cc',
-                    'src/h5_lt.hpp'
+                    'src/h5lt.cc'
                 ],
                 'link_settings': {
                     'libraries': [
@@ -138,8 +137,7 @@
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
-                    'src/h5lt.cc',
-                    'src/h5_lt.hpp'
+                    'src/h5lt.cc'
                 ],
                 'msbuild_toolset': 'v120',
                 "configurations": {
@@ -183,8 +181,7 @@
                     '<(hdf5_home_mac)/include'
                 ],
                 'sources': [
-                    'src/h5lt.cc',
-                    'src/h5_lt.hpp'
+                    'src/h5lt.cc'
                 ],
                 'link_settings': {
                     'libraries': [
@@ -209,8 +206,7 @@
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
-                    'src/h5tb.cc',
-                    'src/h5_tb.hpp'
+                    'src/h5tb.cc'
                 ],
                 'link_settings': {
                     'libraries': [
@@ -231,8 +227,7 @@
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
-                    'src/h5tb.cc',
-                    'src/h5_tb.hpp'
+                    'src/h5tb.cc'
                 ],
                 'msbuild_toolset': 'v120',
                 "configurations": {
@@ -276,8 +271,7 @@
                     '<(hdf5_home_mac)/include'
                 ],
                 'sources': [
-                    'src/h5tb.cc',
-                    'src/h5_tb.hpp'
+                    'src/h5tb.cc'
                 ],
                 'link_settings': {
                     'libraries': [
@@ -393,8 +387,7 @@
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
-                    'src/h5im.cc',
-                    'src/h5_im.hpp'
+                    'src/h5im.cc'
                 ],
                 'link_settings': {
                     'libraries': [
@@ -415,8 +408,7 @@
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
-                    'src/h5im.cc',
-                    'src/h5_im.hpp'
+                    'src/h5im.cc'
                 ],
                 'msbuild_toolset': 'v120',
                 "configurations": {
@@ -460,8 +452,7 @@
                     '<(hdf5_home_mac)/include'
                 ],
                 'sources': [
-                    'src/h5im.cc',
-                    'src/h5_im.hpp'
+                    'src/h5im.cc'
                 ],
                 'link_settings': {
                     'libraries': [
@@ -486,8 +477,7 @@
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
-                    'src/h5ds.cc',
-                    'src/h5_ds.hpp'
+                    'src/h5ds.cc'
                 ],
                 'link_settings': {
                     'libraries': [
@@ -508,8 +498,7 @@
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
-                    'src/h5ds.cc',
-                    'src/h5_ds.hpp'
+                    'src/h5ds.cc'
                 ],
                 'msbuild_toolset': 'v120',
                 "configurations": {
@@ -552,8 +541,7 @@
                     '<(hdf5_home_mac)/include'
                 ],
                 'sources': [
-                    'src/h5ds.cc',
-                    'src/h5_ds.hpp'
+                    'src/h5ds.cc'
                 ],
                 'link_settings': {
                     'libraries': [

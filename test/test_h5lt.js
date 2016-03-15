@@ -193,6 +193,45 @@ describe("testing lite interface ", function() {
             buffer.rows=5;
             buffer.should.match(readBuffer);
         });
+
+        it("should be make a dataset with compression ", function*() {
+            const buffer=new Float64Array(5);
+            buffer[0]=1.0;
+            buffer[1]=2.0;
+            buffer[2]=3.0;
+            buffer[3]=4.0;
+            buffer[4]=5.0;
+            h5lt.makeDataset(group.id, 'Compressed Index', buffer, { compression: 7});
+            const readBuffer=h5lt.readDataset(group.id, 'Compressed Index');
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(5);
+            readBuffer.buffer.byteLength.should.match(buffer.buffer.byteLength);
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.should.match(readBuffer);
+            const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Refractive Index');
+            readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
+        });
+
+        it("should be make a dataset with cutom chunk size ", function*() {
+            const buffer=new Float64Array(5);
+            buffer[0]=1.0;
+            buffer[1]=2.0;
+            buffer[2]=3.0;
+            buffer[3]=4.0;
+            buffer[4]=5.0;
+            h5lt.makeDataset(group.id, 'Custom-chunked Index', buffer, { chunkSize: 2});
+            const readBuffer=h5lt.readDataset(group.id, 'Custom-chunked Index');
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(5);
+            readBuffer.buffer.byteLength.should.match(buffer.buffer.byteLength);
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.should.match(readBuffer);
+            const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Refractive Index');
+            readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
+        });
+
         it("flush properties to h5 ", function(done){
             group.getNumAttrs().should.equal(0);
             group[ 'Computed Heat of Formation' ]=100.0;
