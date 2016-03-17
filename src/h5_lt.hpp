@@ -451,7 +451,7 @@ static void make_dataset_from_array(const hid_t &group_id, const char *dset_name
             if(fixedWidth<s.length()){
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed fixed length to make var len dataset")));
             return;
-                
+
             }
             std::strncpy(&vl.get()[fixedWidth*arrayIndex], s.c_str(), s.length());
         }
@@ -485,7 +485,7 @@ static void make_dataset_from_array(const hid_t &group_id, const char *dset_name
             vl.get()[arrayIndex]=new char[s.length()+1];
             std::memset(vl.get()[arrayIndex], 0, s.length()+1);
             std::strncpy(vl.get()[arrayIndex], s.c_str(), s.length());
-    
+
         }
         //hsize_t maxdims[1]={H5S_UNLIMITED};
         hid_t memspace_id = H5Screate_simple (rank, count.get(), NULL);
@@ -955,7 +955,7 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, callback")));
         args.GetReturnValue().SetUndefined();
         return;
-        
+
     }
     else if (args.Length() ==2 && (!args[0]->IsObject() || !args[1]->IsString())) {
 
@@ -1232,11 +1232,11 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                     H5T_order_t order=H5Tget_order( type_id );
                     options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "endian"), Number::New(v8::Isolate::GetCurrent(), order));
                     //options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"), String::NewFromUtf8(v8::Isolate::GetCurrent(), interlace));
-                    
+
                     v8::Local<v8::Value> argv[1] = { options };
                     v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), argc, argv);
                 }
-                
+
         //Attributes
         uint32_t index=0;
         hsize_t idx=0;
