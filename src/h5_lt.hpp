@@ -10,6 +10,7 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <memory>
 
 #include "file.h"
 #include "group.h"
