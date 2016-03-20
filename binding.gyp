@@ -1,8 +1,8 @@
 {
     "variables": {
-        "hdf5_home_linux": "/usr/local",
-        "hdf5_home_win": "C:/Software/hdf5",
-        "hdf5_home_mac": "/usr/local"
+        "hdf5_home_linux%": "/usr/local",
+        "hdf5_home_win%": "C:/Software/hdf5",
+        "hdf5_home_mac%": "/usr/local"
     },
     'targets': [
         {
