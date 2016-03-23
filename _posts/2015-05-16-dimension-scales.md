@@ -10,9 +10,10 @@ date: 2015-05-16 18:10:49
 var h5ds = require('hdf5').h5ds;
 ```
 
-####Functions
+#### Functions
 
 h5ds.**setScale**(id, name, dimname)  
+
 > 
 > *  id &rarr; {{ site.hdf5_id }}
 > *  name &rarr; dataset name - the one to become a dimension scale
@@ -20,12 +21,14 @@ h5ds.**setScale**(id, name, dimname)
 
 
 h5ds.**isScale**(id, name)  
+
 > 
 > *  id &rarr; {{ site.hdf5_id }}
 > *  name &rarr; dataset name - the one to become a dimension scale
 > *  return &larr; true if it is a dimension scale.
 
 h5ds.**attachScale**(id, dataset name, name, index)  
+
 > 
 > *  id &rarr; {{ site.hdf5_id }}
 > *  dataset name &rarr; dataset name to attach this scale.
@@ -33,6 +36,7 @@ h5ds.**attachScale**(id, dataset name, name, index)
 > *  index &rarr; the selected axis or rank.
 
 h5ds.**isAttached**(id, dataset name, name, index)  
+
 > 
 > *  id &rarr; {{ site.hdf5_id }}
 > *  dataset name &rarr; dataset name to check for attachement.
@@ -42,6 +46,7 @@ h5ds.**isAttached**(id, dataset name, name, index)
 
 
 h5ds.**getNumberOfScales**(id, dataset name, index)
+
 > 
 > *  id &rarr; {{ site.hdf5_id }}
 > *  dataset name &rarr; dataset name to check.
@@ -50,12 +55,14 @@ h5ds.**getNumberOfScales**(id, dataset name, index)
 
 
 h5ds.**getScaleName**(id, name)
+
 > 
 > *  id &rarr; {{ site.hdf5_id }}
 > *  name &rarr; dataset name.
 > *  return &larr; dimension scale name.
 
 h5ds.**getLabel**(id, name, index)
+
 > 
 > *  id &rarr; {{ site.hdf5_id }}
 > *  name &rarr; dataset name.
@@ -63,9 +70,9 @@ h5ds.**getLabel**(id, name, index)
 > *  return &larr; the label.
 
 h5ds.**setLabel**(id, name, index, label);
+
 > 
 > *  id &rarr; {{ site.hdf5_id }}
 > *  name &rarr; dataset name.
 > *  index &rarr; the selected axis or rank.
 > *  label &rarr; what to call it.
-

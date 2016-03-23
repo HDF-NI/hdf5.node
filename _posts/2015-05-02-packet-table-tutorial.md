@@ -5,9 +5,10 @@ category: tut
 date: 2015-05-02 20:29:43
 ---
 {% include anchors.html %}
-###Packet Tables
+### Packet Tables
 
-This one is experimental and can only do variable length strings today(and I had a need for it)
+This one is experimental and can only do variable length strings today(and I had
+a need for it)
 
 ```javascript
 var table=new h5pt.PacketTable(0, 5);
@@ -46,5 +47,3 @@ while(table.next()){
 }
 table.close();
 ```
-
-

@@ -5,7 +5,7 @@ category: tut
 date: 2015-05-02 20:14:07
 ---
 
-###Datasets as javascript arrays
+### Datasets as javascript arrays
 To create a new h5 and put data into it,
 
 ```javascript
@@ -36,27 +36,28 @@ frequency.columns=3;
 h5lt.makeDataset(groupFrequencies.id, title, frequency);
 ```
 
-The dataset members of a group can be retrieved in order of creation. Something I've needed more often than not.
+The dataset members of a group can be retrieved in order of creation. Something
+I've needed more often than not.
 
 ```javascript
-var groupFrequencies=file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
-var frequencyNames=groupFrequencies.getMemberNamesByCreationOrder();
+var groupFrequencies = file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
+var frequencyNames = groupFrequencies.getMemberNamesByCreationOrder();
 for (var frequencyIndex = 0; frequencyIndex < frequencyNames.length; frequencyIndex++)
 {
-    xmolDocument+=elements.length+'\n';
-    xmolDocument+=frequencyNames[frequencyIndex]+'\n';
-    var frequency=h5lt.readDataset(groupFrequencies.id, frequencyNames[frequencyIndex]);
-    for (var index = 0; index < elements.length; index++)
-    {
-        xmolDocument+=elements[index]+' '+lastTrajectory[3*index]+' '+lastTrajectory[3*index+1]+' '+lastTrajectory[3*index+2]+' '+frequency[3*index]+' '+frequency[3*index+1]+' '+frequency[3*index+2]+'\n';
-    }
+  xmolDocument += elements.length+'\n';
+  xmolDocument += frequencyNames[frequencyIndex]+'\n';
+  var frequency = h5lt.readDataset(groupFrequencies.id, frequencyNames[frequencyIndex]);
+  for (var index = 0; index < elements.length; index++) {
+    xmolDocument += elements[index] + ' ' + lastTrajectory[3 * index] + ' ' + lastTrajectory[3*index+1] + ' ' + lastTrajectory[3*index+2] + ' ' + frequency[3 * index] + ' ' + frequency[3 * index + 1] + ' ' + frequency[3 * index + 2] + '\n';
+  }
 }
 ```
 
-###Array of variable length strings
+### Array of variable length strings
 
-To store variable length strings, put your javascript strings into an Array and pass as third argument of makeDataset. To retrieve use
-readDataset to get an equivalent Array filled with the strings.
+To store variable length strings, put your javascript strings into an Array and
+pass as third argument of makeDataset. To retrieve use readDataset to get an
+equivalent Array filled with the strings.
 
 ```javascript
 try
@@ -90,10 +91,13 @@ catch(err) {
     console.dir(err.message);
 }
 ```
-Currently this interface supports only the custom variable length string datatype in the h5 array class.
+Currently this interface supports only the custom variable length string
+datatype in the h5 array class.
 
-###Datasets as nodejs Buffer's
-If a Buffer http://nodejs.org/docs/v0.12.0/api/buffer.html is filled with pure datatype(e.g. double) it can be written to h5 as a dataset.
+### Datasets as nodejs Buffers
+
+If a [Buffer](https://nodejs.org/api/buffer.html) is filled with pure datatype
+(e.g. double) it can be written to h5 as a dataset.
 
 ```javascript
 var H5Type = require('hdf5/lib/globals.js').H5Type;
@@ -108,7 +112,8 @@ buffer.writeDoubleLE(5.0, 32);
 h5lt.makeDataset(group.id, 'Dielectric Constant', buffer);
 ```
 
-will assume the rank is one. Rank, rows, columns and sections can be set to shape the dataset.
+will assume the rank is one. Rank, rows, columns and sections can be set to
+shape the dataset.
 
 ```javascript
 var H5Type = require('hdf5/lib/globals.js').H5Type;
@@ -126,12 +131,13 @@ buffer.columns=2;
 h5lt.makeDataset(group.id, 'Two Rank', buffer);
 ```
 
-is 3 by 2 dataset.  To read from h5 the dataset can still transfer to a javascript array or with the method
-readDatasetAsBuffer the return is a nodejs Buffer with the shape properties set.
+is 3 by 2 dataset.  To read from h5 the dataset can still transfer to a
+javascript array or with the method readDatasetAsBuffer the return is a nodejs
+Buffer with the shape properties set.
 
 ```javascript
-var readBuffer=h5lt.readDataset(group.id, 'Two Rank');
+var readBuffer = h5lt.readDataset(group.id, 'Two Rank');
 readBuffer.constructor.name.should.match('Float64Array');
 
-var readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Two Rank');
+var readAsBuffer = h5lt.readDatasetAsBuffer(group.id, 'Two Rank');
 ```

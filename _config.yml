@@ -1,7 +1,7 @@
 
 # Site title and subtitle. This is used in _includes/header.html
-title: 'HDF5 Node Interface Documentation'
-subtitle: 'Hello complex and interesting world'
+title: 'HDF5 Node Interface'
+#subtitle: 'a node module for reading the HDF5 file format'
 
 # if you wish to integrate disqus on pages set your shortname here
 disqus_shortname: ''
@@ -16,7 +16,7 @@ google_analytics_id: ''
 navigation: 1
 
 # URL to source code, used in _includes/footer.html
-codeurl: 'https://github.com/ryancole/hdf5.node'
+codeurl: 'https://github.com/HDF-NI/hdf5.node'
 
 # Default categories (in order) to appear in the navigation
 sections: [
@@ -42,19 +42,12 @@ future: true
 
 # Exclude non-site files
 exclude: ['bin', 'README.md']
-    
+
 hdf5_id: the group or file id location.  Every group and the file return with an id attribute
 
-# Use the redcarpet Markdown renderer
-markdown: redcarpet
-redcarpet:
-    extensions: [
-        'no_intra_emphasis',
-        'fenced_code_blocks',
-        'autolink',
-        'strikethrough',
-        'superscript',
-        'with_toc_data',
-        'tables',
-        'hardwrap'
-    ]
+# Use the kramdown Markdown renderer
+markdown: kramdown
+kramdown:
+  input: GFM # Enable GitHub Flavored Markdown (fenced code blocks)
+  hard_wrap: false
+highlighter: rouge
