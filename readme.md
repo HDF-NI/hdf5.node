@@ -12,12 +12,12 @@ won't need to write yet another layer in your code to accomplish your goals.
 
 The node::Buffer and streams are being investigated so native hdf5 data's only destination is client browser window or client in general.
 
-API documentation is available at <a href="http://ryancole.github.io/hdf5.node">http://ryancole.github.io/hdf5.node</a>
+API documentation is available at <http://hdf-ni.github.io/hdf5.node>
 
 ```bash
 npm install hdf5 --fallback-to-build
 ```
-<a href="http://ryancole.github.io/hdf5.node/doc/install-setup.html">http://ryancole.github.io/hdf5.node/doc/install-setup.html</a> for the native requirements and details.
+See <http://hdf-ni.github.io/hdf5.node/doc/install-setup.html> for the native requirements and details.
 
 ```javascript
 var hdf5 = require('hdf5').hdf5;
@@ -35,7 +35,7 @@ Mostly implemented (missing H5DSiterate_scales[ found a way to make callback fun
 ### High-level Functions for Region References, Hyperslabs, and Bit-fields
 
 Writing an interface based on the standard hdf5 library.  Currently you can write and read a subset from a two rank dataset. Other ranks may work yet are untested.
-See tutorial <a href="http://ryancole.github.io/hdf5.node/tut/subset_tutorial.html">http://ryancole.github.io/hdf5.node/tut/subset_tutorial.html</a> for example applied to node Buffers.
+See tutorial <http://hdf-ni.github.io/hdf5.node/tut/subset_tutorial.html> for example applied to node Buffers.
 
 ### Filters and Compression
 
@@ -46,6 +46,7 @@ Third party filters can be used.  Those do take separate compiled libraries yet 
 hdf5 from the HDF5_PLUGIN_PATH.
 
 ### Koa Based Browser Interface
+
 The koa based browser interface is a reference app for viewing, modifying and looking at h5 content from browsers. Eventually it will provide for editing, charting and performing statistics on h5 file data.  
 The interface is now showing images, datasets, text, column tables and string based packet tables. Basic group operations are available with right-click on a node.  Hovering on a group or dataset shows attributes in a tooltip however still looking for 
 a good mechanism to add, copy and edit attributes.  Images can be dropped on the main panel after selecting a group and will be stored at the equivalent place in the h5.  Learning how to accomplish more HDFView functionality in browser style.  
@@ -56,6 +57,6 @@ Testing addons for custom views/editing or multiviews of the same data.  Impleme
 
 ## Experimental
 
-The h5im namespace is being designed to meet the Image Spec 1.2 <a href="http://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html">http://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html</a>
+The h5im namespace is being designed to meet the Image Spec 1.2 <http://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html>.
 
 Any ideas for the design of the API and interface are welcome.
