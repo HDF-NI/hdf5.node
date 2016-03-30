@@ -13,7 +13,8 @@ API documentation is available at <http://hdf-ni.github.io/hdf5.node>
 ```bash
 npm install hdf5 --fallback-to-build
 ```
-See <http://hdf-ni.github.io/hdf5.node/doc/install-setup.html> for the native requirements and details.
+See <http://hdf-ni.github.io/hdf5.node/doc/install-setup.html> for the native 
+requirements and details.
 
 ```javascript
 var hdf5 = require('hdf5').hdf5;
@@ -25,9 +26,9 @@ var group = file.openGroup('pmc');
 
 ### Notes on Recent Releases
 
-* Note: Release v0.1.0 was built with nodejs v4.2.1. If you want nodejs v0.12.x then
-stay with  release v0.0.20. npm will continue with nodejs v4.x.x line and any
-fixes or features needed by prior versions will be from github branches.
+* Note: Release v0.1.0 was built with nodejs v4.2.1. If you want nodejs v0.12.x 
+then stay with  release v0.0.20. npm will continue with nodejs v4.x.x line and 
+any fixes or features needed by prior versions will be from github branches.
 
 * Note: Release v0.0.20 is for prebuilts with hdf5-1.8.15-patch1. If you want
 hdf5-1.8.14 stay with v0.0.19.
@@ -43,26 +44,35 @@ your goals.
 
 ## Other Feature Notes
 
-
-The node::Buffer and streams are being investigated so native hdf5 data's only destination is client browser window or client in general.
+The node::Buffer and streams are being investigated so native hdf5 data's only
+destination is client browser window or client in general.
 
 
 ### Dimension Scales
 
-Mostly implemented (missing H5DSiterate_scales[ found a way to make callback functions from te native side and looking to finish this and use the technique for other h5 iterators])
+Mostly implemented (missing H5DSiterate_scales[ found a way to make callback
+functions from te native side and looking to finish this and use the technique
+for other h5 iterators])
 
 ### High-level Functions for Region References, Hyperslabs, and Bit-fields
 
-Writing an interface based on the standard hdf5 library.  Currently you can write and read a subset from a two rank dataset. Other ranks may work yet are untested.
-See tutorial <http://hdf-ni.github.io/hdf5.node/tut/subset_tutorial.html> for example applied to node Buffers.
-
+Writing an interface based on the standard hdf5 library.  Currently you can
+write and read a subset from a two rank dataset. Other ranks may work yet are
+untested.
+ See tutorial
+<http://hdf-ni.github.io/hdf5.node/tut/subset_tutorial.html> for example applied
+to node Buffers.
+ 
 ### Filters and Compression
 
-Testing filters and compression.  Have the gzip filter working. For some applications getting the uncompressed data from the h5 would reduce the number of 
-compressions and decompressions.  For example an image could be sent to client before unzipping and rezipping on the server side.  
+Testing filters and compression.  Have the gzip filter working. For some
+applications getting the uncompressed data from the h5 would reduce the number
+of compressions and decompressions.  For example an image could be sent to
+client before unzipping and rezipping on the server side.  
 
-Third party filters can be used.  Those do take separate compiled libraries yet are independent. They get picked up by native 
-hdf5 from the HDF5_PLUGIN_PATH.
+Third party filters can be used.  Those do take separate compiled libraries
+yet are independent. They get picked up by native hdf5 from the
+HDF5_PLUGIN_PATH.
 
 ### Koa Based Browser Interface
 
