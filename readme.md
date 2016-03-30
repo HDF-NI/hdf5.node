@@ -73,20 +73,6 @@ Testing filters and compression.  Have the gzip filter working. For some
 applications getting the uncompressed data from the h5 would reduce the number
 of compressions and decompressions.  For example an image could be sent to
 client before unzipping and rezipping on the server side.  
-<<<<<<< HEAD
-=======
-
-Third party filters can be used.  Those do take separate compiled libraries
-yet are independent. They get picked up by native hdf5 from the
-HDF5_PLUGIN_PATH.
-
-### Koa Based Browser Interface
-
-The koa based browser interface is a reference app for viewing, modifying and looking at h5 content from browsers. Eventually it will provide for editing, charting and performing statistics on h5 file data.  
-The interface is now showing images, datasets, text, column tables and string based packet tables. Basic group operations are available with right-click on a node.  Hovering on a group or dataset shows attributes in a tooltip however still looking for 
-a good mechanism to add, copy and edit attributes.  Images can be dropped on the main panel after selecting a group and will be stored at the equivalent place in the h5.  Learning how to accomplish more HDFView functionality in browser style.  
-Experimenting with https://ethercalc.net/ as an editor; there is an upper limit to practical data going from h5 into a spreadsheet and other mechanism may need to be provided.  It has some charting yet that may need addressed with a d3 or threejs approach.
->>>>>>> a245de0995d2d59288595b11f5d7f830fa7084f6
 
 Third party filters can be used.  Those do take separate compiled libraries
 yet are independent. They get picked up by native hdf5 from the
