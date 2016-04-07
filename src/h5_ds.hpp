@@ -173,7 +173,7 @@ static void iterate_scales (const v8::FunctionCallbackInfo<Value>& args)
         v8::Local<v8::Function> func=v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback);
     herr_t err=H5DSiterate_scales( did, (unsigned int)rank, &idx, [](hid_t did, unsigned int dim, hid_t dsid, void *visitor_data) -> herr_t {
         v8::Local<v8::Value> argv[2] = { v8::Int32::New(v8::Isolate::GetCurrent(), dim),v8:: String::NewFromUtf8(v8::Isolate::GetCurrent(), "success") };
-        ((v8::Local<v8::Function>*)visitor_data)[0]->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), argc, argv);
+        ((v8::Local<v8::Function>*)visitor_data)[0]->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), 3, argv);
         return (herr_t)0;
     }, &func);
     if(err<0){
