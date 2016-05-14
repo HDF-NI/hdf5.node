@@ -1,11 +1,11 @@
 {
   "name": "hdf5",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Native Abstractions for hdf5 file io",
   "main": "./index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ryancole/hdf5.node.git"
+    "url": "https://github.com/HDF-NI/hdf5.node.git"
   },
   "dependencies": {
     "node-pre-gyp": "0.6.11"
