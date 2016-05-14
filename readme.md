@@ -14,7 +14,14 @@ API documentation is available at <http://hdf-ni.github.io/hdf5.node>
 npm install hdf5 --fallback-to-build
 ```
 See <http://hdf-ni.github.io/hdf5.node/doc/install-setup.html> for the native 
-requirements and details.
+requirements and details. If your native hdf5 libraries aren't at the default 
+you can set the path with --hdf5_home_linux switch on tis project as well as 
+dependent projects.
+
+```bash
+npm install hdf5 --fallback-to-build --hdf5_home_linux=<your native hdf path>
+```
+For mac and windows the switches are --hdf5_home_mac & --hdf5_home_win
 
 ```javascript
 var hdf5 = require('hdf5').hdf5;
