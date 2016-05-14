@@ -17,7 +17,8 @@
     "co-mocha": "^1.1.2",
     "mocha": "2.3.3",
     "should": "*",
-    "xml2js": "*"
+    "xml2js": "*",
+    "aws-sdk": "2.2.33"
   },
   "scripts": {
     "install": "./node_modules/.bin/node-pre-gyp install --fallback-to-build",
