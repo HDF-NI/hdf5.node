@@ -44,7 +44,7 @@ hdf5-1.8.14 stay with v0.0.19.
 
 This module, [hdf5.node][npm-url], is intended to be a pure API for reading
 and writing HDF5 files. Graphical user interfaces or other layers should
-be implemented in separate modeuls.
+be implemented in separate modules.
 
 Unlike other languages that wrap hdf5 API's this interface takes advantage of
 the compatibility of V8 and HDF5. The result is a direct map to javascript
