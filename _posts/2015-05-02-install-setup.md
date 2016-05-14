@@ -3,6 +3,7 @@ layout: page
 title: "Install & Setup"
 category: doc
 date: 2015-05-02 12:02:34
+
 ---
 
 ## Status
@@ -10,9 +11,18 @@ date: 2015-05-02 12:02:34
 Currently testing with node v0.12.x and V8 3.28.73.  Prebuilt native modules for Ubuntu 14_04, Windows VS2013 and MacOSX 10.7.
 Resources leaks are being found when the h5 file is closed.  When found they are being eliminated.  Error handling component is being investigated; how to best leverage V8 and node from the native side.
 
+```bash
+ npm install --fallback-to-build
 ```
-npm install --fallback-to-build
+
+If your native hdf5 libraries aren't at the default 
+you can set the path with --hdf5_home_linux switch on tis project as well as 
+dependent projects.
+
+```bash
+ npm install hdf5 --fallback-to-build --hdf5_home_linux=<your native hdf path>
 ```
+For mac and windows the switches are --hdf5_home_mac & --hdf5_home_win
 
 ## Dependencies
 
@@ -29,9 +39,8 @@ The `binding.gyp` expects the HDF5_HOME environment variable set to your install
 ### In a working copy of git
 
 ```bash
-export HDF5_HOME=/home/user/NodeProjects/hdf5
 export NODE_PATH=/home/user/NodeProjects/hdf5.node/build/Release:$NODE_PATH
-npm install  --build-from-source
+npm install  --build-from-source --hdf5_home_linux=<your native hdf path>
 
 ```
 
@@ -39,7 +48,7 @@ NODE_PATH is still used for the mocha tests.
 
 ### Including as a node module
 
-The HDF5_HOME needs to be set. NODE_PATH should not. Then an 'npm install hdf5 --fallback-to-build' will try to locate a prebuilt version or fall back to building the source
+An 'npm install hdf5 --fallback-to-build' will try to locate a prebuilt version or fall back to building the source
 in node_modules/hdf5. There is no need for the node-gyp step.
 
 
