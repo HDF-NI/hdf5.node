@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <v8.h>
 #include <uv.h>
 #include <node.h>
@@ -33,7 +34,8 @@ H5LT_make_dataset_numerical( hid_t loc_id,
       return -1;
 
     /* Create the data space for the dataset. */
-    if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
+    const hsize_t maxsize = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(rank, dims, &maxsize)) < 0)
         return -1;
 
     /* Create the dataset. */
@@ -181,7 +183,7 @@ static void make_dataset_from_buffer(const hid_t &group_id, const char *dset_nam
     switch(rank)
     {
         case 1:
-            dims.get()[0]={node::Buffer::Length(buffer)/H5Tget_size(type_id)};
+            dims.get()[0]={node::Buffer::Length(buffer)*100/H5Tget_size(type_id)};
             break;
         case 3:
             dims.get()[2]=(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->ToInt32()->Value();
@@ -686,8 +688,12 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
         hid_t dataspace_id=H5S_ALL;
         hid_t memspace_id=H5S_ALL;
         if(subsetOn){
-            memspace_id = H5Screate_simple (rank, count.get(), NULL);
+            const hsize_t maxsize = H5S_UNLIMITED;
+            memspace_id = H5Screate_simple (rank, count.get(), &maxsize);
             dataspace_id = H5Dget_space (did);
+            hsize_t dims;
+            hsize_t maxdims;
+            H5Sget_simple_extent_dims(dataspace_id, &dims, &maxdims);
             herr_t  err = H5Sselect_hyperslab (dataspace_id, H5S_SELECT_SET, start.get(),
                                           stride.get(), count.get(), NULL);
             if(err<0)
@@ -798,6 +804,10 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
         return;
     }
     hid_t type_id;
+    if (args[2]->IsArray()) {
+      write_dataset_from_array(args, Local<Array>::Cast(args[2]), subsetOn, start, stride, count);
+      return;
+    }
     Local<TypedArray> buffer;
     if(args[2]->IsFloat64Array())
     {
@@ -853,9 +863,17 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
         hid_t did = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
         hid_t dataspace_id=H5S_ALL;
         hid_t memspace_id=H5S_ALL;
+        hsize_t dims;
+        hsize_t maxdims;
+        H5Sget_simple_extent_dims(dataspace_id, &dims, &maxdims);
+        const int remainingRows = dims - (*start.get() + *count.get());
+        if (remainingRows < 0) {
+          dims -= remainingRows;
+          H5Dset_extent(did, &dims);
+          H5Sset_extent_simple(dataspace_id, rank, &dims, &maxdims);
+        }
         if(subsetOn){
             memspace_id = H5Screate_simple (rank, count.get(), NULL);
-            dataspace_id = H5Dget_space (did);
             herr_t  err = H5Sselect_hyperslab (dataspace_id, H5S_SELECT_SET, start.get(),
                                           stride.get(), count.get(), NULL);
             if(err<0)
@@ -884,12 +902,12 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
             return;
         }
         if(subsetOn){
-            H5Sclose (memspace_id);
-            H5Sclose (dataspace_id);
+          H5Sclose (memspace_id);
+          H5Sclose (dataspace_id);
         }
         H5Dclose(did);
         //H5Pclose(dcpl);
-    //Atributes
+        //Atributes
         /*v8::Local<v8::Array> propertyNames=buffer->GetPropertyNames();
         for(unsigned int index=buffer->GetIndexedPropertiesExternalArrayDataLength();index<propertyNames->Length();index++)
         {
@@ -947,6 +965,137 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
         }*/
 
     args.GetReturnValue().SetUndefined();
+}
+
+static void write_dataset_from_array(const v8::FunctionCallbackInfo<Value>& args,
+    Local<v8::Array> array,
+    bool subsetOn,
+    std::unique_ptr<hsize_t>& start,
+    std::unique_ptr<hsize_t>& stride,
+    std::unique_ptr<hsize_t>& count
+    ) {
+  int rank = 1;
+  String::Utf8Value dset_name (args[1]->ToString());
+  hid_t did = H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT);
+  hid_t dataspace_id=H5Dget_space(did);
+  hid_t memspace_id=H5S_ALL;
+  hsize_t dims;
+  hsize_t maxdims;
+  herr_t err;
+  H5Sget_simple_extent_dims(dataspace_id, &dims, &maxdims);
+  const int remainingRows = dims - (*start.get() + *count.get());
+  if (remainingRows < 0) {
+    dims -= remainingRows;
+    H5Dset_extent(did, &dims);
+    H5Sset_extent_simple(dataspace_id, rank, &dims, &maxdims);
+  }
+  if(subsetOn){
+      memspace_id = H5Screate_simple (rank, count.get(), NULL);
+      herr_t  err = H5Sselect_hyperslab (dataspace_id, H5S_SELECT_SET, start.get(),
+                                    stride.get(), count.get(), NULL);
+      if(err<0)
+      {
+          if(subsetOn){
+              H5Sclose (memspace_id);
+              H5Sclose (dataspace_id);
+          }
+          H5Dclose(did);
+          v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+          args.GetReturnValue().SetUndefined();
+          return;
+      }
+  }
+  hid_t type_id = H5Tcopy(H5T_C_S1);
+  H5Tset_size(type_id, H5T_VARIABLE);
+  const unsigned int arraySize = array->Length();
+    std::unique_ptr<char* []> vl(new char*[arraySize]);
+    std::vector<std::unique_ptr<String::Utf8Value>> string_values;
+
+    for(unsigned int arrayIndex=0; arrayIndex<arraySize; arrayIndex++) {
+        std::unique_ptr<String::Utf8Value> value(new String::Utf8Value(array->Get(arrayIndex)));
+        vl.get()[arrayIndex] = **value;
+        string_values.emplace_back(std::move(value));
+    }
+  err = H5Dwrite(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, vl.get());
+  if(err<0)
+  {
+      if(subsetOn){
+          H5Sclose (memspace_id);
+          H5Sclose (dataspace_id);
+      }
+      H5Dclose(did);
+      //H5Pclose(dcpl);
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
+      args.GetReturnValue().SetUndefined();
+      return;
+  }
+  if(subsetOn){
+    H5Sclose (memspace_id);
+    H5Sclose (dataspace_id);
+  }
+  H5Dclose(did);
+  //H5Pclose(dcpl);
+  //Atributes
+  /*v8::Local<v8::Array> propertyNames=buffer->GetPropertyNames();
+  for(unsigned int index=buffer->GetIndexedPropertiesExternalArrayDataLength();index<propertyNames->Length();index++)
+  {
+       v8::Local<v8::Value> name=propertyNames->Get (index);
+       if(!buffer->Get(name)->IsFunction() && !buffer->Get(name)->IsArray() && strncmp("id",(*String::Utf8Value(name->ToString())), 2)!=0 && strncmp("rank",(*String::Utf8Value(name->ToString())), 4)!=0 && strncmp("rows",(*String::Utf8Value(name->ToString())), 4)!=0 && strncmp("columns",(*String::Utf8Value(name->ToString())), 7)!=0 && strncmp("buffer",(*String::Utf8Value(name->ToString())), 6)!=0)
+       {
+          //std::cout<<index<<" "<<name->IsString()<<std::endl;
+          //std::cout<<index<<" "<<(*String::Utf8Value(name->ToString()))<<" rnp "<<buffer->HasRealNamedProperty( Local<String>::Cast(name))<<std::endl;
+          if(buffer->Get(name)->IsObject() || buffer->Get(name)->IsExternal())
+          {
+
+          }
+          else if(buffer->Get(name)->IsUint32())
+          {
+              uint32_t value=buffer->Get(name)->ToUint32()->Uint32Value();
+              if(H5Aexists_by_name(args[0]->ToInt32()->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
+              {
+                  H5Adelete_by_name(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+              }
+              H5LTset_attribute_uint(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), (unsigned int*)&value, 1);
+
+          }
+          else if(buffer->Get(name)->IsInt32())
+          {
+              int32_t value=buffer->Get(name)->ToInt32()->Int32Value();
+              if(H5Aexists_by_name(args[0]->ToInt32()->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
+              {
+                  H5Adelete_by_name(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+              }
+              H5LTset_attribute_int(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), (int*)&value, 1);
+
+          }
+          else if(buffer->Get(name)->IsString())
+          {
+              std::string value((*String::Utf8Value(buffer->Get(name)->ToString())));
+              if(H5Aexists_by_name(args[0]->ToInt32()->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
+              {
+                  H5Adelete_by_name(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+              }
+               H5::DataSpace ds(H5S_SIMPLE);
+               const long long unsigned int currentExtent=name->ToString()->Utf8Length();
+               ds.setExtentSimple(1, &currentExtent);
+              H5LTset_attribute_string(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), (const char*)value.c_str());
+
+          }
+          else if(buffer->Get(name)->IsNumber())
+          {
+              double value=buffer->Get(name)->ToNumber()->NumberValue();
+          //std::cout<<index<<" "<<(*dset_name)<<" "<<name->IsString()<<" "<<value<<std::endl;
+              if(H5Aexists_by_name(args[0]->ToInt32()->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
+              {
+                  H5Adelete_by_name(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+              }
+              H5LTset_attribute_double(args[0]->ToInt32()->Value(), *dset_name, (*String::Utf8Value(name->ToString())), (double*)&value, 1);
+
+          }
+       }
+  }*/
+
+args.GetReturnValue().SetUndefined();
 }
 
 static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
@@ -1401,7 +1550,8 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
                 hid_t dataspace_id=H5S_ALL;
                 hid_t memspace_id=H5S_ALL;
                 if(subsetOn){
-                    memspace_id = H5Screate_simple (rank, count.get(), NULL);
+                    const hsize_t maxsize = H5S_UNLIMITED;
+                    memspace_id = H5Screate_simple (rank, count.get(), &maxsize);
                     dataspace_id = H5Dget_space (did);
                     herr_t  err = H5Sselect_hyperslab (dataspace_id, H5S_SELECT_SET, start.get(),
                                                   stride.get(), count.get(), NULL);
