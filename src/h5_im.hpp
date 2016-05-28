@@ -47,6 +47,10 @@ static void make_image (const v8::FunctionCallbackInfo<Value>& args)
             H5LTset_attribute_string(args[0]->ToInt32()->Value(), *dset_name, "IMAGE_SUBCLASS", "IMAGE_TRUECOLOR");
             H5LTset_attribute_string(args[0]->ToInt32()->Value(), *dset_name, "IMAGE_VERSION", "1.2");
             H5LTset_attribute_string(args[0]->ToInt32()->Value(), *dset_name, "INTERLACE_MODE", "INTERLACE_PIXEL");
+            std::unique_ptr<unsigned char[]> rangeBuffer(new unsigned char[(size_t)(2)]);
+            rangeBuffer.get()[0]=(unsigned char)0;
+            rangeBuffer.get()[1]=(unsigned char)255;
+            H5LTset_attribute_uchar(args[0]->ToInt32()->Value(), *dset_name, "IMAGE_MINMAXRANGE", rangeBuffer.get(), 2);
 //                hid_t dataset = H5Dopen(args[0]->ToInt32()->Value(), (*table_name), H5P_DEFAULT);
 //                H5Dclose(dataset);
 

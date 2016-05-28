@@ -8,17 +8,16 @@
     "url": "https://github.com/HDF-NI/hdf5.node.git"
   },
   "dependencies": {
-    "node-pre-gyp": "0.6.11"
+    "node-pre-gyp": "0.6.28"
   },
   "bundledDependencies": [
     "node-pre-gyp"
   ],
   "devDependencies": {
     "co-mocha": "^1.1.2",
-    "mocha": "2.3.3",
+    "mocha": "2.4.5",
     "should": "*",
-    "xml2js": "*",
-    "aws-sdk": "2.2.33"
+    "xml2js": "*"
   },
   "scripts": {
     "install": "./node_modules/.bin/node-pre-gyp install --fallback-to-build",

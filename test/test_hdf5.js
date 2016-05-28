@@ -7,7 +7,7 @@ require('should');
 const hdf5Lib = require('..');
 const globs   = require('../lib/globals');
 
-describe("testing c++ interface ", function() {
+describe("testing c interface ", function() {
 
     describe("create an h5 and group ", function() {
         let file;
