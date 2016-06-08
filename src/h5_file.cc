@@ -395,6 +395,10 @@ namespace NodeHDF5 {
 
         // unwrap file object
         File* file = ObjectWrap::Unwrap<File>(args.This());
+        if (!file->is_open) {
+          return;
+        }
+
         H5Pclose(file->gcpl);
         ssize_t size = 0;
         if (H5Fget_obj_count(file->id, H5F_OBJ_FILE) == 1) {
