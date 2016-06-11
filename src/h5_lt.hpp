@@ -1234,7 +1234,7 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 {
                     type_id=H5T_NATIVE_LLONG;
                     Handle<Object> int64Buffer = node::Buffer::New(v8::Isolate::GetCurrent(), bufSize * theSize).ToLocalChecked();
-                    H5LTread_dataset (args[0]->ToInt32()->Value(), *dset_name, type_id, (char*)node::Buffer::Data(int64Buffer) );
+                    H5LTread_dataset (args[0]->ToInt32()->Value(), *dset_name, H5T_STD_I64BE, (char*)node::Buffer::Data(int64Buffer) );
 
                     args.GetReturnValue().Set(int64Buffer);
                     return;
