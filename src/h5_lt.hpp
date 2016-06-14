@@ -1232,11 +1232,15 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 }
                 else if(class_id==H5T_INTEGER && bufSize==8)
                 {
-                    type_id=H5T_NATIVE_LLONG;
+                    hid_t did=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
+                    type_id=H5Dget_type(did);
+                    hid_t native_type_id=H5Tget_native_type(type_id,H5T_DIR_ASCEND);
                     Handle<Object> int64Buffer = node::Buffer::New(v8::Isolate::GetCurrent(), bufSize * theSize).ToLocalChecked();
-                    H5LTread_dataset (args[0]->ToInt32()->Value(), *dset_name, H5T_NATIVE_LLONG, (char*)node::Buffer::Data(int64Buffer) );
+                    H5LTread_dataset (args[0]->ToInt32()->Value(), *dset_name, native_type_id, (char*)node::Buffer::Data(int64Buffer) );
 
                     args.GetReturnValue().Set(int64Buffer);
+                    H5Tclose(type_id);
+                    H5Dclose(did);
                     return;
 
                 }
