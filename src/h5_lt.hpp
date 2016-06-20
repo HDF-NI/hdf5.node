@@ -76,6 +76,7 @@ namespace NodeHDF5 {
         // append this function to the target object
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeDataset"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::make_dataset)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "writeDataset"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::write_dataset)->GetFunction());
+        target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "lengthDataset"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::length_dataset)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDataset"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::read_dataset)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDatasetAsBuffer"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::readDatasetAsBuffer)->GetFunction());
 
@@ -1041,6 +1042,35 @@ static void write_dataset_from_array(const v8::FunctionCallbackInfo<Value>& args
   args.GetReturnValue().SetUndefined();
 }
 
+static void length_dataset(const v8::FunctionCallbackInfo<Value>& args) {
+
+  if (args.Length() != 2 || !args[0]->IsUint32() || !args[1]->IsString()) {
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+      args.GetReturnValue().SetUndefined();
+      return;
+  }
+
+  const String::Utf8Value dataset_name (args[1]->ToString());
+  const hid_t location_id = args[0]->ToInt32()->Value();
+
+  const hid_t dataset = H5Dopen(location_id, *dataset_name, H5P_DEFAULT);
+  const hid_t dataspace = H5Dget_space(dataset);
+
+  const int rank = H5Sget_simple_extent_ndims(dataspace);
+
+  hsize_t* dims = new hsize_t[rank];
+  hsize_t* maxdims = new hsize_t[rank];
+  H5Sget_simple_extent_dims(dataspace, dims, maxdims);
+
+  args.GetReturnValue().Set(Int32::New(v8::Isolate::GetCurrent(), dims[0]));
+
+  H5Sclose(dataspace);
+  H5Dclose(dataset);
+
+  delete[] dims;
+  delete[] maxdims;
+}
+
 static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
 {
     // fail out if arguments are not correct
@@ -1055,8 +1085,8 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
         args.GetReturnValue().SetUndefined();
         return;
-
     }
+
     String::Utf8Value dset_name (args[1]->ToString());
     size_t bufSize = 0;
     H5T_class_t class_id;
@@ -1077,6 +1107,7 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
         args.GetReturnValue().SetUndefined();
         return;
     }
+
     hsize_t theSize=bufSize;
           switch(rank)
           {
