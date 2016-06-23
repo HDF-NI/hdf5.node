@@ -9,7 +9,6 @@
 #include <vector>
 #include <memory>
 
-
 namespace NodeHDF5{
     class Attributes : public node::ObjectWrap {
     protected:
@@ -55,19 +54,76 @@ namespace NodeHDF5{
                     args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::Int32::New(v8::Isolate::GetCurrent(), intValue));
                     break;
                 case H5T_FLOAT:
-                    double value;
-                    H5Aread(attr_id, attr_type, &value);
-                    args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::Number::New(v8::Isolate::GetCurrent(), value));
+                {
+                    size_t size=H5Tget_size( attr_type );
+                    switch(size){
+                        case 8:
+                        {
+                            double value;
+                            H5Aread(attr_id, attr_type, &value);
+                            args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::Number::New(v8::Isolate::GetCurrent(), value));
+                        }
+                            break;
+                        default:
+                        {
+                            float value;
+                            H5Aread(attr_id, attr_type, &value);
+                            args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::Number::New(v8::Isolate::GetCurrent(), value));
+                        }
+                            break;
+                    }
+                }
                     break;
                 case H5T_STRING:
                 {
-                    std::string strValue(H5Aget_storage_size(attr_id),'\0');
-                    H5Aread(attr_id, attr_type, (void*)strValue.c_str());
-                    args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str()));
+                    htri_t isVlen = H5Tis_variable_str( attr_type );
+
+                    if (isVlen == -1) {
+                        //std::cout << "The H5Tis_variable_str function did not return successfully" << std::endl;
+                    } else if (isVlen == 0) {
+                        /*
+                         * Do whatever was done before I came along.
+                         */
+                        hsize_t storeSize = H5Aget_storage_size(attr_id);
+                        std::string strValue(storeSize,'\0');
+                        H5Aread(attr_id, attr_type, (void*)strValue.c_str());
+                        args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str()));
+                    } else {
+                        //std::cout << "Variable-length string attribute encountered" << std::endl;
+
+                        hid_t space = H5Aget_space (attr_id);
+                        H5A_info_t ainfo;
+                        H5Aget_info(attr_id, &ainfo );
+                        std::unique_ptr<char*> buffer(new char*[2]);
+
+                        /*
+                         * Create the memory datatype.
+                         */
+                        hid_t memtype = H5Tcopy (H5T_C_S1);
+                        herr_t status = H5Tset_size (memtype, H5T_VARIABLE);
+
+                        hid_t type = H5Tget_native_type(attr_type, H5T_DIR_ASCEND);
+                        /*
+                         * Read the data.
+                         */
+                        status = H5Aread (attr_id, type, buffer.get());
+                        v8::Local<v8::String> varLenStr=v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), buffer.get()[0]);
+                        v8::Local<v8::Value> varLenStrObject=v8::StringObject::New(varLenStr);
+                        varLenStrObject->ToObject()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"), v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "variable-length") );
+                        args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), varLenStrObject);
+
+                        /*
+                         * Clean up the mess I made
+                         */
+                        //status = H5Dvlen_reclaim (memtype, space, H5P_DEFAULT, rdata);
+                        status = H5Sclose (space);
+                        status = H5Tclose (memtype);
+                    }
                 }
                     break;
                 case H5T_NO_CLASS:
                 default:
+                    //throw std::invalid_argument("unsupported data type");
     //                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
     //                    args.GetReturnValue().SetUndefined();
                         return;
@@ -175,6 +231,35 @@ namespace NodeHDF5{
 
                         }
                         H5Awrite(attr_id, attr_type, &value);
+                        H5Sclose(attr_space);
+                        H5Tclose(attr_type);
+                        H5Aclose(attr_id);
+
+                    }
+                    else if(args.This()->Get(name)->IsStringObject())
+                    {
+                        std::string value((*v8::String::Utf8Value(v8::StringObject::Cast(*args.This()->Get(name))->ValueOf())));
+                        if(attrExists)
+                        {
+                            H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
+                        }
+                        hid_t attr_type=H5Tcopy(H5T_C_S1);
+                        H5Tset_size(attr_type, H5T_VARIABLE);
+                        hid_t attr_space=H5Screate( H5S_SCALAR );
+                        hid_t attr_id=H5Acreate2(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+                        if(attr_id<0)
+                        {
+                            H5Sclose(attr_space);
+                            H5Tclose(attr_type);
+                            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                            args.GetReturnValue().SetUndefined();
+                            return;
+
+                        }
+                        std::unique_ptr<char*> vl(new char*[1]);
+                        vl.get()[0]=new char[value.length()+1];
+                        std::strncpy(vl.get()[0], value.c_str(), value.length()+1);
+                        H5Awrite(attr_id, attr_type, vl.get());
                         H5Sclose(attr_space);
                         H5Tclose(attr_type);
                         H5Aclose(attr_id);
