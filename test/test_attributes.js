@@ -6,7 +6,7 @@ require('should');
 const hdf5Lib = require('..');
 const globs   = require('../lib/globals');
 
-describe("testing fiter interface ",function(){
+describe("testing atrribute interface ",function(){
 
     describe("create an h5, group and some attributes ", function() {
         // open hdf file
@@ -21,6 +21,7 @@ describe("testing fiter interface ",function(){
             var name=new String("3FVA");
             name.type="variable-length";
             group.name=name;
+            group.size=new Float64Array([0.1, 0.1, 0.1]);
             group.flush();
             group.close();
         });
@@ -36,12 +37,13 @@ describe("testing fiter interface ",function(){
           file = new hdf5Lib.hdf5.File('./attributes.h5', globs.Access.ACC_RDONLY);
         });
 
-        it("should be compression filter info ", function*() {
-            //const group   = file.openGroup('pmc/refinement');
-            //group.refresh();
-            //group.name.should.equal("3FVA");
-            //group.name.type.should.equal("variable-length");
-            //group.close();
+        it("should be attribute info ", function*() {
+            const group   = file.openGroup('pmc/refinement');
+            group.refresh();
+            group.name.should.equal("3FVA");
+            group.name.type.should.equal("variable-length");
+            group.size.constructor.name.should.match('Float64Array');
+            group.close();
         });
 
         after(function*(){

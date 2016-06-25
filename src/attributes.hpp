@@ -8,6 +8,7 @@
 #include <cstring>
 #include <vector>
 #include <memory>
+#include "H5Tpublic.h"
 
 namespace NodeHDF5{
     class Attributes : public node::ObjectWrap {
@@ -20,6 +21,22 @@ namespace NodeHDF5{
         Attributes(hid_t id) : id (id) {};
         Attributes(const Attributes& orig) = delete;
         virtual ~Attributes(){};
+        
+        static void make_attribute_from_typed_array(const int32_t &group_id, const char *attribute_name, v8::Handle<v8::TypedArray> buffer, hid_t type_id) {
+            std::unique_ptr<hsize_t> currentDims(new hsize_t[1]);
+            currentDims.get()[0]=buffer->Length();
+            hid_t attr_space=H5Screate_simple( 1, currentDims.get(), NULL );
+            if(attr_space>=0){
+                hid_t attr_type=H5Tcopy(type_id);
+                hid_t attr_id=H5Acreate2(group_id, attribute_name, attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+                
+                H5Awrite(attr_id, attr_type, buffer->Buffer()->Externalize().Data());
+                H5Aclose(attr_id);
+                H5Tclose(attr_type);
+                H5Sclose(attr_space);
+            }
+        }
+
         static void Refresh (const v8::FunctionCallbackInfo<v8::Value>& args) {
 
             // fail out if arguments are not correct
@@ -46,89 +63,167 @@ namespace NodeHDF5{
             {
             hid_t attr_id = H5Aopen(group->id, holder[index].c_str(), H5P_DEFAULT);
             hid_t attr_type=H5Aget_type(attr_id);
-            switch(H5Tget_class(attr_type))
-            {
-                case H5T_INTEGER:
-                    long long intValue;
-                    H5Aread(attr_id, attr_type, &intValue);
-                    args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::Int32::New(v8::Isolate::GetCurrent(), intValue));
-                    break;
-                case H5T_FLOAT:
+            hid_t space = H5Aget_space (attr_id);
+            switch(H5Sget_simple_extent_type(space)){
+                case H5S_SIMPLE:
                 {
-                    size_t size=H5Tget_size( attr_type );
-                    switch(size){
-                        case 8:
-                        {
-                            double value;
-                            H5Aread(attr_id, attr_type, &value);
-                            args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::Number::New(v8::Isolate::GetCurrent(), value));
-                        }
-                            break;
+                    hssize_t numberOfElements=H5Sget_simple_extent_npoints(space);
+                    H5T_class_t class_id=H5Tget_class(attr_type);
+                    switch(class_id)
+                    {
+                        case H5T_ARRAY:
+                        break;
+                        case H5T_STRING:
+                        break;
                         default:
-                        {
-                            float value;
-                            H5Aread(attr_id, attr_type, &value);
-                            args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::Number::New(v8::Isolate::GetCurrent(), value));
+                            size_t size=H5Tget_size( attr_type );
+                        v8::Local<v8::ArrayBuffer> arrayBuffer;
+                        v8::Local<v8::TypedArray> buffer;
+                        if(class_id==H5T_FLOAT && size==8) {
+                            arrayBuffer=v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), 8*numberOfElements);
+                            buffer = v8::Float64Array::New(arrayBuffer, 0, numberOfElements);
                         }
+                        else if(class_id==H5T_FLOAT && size==4) {
+                            arrayBuffer=v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), 4*numberOfElements);
+                            buffer = v8::Float32Array::New(arrayBuffer, 0, numberOfElements);
+                        }
+                        else if(class_id==H5T_INTEGER && size==4) {
+                            if(H5Tget_sign(attr_type)==H5T_SGN_2)
+                            {
+                                arrayBuffer=v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), 4*numberOfElements);
+                                buffer = v8::Int32Array::New(arrayBuffer, 0, numberOfElements);
+                            }
+                            else{
+                                arrayBuffer=v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), 4*numberOfElements);
+                                buffer = v8::Uint32Array::New(arrayBuffer, 0, numberOfElements);
+                            }
+                        }
+                        else if(class_id==H5T_FLOAT && size==2) {
+                            if(H5Tget_sign(attr_type)==H5T_SGN_2)
+                            {
+                                arrayBuffer=v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), 2*numberOfElements);
+                                buffer = v8::Int16Array::New(arrayBuffer, 0, numberOfElements);
+                            }
+                            else{
+                                arrayBuffer=v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), 2*numberOfElements);
+                                buffer = v8::Uint16Array::New(arrayBuffer, 0, numberOfElements);
+                            }
+                        }
+                        else if(class_id==H5T_FLOAT && size==1) {
+                            if(H5Tget_sign(attr_type)==H5T_SGN_2)
+                            {
+                                arrayBuffer=v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), numberOfElements);
+                                buffer = v8::Int8Array::New(arrayBuffer, 0, numberOfElements);
+                            }
+                            else{
+                                arrayBuffer=v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), numberOfElements);
+                                buffer = v8::Uint8Array::New(arrayBuffer, 0, numberOfElements);
+                            }
+                        }
+                        else
+                        {
+                            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
+                            args.GetReturnValue().SetUndefined();
+                            H5Sclose (space);
+                            H5Tclose(attr_type);
+                            H5Aclose(attr_id);
+                            return;
+                        }
+                            H5Aread(attr_id, attr_type, buffer->Buffer()->Externalize().Data());
+                            args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), buffer);
                             break;
                     }
+                    
                 }
                     break;
-                case H5T_STRING:
-                {
-                    htri_t isVlen = H5Tis_variable_str( attr_type );
-
-                    if (isVlen == -1) {
-                        //std::cout << "The H5Tis_variable_str function did not return successfully" << std::endl;
-                    } else if (isVlen == 0) {
-                        /*
-                         * Do whatever was done before I came along.
-                         */
-                        hsize_t storeSize = H5Aget_storage_size(attr_id);
-                        std::string strValue(storeSize,'\0');
-                        H5Aread(attr_id, attr_type, (void*)strValue.c_str());
-                        args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str()));
-                    } else {
-                        //std::cout << "Variable-length string attribute encountered" << std::endl;
-
-                        hid_t space = H5Aget_space (attr_id);
-                        H5A_info_t ainfo;
-                        H5Aget_info(attr_id, &ainfo );
-                        std::unique_ptr<char*> buffer(new char*[2]);
-
-                        /*
-                         * Create the memory datatype.
-                         */
-                        hid_t memtype = H5Tcopy (H5T_C_S1);
-                        herr_t status = H5Tset_size (memtype, H5T_VARIABLE);
-
-                        hid_t type = H5Tget_native_type(attr_type, H5T_DIR_ASCEND);
-                        /*
-                         * Read the data.
-                         */
-                        status = H5Aread (attr_id, type, buffer.get());
-                        v8::Local<v8::String> varLenStr=v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), buffer.get()[0]);
-                        v8::Local<v8::Value> varLenStrObject=v8::StringObject::New(varLenStr);
-                        varLenStrObject->ToObject()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"), v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "variable-length") );
-                        args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), varLenStrObject);
-
-                        /*
-                         * Clean up the mess I made
-                         */
-                        //status = H5Dvlen_reclaim (memtype, space, H5P_DEFAULT, rdata);
-                        status = H5Sclose (space);
-                        status = H5Tclose (memtype);
+                case H5S_SCALAR:
+                    switch(H5Tget_class(attr_type))
+                    {
+                        case H5T_INTEGER:
+                            long long intValue;
+                            H5Aread(attr_id, attr_type, &intValue);
+                            args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::Int32::New(v8::Isolate::GetCurrent(), intValue));
+                            break;
+                        case H5T_FLOAT:
+                        {
+                            size_t size=H5Tget_size( attr_type );
+                            switch(size){
+                                case 8:
+                                {
+                                    double value;
+                                    H5Aread(attr_id, attr_type, &value);
+                                    args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::Number::New(v8::Isolate::GetCurrent(), value));
+                                }
+                                    break;
+                                default:
+                                {
+                                    float value;
+                                    H5Aread(attr_id, attr_type, &value);
+                                    args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::Number::New(v8::Isolate::GetCurrent(), value));
+                                }
+                                    break;
+                            }
+                        }
+                            break;
+                        case H5T_STRING:
+                        {
+                            htri_t isVlen = H5Tis_variable_str( attr_type );
+        
+                            if (isVlen == -1) {
+                                //std::cout << "The H5Tis_variable_str function did not return successfully" << std::endl;
+                            } else if (isVlen == 0) {
+                                /*
+                                 * Do whatever was done before I came along.
+                                 */
+                                hsize_t storeSize = H5Aget_storage_size(attr_id);
+                                std::string strValue(storeSize,'\0');
+                                H5Aread(attr_id, attr_type, (void*)strValue.c_str());
+                                args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str()));
+                            } else {
+                                //std::cout << "Variable-length string attribute encountered" << std::endl;
+        
+                                H5A_info_t ainfo;
+                                H5Aget_info(attr_id, &ainfo );
+                                std::unique_ptr<char*> buffer(new char*[2]);
+        
+                                /*
+                                 * Create the memory datatype.
+                                 */
+                                hid_t memtype = H5Tcopy (H5T_C_S1);
+                                herr_t status = H5Tset_size (memtype, H5T_VARIABLE);
+        
+                                hid_t type = H5Tget_native_type(attr_type, H5T_DIR_ASCEND);
+                                /*
+                                 * Read the data.
+                                 */
+                                status = H5Aread (attr_id, type, buffer.get());
+                                v8::Local<v8::String> varLenStr=v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), buffer.get()[0]);
+                                v8::Local<v8::Value> varLenStrObject=v8::StringObject::New(varLenStr);
+                                varLenStrObject->ToObject()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"), v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "variable-length") );
+                                args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), varLenStrObject);
+        
+                                /*
+                                 * Clean up the mess I made
+                                 */
+                                //status = H5Dvlen_reclaim (memtype, space, H5P_DEFAULT, rdata);
+                                status = H5Tclose (memtype);
+                            }
+                        }
+                            break;
+                        case H5T_NO_CLASS:
+                        default:
+                            //throw std::invalid_argument("unsupported data type");
+            //                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
+            //                    args.GetReturnValue().SetUndefined();
+                                return;
+                            break;
                     }
-                }
                     break;
                 case H5T_NO_CLASS:
                 default:
-                    //throw std::invalid_argument("unsupported data type");
-    //                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
-    //                    args.GetReturnValue().SetUndefined();
-                        return;
                     break;
             }
+            H5Sclose (space);
             H5Tclose(attr_type);
             H5Aclose(attr_id);
             }
@@ -160,7 +255,71 @@ namespace NodeHDF5{
     //                //std::cout<<index<<" "<<name->IsString()<<std::endl;
     //                //std::cout<<index<<" "<<(*v8::String::Utf8Value(name->ToString()))<<std::endl;
                     htri_t attrExists=H5Aexists(group->id, *v8::String::Utf8Value(name->ToString()));
-                    if(args.This()->Get(name)->IsUint32())
+                    if(args.This()->Get(name)->IsFloat64Array())
+                    {
+                        if(attrExists)
+                        {
+                            H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
+                        }
+                        make_attribute_from_typed_array(group->id, *v8::String::Utf8Value(name->ToString()), v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)), H5T_NATIVE_DOUBLE);
+                    }
+                    else if(args.This()->Get(name)->IsFloat32Array())
+                    {
+                        if(attrExists)
+                        {
+                            H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
+                        }
+                        make_attribute_from_typed_array(group->id, *v8::String::Utf8Value(name->ToString()), v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)), H5T_NATIVE_FLOAT);
+                    }
+                    else if(args.This()->Get(name)->IsInt32Array())
+                    {
+                        if(attrExists)
+                        {
+                            H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
+                        }
+                        make_attribute_from_typed_array(group->id, *v8::String::Utf8Value(name->ToString()), v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)), H5T_NATIVE_INT);
+                    }
+                    else if(args.This()->Get(name)->IsUint32Array())
+                    {
+                        if(attrExists)
+                        {
+                            H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
+                        }
+                        make_attribute_from_typed_array(group->id, *v8::String::Utf8Value(name->ToString()), v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)), H5T_NATIVE_UINT);
+                    }
+                    else if(args.This()->Get(name)->IsInt16Array())
+                    {
+                        if(attrExists)
+                        {
+                            H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
+                        }
+                        make_attribute_from_typed_array(group->id, *v8::String::Utf8Value(name->ToString()), v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)), H5T_NATIVE_SHORT);
+                    }
+                    else if(args.This()->Get(name)->IsUint16Array())
+                    {
+                        if(attrExists)
+                        {
+                            H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
+                        }
+                        make_attribute_from_typed_array(group->id, *v8::String::Utf8Value(name->ToString()), v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)), H5T_NATIVE_USHORT);
+                    }
+                    else if(args.This()->Get(name)->IsInt8Array())
+                    {
+                        if(attrExists)
+                        {
+                            H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
+                        }
+                        make_attribute_from_typed_array(group->id, *v8::String::Utf8Value(name->ToString()), v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)), H5T_NATIVE_INT8);
+                    }
+                    else if(args.This()->Get(name)->IsUint8Array())
+                    {
+                        if(attrExists)
+                        {
+                            H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
+                        }
+                        make_attribute_from_typed_array(group->id, *v8::String::Utf8Value(name->ToString()), v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)), H5T_NATIVE_UINT8);
+                    }
+                    else if(args.This()->Get(name)->IsUint32())
                     {
                         uint32_t value=args.This()->Get(name)->ToUint32()->Uint32Value();
                         if(attrExists)

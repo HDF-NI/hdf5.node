@@ -23,6 +23,12 @@ npm install hdf5 --fallback-to-build --hdf5_home_linux=<your native hdf path>
 ```
 For mac and windows the switches are --hdf5_home_mac & --hdf5_home_win
 
+Note: If node-gyp isn't installed
+
+```bash
+npm install -g node-gyp
+```
+
 ```javascript
 var hdf5 = require('hdf5').hdf5;
 
