@@ -22,6 +22,11 @@ describe("testing atrribute interface ",function(){
             name.type="variable-length";
             group.name=name;
             group.size=new Float64Array([0.1, 0.1, 0.1]);
+            const notes=new Array(3);
+            notes[0]="Pick up dry cleaning";
+            notes[1]="Prefry the refried beans";
+            notes[2]="Remember Mother's Day";
+            group.notes=notes;
             group.flush();
             group.close();
         });
@@ -43,6 +48,8 @@ describe("testing atrribute interface ",function(){
             group.name.should.equal("3FVA");
             group.name.type.should.equal("variable-length");
             group.size.constructor.name.should.match('Float64Array');
+            group.notes.constructor.name.should.match('Array');
+            console.dir(group.notes);
             group.close();
         });
 

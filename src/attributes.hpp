@@ -36,6 +36,44 @@ namespace NodeHDF5{
                 H5Sclose(attr_space);
             }
         }
+        
+    static void make_attribute_from_array(const int32_t &group_id, const char *attribute_name, v8::Handle<v8::Array> array) {
+        //hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
+        int rank=1;
+        std::unique_ptr<hsize_t> countSpace(new hsize_t[rank]);
+        countSpace.get()[0]=1;
+        std::unique_ptr<hsize_t> count(new hsize_t[rank]);
+        count.get()[0]=array->Length();
+        hid_t memspace_id = H5Screate_simple (rank, countSpace.get(), NULL);
+        hid_t type_id = H5Tcopy(H5T_C_S1);
+        H5Tset_size(type_id, H5T_VARIABLE);
+        hid_t arraytype_id =H5Tarray_create( type_id,  rank, count.get() );
+        hid_t attr_id=H5Acreate2(group_id, attribute_name, arraytype_id, memspace_id, H5P_DEFAULT, H5P_DEFAULT);
+        std::unique_ptr<char*> vl(new char*[array->Length()]);
+        for(unsigned int arrayIndex=0;arrayIndex<array->Length();arrayIndex++){
+            v8::String::Utf8Value buffer (array->Get(arrayIndex)->ToString());
+            std::string s(*buffer);
+            ////std::cout<<s<<std::endl;
+            vl.get()[arrayIndex]=new char[s.length()+1];
+            std::strncpy(vl.get()[arrayIndex], s.c_str(), s.length()+1);
+    
+        }
+            //if(arrayIndex==0){
+        //std::cout<<"write the data "<<(vl.get())<<std::endl;
+        herr_t err=H5Awrite(attr_id, arraytype_id, vl.get());
+        //std::cout<<"wrote the data "<<err<<std::endl;
+        if(err<0)
+        {
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make var len array attribute")));
+            //return;
+        }
+            //}
+        H5Tclose(arraytype_id);
+        H5Tclose(type_id);
+        H5Aclose(attr_id);
+        H5Sclose(memspace_id);
+        //H5Pclose(dcpl);
+    }
 
         static void Refresh (const v8::FunctionCallbackInfo<v8::Value>& args) {
 
@@ -72,6 +110,30 @@ namespace NodeHDF5{
                     switch(class_id)
                     {
                         case H5T_ARRAY:
+                        {
+                            hid_t basetype_id=H5Tget_super(attr_type);
+                            if(H5Tis_variable_str(basetype_id)){
+                                int arrayRank=H5Tget_array_ndims(attr_type);
+                                std::unique_ptr<hsize_t> arrayDims(new hsize_t[arrayRank]);
+                                /*int arrayLength=*/H5Tget_array_dims(attr_type, arrayDims.get());
+                                std::unique_ptr<char*> vl(new char*[arrayDims.get()[0]]);
+                                herr_t err = H5Aread(attr_id, attr_type, vl.get());
+                                if(err<0)
+                                {
+                                    v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read array dataset")));
+                                    args.GetReturnValue().SetUndefined();
+                                    return;
+                                }
+                                v8::Local<v8::Array> array=v8::Array::New(v8::Isolate::GetCurrent(), arrayDims.get()[0]);
+                                for(unsigned int arrayIndex=0;arrayIndex<arrayDims.get()[0];arrayIndex++){
+                                    std::string s(vl.get()[arrayIndex]);
+                                    //std::cout<<arrayIndex<<" "<<(s)<<" "<<std::strlen(vl.get()[arrayIndex])<<std::endl;
+                                    array->Set(arrayIndex, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), vl.get()[arrayIndex],v8::String::kNormalString, std::strlen(vl.get()[arrayIndex])));
+                                }
+                                args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), array);
+            //                    args.GetReturnValue().Set(array);
+                            }
+                        }
                         break;
                         case H5T_STRING:
                         break;
@@ -449,6 +511,14 @@ namespace NodeHDF5{
                         H5Tclose(attr_type);
                         H5Aclose(attr_id);
 
+                    }
+                    else if(args.This()->Get(name)->IsArray())
+                    {
+                        if(attrExists)
+                        {
+                            H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
+                        }
+                        make_attribute_from_array(group->id, *v8::String::Utf8Value(name->ToString()), v8::Local<v8::Array>::Cast(args.This()->Get(name)));
                     }
                  }
             }

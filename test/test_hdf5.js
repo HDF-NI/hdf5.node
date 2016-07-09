@@ -16,7 +16,7 @@ describe("testing c interface ", function() {
         });
 
         it("should be >0 ", function*() {
-            const group=file.createGroup('pmc');
+            const group=file.createGroup('/pmcservices/x-ray/refinement');
             group.id.should.not.equal(-1);
             group.close();
         });
