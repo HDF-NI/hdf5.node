@@ -94,7 +94,8 @@ HDF5_PLUGIN_PATH.
 
 ## Experimental
 
-The h5im namespace is being designed to meet the Image Spec 1.2 <http://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html>.
+The h5im namespace is being designed to meet the Image Spec 1.2 <http://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html>. Hyperslabs/regions
+of images can now be read.
 
 Any ideas for the design of the API and interface are welcome.
 
