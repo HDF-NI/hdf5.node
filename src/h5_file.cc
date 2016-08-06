@@ -122,8 +122,13 @@ namespace NodeHDF5 {
         NODE_SET_PROTOTYPE_METHOD(t, "delete", Delete);
         NODE_SET_PROTOTYPE_METHOD(t, "flush", Flush);
         NODE_SET_PROTOTYPE_METHOD(t, "close", Close);
+        NODE_SET_PROTOTYPE_METHOD(t, "getNumObjs", GetNumObjs);
+        NODE_SET_PROTOTYPE_METHOD(t, "getMemberNames", GetMemberNames);
         NODE_SET_PROTOTYPE_METHOD(t, "getMemberNamesByCreationOrder", GetMemberNamesByCreationOrder);
         NODE_SET_PROTOTYPE_METHOD(t, "getChildType", GetChildType);
+        NODE_SET_PROTOTYPE_METHOD(t, "getDatasetType", getDatasetType);
+        NODE_SET_PROTOTYPE_METHOD(t, "getDatasetAttributes", getDatasetAttributes);
+        NODE_SET_PROTOTYPE_METHOD(t, "getFilters", getFilters);
 //        Local<Function> f=t->GetFunction();
         // append this function to the target object
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "File"), t->GetFunction());
@@ -430,171 +435,6 @@ namespace NodeHDF5 {
         }
         H5Fclose(file->id);
 
-        return;
-
-    }
-
-    void File::GetNumAttrs (const v8::FunctionCallbackInfo<Value>& args) {
-
-//        HandleScope scope;
-
-        // fail out if arguments are not correct
-//        if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
-//
-//            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file")));
-//            args.GetReturnValue().SetUndefined();
-//            return;
-//
-//        }
-
-        // unwrap file object
-        File* file = ObjectWrap::Unwrap<File>(args.This());
-
-        args.GetReturnValue().Set(file->getNumAttrs());
-        return;
-
-    }
-
-    hsize_t File::getNumObjs()
-    {
-       H5G_info_t 		ginfo;                  /* Group information */
-
-       herr_t ret_value = H5Gget_info(id, &ginfo);
-       if(ret_value < 0){
-//          throwException("getNumObjs", "H5Gget_info failed");
-       }
-       return (ginfo.nlinks);
-    }
-
-    int File::getNumAttrs()
-    {
-       H5O_info_t oinfo;    /* Object info */
-
-       H5Oget_info(id, &oinfo);
-       return( (int)oinfo.num_attrs );
-    }
-
-    H5O_type_t File::childObjType(const char* objname)
-    {
-        H5O_info_t objinfo;
-        H5O_type_t objtype = H5O_TYPE_UNKNOWN;
-
-        // Use C API to get information of the object
-        herr_t ret_value = H5Oget_info_by_name(id, objname, &objinfo, H5P_DEFAULT);
-
-        // Throw exception if C API returns failure
-        if (ret_value < 0){
-    //	throwException("childObjType", "H5Oget_info_by_name failed");
-        // Return a valid type or throw an exception for unknown type
-        }
-        else
-          switch (objinfo.type)
-          {
-            case H5O_TYPE_GROUP:
-            case H5O_TYPE_DATASET:
-            case H5O_TYPE_NAMED_DATATYPE:
-                objtype = objinfo.type;
-                break;
-            default:
-    //	    throwException("childObjType", "Unknown type of object");
-                break;
-          }
-        return(objtype);
-    }
-
-    std::string File::getObjnameByIdx(hsize_t idx)
-    {
-        // call H5Lget_name_by_idx with name as NULL to get its length
-        ssize_t name_len = H5Lget_name_by_idx(id, ".", H5_INDEX_NAME, H5_ITER_INC, idx, NULL, 0, H5P_DEFAULT);
-        if(name_len < 0){
-//          throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
-        }
-        // now, allocate C buffer to get the name
-        char* name_C = new char[name_len+1];
-        std::memset(name_C, 0, name_len+1); // clear buffer
-
-        name_len = H5Lget_name_by_idx(id, ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C, name_len+1, H5P_DEFAULT);
-
-        // clean up and return the string
-        std::string name = std::string(name_C);
-        delete []name_C;
-        return (name);
-    }
-
-    void File::GetMemberNamesByCreationOrder (const v8::FunctionCallbackInfo<Value>& args) {
-
-//        HandleScope scope;
-
-        // unwrap file
-        File* file = ObjectWrap::Unwrap<File>(args.This());
-        Local<Array> array=Array::New(v8::Isolate::GetCurrent(), file->getNumObjs());
-        uint32_t index=0;
-        std::vector<std::string> holder;
-//        //std::cout<<"group_name "<<group->name<std::endl;
-//        String::Utf8Value group_name (group->name);
-//            //std::cout<<"group_name "<<(*group_name)<<std::endl;
-//        group->m_group.iterateElems("Geometries", &index, [&](hid_t group_id, const char * member_name, void *operator_data) -> herr_t {
-//            //std::cout<<" "<<(*member_name)<<std::endl;
-//            ((std::vector<std::string>*)operator_data)->push_back(std::string(member_name));
-//            return 0;
-//        }, &holder);
-        herr_t err;
-            H5G_info_t group_info;
-            if ((err = H5Gget_info(file->id, &group_info)) < 0) {
-                v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), " has no info")));
-                args.GetReturnValue().SetUndefined();
-                return;
-            }
-        for(index=0;index<(uint32_t)group_info.nlinks;index++)
-        {
-            std::string datasetTitle;
-            H5L_info_t link_buff;
-            herr_t err=H5Lget_info_by_idx(file->id, ".", H5_INDEX_NAME, H5_ITER_INC, index, &link_buff, H5P_DEFAULT);
-            if(err>=0)
-            {
-                H5_index_t index_field=(link_buff.corder_valid) ? H5_INDEX_CRT_ORDER : H5_INDEX_NAME;
-            /*
-             * Get size of name, add 1 for null terminator.
-             */
-            ssize_t size = 1 + H5Lget_name_by_idx(file->id, ".",  index_field,
-                    H5_ITER_INC, index, NULL, 0, H5P_DEFAULT);
-
-            /*
-             * Allocate storage for name.
-             */
-            datasetTitle.resize(size);
-
-            /*
-             * Retrieve name, print it, and free the previously allocated
-             * space.
-             */
-            size = H5Lget_name_by_idx(file->id, ".",  index_field, H5_ITER_INC, index,
-                    (char*) datasetTitle.c_str(), (size_t) size, H5P_DEFAULT);
-            }
-            array->Set(index, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), datasetTitle.c_str()));
-        }
-        args.GetReturnValue().Set(array);
-        return;
-
-    }
-
-    void File::GetChildType (const v8::FunctionCallbackInfo<Value>& args) {
-
-//        HandleScope scope;
-
-        // fail out if arguments are not correct
-        if (args.Length() != 1 || !args[0]->IsString()) {
-
-            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected child object's name")));
-            args.GetReturnValue().SetUndefined();
-            return;
-
-        }
-        // unwrap group
-        File* file = ObjectWrap::Unwrap<File>(args.This());
-        // store specified child name
-        String::Utf8Value child_name (args[0]->ToString());
-        args.GetReturnValue().Set((uint32_t) file->childObjType(*child_name));
         return;
 
     }

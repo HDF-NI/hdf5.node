@@ -17,6 +17,8 @@
                 ],
                 'sources': [
                     'src/hdf5.cc',
+                    'src/attributes.cc',
+                    'src/methods.cc',
                     'src/h5_file.cc',
                     'src/h5_group.cc',
                 ],
@@ -40,6 +42,8 @@
                 ],
                 'sources': [
                     'src/hdf5.cc',
+                    'src/attributes.cc',
+                    'src/methods.cc',
                     'src/h5_file.cc',
                     'src/h5_group.cc',
                 ],
@@ -88,6 +92,8 @@
                 ],
                 'sources': [
                     'src/hdf5.cc',
+                    'src/attributes.cc',
+                    'src/methods.cc',
                     'src/h5_file.cc',
                     'src/h5_group.cc',
                 ],
