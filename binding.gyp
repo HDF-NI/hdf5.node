@@ -16,6 +16,7 @@
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
+                    'src/int64.cc',
                     'src/hdf5.cc',
                     'src/attributes.cc',
                     'src/methods.cc',
@@ -300,6 +301,7 @@
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
+                    'src/int64.cc',
                     'src/h5pt.cc',
                     'src/h5_pt.cc'
                 ],

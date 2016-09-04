@@ -22,7 +22,7 @@ describe("testing dimension scale interface ", function() {
         it("should set scale ", function*() {
             const group=file.createGroup('pmc/refinement');
             group.id.should.not.equal(-1);
-            const buffer=new Buffer(4096*4, "binary");
+            const buffer=Buffer.alloc(4096*4, "binary");
             buffer.type=H5Type.H5T_NATIVE_UINT;
             buffer.rank=2;
             buffer.rows=64;
@@ -36,7 +36,7 @@ describe("testing dimension scale interface ", function() {
             readAsBuffer.length.should.equal(16384);
             readAsBuffer.rows.should.equal(64);
 
-            const scaleBuffer=new Buffer(64*8, "binary");
+            const scaleBuffer=Buffer.alloc(64*8, "binary");
             scaleBuffer.type=H5Type.H5T_NATIVE_DOUBLE;
             for(let index=0;index<64;index++) {
                 scaleBuffer.writeDoubleLE(index, index*8);
@@ -50,7 +50,7 @@ describe("testing dimension scale interface ", function() {
             h5ds.attachScale(group.id, 'Data', 'X(dim)', 0);
             h5ds.isAttached(group.id, 'Data', 'X(dim)', 0).should.equal(true);
 
-            const scaleYBuffer=new Buffer(64*8, "binary");
+            const scaleYBuffer=Buffer.alloc(64*8, "binary");
             scaleYBuffer.type=H5Type.H5T_NATIVE_DOUBLE;
             for(let index=0;index<64;index++) {
                 scaleYBuffer.writeDoubleLE(index-31, index*8);

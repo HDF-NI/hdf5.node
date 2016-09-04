@@ -10,6 +10,7 @@
 
 #include "file.h"
 #include "group.h"
+#include "int64.hpp"
 #include "H5PTpublic.h"
 
 namespace NodeHDF5 {
@@ -39,8 +40,11 @@ namespace NodeHDF5 {
             //        v8::Isolate* isolate = v8::Isolate::GetCurrent();
             //        HandleScope scope(isolate);
 
+            Local<Object> idInstance=Int64::Instantiate(packetId);
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(idInstance);
+            idWrap->value=packetId;
             const unsigned argc = 2;
-            v8::Handle<v8::Value> argv[argc] = {Uint32::New(v8::Isolate::GetCurrent(), packetId),
+            v8::Handle<v8::Value> argv[argc] = {idInstance,
                 Uint32::New(v8::Isolate::GetCurrent(), nmembers)};
             //            v8::Local<v8::FunctionTemplate> cons = v8::Local<v8::FunctionTemplate>::New(isolate, Constructor);
             //        //std::cout<<"NewInstance "<<std::endl;
@@ -64,7 +68,7 @@ namespace NodeHDF5 {
             v8::HandleScope scope(isolate);
             //        if (args.IsConstructCall()) {
             // Invoked as constructor: `new MyObject(...)`
-            hid_t value = args[0]->IsUndefined() ? -1 : args[0]->ToInt32()->Value();
+            hid_t value = args[0]->IsUndefined() ? -1 : ObjectWrap::Unwrap<Int64>(args[0]->ToObject())->Value();
             int nmembers = args[1]->IsUndefined() ? -1 : args[1]->ToInt32()->Value();
             PacketTable* obj = new PacketTable(value, nmembers);
             obj->Wrap(args.This());
@@ -165,11 +169,12 @@ namespace NodeHDF5 {
                 std::strcpy(obj->p_data[index], *record_value);
             }
             H5Tpack(compoundID);
-            obj->packetTableID = H5PTcreate_fl(args[0]->ToInt32()->Value(), *table_name, compoundID, (hsize_t) 100, -1);
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            obj->packetTableID = H5PTcreate_fl(idWrap->Value(), *table_name, compoundID, (hsize_t) 100, -1);
             if (obj->packetTableID == H5I_BADID) {
                 H5Tclose(compoundID);
                 H5Tclose(vlenID);
-                std::string errStr = "Failed creating table, " + std::string(*table_name) + " with return: " + std::to_string(obj->packetTableID) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                std::string errStr = "Failed creating table, " + std::string(*table_name) + " with return: " + std::to_string(obj->packetTableID) + " " + std::to_string(idWrap->Value()) + ".\n";
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                 args.GetReturnValue().SetUndefined();
                 return;
@@ -194,10 +199,11 @@ namespace NodeHDF5 {
 
         static void read_table(const v8::FunctionCallbackInfo<Value>& args) {
             String::Utf8Value table_name(args[1]->ToString());
-            hid_t packetTableID = H5PTopen(args[0]->ToInt32()->Value(), (*table_name));
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            hid_t packetTableID = H5PTopen(idWrap->Value(), (*table_name));
             int nmembers = 0;
             if (packetTableID == H5I_BADID) {
-                std::string errStr = "Failed opening table, " + std::string(*table_name) + " with return: " + std::to_string(packetTableID) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                std::string errStr = "Failed opening table, " + std::string(*table_name) + " with return: " + std::to_string(packetTableID) + " " + std::to_string(idWrap->Value()) + ".\n";
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                 args.GetReturnValue().SetUndefined();
                 return;
@@ -210,7 +216,7 @@ namespace NodeHDF5 {
             hsize_t nrecords = 0;
             err = H5PTget_num_packets(packetTableID, &nrecords);
             if (err < 0) {
-                std::string errStr = "Failed to get size of Events table, " + std::string(*table_name) + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                std::string errStr = "Failed to get size of Events table, " + std::string(*table_name) + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                 args.GetReturnValue().SetUndefined();
                 return;
@@ -220,7 +226,7 @@ namespace NodeHDF5 {
 
             }
             v8::Local<v8::Object> record = v8::Object::New(v8::Isolate::GetCurrent());
-            hid_t ds = H5Dopen(args[0]->ToInt32()->Value(), (*table_name), H5P_DEFAULT);
+            hid_t ds = H5Dopen(idWrap->Value(), (*table_name), H5P_DEFAULT);
             if (ds >= 0) {
                 hid_t type = H5Dget_type(ds);
                 if (type >= 0) {

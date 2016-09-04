@@ -12,6 +12,7 @@
 
 #include "file.h"
 #include "group.h"
+#include "int64.hpp"
 #include "H5TBpublic.h"
 #include "H5Dpublic.h"
 #include "H5Tpublic.h"
@@ -347,7 +348,7 @@ namespace NodeHDF5 {
         static void make_table (const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 3 || !args[0]->IsUint32() || !args[1]->IsString() || !args[2]->IsArray()) {
+            if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsArray()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, model")));
                 args.GetReturnValue().SetUndefined();
@@ -369,10 +370,11 @@ namespace NodeHDF5 {
                 std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&& data=prepareData(table);
                 hsize_t chunk_size = 10;
                 int *fill_data = NULL;
-                herr_t err=H5TBmake_table( (*table_name), args[0]->ToInt32()->Value(), (*table_name), table->Length(), std::get<0>(data), std::get<1>(data), (const char**)field_names.get(), std::get<2>(data).get(), std::get<4>(data).get(), chunk_size, fill_data, 0, (const void*)std::get<5>(data).get());
+                Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+                herr_t err=H5TBmake_table( (*table_name), idWrap->Value(), (*table_name), table->Length(), std::get<0>(data), std::get<1>(data), (const char**)field_names.get(), std::get<2>(data).get(), std::get<4>(data).get(), chunk_size, fill_data, 0, (const void*)std::get<5>(data).get());
                 if (err < 0) {
                     std::string tableName(*table_name);
-                    std::string errStr="Failed making table , " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                    std::string errStr="Failed making table , " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                     args.GetReturnValue().SetUndefined();
                     return;
@@ -389,7 +391,7 @@ namespace NodeHDF5 {
         static void read_table (const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 2 || !args[0]->IsUint32() || !args[1]->IsString()) {
+            if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
                 args.GetReturnValue().SetUndefined();
@@ -399,10 +401,11 @@ namespace NodeHDF5 {
             String::Utf8Value table_name (args[1]->ToString());
             hsize_t nfields;
             hsize_t nrecords;
-            herr_t err = H5TBget_table_info(args[0]->ToInt32()->Value(), (*table_name), &nfields, &nrecords);
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            herr_t err = H5TBget_table_info(idWrap->Value(), (*table_name), &nfields, &nrecords);
             if (err < 0) {
                 std::string tableName(*table_name);
-                std::string errStr="Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                std::string errStr="Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                 args.GetReturnValue().SetUndefined();
                 return;
@@ -416,10 +419,10 @@ namespace NodeHDF5 {
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
 //            //std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
-            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
+            err=H5TBget_field_info(idWrap->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
                 if (err < 0) {
                     std::string tableName(*table_name);
-                    std::string errStr="Failed getting field info , " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                    std::string errStr="Failed getting field info , " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                     args.GetReturnValue().SetUndefined();
                     return;
@@ -435,15 +438,15 @@ namespace NodeHDF5 {
             }
 //            //std::cout<<dst_size<<" "<<type_size<<" nrecords "<<nrecords<<std::endl;
             std::unique_ptr<char[]> data(new char[type_size*nrecords]);
-            err=H5TBread_table (args[0]->ToInt32()->Value(), (*table_name), type_size,  field_offsets.get(), field_size.get(),  (void*) data.get() );
+            err=H5TBread_table (idWrap->Value(), (*table_name), type_size,  field_offsets.get(), field_size.get(),  (void*) data.get() );
                 if (err < 0) {
                     std::string tableName(*table_name);
-                    std::string errStr="Failed reading table , " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                    std::string errStr="Failed reading table , " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                     args.GetReturnValue().SetUndefined();
                     return;
                 }
-                hid_t dataset = H5Dopen(args[0]->ToInt32()->Value(), (*table_name), H5P_DEFAULT);
+                hid_t dataset = H5Dopen(idWrap->Value(), (*table_name), H5P_DEFAULT);
                 hid_t dataset_type=H5Dget_type(dataset );
                 v8::Local< v8::Array > 	table=v8::Array::New (v8::Isolate::GetCurrent(), nfields);
                 try{
@@ -463,7 +466,7 @@ namespace NodeHDF5 {
         static void append_records(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 3 || !args[0]->IsUint32() || !args[1]->IsString() || !args[2]->IsArray()) {
+            if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsArray()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, model")));
                 args.GetReturnValue().SetUndefined();
@@ -474,10 +477,11 @@ namespace NodeHDF5 {
             Local<v8::Array> table=Local<v8::Array>::Cast(args[2]);
             std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&& data=prepareData(table);
             try{
-                herr_t err=H5TBappend_records (args[0]->ToInt32()->Value(), (*table_name), std::get<0>(data), std::get<1>(data), std::get<2>(data).get(), std::get<3>(data).get(), (const void*)std::get<5>(data).get() );
+                Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+                herr_t err=H5TBappend_records (idWrap->Value(), (*table_name), std::get<0>(data), std::get<1>(data), std::get<2>(data).get(), std::get<3>(data).get(), (const void*)std::get<5>(data).get() );
                 if (err < 0) {
                     std::string tableName(*table_name);
-                    std::string errStr="Failed appending to table , " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                    std::string errStr="Failed appending to table , " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                     args.GetReturnValue().SetUndefined();
                     return;
@@ -494,7 +498,7 @@ namespace NodeHDF5 {
         static void write_records(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 4 || !args[0]->IsUint32() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
+            if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model")));
                 args.GetReturnValue().SetUndefined();
@@ -505,10 +509,11 @@ namespace NodeHDF5 {
             Local<v8::Array> table=Local<v8::Array>::Cast(args[3]);
             std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&& data=prepareData(table);
             try{
-                herr_t err=H5TBwrite_records (args[0]->ToInt32()->Value(), (*table_name), args[2]->ToInt32()->Value(), std::get<0>(data), std::get<1>(data), std::get<2>(data).get(), std::get<3>(data).get(), (const void*)std::get<5>(data).get() );
+                Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+                herr_t err=H5TBwrite_records (idWrap->Value(), (*table_name), args[2]->ToInt32()->Value(), std::get<0>(data), std::get<1>(data), std::get<2>(data).get(), std::get<3>(data).get(), (const void*)std::get<5>(data).get() );
                 if (err < 0) {
                     std::string tableName(*table_name);
-                    std::string errStr="Failed writing to table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                    std::string errStr="Failed writing to table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                     args.GetReturnValue().SetUndefined();
                     return;
@@ -525,7 +530,7 @@ namespace NodeHDF5 {
         static void read_records(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 4 || !args[0]->IsUint32() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsUint32()) {
+            if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsUint32()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, nrecords")));
                 args.GetReturnValue().SetUndefined();
@@ -535,10 +540,11 @@ namespace NodeHDF5 {
             String::Utf8Value table_name (args[1]->ToString());
             hsize_t nfields;
             hsize_t nrecords;
-            herr_t err = H5TBget_table_info(args[0]->ToInt32()->Value(), (*table_name), &nfields, &nrecords);
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            herr_t err = H5TBget_table_info(idWrap->Value(), (*table_name), &nfields, &nrecords);
             if (err < 0) {
                 std::string tableName(*table_name);
-                std::string errStr="Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                std::string errStr="Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                 args.GetReturnValue().SetUndefined();
                 return;
@@ -553,7 +559,7 @@ namespace NodeHDF5 {
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
 //            //std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
-            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
+            err=H5TBget_field_info(idWrap->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             std::unique_ptr<int[]> field_indices(new int[nfields]);
             for (unsigned int i = 0; i < nfields; i++)
             {
@@ -563,8 +569,8 @@ namespace NodeHDF5 {
             }
 
             std::unique_ptr<char[]> data(new char[type_size*args[3]->ToInt32()->Value()]);
-            err=H5TBread_records (args[0]->ToInt32()->Value(), (*table_name), args[2]->ToInt32()->Value(), args[3]->ToInt32()->Value(), type_size,  field_offsets.get(), field_size.get(),  (void*) data.get() );
-                hid_t dataset = H5Dopen(args[0]->ToInt32()->Value(), (*table_name), H5P_DEFAULT);
+            err=H5TBread_records (idWrap->Value(), (*table_name), args[2]->ToInt32()->Value(), args[3]->ToInt32()->Value(), type_size,  field_offsets.get(), field_size.get(),  (void*) data.get() );
+                hid_t dataset = H5Dopen(idWrap->Value(), (*table_name), H5P_DEFAULT);
                 hid_t dataset_type=H5Dget_type(dataset );
                 v8::Local< v8::Array > 	table=v8::Array::New (v8::Isolate::GetCurrent(), nfields);
                 try{
@@ -584,7 +590,7 @@ namespace NodeHDF5 {
         static void delete_record(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 4 || !args[0]->IsUint32() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsUint32()) {
+            if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsUint32()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, nrecords")));
                 args.GetReturnValue().SetUndefined();
@@ -592,10 +598,11 @@ namespace NodeHDF5 {
 
             }
             String::Utf8Value table_name (args[1]->ToString());
-            herr_t err = H5TBdelete_record(args[0]->ToInt32()->Value(), (*table_name), args[2]->ToInt32()->Value(), args[3]->ToInt32()->Value());
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            herr_t err = H5TBdelete_record(idWrap->Value(), (*table_name), args[2]->ToInt32()->Value(), args[3]->ToInt32()->Value());
             if (err < 0) {
                 std::string tableName(*table_name);
-                std::string errStr="Failed deleting records from table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                std::string errStr="Failed deleting records from table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                 args.GetReturnValue().SetUndefined();
                 return;
@@ -605,7 +612,7 @@ namespace NodeHDF5 {
         static void insert_record(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 4 || !args[0]->IsUint32() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
+            if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model")));
                 args.GetReturnValue().SetUndefined();
@@ -616,10 +623,11 @@ namespace NodeHDF5 {
             Local<v8::Array> table=Local<v8::Array>::Cast(args[3]);
             std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&& data=prepareData(table);
             try{
-                herr_t err=H5TBinsert_record (args[0]->ToInt32()->Value(), (*table_name), args[2]->ToInt32()->Value(), std::get<0>(data), std::get<1>(data), std::get<2>(data).get(), std::get<3>(data).get(), (void*)std::get<5>(data).get() );
+                Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+                herr_t err=H5TBinsert_record (idWrap->Value(), (*table_name), args[2]->ToInt32()->Value(), std::get<0>(data), std::get<1>(data), std::get<2>(data).get(), std::get<3>(data).get(), (void*)std::get<5>(data).get() );
                 if (err < 0) {
                     std::string tableName(*table_name);
-                    std::string errStr="Failed inserting to table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                    std::string errStr="Failed inserting to table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                     args.GetReturnValue().SetUndefined();
                     return;
@@ -636,7 +644,7 @@ namespace NodeHDF5 {
         static void write_fields_name(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 4 || !args[0]->IsUint32() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
+            if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model")));
                 args.GetReturnValue().SetUndefined();
@@ -660,10 +668,11 @@ namespace NodeHDF5 {
             }
             hsize_t nfields;
             hsize_t nrecords;
-            herr_t err = H5TBget_table_info(args[0]->ToInt32()->Value(), (*table_name), &nfields, &nrecords);
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            herr_t err = H5TBget_table_info(idWrap->Value(), (*table_name), &nfields, &nrecords);
             if (err < 0) {
                 std::string tableName(*table_name);
-                std::string errStr="Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                std::string errStr="Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                 args.GetReturnValue().SetUndefined();
                 return;
@@ -677,14 +686,14 @@ namespace NodeHDF5 {
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
-            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
+            err=H5TBget_field_info(idWrap->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             try{
                 std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&& data=prepareData(table);
 
-                herr_t err=H5TBwrite_fields_name (args[0]->ToInt32()->Value(), (*table_name), (const char*)fieldNames.c_str(), args[2]->ToInt32()->Value(), std::get<0>(data), std::get<1>(data), std::get<2>(data).get(), std::get<3>(data).get(), (const void*)std::get<5>(data).get() );
+                herr_t err=H5TBwrite_fields_name (idWrap->Value(), (*table_name), (const char*)fieldNames.c_str(), args[2]->ToInt32()->Value(), std::get<0>(data), std::get<1>(data), std::get<2>(data).get(), std::get<3>(data).get(), (const void*)std::get<5>(data).get() );
                 if (err < 0) {
                     std::string tableName(*table_name);
-                    std::string errStr="Failed overwriting fields in table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                    std::string errStr="Failed overwriting fields in table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                     args.GetReturnValue().SetUndefined();
                     return;
@@ -703,7 +712,7 @@ namespace NodeHDF5 {
         static void write_fields_index(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 5 || !args[0]->IsUint32() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray() || !args[4]->IsArray()) {
+            if (args.Length() != 5 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray() || !args[4]->IsArray()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model, indices")));
                 args.GetReturnValue().SetUndefined();
@@ -720,10 +729,11 @@ namespace NodeHDF5 {
             }
             hsize_t nfields;
             hsize_t nrecords;
-            herr_t err = H5TBget_table_info(args[0]->ToInt32()->Value(), (*table_name), &nfields, &nrecords);
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            herr_t err = H5TBget_table_info(idWrap->Value(), (*table_name), &nfields, &nrecords);
             if (err < 0) {
                 std::string tableName(*table_name);
-                std::string errStr="Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                std::string errStr="Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                 args.GetReturnValue().SetUndefined();
                 return;
@@ -738,14 +748,14 @@ namespace NodeHDF5 {
             std::unique_ptr<size_t[]> field_size(new size_t[nfields]);
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
-            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
+            err=H5TBget_field_info(idWrap->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             try{
                 std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&& data=prepareData(table);
 
-                herr_t err=H5TBwrite_fields_index (args[0]->ToInt32()->Value(), (*table_name), table->Length(), field_indices.get(), args[2]->ToInt32()->Value(), std::get<0>(data), std::get<1>(data), std::get<2>(data).get(), std::get<3>(data).get(), (const void*)std::get<5>(data).get() );
+                herr_t err=H5TBwrite_fields_index (idWrap->Value(), (*table_name), table->Length(), field_indices.get(), args[2]->ToInt32()->Value(), std::get<0>(data), std::get<1>(data), std::get<2>(data).get(), std::get<3>(data).get(), (const void*)std::get<5>(data).get() );
                 if (err < 0) {
                     std::string tableName(*table_name);
-                    std::string errStr="Failed overwriting fields in table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                    std::string errStr="Failed overwriting fields in table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                     args.GetReturnValue().SetUndefined();
                     return;
@@ -764,7 +774,7 @@ namespace NodeHDF5 {
         static void read_fields_name(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 5 || !args[0]->IsUint32() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsUint32() || !args[4]->IsArray()) {
+            if (args.Length() != 5 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsUint32() || !args[4]->IsArray()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, nrecords, model, field names")));
                 args.GetReturnValue().SetUndefined();
@@ -774,10 +784,11 @@ namespace NodeHDF5 {
             String::Utf8Value table_name (args[1]->ToString());
             hsize_t nfields;
             hsize_t nrecords;
-            herr_t err = H5TBget_table_info(args[0]->ToInt32()->Value(), (*table_name), &nfields, &nrecords);
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            herr_t err = H5TBget_table_info(idWrap->Value(), (*table_name), &nfields, &nrecords);
             if (err < 0) {
                 std::string tableName(*table_name);
-                std::string errStr="Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                std::string errStr="Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                 args.GetReturnValue().SetUndefined();
                 return;
@@ -806,12 +817,12 @@ namespace NodeHDF5 {
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
 //            //std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
-            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
+            err=H5TBget_field_info(idWrap->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             std::unique_ptr<size_t[]> model_field_size(new size_t[indices->Length()]);
             std::unique_ptr<size_t[]> model_field_offsets(new size_t[indices->Length()]);
             size_t model_type_size=0;
             size_t model_size=0;
-                hid_t dataset = H5Dopen(args[0]->ToInt32()->Value(), (*table_name), H5P_DEFAULT);
+                hid_t dataset = H5Dopen(idWrap->Value(), (*table_name), H5P_DEFAULT);
                 hid_t dataset_type=H5Dget_type(dataset );
             std::unique_ptr<int[]> field_indices(new int[indices->Length()]);
             for (unsigned int j = 0; j < indices->Length(); j++)
@@ -839,16 +850,16 @@ namespace NodeHDF5 {
                 H5Dclose(dataset);
 
                 std::unique_ptr<char[]> data(new char[model_type_size*args[3]->ToInt32()->Value()]);
-                err=H5TBread_fields_name (args[0]->ToInt32()->Value(), (*table_name), fieldNames.c_str(), args[2]->ToInt32()->Value(), args[3]->ToInt32()->Value(), model_type_size,  model_field_offsets.get(), model_field_size.get(),  (void*) data.get() );
+                err=H5TBread_fields_name (idWrap->Value(), (*table_name), fieldNames.c_str(), args[2]->ToInt32()->Value(), args[3]->ToInt32()->Value(), model_type_size,  model_field_offsets.get(), model_field_size.get(),  (void*) data.get() );
                 if (err < 0) {
                     std::string tableName(*table_name);
-                    std::string errStr="Failed reading fields in table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                    std::string errStr="Failed reading fields in table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                     args.GetReturnValue().SetUndefined();
                     return;
                 }
                 v8::Local< v8::Array > 	table=v8::Array::New (v8::Isolate::GetCurrent(), indices->Length());
-                dataset = H5Dopen(args[0]->ToInt32()->Value(), (*table_name), H5P_DEFAULT);
+                dataset = H5Dopen(idWrap->Value(), (*table_name), H5P_DEFAULT);
                 dataset_type=H5Dget_type(dataset );
                 try{
                     prepareTable(args[3]->ToInt32()->Value(), indices->Length(), std::move(field_indices), model_type_size, dataset, dataset_type, model_field_names.get(), std::move(model_field_offsets), std::move(data), table);
@@ -866,7 +877,7 @@ namespace NodeHDF5 {
         static void read_fields_index(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 5 || !args[0]->IsUint32() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsUint32() || !args[4]->IsArray()) {
+            if (args.Length() != 5 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsUint32() || !args[4]->IsArray()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, nrecords, model, field indices")));
                 args.GetReturnValue().SetUndefined();
@@ -876,10 +887,11 @@ namespace NodeHDF5 {
             String::Utf8Value table_name (args[1]->ToString());
             hsize_t nfields;
             hsize_t nrecords;
-            herr_t err = H5TBget_table_info(args[0]->ToInt32()->Value(), (*table_name), &nfields, &nrecords);
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            herr_t err = H5TBget_table_info(idWrap->Value(), (*table_name), &nfields, &nrecords);
             if (err < 0) {
                 std::string tableName(*table_name);
-                std::string errStr="Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                std::string errStr="Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                 args.GetReturnValue().SetUndefined();
                 return;
@@ -904,12 +916,12 @@ namespace NodeHDF5 {
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
 //            //std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
-            err=H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
+            err=H5TBget_field_info(idWrap->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             std::unique_ptr<size_t[]> model_field_size(new size_t[indices->Length()]);
             std::unique_ptr<size_t[]> model_field_offsets(new size_t[indices->Length()]);
             size_t model_type_size=0;
             size_t model_size=0;
-                hid_t dataset = H5Dopen(args[0]->ToInt32()->Value(), (*table_name), H5P_DEFAULT);
+                hid_t dataset = H5Dopen(idWrap->Value(), (*table_name), H5P_DEFAULT);
                 hid_t dataset_type=H5Dget_type(dataset );
             for (unsigned int j = 0; j < indices->Length(); j++)
             {
@@ -938,16 +950,16 @@ namespace NodeHDF5 {
                 H5Dclose(dataset);
 
                 std::unique_ptr<char[]> data(new char[model_type_size*args[3]->ToInt32()->Value()]);
-                err=H5TBread_fields_index (args[0]->ToInt32()->Value(), (*table_name), indices->Length(), field_indices.get(), args[2]->ToInt32()->Value(), args[3]->ToInt32()->Value(), model_type_size,  model_field_offsets.get(), model_field_size.get(),  (void*) data.get() );
+                err=H5TBread_fields_index (idWrap->Value(), (*table_name), indices->Length(), field_indices.get(), args[2]->ToInt32()->Value(), args[3]->ToInt32()->Value(), model_type_size,  model_field_offsets.get(), model_field_size.get(),  (void*) data.get() );
                 if (err < 0) {
                     std::string tableName(*table_name);
-                    std::string errStr="Failed reading fields in table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                    std::string errStr="Failed reading fields in table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                     args.GetReturnValue().SetUndefined();
                     return;
                 }
                 v8::Local< v8::Array > 	table=v8::Array::New (v8::Isolate::GetCurrent(), indices->Length());
-                dataset = H5Dopen(args[0]->ToInt32()->Value(), (*table_name), H5P_DEFAULT);
+                dataset = H5Dopen(idWrap->Value(), (*table_name), H5P_DEFAULT);
                 dataset_type=H5Dget_type(dataset );
                 try{
                     prepareTable(args[3]->ToInt32()->Value(), indices->Length(), std::move(field_indices), model_type_size, dataset, dataset_type, model_field_names.get(), std::move(model_field_offsets), std::move(data), table);
@@ -965,7 +977,7 @@ namespace NodeHDF5 {
         static void delete_field(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 3 || !args[0]->IsUint32() || !args[1]->IsString() || !args[2]->IsString()) {
+            if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, field name")));
                 args.GetReturnValue().SetUndefined();
@@ -974,10 +986,11 @@ namespace NodeHDF5 {
             }
             String::Utf8Value table_name (args[1]->ToString());
             String::Utf8Value field_name (args[2]->ToString());
-            herr_t err = H5TBdelete_field(args[0]->ToInt32()->Value(), (*table_name), (*field_name));
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            herr_t err = H5TBdelete_field(idWrap->Value(), (*table_name), (*field_name));
             if (err < 0) {
                 std::string tableName(*table_name);
-                std::string errStr="Failed deleting field from table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                std::string errStr="Failed deleting field from table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                 args.GetReturnValue().SetUndefined();
                 return;
@@ -987,7 +1000,7 @@ namespace NodeHDF5 {
         static void add_records_from(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 6 || !args[0]->IsUint32() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsUint32() || !args[4]->IsString() || !args[5]->IsUint32()) {
+            if (args.Length() != 6 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsUint32() || !args[4]->IsString() || !args[5]->IsUint32()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name1, start1, nrecords, name2, start2")));
                 args.GetReturnValue().SetUndefined();
@@ -996,11 +1009,12 @@ namespace NodeHDF5 {
             }
             String::Utf8Value table_name1 (args[1]->ToString());
             String::Utf8Value table_name2 (args[4]->ToString());
-            //std::cout<<args[0]->ToInt32()->Value()<<" "<<(*table_name1)<<" "<<args[2]->ToInt32()->Value()<<" "<<args[3]->ToInt32()->Value()<<" "<<(*table_name2)<<" "<<args[5]->ToInt32()->Value()<<std::endl;
-            herr_t err=H5TBadd_records_from (args[0]->ToInt32()->Value(), (*table_name1),args[2]->ToInt32()->Value(), args[3]->ToInt32()->Value(), (*table_name2), args[5]->ToInt32()->Value());
+            //std::cout<<idWrap->Value()<<" "<<(*table_name1)<<" "<<args[2]->ToInt32()->Value()<<" "<<args[3]->ToInt32()->Value()<<" "<<(*table_name2)<<" "<<args[5]->ToInt32()->Value()<<std::endl;
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            herr_t err=H5TBadd_records_from (idWrap->Value(), (*table_name1),args[2]->ToInt32()->Value(), args[3]->ToInt32()->Value(), (*table_name2), args[5]->ToInt32()->Value());
             if (err < 0) {
                 std::string tableName(*table_name1);
-                std::string errStr="Failed add records from table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                std::string errStr="Failed add records from table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                 args.GetReturnValue().SetUndefined();
                 return;
@@ -1010,7 +1024,7 @@ namespace NodeHDF5 {
         static void combine_tables(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 5 || !args[0]->IsUint32() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsString() || !args[4]->IsString()) {
+            if (args.Length() != 5 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsObject() || !args[3]->IsString() || !args[4]->IsString()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id1, name1, id2, name2, name3")));
                 args.GetReturnValue().SetUndefined();
@@ -1020,10 +1034,12 @@ namespace NodeHDF5 {
             String::Utf8Value table_name1 (args[1]->ToString());
             String::Utf8Value table_name2 (args[3]->ToString());
             String::Utf8Value table_name3 (args[4]->ToString());
-            herr_t err=H5TBcombine_tables (args[0]->ToInt32()->Value(), (*table_name1),args[2]->ToInt32()->Value(), (*table_name2), (*table_name3));
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            Int64* id2Wrap = ObjectWrap::Unwrap<Int64>(args[2]->ToObject());
+            herr_t err=H5TBcombine_tables (idWrap->Value(), (*table_name1),id2Wrap->Value(), (*table_name2), (*table_name3));
             if (err < 0) {
                 std::string tableName(*table_name1);
-                std::string errStr="Failed combining from table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                std::string errStr="Failed combining from table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                 args.GetReturnValue().SetUndefined();
                 return;
@@ -1033,7 +1049,7 @@ namespace NodeHDF5 {
         static void insert_field(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 4 || !args[0]->IsUint32() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
+            if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model")));
                 args.GetReturnValue().SetUndefined();
@@ -1046,10 +1062,11 @@ namespace NodeHDF5 {
             std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&& data=prepareData(table);
             try{
                 int *fill_data = NULL;
-                herr_t err=H5TBinsert_field (args[0]->ToInt32()->Value(), (*table_name), (*field_name), std::get<4>(data)[0], args[2]->ToInt32()->Value(), fill_data, (void*)std::get<5>(data).get() );
+                Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+                herr_t err=H5TBinsert_field (idWrap->Value(), (*table_name), (*field_name), std::get<4>(data)[0], args[2]->ToInt32()->Value(), fill_data, (void*)std::get<5>(data).get() );
                 if (err < 0) {
                     std::string tableName(*table_name);
-                    std::string errStr="Failed inserting to table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(args[0]->ToInt32()->Value()) + ".\n";
+                    std::string errStr="Failed inserting to table, " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
                     args.GetReturnValue().SetUndefined();
                     return;
@@ -1066,7 +1083,7 @@ namespace NodeHDF5 {
         static void get_table_info(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 2 || !args[0]->IsUint32() || !args[1]->IsString()) {
+            if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
                 args.GetReturnValue().SetUndefined();
@@ -1076,7 +1093,8 @@ namespace NodeHDF5 {
             String::Utf8Value table_name (args[1]->ToString());
             hsize_t nfields;
             hsize_t nrecords;
-            H5TBget_table_info(args[0]->ToInt32()->Value(), (*table_name), &nfields, &nrecords);
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            H5TBget_table_info(idWrap->Value(), (*table_name), &nfields, &nrecords);
             v8::Local<v8::Object> obj = v8::Object::New(v8::Isolate::GetCurrent());
             obj->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "nfields"),  Uint32::New(v8::Isolate::GetCurrent(), nfields));
             obj->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "nrecords"),  Uint32::New(v8::Isolate::GetCurrent(), nrecords));
@@ -1086,7 +1104,7 @@ namespace NodeHDF5 {
         static void get_field_info(const v8::FunctionCallbackInfo<Value>& args)
         {
             // fail out if arguments are not correct
-            if (args.Length() != 2 || !args[0]->IsUint32() || !args[1]->IsString()) {
+            if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
                 args.GetReturnValue().SetUndefined();
@@ -1096,7 +1114,8 @@ namespace NodeHDF5 {
             String::Utf8Value table_name (args[1]->ToString());
             hsize_t nfields;
             hsize_t nrecords;
-            H5TBget_table_info(args[0]->ToInt32()->Value(), (*table_name), &nfields, &nrecords);
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            H5TBget_table_info(idWrap->Value(), (*table_name), &nfields, &nrecords);
             std::unique_ptr<char*> field_names(new char*[nfields]);
             for (unsigned int i = 0; i < nfields; i++)
             {
@@ -1106,7 +1125,7 @@ namespace NodeHDF5 {
             std::unique_ptr<size_t[]> field_offsets(new size_t[nfields]);
             size_t type_size;
 //            //std::cout<<"H5TBget_field_info "<<nfields<<" "<<std::endl;
-            /*herr_t err=*/H5TBget_field_info(args[0]->ToInt32()->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
+            /*herr_t err=*/H5TBget_field_info(idWrap->Value(), (*table_name), field_names.get(), field_size.get(), field_offsets.get(), &type_size );
             v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), nfields);
             for (unsigned int i = 0; i < nfields; i++)
             {

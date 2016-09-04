@@ -16,9 +16,14 @@ describe("testing images ",function() {
         let file2;
         let image;
         before(function*() {
+            try {
             file  = new hdf5.File('./h5im.h5', Access.ACC_TRUNC);
             file2 = new hdf5.File('./test/examples/hdf5.h5', Access.ACC_RDONLY);
             image = h5im.readImage(file2.id, 'hdf_logo.jpg');
+            } catch(err) {
+                err.message.should.equal("");
+                console.dir(err.message);
+            }
         });
 
         let group;

@@ -11,6 +11,7 @@
 
 #include "file.h"
 #include "group.h"
+#include "int64.hpp"
 
 #include "H5Lpublic.h"
 
@@ -182,7 +183,12 @@ namespace NodeHDF5 {
         args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "size"), Number::New(v8::Isolate::GetCurrent(), file_size));
         args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "freeSpace"), Number::New(v8::Isolate::GetCurrent(), H5Fget_freespace(f->id)));
         args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "objectCount"), Number::New(v8::Isolate::GetCurrent(), H5Fget_obj_count(f->id, H5F_OBJ_ALL)));
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), f->id));
+        Local<Object> idInstance=Int64::Instantiate(args.This(), f->id);
+        Int64* idWrap = ObjectWrap::Unwrap<Int64>(idInstance);
+        idWrap->value=f->id;
+        //idWrap->Wrap(instance);
+        
+        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), idInstance);
 
         return;
 
@@ -257,7 +263,11 @@ namespace NodeHDF5 {
                 }
                 for (std::vector<hid_t>::iterator it = hidPath.begin() ; it != hidPath.end(); ++it)
                     group->hidPath.push_back(*it);
-                instance->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->id));
+                    
+                Local<Object> idInstance=Int64::Instantiate(args.This(), group->id);
+                Int64* idWrap = ObjectWrap::Unwrap<Int64>(idInstance);
+                idWrap->value=group->id;
+                instance->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), idInstance);
                 group->Wrap(instance);
 
                 // attach various properties
@@ -279,7 +289,10 @@ namespace NodeHDF5 {
             }
             for (std::vector<hid_t>::iterator it = hidPath.begin() ; it != hidPath.end(); ++it)
                 group->hidPath.push_back(*it);
-            instance->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->id));
+                Local<Object> idInstance=Int64::Instantiate(args.This(), group->id);
+                Int64* idWrap = ObjectWrap::Unwrap<Int64>(idInstance);
+                idWrap->value=group->id;
+            instance->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), idInstance);
             group->Wrap(instance);
 
             // attach various properties

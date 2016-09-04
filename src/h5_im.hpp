@@ -9,6 +9,7 @@
 
 #include "file.h"
 #include "group.h"
+#include "int64.hpp"
 #include "H5IMpublic.h"
 
 namespace NodeHDF5 {
@@ -36,23 +37,24 @@ static void make_image (const v8::FunctionCallbackInfo<Value>& args)
 //    //std::cout<<"planes "<<buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->ToInt32()->Value()<<std::endl;
     String::Utf8Value interlace (buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"))->ToString());
     herr_t err;
-            hsize_t dims[3]={(hsize_t) buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->ToInt32()->Value()};
-            err=H5LTmake_dataset (args[0]->ToInt32()->Value(), *dset_name, 3, dims, H5T_NATIVE_UCHAR,  (const char *)node::Buffer::Data(args[2]) );
-            if(err<0)
-            {
-                v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make image dataset")));
-                args.GetReturnValue().SetUndefined();
-                return;
-            }
-            H5LTset_attribute_string(args[0]->ToInt32()->Value(), *dset_name, "CLASS", "IMAGE");
-            H5LTset_attribute_string(args[0]->ToInt32()->Value(), *dset_name, "IMAGE_SUBCLASS", "IMAGE_BITMAP");
-            H5LTset_attribute_string(args[0]->ToInt32()->Value(), *dset_name, "IMAGE_SUBCLASS", "IMAGE_TRUECOLOR");
-            H5LTset_attribute_string(args[0]->ToInt32()->Value(), *dset_name, "IMAGE_VERSION", "1.2");
-            H5LTset_attribute_string(args[0]->ToInt32()->Value(), *dset_name, "INTERLACE_MODE", "INTERLACE_PIXEL");
-            std::unique_ptr<unsigned char[]> rangeBuffer(new unsigned char[(size_t)(2)]);
-            rangeBuffer.get()[0]=(unsigned char)0;
-            rangeBuffer.get()[1]=(unsigned char)255;
-            H5LTset_attribute_uchar(args[0]->ToInt32()->Value(), *dset_name, "IMAGE_MINMAXRANGE", rangeBuffer.get(), 2);
+    hsize_t dims[3]={(hsize_t) buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->ToInt32()->Value()};
+    Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+    err=H5LTmake_dataset (idWrap->Value(), *dset_name, 3, dims, H5T_NATIVE_UCHAR,  (const char *)node::Buffer::Data(args[2]) );
+    if(err<0)
+    {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make image dataset")));
+        args.GetReturnValue().SetUndefined();
+        return;
+    }
+    H5LTset_attribute_string(idWrap->Value(), *dset_name, "CLASS", "IMAGE");
+    H5LTset_attribute_string(idWrap->Value(), *dset_name, "IMAGE_SUBCLASS", "IMAGE_BITMAP");
+    H5LTset_attribute_string(idWrap->Value(), *dset_name, "IMAGE_SUBCLASS", "IMAGE_TRUECOLOR");
+    H5LTset_attribute_string(idWrap->Value(), *dset_name, "IMAGE_VERSION", "1.2");
+    H5LTset_attribute_string(idWrap->Value(), *dset_name, "INTERLACE_MODE", "INTERLACE_PIXEL");
+    std::unique_ptr<unsigned char[]> rangeBuffer(new unsigned char[(size_t)(2)]);
+    rangeBuffer.get()[0]=(unsigned char)0;
+    rangeBuffer.get()[1]=(unsigned char)255;
+    H5LTset_attribute_uchar(idWrap->Value(), *dset_name, "IMAGE_MINMAXRANGE", rangeBuffer.get(), 2);
 //                hid_t dataset = H5Dopen(args[0]->ToInt32()->Value(), (*table_name), H5P_DEFAULT);
 //                H5Dclose(dataset);
 
@@ -91,7 +93,8 @@ static void read_image (const v8::FunctionCallbackInfo<Value>& args)
     hsize_t planes;
     char interlace[255];
     hssize_t npals;
-    herr_t err=H5IMget_image_info(args[0]->ToInt32()->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
+    Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+    herr_t err=H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
     if(err<0)
     {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
@@ -100,7 +103,7 @@ static void read_image (const v8::FunctionCallbackInfo<Value>& args)
     }
     std::unique_ptr<unsigned char[]> contentBuffer(new unsigned char[(size_t)(planes*width*height)]);
 //    err=H5IMread_image (args[0]->ToInt32()->Value(), *dset_name, contentBuffer.get() );
-    err=H5LTread_dataset(args[0]->ToInt32()->Value(), *dset_name, H5T_NATIVE_UCHAR, contentBuffer.get() );
+    err=H5LTread_dataset(idWrap->Value(), *dset_name, H5T_NATIVE_UCHAR, contentBuffer.get() );
     if(err<0)
     {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read image")));
@@ -126,7 +129,8 @@ static void read_image_region (const v8::FunctionCallbackInfo<Value>& args)
     hsize_t planes;
     char interlace[255];
     hssize_t npals;
-    herr_t err=H5IMget_image_info(args[0]->ToInt32()->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
+    Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+    herr_t err=H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
     if(err<0)
     {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
@@ -167,7 +171,7 @@ static void read_image_region (const v8::FunctionCallbackInfo<Value>& args)
             }
          }
 //            std::cout<<" start "<<(start.get()[0])<<" "<<start.get()[1]<<" "<<start.get()[2]<<" "<<stride.get()[0]<<" "<<stride.get()[1]<<" "<<stride.get()[2]<<" "<<count.get()[0]<<" "<<count.get()[1]<<" "<<count.get()[2]<<std::endl;
-                hid_t did=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
+                hid_t did=H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT );
                 hid_t t=H5Dget_type(did);
                 hid_t type_id=H5Tget_native_type(t,H5T_DIR_ASCEND);
                 hid_t dataspace_id=H5Dget_space (did);
@@ -219,7 +223,8 @@ static void is_image (const v8::FunctionCallbackInfo<Value>& args)
 {
 
     String::Utf8Value dset_name (args[1]->ToString());
-    herr_t err=H5IMis_image ( args[0]->ToInt32()->Value(), *dset_name );
+    Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+    herr_t err=H5IMis_image ( idWrap->Value(), *dset_name );
     args.GetReturnValue().Set(err? true:false);
 }
 
@@ -232,7 +237,8 @@ static void get_image_info (const v8::FunctionCallbackInfo<Value>& args)
     hsize_t planes;
     char interlace[255];
     hssize_t npals;
-    herr_t err=H5IMget_image_info(args[0]->ToInt32()->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
+    Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+    herr_t err=H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
     if(err<0)
     {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
@@ -256,7 +262,8 @@ static void make_palette (const v8::FunctionCallbackInfo<Value>& args)
     String::Utf8Value dset_name (args[1]->ToString());
     Local<Value> rankValue=args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "size"));
     hsize_t pal_dims[1] { static_cast<hsize_t>(rankValue->ToInt32()->Value()) };
-    /*herr_t err=*/H5IMmake_palette ( args[0]->ToInt32()->Value(), *dset_name, pal_dims, (const unsigned char *)buffer->Buffer()->Externalize().Data());
+    Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+    /*herr_t err=*/H5IMmake_palette ( idWrap->Value(), *dset_name, pal_dims, (const unsigned char *)buffer->Buffer()->Externalize().Data());
     args.GetReturnValue().SetUndefined();
 }
 

@@ -18,7 +18,7 @@ describe("testing fiter interface ",function(){
         it("should set filter ", function*() {
             const group = file.createGroup('pmc/refinement');
             group.id.should.not.equal(-1);
-            const buffer = new Buffer(5000*8, "binary");
+            const buffer = Buffer.alloc(5000*8, "binary");
 
             buffer.type = globs.H5Type.H5T_NATIVE_DOUBLE;
             for (let index = 0; index < 5000;index++) {

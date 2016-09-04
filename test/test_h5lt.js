@@ -49,7 +49,7 @@ describe("testing lite interface ", function() {
             readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
         });
         it("should be node::Buffer io for double le", function*() {
-            const buffer=new Buffer(5*8, "binary");
+            const buffer=Buffer.alloc(5*8, "binary");
             buffer.type=H5Type.H5T_NATIVE_DOUBLE;
             buffer.writeDoubleLE(1.0, 0);
             buffer.writeDoubleLE(2.0, 8);
@@ -67,7 +67,7 @@ describe("testing lite interface ", function() {
             readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
         });
         it("should be node::Buffer io for double 2 rank data", function*() {
-            const buffer=new Buffer(6*8, "binary");
+            const buffer=Buffer.alloc(6*8, "binary");
             buffer.type=H5Type.H5T_NATIVE_DOUBLE;
             buffer.writeDoubleLE(1.0, 0);
             buffer.writeDoubleLE(2.0, 8);
@@ -506,7 +506,7 @@ describe("testing lite interface ", function() {
 
         it("should be node::Buffer io for double 2 rank data", function*() {
             const group=file.openGroup('pmcservices');
-            const buffer=new Buffer(8*10*8, "binary");
+            const buffer=Buffer.alloc(8*10*8, "binary");
             buffer.rank=2;
             buffer.rows=8;
             buffer.columns=10;
@@ -522,7 +522,7 @@ describe("testing lite interface ", function() {
             }
 
             h5lt.makeDataset(group.id, 'Waldo', buffer);
-            const subsetBuffer=new Buffer(3*4*8, "binary");
+            const subsetBuffer=Buffer.alloc(3*4*8, "binary");
             subsetBuffer.rank=2;
             subsetBuffer.rows=3;
             subsetBuffer.columns=4;

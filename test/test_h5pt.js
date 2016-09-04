@@ -24,7 +24,7 @@ describe("testing table interface ", function() {
         it("should be Table io ", function*() {
             const group=file.createGroup('pmc/refinement');
             group.id.should.not.equal(-1);
-            const table  = new h5pt.PacketTable(0, 5);
+            const table  = new h5pt.PacketTable(new hdf5.Int64(0), 5);
             table.record = {};
             table.record.Set          = "Single Point";
             table.record["Date Time"] = "Mon Nov 24 13:10:44 2014";

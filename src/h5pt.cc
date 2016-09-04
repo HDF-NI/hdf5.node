@@ -14,6 +14,7 @@ extern "C" {
         HandleScope scope(v8::Isolate::GetCurrent());
         
         // initialize wrapped objects
+        Int64::Initialize(target);
         H5pt::Initialize(target);
         PacketTable::Init(target);
         

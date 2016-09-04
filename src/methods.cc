@@ -221,7 +221,7 @@ namespace NodeHDF5 {
         // store specified child name
         v8::String::Utf8Value child_name (args[0]->ToString());
         args.GetReturnValue().Set((uint32_t) group->childObjType(*child_name));
-        args.This()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"));
+        //args.This()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"));
         return;
 
     }
@@ -242,7 +242,8 @@ namespace NodeHDF5 {
         //Group* group = ObjectWrap::Unwrap<Group>(args.This());
         // store specified child name
         v8::String::Utf8Value child_name (args[0]->ToString());
-        size_t id=args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToNumber()->NumberValue();
+        Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
+        hid_t id=idWrap->Value();
         HLType hlType=HLType::HL_TYPE_LITE;
         if(H5IMis_image(id, (*child_name))){
             hlType=HLType::HL_TYPE_IMAGE;

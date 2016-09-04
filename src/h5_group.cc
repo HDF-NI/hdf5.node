@@ -9,6 +9,7 @@
 
 #include "file.h"
 #include "group.h"
+#include "int64.hpp"
 #include "filters.hpp"
 #include "H5LTpublic.h"
 #include "H5PTpublic.h"
@@ -146,12 +147,18 @@ namespace NodeHDF5 {
 //                });
 
                // attach various properties
-               args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->id));
+                Local<Object> instance=Int64::Instantiate(args.This(), group->id);
+                Int64* idWrap = ObjectWrap::Unwrap<Int64>(instance);
+                idWrap->value=group->id;
+               args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
 
         }
         else
         {
-            args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), -1));
+                Local<Object> instance=Int64::Instantiate(args.This(), -1);
+                Int64* idWrap = ObjectWrap::Unwrap<Int64>(instance);
+                idWrap->value=-1;
+            args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
 
         }
         }
@@ -249,9 +256,12 @@ namespace NodeHDF5 {
                 for (std::vector<hid_t>::iterator it = hidPath.begin() ; it != hidPath.end(); ++it)
                     group->hidPath.push_back(*it);
                 group->Wrap(args.This());
+                Local<Object> instance=Int64::Instantiate(args.This(), group->id);
+                Int64* idWrap = ObjectWrap::Unwrap<Int64>(instance);
+                idWrap->value=group->id;
 
                 // attach various properties
-                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->id));
+                args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
                 created=true;
             }
             previous_hid=hid;
@@ -270,9 +280,12 @@ namespace NodeHDF5 {
             for (std::vector<hid_t>::iterator it = hidPath.begin() ; it != hidPath.end(); ++it)
                 group->hidPath.push_back(*it);
             group->Wrap(args.This());
+                Local<Object> instance=Int64::Instantiate(args.This(), group->id);
+                Int64* idWrap = ObjectWrap::Unwrap<Int64>(instance);
+                idWrap->value=group->id;
 
             // attach various properties
-            args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->id));
+            args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
             created=true;
         }
         return;
@@ -354,9 +367,12 @@ namespace NodeHDF5 {
         for (std::vector<hid_t>::iterator it = hidPath.begin() ; it != hidPath.end(); ++it)
             group->hidPath.push_back(*it);
         group->Wrap(args.This());
+        Local<Object> instance=Int64::Instantiate(args.This(), group->id);
+        Int64* idWrap = ObjectWrap::Unwrap<Int64>(instance);
+        idWrap->value=group->id;
 
         // attach various properties
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), Number::New(v8::Isolate::GetCurrent(), group->id));
+        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
 
         return;
 

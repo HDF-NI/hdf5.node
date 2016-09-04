@@ -2,6 +2,7 @@
 #include "file.h"
 #include "group.h"
 #include "filters.hpp"
+#include "int64.hpp"
 
 using namespace v8;
 using namespace NodeHDF5;
@@ -16,6 +17,7 @@ extern "C" {
         // initialize wrapped objects
         File::Initialize(target);
         Filters::Init(target);
+        Int64::Initialize(target);
         
         // initialize wrapped object factories
         Group::Initialize();

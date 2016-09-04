@@ -6,7 +6,7 @@
 
 namespace NodeHDF5{
 
-    void Attributes::make_attribute_from_typed_array(const int32_t &group_id, const char *attribute_name, v8::Handle<v8::TypedArray> buffer, hid_t type_id) {
+    void Attributes::make_attribute_from_typed_array(const hid_t &group_id, const char *attribute_name, v8::Handle<v8::TypedArray> buffer, hid_t type_id) {
         std::unique_ptr<hsize_t> currentDims(new hsize_t[1]);
         currentDims.get()[0]=buffer->Length();
         hid_t attr_space=H5Screate_simple( 1, currentDims.get(), NULL );
@@ -21,7 +21,7 @@ namespace NodeHDF5{
         }
     }
     
-    void Attributes::make_attribute_from_array(const int32_t &group_id, const char *attribute_name, v8::Handle<v8::Array> array) {
+    void Attributes::make_attribute_from_array(const hid_t &group_id, const char *attribute_name, v8::Handle<v8::Array> array) {
         //hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
         int rank=1;
         std::unique_ptr<hsize_t> countSpace(new hsize_t[rank]);
@@ -237,6 +237,13 @@ namespace NodeHDF5{
                              */
                             hid_t memtype = H5Tcopy (H5T_C_S1);
                             herr_t status = H5Tset_size (memtype, H5T_VARIABLE);
+                            if(status<0)
+                            {
+                                v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to set size variable")));
+                                args.GetReturnValue().SetUndefined();
+                                return;
+        
+                            }
     
                             hid_t type = H5Tget_native_type(attr_type, H5T_DIR_ASCEND);
                             /*

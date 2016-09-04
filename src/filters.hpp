@@ -10,6 +10,7 @@
 
 #include "file.h"
 #include "group.h"
+#include "int64.hpp"
 #include "H5Zpublic.h"
 
 namespace NodeHDF5 {
@@ -39,8 +40,11 @@ namespace NodeHDF5 {
             //        v8::Isolate* isolate = v8::Isolate::GetCurrent();
             //        HandleScope scope(isolate);
 
+        Local<Object> idInstance=Int64::Instantiate(parentId);
+        Int64* idWrap = ObjectWrap::Unwrap<Int64>(idInstance);
+        idWrap->value=parentId;
             const unsigned argc = 2;
-            v8::Handle<v8::Value> argv[argc] = {Uint32::New(v8::Isolate::GetCurrent(), parentId),
+            v8::Handle<v8::Value> argv[argc] = {idInstance,
                 v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), dset_name.c_str())};
             //            v8::Local<v8::FunctionTemplate> cons = v8::Local<v8::FunctionTemplate>::New(isolate, Constructor);
             return v8::Local<v8::FunctionTemplate>::New(v8::Isolate::GetCurrent(), Constructor)->GetFunction()->NewInstance(argc, argv);
@@ -61,7 +65,8 @@ namespace NodeHDF5 {
             v8::HandleScope scope(isolate);
             //        if (args.IsConstructCall()) {
             // Invoked as constructor: `new MyObject(...)`
-            hid_t value = args[0]->IsUndefined() ? -1 : args[0]->ToInt32()->Value();
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+            hid_t value = args[0]->IsUndefined() ? -1 : idWrap->Value();
 
             std::string name = args[1]->IsUndefined() ? std::string("") : std::string(*v8::String::Utf8Value (args[1]->ToString()));
             Filters* obj = new Filters(value, name);
