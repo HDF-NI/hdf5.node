@@ -128,6 +128,7 @@ namespace NodeHDF5 {
         NODE_SET_PROTOTYPE_METHOD(t, "getMemberNamesByCreationOrder", GetMemberNamesByCreationOrder);
         NODE_SET_PROTOTYPE_METHOD(t, "getChildType", GetChildType);
         NODE_SET_PROTOTYPE_METHOD(t, "getDatasetType", getDatasetType);
+        NODE_SET_PROTOTYPE_METHOD(t, "getDataType", getDataType);
         NODE_SET_PROTOTYPE_METHOD(t, "getDatasetAttributes", getDatasetAttributes);
         NODE_SET_PROTOTYPE_METHOD(t, "getFilters", getFilters);
 //        Local<Function> f=t->GetFunction();

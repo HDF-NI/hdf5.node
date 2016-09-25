@@ -9,6 +9,8 @@
 #include "H5PTpublic.h"
 #include "H5Lpublic.h"
 
+#include <iostream>
+
 namespace NodeHDF5 {
 
     void Methods::GetNumAttrs (const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -296,6 +298,41 @@ namespace NodeHDF5 {
             }
         }
         args.GetReturnValue().Set((uint32_t) hlType);
+        return;
+
+    }
+
+    void Methods::getDataType (const v8::FunctionCallbackInfo<v8::Value>& args) {
+
+//        HandleScope scope;
+
+        // fail out if arguments are not correct
+        if (args.Length() != 1 || !args[0]->IsString()) {
+
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected child object's name")));
+            args.GetReturnValue().SetUndefined();
+            return;
+
+        }
+        // unwrap group
+        //Group* group = ObjectWrap::Unwrap<Group>(args.This());
+        // store specified child name
+        v8::String::Utf8Value child_name (args[0]->ToString());
+        Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
+        hid_t did=H5Dopen(idWrap->Value(), *child_name, H5P_DEFAULT );
+        hid_t t=H5Dget_type(did);
+        bool hit=false;
+        H5T etype=NODE_H5T_UNKNOWN;
+        for(std::map<H5T, hid_t>::iterator it=toTypeMap.begin();!hit && it!=toTypeMap.end();it++){
+            
+            if(H5Tequal(t, toTypeMap[(*it).first])){
+                etype=(*it).first;
+                hit=true;
+            }
+        }
+        args.GetReturnValue().Set((uint32_t) etype);
+        H5Tclose(t);
+        H5Dclose(did);
         return;
 
     }

@@ -178,13 +178,16 @@ describe("testing lite interface ", function() {
             buffer.rows=5;
             buffer.should.match(readBuffer);
         });
-        it.skip("should be Uint8Array io ", function*() {
+        it("should be Uint8Array io ", function*() {
             const buffer=new Uint8Array(5);
             buffer[0]=5;
             buffer[1]=4;
             buffer[2]=3;
             buffer[3]=2;
             buffer[4]=1;
+            buffer.rank=1;
+            buffer.rows=5;
+            buffer.type=H5Type.H5T_NATIVE_UCHAR;
             h5lt.makeDataset(group.id, 'Refractive Index u8', buffer);
             const readBuffer=h5lt.readDataset(group.id, 'Refractive Index u8');
             readBuffer.length.should.match(5);
@@ -260,7 +263,7 @@ describe("testing lite interface ", function() {
         });
     });
 
-    describe("create an h5, group and some datasets ", function() {
+    describe("create an h5, group and some documents ", function() {
         let file;
         before(function*() {
           file = new hdf5.File('./roothaan.h5', Access.ACC_TRUNC);
@@ -413,7 +416,7 @@ describe("testing lite interface ", function() {
                 groupTarget[ 'Computed Total Energy' ].should.equal(-3573.674399276322);
             });
         });
-        it.skip("open of Geometries should be >0", function*(){
+        it("open of Geometries should be >0", function*(){
             const groupDocuments = file.openGroup('pmcservices/sodium-icosanoate/Documents');
             const xmlDocument    = h5lt.readDataset(groupDocuments.id, 'sodium-icosanoate.xml');
             parseString(xmlDocument, function (err, result) {
@@ -498,14 +501,14 @@ describe("testing lite interface ", function() {
         });
     });
 
-    describe.skip("create dataset and extract subset", function() {
+    describe("create dataset and extract subset", function() {
         let file;
         before(function*() {
-          file = new hdf5.File('./roothaan.h5', Access.ACC_RDWR);
+          file = new hdf5.File('./roothaan.h5', Access.ACC_TRUNC);
         });
 
-        it("should be node::Buffer io for double 2 rank data", function*() {
-            const group=file.openGroup('pmcservices');
+        it("should be node::Buffer io for double 2 rank hyperslab", function*() {
+            const group=file.createGroup('pmcservices');
             const buffer=Buffer.alloc(8*10*8, "binary");
             buffer.rank=2;
             buffer.rows=8;
@@ -534,6 +537,8 @@ describe("testing lite interface ", function() {
             }
 
             h5lt.writeDataset(group.id, 'Waldo', subsetBuffer, {start: [1,2], stride: [1,1], count: [3,4]});
+            let theType=group.getDataType('Waldo');
+            theType.should.equal(H5Type.H5T_IEEE_F64LE);
             const readBuffer=h5lt.readDataset(group.id, 'Waldo');
             readBuffer.constructor.name.should.match('Float64Array');
             readBuffer.length.should.match(8*10);
@@ -545,13 +550,15 @@ describe("testing lite interface ", function() {
             readAsBuffer.readDoubleLE(1*8).should.equal(5.0);
             readAsBuffer.readDoubleLE(2*8).should.equal(1.0);
             readAsBuffer.readDoubleLE(3*8).should.equal(2.0);
+            readAsBuffer.type.should.equal(H5Type.H5T_IEEE_F64LE);
             group.close();
         });
         after(function*() {
           file.close();
         });
     });
-    describe.skip("varlen char arrays", function() {
+    
+    describe("varlen char arrays", function() {
         let file;
         before(function*() {
           file = new hdf5.File('./roothaan.h5', Access.ACC_RDWR);
@@ -579,17 +586,17 @@ describe("testing lite interface ", function() {
         });
     });
 
-    describe.skip("varlen chars", function() {
+    describe("varlen chars", function() {
         let file;
         before(function*() {
           file = new hdf5.File('./test/examples/nba.h5', Access.ACC_RDWR);
         });
-        it("read varlen's", function*() {
+        it("read varlen's", function() {
             const array=h5lt.readDataset(file.id, 'player');
-            console.dir(array.length);
+            array.length.should.equal(500);
             if(array.constructor.name==='Array'){
                 for(let mIndex=0;mIndex<array.length;mIndex++){
-                    console.dir(array[mIndex]);
+                    //console.dir(array[mIndex]);
                 }
             }
         });

@@ -7,6 +7,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <map>
 #include <memory>
 #include "H5Tpublic.h"
 
@@ -25,6 +26,7 @@ enum HLType {
 };
 
 enum H5T {
+     NODE_H5T_UNKNOWN = 0,
      NODE_H5T_STD_I8BE = 258,
      NODE_H5T_STD_I8LE = 259,
      NODE_H5T_STD_I16BE = 260,
@@ -85,6 +87,126 @@ enum H5T {
      NODE_H5T_NATIVE_UINT8 = 315
 };
 
+    static std::map<H5T, hid_t> toTypeMap{
+                                     {NODE_H5T_STD_I8BE,H5T_STD_I8BE},
+                                     {NODE_H5T_STD_I8LE,H5T_STD_I8LE},
+                                     {NODE_H5T_STD_I16BE,H5T_STD_I16BE},
+                                     {NODE_H5T_STD_I16LE,H5T_STD_I16LE},
+                                     {NODE_H5T_STD_I32BE,H5T_STD_I32BE},
+                                     {NODE_H5T_STD_I32LE,H5T_STD_I32LE},
+                                     {NODE_H5T_STD_I64BE,H5T_STD_I64BE},
+                                     {NODE_H5T_STD_I64LE,H5T_STD_I64LE},
+                                     {NODE_H5T_STD_U8BE,H5T_STD_U8BE},
+                                     {NODE_H5T_STD_U8LE,H5T_STD_U8LE},
+                                     {NODE_H5T_STD_U16BE,H5T_STD_U16BE},
+                                     {NODE_H5T_STD_U16LE,H5T_STD_U16LE},
+                                     {NODE_H5T_STD_U32BE,H5T_STD_U32BE},
+                                     {NODE_H5T_STD_U32LE,H5T_STD_U32LE},
+                                     {NODE_H5T_STD_U64BE,H5T_STD_U64BE},
+                                     {NODE_H5T_STD_U64LE,H5T_STD_U64LE},
+                                     {NODE_H5T_NATIVE_CHAR,H5T_NATIVE_CHAR},
+                                     {NODE_H5T_NATIVE_SCHAR,H5T_NATIVE_SCHAR},
+                                     {NODE_H5T_NATIVE_UCHAR,H5T_NATIVE_UCHAR},
+                                     {NODE_H5T_NATIVE_SHORT,H5T_NATIVE_SHORT},
+                                     {NODE_H5T_NATIVE_USHORT,H5T_NATIVE_USHORT},
+                                     {NODE_H5T_NATIVE_INT,H5T_NATIVE_INT},
+                                     {NODE_H5T_NATIVE_UINT,H5T_NATIVE_UINT},
+                                     {NODE_H5T_NATIVE_LONG,H5T_NATIVE_LONG},
+                                     {NODE_H5T_NATIVE_ULONG,H5T_NATIVE_ULONG},
+                                     {NODE_H5T_NATIVE_LLONG,H5T_NATIVE_LLONG},
+                                     {NODE_H5T_NATIVE_ULLONG,H5T_NATIVE_ULLONG},
+                                     {NODE_H5T_IEEE_F32BE,H5T_IEEE_F32BE},
+                                     {NODE_H5T_IEEE_F32LE,H5T_IEEE_F32LE},
+                                     {NODE_H5T_IEEE_F64BE,H5T_IEEE_F64BE},
+                                     {NODE_H5T_IEEE_F64LE,H5T_IEEE_F64LE},
+                                     {NODE_H5T_NATIVE_FLOAT,H5T_NATIVE_FLOAT},
+                                     {NODE_H5T_NATIVE_DOUBLE,H5T_NATIVE_DOUBLE},
+                                     {NODE_H5T_NATIVE_LDOUBLE,H5T_NATIVE_LDOUBLE},
+                                     {NODE_H5T_STRING,H5T_STRING},
+                                     //{NODE_STRSIZE,STRSIZE},
+                                     //{NODE_STRPAD,STRPAD},
+                                     //{NODE_CSET,CSET},
+                                     //{NODE_CTYPE,CTYPE},
+                                     {NODE_H5T_VARIABLE,H5T_VARIABLE},
+                                     {NODE_H5T_STR_NULLTERM,H5T_STR_NULLTERM},
+                                     {NODE_H5T_STR_NULLPAD,H5T_STR_NULLPAD},
+                                     {NODE_H5T_STR_SPACEPAD,H5T_STR_SPACEPAD},
+                                     {NODE_H5T_CSET_ASCII,H5T_CSET_ASCII},
+                                     {NODE_H5T_CSET_UTF8,H5T_CSET_UTF8},
+                                     {NODE_H5T_C_S1,H5T_C_S1},
+                                     {NODE_H5T_FORTRAN_S1,H5T_FORTRAN_S1},
+                                     {NODE_H5T_OPAQUE,H5T_OPAQUE},
+                                     //{NODE_OPQ_SIZE,OPQ_SIZE},
+                                     //{NODE_OPQ_TAG,OPQ_TAG},
+                                     {NODE_H5T_COMPOUND,H5T_COMPOUND},
+                                     {NODE_H5T_ENUM,H5T_ENUM},
+                                     {NODE_H5T_ARRAY,H5T_ARRAY},
+                                     {NODE_H5T_VLEN,H5T_VLEN},
+                                     //{NODE_STRING,STRING},
+                                     //{NODE_NUMBER,NUMBER},
+                                     {NODE_H5T_NATIVE_INT8,H5T_NATIVE_INT8},
+                                     {NODE_H5T_NATIVE_UINT8,H5T_NATIVE_UINT8}};
+
+    static std::map<hid_t, H5T> toEnumMap{
+                                     {H5T_STD_I8BE,NODE_H5T_STD_I8BE},
+                                     {H5T_STD_I8LE,NODE_H5T_STD_I8LE},
+                                     {H5T_STD_I16BE,NODE_H5T_STD_I16BE},
+                                     {H5T_STD_I16LE,NODE_H5T_STD_I16LE},
+                                     {H5T_STD_I32BE,NODE_H5T_STD_I32BE},
+                                     {H5T_STD_I32LE,NODE_H5T_STD_I32LE},
+                                     {H5T_STD_I64BE,NODE_H5T_STD_I64BE},
+                                     {H5T_STD_I64LE,NODE_H5T_STD_I64LE},
+                                     {H5T_STD_U8BE,NODE_H5T_STD_U8BE},
+                                     {H5T_STD_U8LE,NODE_H5T_STD_U8LE},
+                                     {H5T_STD_U16BE,NODE_H5T_STD_U16BE},
+                                     {H5T_STD_U16LE,NODE_H5T_STD_U16LE},
+                                     {H5T_STD_U32BE,NODE_H5T_STD_U32BE},
+                                     {H5T_STD_U32LE,NODE_H5T_STD_U32LE},
+                                     {H5T_STD_U64BE,NODE_H5T_STD_U64BE},
+                                     {H5T_STD_U64LE,NODE_H5T_STD_U64LE},
+                                     {H5T_NATIVE_CHAR,NODE_H5T_NATIVE_CHAR},
+                                     {H5T_NATIVE_SCHAR,NODE_H5T_NATIVE_SCHAR},
+                                     {H5T_NATIVE_UCHAR,NODE_H5T_NATIVE_UCHAR},
+                                     {H5T_NATIVE_SHORT,NODE_H5T_NATIVE_SHORT},
+                                     {H5T_NATIVE_USHORT,NODE_H5T_NATIVE_USHORT},
+                                     {H5T_NATIVE_INT,NODE_H5T_NATIVE_INT},
+                                     {H5T_NATIVE_UINT,NODE_H5T_NATIVE_UINT},
+                                     {H5T_NATIVE_LONG,NODE_H5T_NATIVE_LONG},
+                                     {H5T_NATIVE_ULONG,NODE_H5T_NATIVE_ULONG},
+                                     {H5T_NATIVE_LLONG,NODE_H5T_NATIVE_LLONG},
+                                     {H5T_NATIVE_ULLONG,NODE_H5T_NATIVE_ULLONG},
+                                     {H5T_IEEE_F32BE,NODE_H5T_IEEE_F32BE},
+                                     {H5T_IEEE_F32LE,NODE_H5T_IEEE_F32LE},
+                                     {H5T_IEEE_F64BE,NODE_H5T_IEEE_F64BE},
+                                     {H5T_IEEE_F64LE,NODE_H5T_IEEE_F64LE},
+                                     {H5T_NATIVE_FLOAT,NODE_H5T_NATIVE_FLOAT},
+                                     {H5T_NATIVE_DOUBLE,NODE_H5T_NATIVE_DOUBLE},
+                                     {H5T_NATIVE_LDOUBLE,NODE_H5T_NATIVE_LDOUBLE},
+                                     {H5T_STRING,NODE_H5T_STRING},
+                                     //{STRSIZE,NODE_STRSIZE},
+                                     //{STRPAD,NODE_STRPAD},
+                                     //{CSET,NODE_CSET},
+                                     //{CTYPE,NODE_CTYPE},
+                                     {H5T_VARIABLE,NODE_H5T_VARIABLE},
+                                     {H5T_STR_NULLTERM,NODE_H5T_STR_NULLTERM},
+                                     {H5T_STR_NULLPAD,NODE_H5T_STR_NULLPAD},
+                                     {H5T_STR_SPACEPAD,NODE_H5T_STR_SPACEPAD},
+                                     {H5T_CSET_ASCII,NODE_H5T_CSET_ASCII},
+                                     {H5T_CSET_UTF8,NODE_H5T_CSET_UTF8},
+                                     {H5T_C_S1,NODE_H5T_C_S1},
+                                     {H5T_FORTRAN_S1,NODE_H5T_FORTRAN_S1},
+                                     {H5T_OPAQUE,NODE_H5T_OPAQUE},
+                                     //{NODE_OPQ_SIZE,OPQ_SIZE},
+                                     //{NODE_OPQ_TAG,OPQ_TAG},
+                                     {H5T_COMPOUND,NODE_H5T_COMPOUND},
+                                     {H5T_ENUM,NODE_H5T_ENUM},
+                                     {H5T_ARRAY,NODE_H5T_ARRAY},
+                                     {H5T_VLEN,NODE_H5T_VLEN},
+                                     //{STRING,NODE_STRING},
+                                     //{NUMBER,NODE_NUMBER},
+                                     {H5T_NATIVE_INT8,NODE_H5T_NATIVE_INT8},
+                                     {H5T_NATIVE_UINT8,NODE_H5T_NATIVE_UINT8}};
+
     class Methods : public Attributes {
     protected:
     public:
@@ -103,6 +225,7 @@ enum H5T {
         static void GetMemberNamesByCreationOrder (const v8::FunctionCallbackInfo<v8::Value>& args);
         static void GetChildType (const v8::FunctionCallbackInfo<v8::Value>& args);
         static void getDatasetType (const v8::FunctionCallbackInfo<v8::Value>& args);
+        static void getDataType (const v8::FunctionCallbackInfo<v8::Value>& args);
         static void getDatasetAttributes (const v8::FunctionCallbackInfo<v8::Value>& args);
         static void getFilters (const v8::FunctionCallbackInfo<v8::Value>& args);
 

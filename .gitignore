@@ -7,3 +7,4 @@ build
 /lib/binding/
 .c9/
 *.h5
+!/test/examples/nba.h5
