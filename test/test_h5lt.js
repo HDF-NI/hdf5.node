@@ -79,7 +79,12 @@ describe("testing lite interface ", function() {
             buffer.rows=3;
             buffer.columns=2;
             h5lt.makeDataset(group.id, 'Two Rank', buffer);
-            const readBuffer=h5lt.readDataset(group.id, 'Two Rank');
+            var byteOrder=group.getByteOrder('Two Rank');
+            byteOrder.should.equal(0);
+            const readBuffer=h5lt.readDataset(group.id, 'Two Rank', function(options) {
+                    console.dir("options: "+JSON.stringify(options));
+                });
+                console.dir(" after options cb: ");
             readBuffer.constructor.name.should.match('Float64Array');
             readBuffer.length.should.match(6);
 

@@ -53,6 +53,7 @@ namespace NodeHDF5 {
         NODE_SET_PROTOTYPE_METHOD(t, "getDatasetType", getDatasetType);
         NODE_SET_PROTOTYPE_METHOD(t, "getDataType", getDataType);
         NODE_SET_PROTOTYPE_METHOD(t, "getDatasetAttributes", getDatasetAttributes);
+        NODE_SET_PROTOTYPE_METHOD(t, "getByteOrder", getByteOrder);
         NODE_SET_PROTOTYPE_METHOD(t, "getFilters", getFilters);
 
         // initialize constructor reference

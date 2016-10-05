@@ -227,6 +227,7 @@ enum H5T {
         static void getDatasetType (const v8::FunctionCallbackInfo<v8::Value>& args);
         static void getDataType (const v8::FunctionCallbackInfo<v8::Value>& args);
         static void getDatasetAttributes (const v8::FunctionCallbackInfo<v8::Value>& args);
+        static void getByteOrder (const v8::FunctionCallbackInfo<v8::Value>& args);
         static void getFilters (const v8::FunctionCallbackInfo<v8::Value>& args);
 
     protected:
