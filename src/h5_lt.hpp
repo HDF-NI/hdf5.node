@@ -5,6 +5,7 @@
 #include <node_buffer.h>
 
 //#include <iostream>
+#include <algorithm>
 #include <cstring>
 #include <vector>
 #include <map>
@@ -75,6 +76,20 @@ namespace NodeHDF5 {
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDataset"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::read_dataset)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDatasetAsBuffer"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::readDatasetAsBuffer)->GetFunction());
 
+    }
+
+    static unsigned int get_fixed_width(Handle<Object> options) {
+        if(options.IsEmpty()) {
+            return 0;
+        }
+
+        auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "fixed_width"));
+
+        if(!options->HasOwnProperty(name)) {
+            return 0;
+        }
+
+        return options->Get(name)->Uint32Value();
     }
 
     static unsigned int get_compression(Handle<Object> options) {
@@ -423,26 +438,37 @@ static void make_dataset_from_typed_array(const hid_t &group_id, const char *dse
     }
 }
 
-static void make_dataset_from_array(const hid_t &group_id, const char *dset_name, Handle<Array> array, Handle<Object> /*options*/) {
+static void make_dataset_from_array(const hid_t &group_id, const char *dset_name, Handle<Array> array, Handle<Object> options) {
     hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
     int rank=1;
+    unsigned int fixedWidth=get_fixed_width(options);
     std::unique_ptr<hsize_t> countSpace(new hsize_t[rank]);
     countSpace.get()[0]=1;
     std::unique_ptr<hsize_t> count(new hsize_t[rank]);
     count.get()[0]=array->Length();
-    hid_t memspace_id = H5Screate_simple (rank, countSpace.get(), NULL);
-    hid_t type_id = H5Tcopy(H5T_C_S1);
-    H5Tset_size(type_id, H5T_VARIABLE);
-    hid_t arraytype_id =H5Tarray_create( type_id,  rank, count.get() );
-    hid_t did = H5Dcreate(group_id, dset_name, arraytype_id, memspace_id, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     std::unique_ptr<char*> vl(new char*[array->Length()]);
     for(unsigned int arrayIndex=0;arrayIndex<array->Length();arrayIndex++){
         String::Utf8Value buffer (array->Get(arrayIndex)->ToString());
         std::string s(*buffer);
-        vl.get()[arrayIndex]=new char[s.length()+1];
+        if(fixedWidth<s.length()){
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed fixed length to make var len dataset")));
+        return;
+            
+        }
+        vl.get()[arrayIndex]=new char[std::max((unsigned int)s.length(), fixedWidth)+1];
         std::strncpy(vl.get()[arrayIndex], s.c_str(), s.length()+1);
 
     }
+    hid_t memspace_id = H5Screate_simple (rank, countSpace.get(), NULL);
+    hid_t type_id = H5Tcopy(H5T_C_S1);
+    if(fixedWidth>0){
+        H5Tset_size(type_id, fixedWidth);
+    }
+    else{
+        H5Tset_size(type_id, H5T_VARIABLE);
+    }
+    hid_t arraytype_id =H5Tarray_create( type_id,  rank, count.get() );
+    hid_t did = H5Dcreate(group_id, dset_name, arraytype_id, memspace_id, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         //if(arrayIndex==0){
     herr_t err=H5Dwrite( did, arraytype_id, memspace_id, H5S_ALL, H5P_DEFAULT, vl.get() );
     if(err<0)
