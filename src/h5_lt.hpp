@@ -133,7 +133,7 @@ namespace NodeHDF5 {
             return true;
         }
 
-        std::unique_ptr<hsize_t> dims(new hsize_t[rank]);
+        std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);
         for(int i=0; i<rank; ++i) {
             dims.get()[i] = size;
         }
@@ -176,7 +176,7 @@ static void make_dataset_from_buffer(const hid_t &group_id, const char *dset_nam
         Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"));
         rank=rankValue->ToInt32()->Value();
     }
-    std::unique_ptr<hsize_t> dims(new hsize_t[rank]);
+    std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);
     switch(rank)
     {
         case 1:
@@ -443,7 +443,7 @@ static void make_dataset_from_array(const hid_t &group_id, const char *dset_name
     int rank=1;
     unsigned int fixedWidth=get_fixed_width(options);
     if(fixedWidth>0){
-        std::unique_ptr<char> vl(new char[fixedWidth*array->Length()]);
+        std::unique_ptr<char[]> vl(new char[fixedWidth*array->Length()]);
         std::memset(vl.get(), 0, fixedWidth*array->Length());
         for(unsigned int arrayIndex=0;arrayIndex<array->Length();arrayIndex++){
             String::Utf8Value buffer (array->Get(arrayIndex)->ToString());
@@ -455,7 +455,7 @@ static void make_dataset_from_array(const hid_t &group_id, const char *dset_name
             }
             std::strncpy(&vl.get()[fixedWidth*arrayIndex], s.c_str(), s.length());
         }
-        std::unique_ptr<hsize_t> countSpace(new hsize_t[rank]);
+        std::unique_ptr<hsize_t[]> countSpace(new hsize_t[rank]);
         countSpace.get()[0]=array->Length();
         hid_t memspace_id = H5Screate_simple (rank, countSpace.get(), NULL);
         hid_t type_id = H5Tcopy(H5T_C_S1);
@@ -476,9 +476,9 @@ static void make_dataset_from_array(const hid_t &group_id, const char *dset_name
         H5Pclose(dcpl);
     }
     else{
-        std::unique_ptr<hsize_t> count(new hsize_t[rank]);
+        std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
         count.get()[0]=array->Length();
-        std::unique_ptr<char*> vl(new char*[array->Length()]);
+        std::unique_ptr<char*[]> vl(new char*[array->Length()]);
         for(unsigned int arrayIndex=0;arrayIndex<array->Length();arrayIndex++){
             String::Utf8Value buffer (array->Get(arrayIndex)->ToString());
             std::string s(*buffer);
@@ -619,7 +619,7 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
         args.GetReturnValue().SetUndefined();
         return;
     }
-    std::unique_ptr<hsize_t> values_dim(new hsize_t[rank]);
+    std::unique_ptr<hsize_t[]> values_dim(new hsize_t[rank]);
     err=H5LTget_dataset_info(idWrap->Value(), *dset_name, values_dim.get(), &class_id, &bufSize);
     if(err<0)
     {
@@ -629,9 +629,9 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
     }
     //hsize_t theSize=bufSize;
     bool subsetOn=false;
-    std::unique_ptr<hsize_t> start(new hsize_t[rank]);
-    std::unique_ptr<hsize_t> stride(new hsize_t[rank]);
-    std::unique_ptr<hsize_t> count(new hsize_t[rank]);
+    std::unique_ptr<hsize_t[]> start(new hsize_t[rank]);
+    std::unique_ptr<hsize_t[]> stride(new hsize_t[rank]);
+    std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
     if(args.Length() == 4){
          Local<Array> names=args[3]->ToObject()->GetOwnPropertyNames();
          for(uint32_t index=0;index<names->Length();index++){
@@ -976,7 +976,7 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
         args.GetReturnValue().SetUndefined();
         return;
     }
-    std::unique_ptr<hsize_t> values_dim(new hsize_t[rank]);
+    std::unique_ptr<hsize_t[]> values_dim(new hsize_t[rank]);
     err=H5LTget_dataset_info(idWrap->Value(), *dset_name, values_dim.get(), &class_id, &bufSize);
     if(err<0)
     {
@@ -1016,9 +1016,9 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 hid_t memspace_id=H5S_ALL;
                 hid_t basetype_id=H5Tget_super(type_id);
                 int arrayRank=H5Tget_array_ndims(type_id);
-                std::unique_ptr<hsize_t> arrayDims(new hsize_t[arrayRank]);
+                std::unique_ptr<hsize_t[]> arrayDims(new hsize_t[arrayRank]);
                 /*int arrayLength=*/H5Tget_array_dims(type_id, arrayDims.get());
-                std::unique_ptr<char*> vl(new char*[arrayDims.get()[0]]);
+                std::unique_ptr<char*[]> vl(new char*[arrayDims.get()[0]]);
                 if(!H5Tis_variable_str(basetype_id)){
                     //size_t nalloc;
                     //H5Tencode(type_id, NULL, &nalloc);
@@ -1067,7 +1067,7 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                     hid_t basetype_id=H5Tget_super(type_id);
                     size_t nalloc;
                     H5Tencode(type_id, NULL, &nalloc);
-                    std::unique_ptr<char*> tbuffer(new char*[values_dim.get()[0]]);
+                    std::unique_ptr<char*[]> tbuffer(new char*[values_dim.get()[0]]);
                     H5Tencode(type_id, tbuffer.get(), &nalloc);
                     H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, tbuffer.get());
                     Local<Array> array=Array::New(v8::Isolate::GetCurrent(), values_dim.get()[0]);
@@ -1082,7 +1082,7 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                         hid_t dataspace_id=H5S_ALL;
                         hid_t memspace_id=H5S_ALL;
                         size_t typeSize=H5Tget_size(t);
-                        std::unique_ptr<char> tbuffer(new char[typeSize*values_dim.get()[0]]);
+                        std::unique_ptr<char[]> tbuffer(new char[typeSize*values_dim.get()[0]]);
                         size_t nalloc;
                         H5Tencode(type_id, NULL, &nalloc);
                         H5Tencode(type_id, tbuffer.get(), &nalloc);
@@ -1313,7 +1313,7 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
         args.GetReturnValue().SetUndefined();
         return;
     }
-    std::unique_ptr<hsize_t> values_dim(new hsize_t[rank]);
+    std::unique_ptr<hsize_t[]> values_dim(new hsize_t[rank]);
     err=H5LTget_dataset_info(idWrap->Value(), *dset_name, values_dim.get(), &class_id, &bufSize);
     if(err<0)
     {
@@ -1323,9 +1323,9 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
     }
     hsize_t theSize=bufSize;
     bool subsetOn=false;
-    std::unique_ptr<hsize_t> start(new hsize_t[rank]);
-    std::unique_ptr<hsize_t> stride(new hsize_t[rank]);
-    std::unique_ptr<hsize_t> count(new hsize_t[rank]);
+    std::unique_ptr<hsize_t[]> start(new hsize_t[rank]);
+    std::unique_ptr<hsize_t[]> stride(new hsize_t[rank]);
+    std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
     if(args.Length() == 3){
          Local<Array> names=args[2]->ToObject()->GetOwnPropertyNames();
          for(uint32_t index=0;index<names->Length();index++){

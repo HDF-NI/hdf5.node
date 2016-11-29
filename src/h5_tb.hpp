@@ -357,7 +357,7 @@ namespace NodeHDF5 {
             }
             String::Utf8Value table_name (args[1]->ToString());
             Local<v8::Array> table=Local<v8::Array>::Cast(args[2]);
-            std::unique_ptr<char*> field_names(new char*[table->Length()]);
+            std::unique_ptr<char*[]> field_names(new char*[table->Length()]);
             for (unsigned int i = 0; i < table->Length(); i++)
             {
                 field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
@@ -410,7 +410,7 @@ namespace NodeHDF5 {
                 args.GetReturnValue().SetUndefined();
                 return;
             }
-            std::unique_ptr<char*> field_names(new char*[nfields]);
+            std::unique_ptr<char*[]> field_names(new char*[nfields]);
             for (unsigned int i = 0; i < nfields; i++)
             {
                 field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
@@ -549,7 +549,7 @@ namespace NodeHDF5 {
                 args.GetReturnValue().SetUndefined();
                 return;
             }
-            std::unique_ptr<char*> field_names(new char*[nfields]);
+            std::unique_ptr<char*[]> field_names(new char*[nfields]);
 //            char** field_names= (char**) HDmalloc( sizeof(char*) * (size_t)nfields );
             for (unsigned int i = 0; i < nfields; i++)
             {
@@ -653,7 +653,7 @@ namespace NodeHDF5 {
             }
             String::Utf8Value table_name (args[1]->ToString());
             Local<v8::Array> table=Local<v8::Array>::Cast(args[3]);
-            std::unique_ptr<char*> model_field_names(new char*[table->Length()]);
+            std::unique_ptr<char*[]> model_field_names(new char*[table->Length()]);
 //            char** field_names= (char**) HDmalloc( sizeof(char*) * (size_t)nfields );
             std::string fieldNames="";
             for (unsigned int i = 0; i < table->Length(); i++)
@@ -677,7 +677,7 @@ namespace NodeHDF5 {
                 args.GetReturnValue().SetUndefined();
                 return;
             }
-            std::unique_ptr<char*> field_names(new char*[nfields]);
+            std::unique_ptr<char*[]> field_names(new char*[nfields]);
             for (unsigned int i = 0; i < nfields; i++)
             {
                 field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
@@ -738,7 +738,7 @@ namespace NodeHDF5 {
                 args.GetReturnValue().SetUndefined();
                 return;
             }
-            std::unique_ptr<char*> field_names(new char*[nfields]);
+            std::unique_ptr<char*[]> field_names(new char*[nfields]);
 //            char** field_names= (char**) HDmalloc( sizeof(char*) * (size_t)nfields );
             for (unsigned int i = 0; i < nfields; i++)
             {
@@ -795,7 +795,7 @@ namespace NodeHDF5 {
             }
             Local<v8::Array> indices=Local<v8::Array>::Cast(args[4]);
             std::string fieldNames="";
-            std::unique_ptr<char*> model_field_names(new char*[indices->Length()]);
+            std::unique_ptr<char*[]> model_field_names(new char*[indices->Length()]);
             for (unsigned int i = 0; i < indices->Length(); i++)
             {
                 String::Utf8Value field_name (indices->Get(i)->ToString());
@@ -806,7 +806,7 @@ namespace NodeHDF5 {
                 fieldNames.append(fieldName);
                 if(i<indices->Length()-1)fieldNames.append(",");
             }
-            std::unique_ptr<char*> field_names(new char*[nfields]);
+            std::unique_ptr<char*[]> field_names(new char*[nfields]);
 //            char** field_names= (char**) HDmalloc( sizeof(char*) * (size_t)nfields );
             for (unsigned int i = 0; i < nfields; i++)
             {
@@ -898,7 +898,7 @@ namespace NodeHDF5 {
             }
             Local<v8::Array> indices=Local<v8::Array>::Cast(args[4]);
             std::string fieldNames="";
-            std::unique_ptr<char*> model_field_names(new char*[indices->Length()]);
+            std::unique_ptr<char*[]> model_field_names(new char*[indices->Length()]);
             std::unique_ptr<int[]> field_indices(new int[indices->Length()]);
             for (unsigned int i = 0; i < indices->Length(); i++)
             {
@@ -906,7 +906,7 @@ namespace NodeHDF5 {
                 model_field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
                 std::memset ( model_field_names.get()[i], 0, 255 );
             }
-            std::unique_ptr<char*> field_names(new char*[nfields]);
+            std::unique_ptr<char*[]> field_names(new char*[nfields]);
             for (unsigned int i = 0; i < nfields; i++)
             {
                 field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );
@@ -1116,7 +1116,7 @@ namespace NodeHDF5 {
             hsize_t nrecords;
             Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
             H5TBget_table_info(idWrap->Value(), (*table_name), &nfields, &nrecords);
-            std::unique_ptr<char*> field_names(new char*[nfields]);
+            std::unique_ptr<char*[]> field_names(new char*[nfields]);
             for (unsigned int i = 0; i < nfields; i++)
             {
                 field_names.get()[i] = (char*) malloc( sizeof(char) * 255 );

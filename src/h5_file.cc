@@ -4,7 +4,7 @@
 #include <node.h>
 #include <string>
 #include <cstring>
-//#include <iostream>
+#include <iostream>
 #include <sstream>
 #include <fstream>
 #include <vector>
@@ -99,7 +99,9 @@ namespace NodeHDF5 {
 
     File::~File () {
 
+        if(id>0){
         H5Fclose(id);
+        }
 
     }
 
@@ -291,9 +293,9 @@ namespace NodeHDF5 {
             }
             for (std::vector<hid_t>::iterator it = hidPath.begin() ; it != hidPath.end(); ++it)
                 group->hidPath.push_back(*it);
-                Local<Object> idInstance=Int64::Instantiate(args.This(), group->id);
-                Int64* idWrap = ObjectWrap::Unwrap<Int64>(idInstance);
-                idWrap->value=group->id;
+            v8::Local<v8::Object> idInstance=Int64::Instantiate(args.This(), group->id);
+            Int64* idWrap = ObjectWrap::Unwrap<Int64>(idInstance);
+            idWrap->value=group->id;
             instance->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), idInstance);
             group->Wrap(instance);
 
@@ -448,10 +450,16 @@ namespace NodeHDF5 {
     //                    throw PersistenceException(ss.str());
             }
         }
-        H5Fclose(file->id);
-
+        herr_t err=H5Fclose(file->id);
+        if(err<0)
+        {
+            v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to close h5")));
+            args.GetReturnValue().SetUndefined();
+            return;
+        }
+        file->id=0;
         return;
 
     }
-
+    
 };

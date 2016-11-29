@@ -26,6 +26,11 @@ describe("testing images ",function() {
             }
         });
 
+        it("should be 1.10.0 ", function*() {
+            var version=hdf5.getLibVersion();
+            console.dir(version);
+        });
+
         let group;
         it("should be >0 ", function*() {
             group = file.createGroup('pmc');

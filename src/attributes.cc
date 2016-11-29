@@ -7,7 +7,7 @@
 namespace NodeHDF5{
 
     void Attributes::make_attribute_from_typed_array(const hid_t &group_id, const char *attribute_name, v8::Handle<v8::TypedArray> buffer, hid_t type_id) {
-        std::unique_ptr<hsize_t> currentDims(new hsize_t[1]);
+        std::unique_ptr<hsize_t[]> currentDims(new hsize_t[1]);
         currentDims.get()[0]=buffer->Length();
         hid_t attr_space=H5Screate_simple( 1, currentDims.get(), NULL );
         if(attr_space>=0){
@@ -24,16 +24,16 @@ namespace NodeHDF5{
     void Attributes::make_attribute_from_array(const hid_t &group_id, const char *attribute_name, v8::Handle<v8::Array> array) {
         //hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
         int rank=1;
-        std::unique_ptr<hsize_t> countSpace(new hsize_t[rank]);
+        std::unique_ptr<hsize_t[]> countSpace(new hsize_t[rank]);
         countSpace.get()[0]=1;
-        std::unique_ptr<hsize_t> count(new hsize_t[rank]);
+        std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
         count.get()[0]=array->Length();
         hid_t memspace_id = H5Screate_simple (rank, countSpace.get(), NULL);
         hid_t type_id = H5Tcopy(H5T_C_S1);
         H5Tset_size(type_id, H5T_VARIABLE);
         hid_t arraytype_id =H5Tarray_create( type_id,  rank, count.get() );
         hid_t attr_id=H5Acreate2(group_id, attribute_name, arraytype_id, memspace_id, H5P_DEFAULT, H5P_DEFAULT);
-        std::unique_ptr<char*> vl(new char*[array->Length()]);
+        std::unique_ptr<char*[]> vl(new char*[array->Length()]);
         for(unsigned int arrayIndex=0;arrayIndex<array->Length();arrayIndex++){
             v8::String::Utf8Value buffer (array->Get(arrayIndex)->ToString());
             std::string s(*buffer);
@@ -98,9 +98,9 @@ namespace NodeHDF5{
                         hid_t basetype_id=H5Tget_super(attr_type);
                         if(H5Tis_variable_str(basetype_id)){
                             int arrayRank=H5Tget_array_ndims(attr_type);
-                            std::unique_ptr<hsize_t> arrayDims(new hsize_t[arrayRank]);
+                            std::unique_ptr<hsize_t[]> arrayDims(new hsize_t[arrayRank]);
                             /*int arrayLength=*/H5Tget_array_dims(attr_type, arrayDims.get());
-                            std::unique_ptr<char*> vl(new char*[arrayDims.get()[0]]);
+                            std::unique_ptr<char*[]> vl(new char*[arrayDims.get()[0]]);
                             herr_t err = H5Aread(attr_id, attr_type, vl.get());
                             if(err<0)
                             {
@@ -230,7 +230,7 @@ namespace NodeHDF5{
     
                             H5A_info_t ainfo;
                             H5Aget_info(attr_id, &ainfo );
-                            std::unique_ptr<char*> buffer(new char*[2]);
+                            std::unique_ptr<char*[]> buffer(new char*[2]);
     
                             /*
                              * Create the memory datatype.
@@ -468,7 +468,7 @@ namespace NodeHDF5{
                         return;
 
                     }
-                    std::unique_ptr<char*> vl(new char*[1]);
+                    std::unique_ptr<char*[]> vl(new char*[1]);
                     vl.get()[0]=new char[value.length()+1];
                     std::strncpy(vl.get()[0], value.c_str(), value.length()+1);
                     H5Awrite(attr_id, attr_type, vl.get());

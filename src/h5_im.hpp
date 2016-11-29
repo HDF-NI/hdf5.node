@@ -138,9 +138,9 @@ static void read_image_region (const v8::FunctionCallbackInfo<Value>& args)
         return;
     }
     int rank=3;
-    std::unique_ptr<hsize_t> start(new hsize_t[rank]);
-    std::unique_ptr<hsize_t> stride(new hsize_t[rank]);
-    std::unique_ptr<hsize_t> count(new hsize_t[rank]);
+    std::unique_ptr<hsize_t[]> start(new hsize_t[rank]);
+    std::unique_ptr<hsize_t[]> stride(new hsize_t[rank]);
+    std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
     if(args.Length() != 3){
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "no region properties")));
         args.GetReturnValue().SetUndefined();
