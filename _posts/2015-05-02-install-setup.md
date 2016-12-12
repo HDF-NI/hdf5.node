@@ -56,22 +56,22 @@ in node_modules/hdf5. There is no need for the node-gyp step.
 
 The path to the HDF5 shared objects must be added to the runtime library search path. 
 
-for linux
+for linux example:
 
 ```bash
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./hdf5.node/../hdf5/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<PATH-TO-YOUR-HDF5>/hdf5/lib
 ```
 
-for Mac OSX
+for Mac OSX example:
 
 ```bash
-export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:./hdf5.node/../hdf5/lib
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:<PATH-TO-YOUR-HDF5>/hdf5/lib
 ```
 
-for Windows
+for Windows example:
 
 ```bash
-set PATH=$PATH;./hdf5.node/../hdf5/bin
+set PATH=$PATH;<PATH-TO-YOUR-HDF5>/hdf5/bin
 ```
 
 If you want one of the third party filters available put its install path on HDF5_PLUGIN_PATH
