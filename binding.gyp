@@ -26,8 +26,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5',
-                        '-lhdf5_hl'
+                        '-lhdf5_serial',
+                        '-lhdf5_serial_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -121,6 +121,7 @@
             ['OS=="linux"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
+                    "/usr/include/hdf5/serial",
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
@@ -128,8 +129,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5',
-                        '-lhdf5_hl'
+                        '-lhdf5_serial',
+                        '-lhdf5_serial_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -211,6 +212,7 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
+                    "/usr/include/hdf5/serial",
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
@@ -218,8 +220,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5',
-                        '-lhdf5_hl'
+                        '-lhdf5_serial',
+                        '-lhdf5_serial_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -299,6 +301,7 @@
             ['OS=="linux"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
+                    "/usr/include/hdf5/serial",
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
@@ -308,8 +311,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5',
-                        '-lhdf5_hl'
+                        '-lhdf5_serial',
+                        '-lhdf5_serial_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -393,6 +396,7 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
+                    "/usr/include/hdf5/serial",
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
@@ -400,8 +404,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5',
-                        '-lhdf5_hl'
+                        '-lhdf5_serial',
+                        '-lhdf5_serial_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -483,6 +487,7 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
+                    "/usr/include/hdf5/serial",
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
@@ -490,8 +495,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5',
-                        '-lhdf5_hl'
+                        '-lhdf5_serial',
+                        '-lhdf5_serial_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
