@@ -43,6 +43,7 @@
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
+                    'src/int64.cc',
                     'src/hdf5.cc',
                     'src/attributes.cc',
                     'src/methods.cc',
@@ -93,6 +94,7 @@
                     '<(hdf5_home_mac)/include'
                 ],
                 'sources': [
+                    'src/int64.cc',
                     'src/hdf5.cc',
                     'src/attributes.cc',
                     'src/methods.cc',
