@@ -572,11 +572,11 @@
         {
             "target_name": "action_after_build",
             "type": "none",
-            "dependencies": [ "<(module_name)" ],
+            "dependencies": [ "hdf5" ],
             "copies": [
             {
-              "files": [ "<(PRODUCT_DIR)/<(module_name).node" ],
-              "destination": "<(module_path)"
+              "files": [ "<(PRODUCT_DIR)/hdf5.node" ],
+              "destination": "./lib/binding/"
             }
             ]
         }
