@@ -969,9 +969,9 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
 static void write_dataset_from_array(const v8::FunctionCallbackInfo<Value>& args,
     Local<v8::Array> array,
     bool subsetOn,
-    std::unique_ptr<hsize_t>& start,
-    std::unique_ptr<hsize_t>& stride,
-    std::unique_ptr<hsize_t>& count
+    std::unique_ptr<hsize_t[]>& start,
+    std::unique_ptr<hsize_t[]>& stride,
+    std::unique_ptr<hsize_t[]>& count
     ) {
   int rank = 1;
   String::Utf8Value dset_name (args[1]->ToString());
