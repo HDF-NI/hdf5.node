@@ -32,12 +32,12 @@ namespace NodeHDF5 {
             NODE_SET_PROTOTYPE_METHOD(tpl, "append", append);
             NODE_SET_PROTOTYPE_METHOD(tpl, "close", close);
 
-            Constructor.Reset(v8::Isolate::GetCurrent(), tpl);
+            Constructor.Reset(v8::Isolate::GetCurrent(), tpl->GetFunction());
             exports->Set(v8::String::NewFromUtf8(isolate, "PacketTable"), tpl->GetFunction());
         }
 
         static Local<Object> Instantiate(hid_t packetId, int nmembers) {
-            //        v8::Isolate* isolate = v8::Isolate::GetCurrent();
+            v8::Isolate* isolate = v8::Isolate::GetCurrent();
             //        HandleScope scope(isolate);
 
             Local<Object> idInstance=Int64::Instantiate(packetId);
@@ -45,10 +45,10 @@ namespace NodeHDF5 {
             idWrap->value=packetId;
             const unsigned argc = 2;
             v8::Handle<v8::Value> argv[argc] = {idInstance,
-                Uint32::New(v8::Isolate::GetCurrent(), nmembers)};
+                Uint32::New(isolate, nmembers)};
             //            v8::Local<v8::FunctionTemplate> cons = v8::Local<v8::FunctionTemplate>::New(isolate, Constructor);
             //        //std::cout<<"NewInstance "<<std::endl;
-            return v8::Local<v8::FunctionTemplate>::New(v8::Isolate::GetCurrent(), Constructor)->GetFunction()->NewInstance(argc, argv);
+            return v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), argc, argv).ToLocalChecked();
 
         }
 
@@ -69,7 +69,7 @@ namespace NodeHDF5 {
             //        if (args.IsConstructCall()) {
             // Invoked as constructor: `new MyObject(...)`
             hid_t value = args[0]->IsUndefined() ? -1 : ObjectWrap::Unwrap<Int64>(args[0]->ToObject())->Value();
-            int nmembers = args[1]->IsUndefined() ? -1 : args[1]->ToInt32()->Value();
+            int nmembers = args[1]->IsUndefined() ? -1 : args[1]->Int32Value();
             PacketTable* obj = new PacketTable(value, nmembers);
             obj->Wrap(args.This());
             args.GetReturnValue().Set(args.This());
@@ -132,7 +132,7 @@ namespace NodeHDF5 {
 
             args.GetReturnValue().SetUndefined();
         }
-        static v8::Persistent<v8::FunctionTemplate> Constructor;
+        static v8::Persistent<v8::Function> Constructor;
     protected:
         hid_t packetTableID;
         unsigned int nmembers;

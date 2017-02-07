@@ -40,7 +40,7 @@ namespace NodeHDF5 {
         
     private:
 
-        static v8::Persistent<v8::FunctionTemplate> Constructor;
+        static v8::Persistent<v8::Function> Constructor;
 
         static void New(const v8::FunctionCallbackInfo<v8::Value>& args) {
             // Xdm value object
@@ -49,7 +49,7 @@ namespace NodeHDF5 {
                 xp = new Int64(-1);
             else{
                 
-                xp = new Int64((long long)args[args.Length()-1]->ToInt32()->Value());
+                xp = new Int64((long long)args[args.Length()-1]->Int32Value());
             }
 
             xp->value=0;

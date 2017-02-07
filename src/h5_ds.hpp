@@ -75,7 +75,7 @@ static void attach_scale (const v8::FunctionCallbackInfo<Value>& args)
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
     hid_t did=H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
     hid_t dsid=H5Dopen(idWrap->Value(), *dim_scale_name, H5P_DEFAULT);
-    herr_t err=H5DSattach_scale(did, dsid, args[3]->ToInt32()->Value());
+    herr_t err=H5DSattach_scale(did, dsid, args[3]->Int32Value());
     if(err<0){
         H5Dclose(dsid);
         H5Dclose(did);
@@ -105,7 +105,7 @@ static void detach_scale (const v8::FunctionCallbackInfo<Value>& args)
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
     hid_t did=H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
     hid_t dsid=H5Dopen(idWrap->Value(), *dim_scale_name, H5P_DEFAULT);
-    herr_t err=H5DSdetach_scale(did, dsid, args[3]->ToInt32()->Value());
+    herr_t err=H5DSdetach_scale(did, dsid, args[3]->Int32Value());
     if(err<0){
         H5Dclose(dsid);
         H5Dclose(did);
@@ -135,7 +135,7 @@ static void is_attached (const v8::FunctionCallbackInfo<Value>& args)
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
     hid_t did=H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
     hid_t dsid=H5Dopen(idWrap->Value(), *dim_scale_name, H5P_DEFAULT);
-    htri_t status=H5DSis_attached(did, dsid, args[3]->ToInt32()->Value());
+    htri_t status=H5DSis_attached(did, dsid, args[3]->Int32Value());
     args.GetReturnValue().Set((status) ? true : false);
     H5Dclose(dsid);
     H5Dclose(did);
@@ -168,7 +168,7 @@ static void iterate_scales (const v8::FunctionCallbackInfo<Value>& args)
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
     H5LTget_dataset_ndims (idWrap->Value(), *dset_name, &rank);
     hid_t did=H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
-    int idx=args[2]->ToInt32()->Value();
+    int idx=args[2]->Int32Value();
         v8::Persistent<v8::Function> callback;
         const unsigned argc = 2;
         callback.Reset(v8::Isolate::GetCurrent(), args[3].As<Function>());
@@ -210,7 +210,7 @@ static void set_label (const v8::FunctionCallbackInfo<Value>& args)
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
     hid_t did=H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
     std::string label(*String::Utf8Value(args[3]->ToString()));
-    /*herr_t err=*/H5DSset_label(did, args[2]->ToInt32()->Value(), (char*)label.c_str());
+    /*herr_t err=*/H5DSset_label(did, args[2]->Int32Value(), (char*)label.c_str());
     H5Dclose(did);
     args.GetReturnValue().SetUndefined();
 }
@@ -231,9 +231,9 @@ static void get_label (const v8::FunctionCallbackInfo<Value>& args)
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
     hid_t did=H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
     size_t size=0;
-    size=H5DSget_label(did, args[2]->ToInt32()->Value(), NULL, size);
+    size=H5DSget_label(did, args[2]->Int32Value(), NULL, size);
     std::string name(size+1, '\0');
-    size=H5DSget_label(did, args[2]->ToInt32()->Value(), (char*)name.c_str(), size+1);
+    size=H5DSget_label(did, args[2]->Int32Value(), (char*)name.c_str(), size+1);
     args.GetReturnValue().Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name.c_str()));
     H5Dclose(did);
 }
@@ -275,7 +275,7 @@ static void get_num_scales (const v8::FunctionCallbackInfo<Value>& args)
     String::Utf8Value dset_name (args[1]->ToString());
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
     hid_t did=H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
-    int num=H5DSget_num_scales(did, args[2]->ToInt32()->Value());
+    int num=H5DSget_num_scales(did, args[2]->Int32Value());
     args.GetReturnValue().Set(v8::Uint32::New(v8::Isolate::GetCurrent(), num));
     H5Dclose(did);
 }

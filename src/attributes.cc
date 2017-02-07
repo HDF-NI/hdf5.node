@@ -374,7 +374,7 @@ namespace NodeHDF5{
                 }
                 else if(args.This()->Get(name)->IsUint32())
                 {
-                    uint32_t value=args.This()->Get(name)->ToUint32()->Uint32Value();
+                    uint32_t value=args.This()->Get(name)->Uint32Value();
                     if(attrExists)
                     {
                         H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
@@ -399,7 +399,7 @@ namespace NodeHDF5{
                 }
                 else if(args.This()->Get(name)->IsInt32())
                 {
-                    int32_t value=args.This()->Get(name)->ToInt32()->Int32Value();
+                    int32_t value=args.This()->Get(name)->Int32Value();
                     if(attrExists)
                     {
                         H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
@@ -424,7 +424,7 @@ namespace NodeHDF5{
                 }
                 else if(args.This()->Get(name)->IsNumber())
                 {
-                    double value=args.This()->Get(name)->ToNumber()->NumberValue();
+                    double value=args.This()->Get(name)->NumberValue();
 
                     if(attrExists)
                     {

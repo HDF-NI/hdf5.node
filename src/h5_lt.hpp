@@ -89,7 +89,7 @@ namespace NodeHDF5 {
 
         auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "fixed_width"));
 
-        if(!options->HasOwnProperty(name)) {
+        if(!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
             return 0;
         }
 
@@ -103,7 +103,7 @@ namespace NodeHDF5 {
 
         auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "compression"));
 
-        if(!options->HasOwnProperty(name)) {
+        if(!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
             return 0;
         }
 
@@ -117,7 +117,7 @@ namespace NodeHDF5 {
 
         auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "chunkSize"));
 
-        if(!options->HasOwnProperty(name)) {
+        if(!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
             return 0;
         }
 
@@ -173,12 +173,12 @@ static void make_dataset_from_buffer(const hid_t &group_id, const char *dset_nam
         }
         return;
     }
-    hid_t type_id=toTypeMap[(H5T)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))->ToInt32()->Value()];
+    hid_t type_id=toTypeMap[(H5T)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))->Int32Value()];
     int rank=1;
     if(buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank")))
     {
         Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"));
-        rank=rankValue->ToInt32()->Value();
+        rank=rankValue->Int32Value();
     }
     std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);
     switch(rank)
@@ -187,10 +187,10 @@ static void make_dataset_from_buffer(const hid_t &group_id, const char *dset_nam
             dims.get()[0]={node::Buffer::Length(buffer)/H5Tget_size(type_id)};
             break;
         case 3:
-            dims.get()[2]=(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->ToInt32()->Value();
+            dims.get()[2]=(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->Int32Value();
         case 2:
-            dims.get()[1]=(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value();
-            dims.get()[0]=(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value();
+            dims.get()[1]=(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->Int32Value();
+            dims.get()[0]=(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->Int32Value();
             break;
         default:
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported rank")));
@@ -234,7 +234,7 @@ static void make_dataset_from_buffer(const hid_t &group_id, const char *dset_nam
             }
             else if(buffer->Get(name)->IsUint32())
             {
-                uint32_t value=buffer->Get(name)->ToUint32()->Uint32Value();
+                uint32_t value=buffer->Get(name)->Uint32Value();
                 if(H5Aexists_by_name(group_id, dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
                 {
                     H5Adelete_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
@@ -244,7 +244,7 @@ static void make_dataset_from_buffer(const hid_t &group_id, const char *dset_nam
             }
             else if(buffer->Get(name)->IsInt32())
             {
-                int32_t value=buffer->Get(name)->ToInt32()->Int32Value();
+                int32_t value=buffer->Get(name)->Int32Value();
                 if(H5Aexists_by_name(group_id, dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
                 {
                     H5Adelete_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
@@ -264,7 +264,7 @@ static void make_dataset_from_buffer(const hid_t &group_id, const char *dset_nam
             }
             else if(buffer->Get(name)->IsNumber())
             {
-                double value=buffer->Get(name)->ToNumber()->NumberValue();
+                double value=buffer->Get(name)->NumberValue();
                 if(H5Aexists_by_name(group_id, dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
                 {
                     H5Adelete_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
@@ -281,7 +281,7 @@ static void make_dataset_from_typed_array(const hid_t &group_id, const char *dse
     if(buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank")))
     {
         Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"));
-        rank=rankValue->ToInt32()->Value();
+        rank=rankValue->Int32Value();
     }
 
     if(rank==1)
@@ -315,9 +315,9 @@ static void make_dataset_from_typed_array(const hid_t &group_id, const char *dse
     }
     else if(rank==2)
     {
-//        Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value();
-//        Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value();
-        hsize_t dims[2]={(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value()};
+//        Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->Int32Value();
+//        Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->Int32Value();
+        hsize_t dims[2]={(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->Int32Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->Int32Value()};
         unsigned int compression= get_compression(options);
         unsigned int chunk_size = get_chunk_size(options);
 
@@ -346,9 +346,7 @@ static void make_dataset_from_typed_array(const hid_t &group_id, const char *dse
     }
     else if(rank==3)
     {
-//        Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value();
-//        Local<Value> rankValue=buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value();
-        hsize_t dims[3]={(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->ToInt32()->Value(),  (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->ToInt32()->Value()};
+        hsize_t dims[3]={(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->Int32Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->Int32Value(),  (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->Int32Value()};
         unsigned int compression= get_compression(options);
         unsigned int chunk_size = get_chunk_size(options);
 
@@ -394,7 +392,7 @@ static void make_dataset_from_typed_array(const hid_t &group_id, const char *dse
             }
             else if(buffer->Get(name)->IsUint32())
             {
-                uint32_t value=buffer->Get(name)->ToUint32()->Uint32Value();
+                uint32_t value=buffer->Get(name)->Uint32Value();
                 if(H5Aexists_by_name(group_id, dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
                 {
                     H5Adelete_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
@@ -404,7 +402,7 @@ static void make_dataset_from_typed_array(const hid_t &group_id, const char *dse
             }
             else if(buffer->Get(name)->IsInt32())
             {
-                int32_t value=buffer->Get(name)->ToInt32()->Int32Value();
+                int32_t value=buffer->Get(name)->Int32Value();
                 if(H5Aexists_by_name(group_id, dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
                 {
                     H5Adelete_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
@@ -427,7 +425,7 @@ static void make_dataset_from_typed_array(const hid_t &group_id, const char *dse
             }
             else if(buffer->Get(name)->IsNumber())
             {
-                double value=buffer->Get(name)->ToNumber()->NumberValue();
+                double value=buffer->Get(name)->NumberValue();
                 if(H5Aexists_by_name(group_id, dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
                 {
                     H5Adelete_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
@@ -636,7 +634,6 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
     if(args.Length() == 4){
          Local<Array> names=args[3]->ToObject()->GetOwnPropertyNames();
          for(uint32_t index=0;index<names->Length();index++){
-             names->CloneElementAt(index);
             String::Utf8Value _name (names->Get(index));
             std::string name(*_name);
             if(name.compare("start")==0){
@@ -680,7 +677,7 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
             args.GetReturnValue().SetUndefined();
             return;
         }
-        hid_t type_id=toTypeMap[(H5T)args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))->ToInt32()->Value()];
+        hid_t type_id=toTypeMap[(H5T)args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))->Int32Value()];
         Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
         hid_t did = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
         hid_t dataspace_id=H5S_ALL;
@@ -745,7 +742,7 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 }
                 else if(args[2]->ToObject()->Get(name)->IsUint32())
                 {
-                    uint32_t value=args[2]->ToObject()->Get(name)->ToUint32()->Uint32Value();
+                    uint32_t value=args[2]->ToObject()->Get(name)->Uint32Value();
                     if(H5Aexists_by_name(idWrap->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
                     {
                         H5Adelete_by_name(idWrap->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
@@ -755,7 +752,7 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 }
                 else if(args[2]->ToObject()->Get(name)->IsInt32())
                 {
-                    int32_t value=args[2]->ToObject()->Get(name)->ToInt32()->Int32Value();
+                    int32_t value=args[2]->ToObject()->Get(name)->Int32Value();
                     if(H5Aexists_by_name(idWrap->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
                     {
                         H5Adelete_by_name(idWrap->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
@@ -778,7 +775,7 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 }
                 else if(args[2]->ToObject()->Get(name)->IsNumber())
                 {
-                    double value=args[2]->ToObject()->Get(name)->ToNumber()->NumberValue();
+                    double value=args[2]->ToObject()->Get(name)->NumberValue();
                     if(H5Aexists_by_name(idWrap->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
                     {
                         H5Adelete_by_name(idWrap->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
@@ -924,7 +921,7 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 }
                 else if(buffer->Get(name)->IsUint32())
                 {
-                    uint32_t value=buffer->Get(name)->ToUint32()->Uint32Value();
+                    uint32_t value=buffer->Get(name)->Uint32Value();
                     if(H5Aexists_by_name(idWrap->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
                     {
                         H5Adelete_by_name(idWrap->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
@@ -934,7 +931,7 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 }
                 else if(buffer->Get(name)->IsInt32())
                 {
-                    int32_t value=buffer->Get(name)->ToInt32()->Int32Value();
+                    int32_t value=buffer->Get(name)->Int32Value();
                     if(H5Aexists_by_name(idWrap->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
                     {
                         H5Adelete_by_name(idWrap->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
@@ -957,7 +954,7 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 }
                 else if(buffer->Get(name)->IsNumber())
                 {
-                    double value=buffer->Get(name)->ToNumber()->NumberValue();
+                    double value=buffer->Get(name)->NumberValue();
                     if(H5Aexists_by_name(idWrap->Value(), *dset_name,  (*String::Utf8Value(name->ToString())), H5P_DEFAULT)>0)
                     {
                         H5Adelete_by_name(idWrap->Value(), *dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
@@ -980,7 +977,8 @@ static void write_dataset_from_array(const v8::FunctionCallbackInfo<Value>& args
     ) {
   int rank = 1;
   String::Utf8Value dset_name (args[1]->ToString());
-  hid_t did = H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT);
+  Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+  hid_t did = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
   hid_t dataspace_id=H5Dget_space(did);
   hid_t memspace_id=H5S_ALL;
   hsize_t dims;
@@ -1460,7 +1458,6 @@ static void readDatasetAsBuffer (const v8::FunctionCallbackInfo<Value>& args)
     if(args.Length() == 3){
          Local<Array> names=args[2]->ToObject()->GetOwnPropertyNames();
          for(uint32_t index=0;index<names->Length();index++){
-             names->CloneElementAt(index);
             String::Utf8Value _name (names->Get(index));
             std::string name(*_name);
             if(name.compare("start")==0){

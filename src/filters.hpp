@@ -32,23 +32,21 @@ namespace NodeHDF5 {
             NODE_SET_PROTOTYPE_METHOD(tpl, "getNFilters", getNFilters);
             NODE_SET_PROTOTYPE_METHOD(tpl, "getFilter", getFilter);
 
-            Constructor.Reset(v8::Isolate::GetCurrent(), tpl);
+            Constructor.Reset(v8::Isolate::GetCurrent(), tpl->GetFunction());
             exports->Set(v8::String::NewFromUtf8(isolate, "Filters"), tpl->GetFunction());
         }
 
         static Local<Object> Instantiate(hid_t parentId, std::string dset_name) {
-            //        v8::Isolate* isolate = v8::Isolate::GetCurrent();
-            //        HandleScope scope(isolate);
+        v8::Isolate* isolate = v8::Isolate::GetCurrent();
 
         Local<Object> idInstance=Int64::Instantiate(parentId);
         Int64* idWrap = ObjectWrap::Unwrap<Int64>(idInstance);
         idWrap->value=parentId;
             const unsigned argc = 2;
             v8::Handle<v8::Value> argv[argc] = {idInstance,
-                v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), dset_name.c_str())};
-            //            v8::Local<v8::FunctionTemplate> cons = v8::Local<v8::FunctionTemplate>::New(isolate, Constructor);
-            return v8::Local<v8::FunctionTemplate>::New(v8::Isolate::GetCurrent(), Constructor)->GetFunction()->NewInstance(argc, argv);
+                v8::String::NewFromUtf8(isolate, dset_name.c_str())};
 
+            return  v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), argc, argv).ToLocalChecked();
         }
 
     private:
@@ -88,7 +86,7 @@ namespace NodeHDF5 {
 
             //Filters* obj = ObjectWrap::Unwrap<Filters>(args.This());
 
-            args.GetReturnValue().Set((H5Zfilter_avail(args[0]->ToInt32()->Value())) ? true : false);
+            args.GetReturnValue().Set((H5Zfilter_avail(args[0]->Int32Value())) ? true : false);
         }
 
         static void getNFilters(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -104,7 +102,7 @@ namespace NodeHDF5 {
         static void getFilter(const v8::FunctionCallbackInfo<v8::Value>& args) {
         }
 
-        static v8::Persistent<v8::FunctionTemplate> Constructor;
+        static v8::Persistent<v8::Function> Constructor;
     protected:
         hid_t parentId;
         std::string datasetName;
