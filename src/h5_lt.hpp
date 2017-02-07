@@ -681,18 +681,8 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
         hid_t dataspace_id=H5S_ALL;
         hid_t memspace_id=H5S_ALL;
         if(subsetOn){
-            const hsize_t maxsize = H5S_UNLIMITED;
-            memspace_id = H5Screate_simple (rank, count.get(), &maxsize);
+            memspace_id = H5Screate_simple (rank, count.get(), NULL);
             dataspace_id = H5Dget_space (did);
-            hsize_t dims;
-            hsize_t maxdims;
-            H5Sget_simple_extent_dims(dataspace_id, &dims, &maxdims);
-            const int remainingRows = dims - (*start.get() + *count.get());
-            if (remainingRows < 0) {
-              dims -= remainingRows;
-              H5Dset_extent(did, &dims);
-              H5Sset_extent_simple(dataspace_id, rank, &dims, &maxdims);
-            }
             herr_t  err = H5Sselect_hyperslab (dataspace_id, H5S_SELECT_SET, start.get(),
                                           stride.get(), count.get(), NULL);
             if(err<0)
