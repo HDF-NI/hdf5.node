@@ -74,7 +74,7 @@ namespace NodeHDF5 {
         // append this function to the target object
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeDataset"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::make_dataset)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "writeDataset"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::write_dataset)->GetFunction());
-        target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "lengthDataset"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::length_dataset)->GetFunction());
+        target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDatasetLength"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::read_dataset_length)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDatasetDatatype"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::read_dataset_datatype)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDataset"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::read_dataset)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDatasetAsBuffer"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::readDatasetAsBuffer)->GetFunction());
@@ -1030,16 +1030,17 @@ static void write_dataset_from_array(const v8::FunctionCallbackInfo<Value>& args
   args.GetReturnValue().SetUndefined();
 }
 
-static void length_dataset(const v8::FunctionCallbackInfo<Value>& args) {
-
-  if (args.Length() != 2 || !args[0]->IsUint32() || !args[1]->IsString()) {
+static void read_dataset_length(const v8::FunctionCallbackInfo<Value>& args) {
+  if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
       v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
       args.GetReturnValue().SetUndefined();
       return;
   }
 
   const String::Utf8Value dataset_name (args[1]->ToString());
-  const hid_t location_id = args[0]->ToInt32()->Value();
+
+  Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+  const hid_t location_id = idWrap->Value();
 
   const hid_t dataset = H5Dopen(location_id, *dataset_name, H5P_DEFAULT);
   const hid_t dataspace = H5Dget_space(dataset);
