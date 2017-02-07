@@ -863,6 +863,7 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
         }
         if(subsetOn){
             memspace_id = H5Screate_simple (rank, count.get(), NULL);
+            dataspace_id = H5Dget_space (did);
             herr_t  err = H5Sselect_hyperslab (dataspace_id, H5S_SELECT_SET, start.get(),
                                           stride.get(), count.get(), NULL);
             if(err<0)
