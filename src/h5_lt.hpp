@@ -204,11 +204,11 @@ static void make_dataset_from_buffer(const hid_t &group_id, const char *dset_nam
         }
     }
 
-    if(compression>0 || chunk_size > 0) {
+    // if(compression>0 || chunk_size > 0) {
         if(!configure_chunked_layout(dcpl, chunk_size, rank, dims.get())) {
             return;
         }
-    }
+    // }
 
     herr_t err=H5LT_make_dataset_numerical (group_id, dset_name, rank, dims.get(), type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, node::Buffer::Data(buffer));
     if(err<0)
@@ -296,11 +296,11 @@ static void make_dataset_from_typed_array(const hid_t &group_id, const char *dse
             }
         }
 
-        if(compression>0 || chunk_size > 0) {
+        // if(compression>0 || chunk_size > 0) {
             if(!configure_chunked_layout(dcpl, chunk_size, rank, dims)) {
                 return;
             }
-        }
+        // }
 
         herr_t err=H5LT_make_dataset_numerical (group_id, dset_name, rank, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data() );
         if(err<0)
@@ -327,11 +327,11 @@ static void make_dataset_from_typed_array(const hid_t &group_id, const char *dse
             }
         }
 
-        if(compression>0 || chunk_size > 0) {
+        // if(compression>0 || chunk_size > 0) {
             if(!configure_chunked_layout(dcpl, chunk_size, rank, dims)) {
                 return;
             }
-        }
+        // }
 
         herr_t err=H5LT_make_dataset_numerical (group_id, dset_name, rank, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data() );
         if(err<0)
@@ -356,11 +356,11 @@ static void make_dataset_from_typed_array(const hid_t &group_id, const char *dse
             }
         }
 
-        if(compression>0 || chunk_size > 0) {
+        // if(compression>0 || chunk_size > 0) {
             if(!configure_chunked_layout(dcpl, chunk_size, rank, dims)) {
                 return;
             }
-        }
+        // }
 
         herr_t err=H5LT_make_dataset_numerical (group_id, dset_name, rank, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data() );
         if(err<0)
