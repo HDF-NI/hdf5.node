@@ -31,7 +31,6 @@ namespace NodeHDF5 {
 
             unsigned int compression = 0;
             bool error=false;
-            bool is_open = false;
 
         public:
             static void Initialize (Handle<Object> target);
@@ -52,10 +51,6 @@ namespace NodeHDF5 {
             static void Move (const v8::FunctionCallbackInfo<Value>& args);
             static void Delete (const v8::FunctionCallbackInfo<Value>& args);
             static void Close (const v8::FunctionCallbackInfo<Value>& args);
-            static void GetNumAttrs (const v8::FunctionCallbackInfo<Value>& args);
-            static void GetMemberNames (const v8::FunctionCallbackInfo<Value>& args);
-            static void GetMemberNamesByCreationOrder (const v8::FunctionCallbackInfo<Value>& args);
-            static void GetChildType (const v8::FunctionCallbackInfo<Value>& args);
 
         protected:
     };

@@ -31,8 +31,9 @@ namespace NodeHDF5 {
         std::vector<hid_t> hidPath;
 
         private:
-            static Persistent<FunctionTemplate> Constructor;
+            static Persistent<Function> Constructor;
             static void New (const v8::FunctionCallbackInfo<Value>& args);
+            bool is_open;
 
         public:
             Group(hid_t id);
@@ -50,22 +51,6 @@ namespace NodeHDF5 {
 
         protected:
 
-            static void GetNumAttrs (const v8::FunctionCallbackInfo<Value>& args);
-            static void GetAttributeNames (const v8::FunctionCallbackInfo<Value>& args);
-            static void ReadAttribute (const v8::FunctionCallbackInfo<Value>& args);
-            static void GetNumObjs (const v8::FunctionCallbackInfo<Value>& args);
-            static void GetMemberNames (const v8::FunctionCallbackInfo<Value>& args);
-            static void GetMemberNamesByCreationOrder (const v8::FunctionCallbackInfo<Value>& args);
-            static void GetChildType (const v8::FunctionCallbackInfo<Value>& args);
-            static void getDatasetType (const v8::FunctionCallbackInfo<Value>& args);
-            static void getDatasetAttributes (const v8::FunctionCallbackInfo<Value>& args);
-            static void getFilters (const v8::FunctionCallbackInfo<Value>& args);
-
-            hsize_t getNumObjs();
-            int getNumAttrs();
-            H5O_type_t childObjType(const char* objname);
-            std::string getObjnameByIdx(hsize_t idx);
-            bool is_open;
     };
 
 };
