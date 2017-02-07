@@ -1,11 +1,9 @@
 #pragma once
-#include <iostream>
 #include <v8.h>
 #include <uv.h>
 #include <node.h>
 #include <node_buffer.h>
 
-//#include <iostream>
 #include <algorithm>
 #include <cstring>
 #include <vector>
@@ -1327,8 +1325,7 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                           args.GetReturnValue().SetUndefined();
                           return;
                 }
-//                hsize_t dims[1]={buffer->Length()};
-//                buffer->;
+
                 err=H5LTread_dataset (idWrap->Value(), *dset_name, type_id, buffer->Buffer()->Externalize().Data() );
                 if(err<0)
                 {

@@ -324,7 +324,7 @@ namespace NodeHDF5 {
         bool hit=false;
         H5T etype=NODE_H5T_UNKNOWN;
         for(std::map<H5T, hid_t>::iterator it=toTypeMap.begin();!hit && it!=toTypeMap.end();it++){
-            
+
             if(H5Tequal(t, toTypeMap[(*it).first])){
                 etype=(*it).first;
                 hit=true;
@@ -612,9 +612,9 @@ namespace NodeHDF5 {
 
     }
 
-    
+
     //protectd methods
-    
+
     int Methods::getNumAttrs()
     {
        H5O_info_t oinfo;    /* Object info */
@@ -682,5 +682,5 @@ namespace NodeHDF5 {
         return (name);
     }
 
-    
+
 }

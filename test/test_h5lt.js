@@ -562,7 +562,7 @@ describe("testing lite interface ", function() {
           file.close();
         });
     });
-    
+
     describe("varlen char arrays", function() {
         let file;
         before(function*() {

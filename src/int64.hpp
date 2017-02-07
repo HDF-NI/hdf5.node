@@ -24,7 +24,7 @@ namespace NodeHDF5 {
         static v8::Local<v8::Object> Instantiate (long long value);
         static v8::Local<v8::Object> Instantiate (v8::Local<v8::Object> parent, long long value = 0);
         long long Value(){return value;};
-        
+
     protected:
 
         Int64() : Int64(0) {
@@ -37,7 +37,7 @@ namespace NodeHDF5 {
 
         ~Int64() {
         };
-        
+
     private:
 
         static v8::Persistent<v8::Function> Constructor;
@@ -48,7 +48,7 @@ namespace NodeHDF5 {
             if (args.Length() < 1)
                 xp = new Int64(-1);
             else{
-                
+
                 xp = new Int64((long long)args[args.Length()-1]->Int32Value());
             }
 
