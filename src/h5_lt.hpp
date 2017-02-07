@@ -75,6 +75,7 @@ namespace NodeHDF5 {
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeDataset"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::make_dataset)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "writeDataset"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::write_dataset)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "lengthDataset"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::length_dataset)->GetFunction());
+        target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDatasetDatatype"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::read_dataset_datatype)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDataset"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::read_dataset)->GetFunction());
         target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDatasetAsBuffer"), FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::readDatasetAsBuffer)->GetFunction());
 
@@ -1056,6 +1057,26 @@ static void length_dataset(const v8::FunctionCallbackInfo<Value>& args) {
 
   delete[] dims;
   delete[] maxdims;
+}
+
+static void read_dataset_datatype(const v8::FunctionCallbackInfo<Value>& args) {
+  if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+      args.GetReturnValue().SetUndefined();
+      return;
+  }
+
+  const String::Utf8Value dataset_name (args[1]->ToString());
+
+  Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+  const hid_t location_id = idWrap->Value();
+
+  const hid_t dataset = H5Dopen(location_id, *dataset_name, H5P_DEFAULT);
+  hid_t t       = H5Dget_type(dataset);
+
+  args.GetReturnValue().Set(Int32::New(v8::Isolate::GetCurrent(), t));
+
+  H5Dclose(dataset);
 }
 
 static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
