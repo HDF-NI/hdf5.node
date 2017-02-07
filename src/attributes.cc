@@ -485,7 +485,10 @@ namespace NodeHDF5{
                         H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
                     }
                     hid_t attr_type=H5Tcopy(H5T_C_S1);
-                    H5Tset_size(attr_type, std::strlen(value.c_str()));
+                    size_t s = std::strlen(value.c_str());
+                    if (s) {
+                        H5Tset_size(attr_type, s);
+                    }
                     hid_t attr_space=H5Screate( H5S_SCALAR );
                     hid_t attr_id=H5Acreate2(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
                     if(attr_id<0)
