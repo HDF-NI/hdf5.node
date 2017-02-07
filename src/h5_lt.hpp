@@ -1269,13 +1269,18 @@ static void read_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 }
                 else if(class_id==H5T_INTEGER && bufSize==8)
                 {
-                    hid_t did=H5Dopen(args[0]->ToInt32()->Value(), *dset_name, H5P_DEFAULT );
-                    type_id=H5Dget_type(did);
-                    hid_t native_type_id=H5Tget_native_type(type_id,H5T_DIR_ASCEND);
-                    Handle<Object> int64Buffer = node::Buffer::New(v8::Isolate::GetCurrent(), bufSize * theSize).ToLocalChecked();
-                    H5LTread_dataset (args[0]->ToInt32()->Value(), *dset_name, native_type_id, (char*)node::Buffer::Data(int64Buffer) );
 
+                    hid_t did=H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT );
+                    type_id=H5Dget_type(did);
+                    Handle<Object> int64Buffer = node::Buffer::New(v8::Isolate::GetCurrent(), bufSize * theSize).ToLocalChecked();
+                    H5LTread_dataset (idWrap->Value(), *dset_name, type_id, (char*)node::Buffer::Data(int64Buffer));
+
+                    hid_t native_type_id=H5Tget_native_type(type_id,H5T_DIR_ASCEND);
+                    if (H5Tequal(H5T_NATIVE_LLONG, native_type_id)) {  // FIXME: we should use read_dataset_datatype
+                      int64Buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"), Int32::New(v8::Isolate::GetCurrent(), toEnumMap[H5T_NATIVE_LLONG]));
+                    }
                     args.GetReturnValue().Set(int64Buffer);
+                    H5Tclose(native_type_id);
                     H5Tclose(type_id);
                     H5Dclose(did);
                     return;
