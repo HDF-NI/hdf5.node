@@ -59,9 +59,7 @@ describe("testing c interface ", function() {
         it("should get member names ", function () {
             const names=file.getMemberNames();
             names.length.should.equal(1);
-            names.forEach(function(val) {
-                console.dir(val);
-            });
+            names[0].should.equal('pmcservices');
         });
 
         it("should add an attribute to the file ", function () {
