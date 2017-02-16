@@ -697,6 +697,16 @@ static void write_dataset (const v8::FunctionCallbackInfo<Value>& args)
                 args.GetReturnValue().SetUndefined();
                 return;
             }
+            hsize_t dims;
+            hsize_t maxdims;
+            H5Sget_simple_extent_dims(dataspace_id, &dims, &maxdims);
+
+            int remainingRows = dims - (*start.get() + *count.get());
+            if (remainingRows < 0) {
+              dims -= remainingRows;
+              H5Dset_extent(did, &dims);
+              H5Sset_extent_simple(dataspace_id, rank, &dims, &maxdims);
+            }
         }
         herr_t err = H5Dwrite(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, node::Buffer::Data(args[2]));
         if(err<0)
