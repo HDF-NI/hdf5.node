@@ -13,6 +13,7 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
+                    "/usr/include/hdf5/serial",
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
@@ -25,8 +26,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5',
-                        '-lhdf5_hl'
+                        '-lhdf5_serial',
+                        '-lhdf5_serial_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -42,6 +43,7 @@
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
+                    'src/int64.cc',
                     'src/hdf5.cc',
                     'src/attributes.cc',
                     'src/methods.cc',
@@ -84,7 +86,7 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions","-v", "-stdlib=libc++", "-Werror"],
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
                     'OTHER_LDFLAGS': [],
                     'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
@@ -92,6 +94,7 @@
                     '<(hdf5_home_mac)/include'
                 ],
                 'sources': [
+                    'src/int64.cc',
                     'src/hdf5.cc',
                     'src/attributes.cc',
                     'src/methods.cc',
@@ -120,6 +123,7 @@
             ['OS=="linux"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
+                    "/usr/include/hdf5/serial",
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
@@ -127,8 +131,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5',
-                        '-lhdf5_hl'
+                        '-lhdf5_serial',
+                        '-lhdf5_serial_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -180,7 +184,7 @@
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions","-v", "-stdlib=libc++", "-Werror"],
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
                     'OTHER_LDFLAGS': [],
                     'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
@@ -210,6 +214,7 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
+                    "/usr/include/hdf5/serial",
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
@@ -217,8 +222,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5',
-                        '-lhdf5_hl'
+                        '-lhdf5_serial',
+                        '-lhdf5_serial_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -270,7 +275,7 @@
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions","-v", "-stdlib=libc++", "-Werror"],
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
                     'OTHER_LDFLAGS': [],
                     'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
@@ -298,6 +303,7 @@
             ['OS=="linux"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
+                    "/usr/include/hdf5/serial",
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
@@ -307,8 +313,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5',
-                        '-lhdf5_hl'
+                        '-lhdf5_serial',
+                        '-lhdf5_serial_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -361,7 +367,7 @@
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions","-v", "-stdlib=libc++", "-Werror"],
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
                     'OTHER_LDFLAGS': [],
                     'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
@@ -392,6 +398,7 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
+                    "/usr/include/hdf5/serial",
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
@@ -399,8 +406,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5',
-                        '-lhdf5_hl'
+                        '-lhdf5_serial',
+                        '-lhdf5_serial_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -452,7 +459,7 @@
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-v", "-stdlib=libc++", "-Werror"],
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
                     'OTHER_LDFLAGS': [],
                     'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
@@ -482,6 +489,7 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
+                    "/usr/include/hdf5/serial",
                     '<(hdf5_home_linux)/include'
                 ],
                 'sources': [
@@ -489,8 +497,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5',
-                        '-lhdf5_hl'
+                        '-lhdf5_serial',
+                        '-lhdf5_serial_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -541,7 +549,7 @@
             }],
             ['OS=="mac"', {
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-v", "-stdlib=libc++", "-Werror"],
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
                     'OTHER_LDFLAGS': [],
                     'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
@@ -566,11 +574,11 @@
         {
             "target_name": "action_after_build",
             "type": "none",
-            "dependencies": [ "<(module_name)" ],
+            "dependencies": [ "hdf5" ],
             "copies": [
             {
-              "files": [ "<(PRODUCT_DIR)/<(module_name).node" ],
-              "destination": "<(module_path)"
+              "files": [ "<(PRODUCT_DIR)/hdf5.node" ],
+              "destination": "./lib/binding/"
             }
             ]
         }

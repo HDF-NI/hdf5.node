@@ -82,9 +82,9 @@ describe("testing lite interface ", function() {
             var byteOrder=group.getByteOrder('Two Rank');
             byteOrder.should.equal(0);
             const readBuffer=h5lt.readDataset(group.id, 'Two Rank', function(options) {
-                    console.dir("options: "+JSON.stringify(options));
+                    JSON.stringify(options).should.equal('{"rank":2,"endian":0}')
                 });
-                console.dir(" after options cb: ");
+                // console.dir(" after options cb: ");
             readBuffer.constructor.name.should.match('Float64Array');
             readBuffer.length.should.match(6);
 
@@ -562,7 +562,7 @@ describe("testing lite interface ", function() {
           file.close();
         });
     });
-    
+
     describe("varlen char arrays", function() {
         let file;
         before(function*() {

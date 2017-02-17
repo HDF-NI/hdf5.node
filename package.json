@@ -7,12 +7,6 @@
     "type": "git",
     "url": "https://github.com/HDF-NI/hdf5.node.git"
   },
-  "dependencies": {
-    "node-pre-gyp": "0.6.28"
-  },
-  "bundledDependencies": [
-    "node-pre-gyp"
-  ],
   "devDependencies": {
     "co-mocha": "^1.1.2",
     "mocha": "2.4.5",
@@ -20,15 +14,8 @@
     "xml2js": "*"
   },
   "scripts": {
-    "install": "./node_modules/.bin/node-pre-gyp install --fallback-to-build",
-    "prebuild": "./node_modules/.bin/node-pre-gyp rebuild && ./node_modules/.bin/node-pre-gyp package",
+    "install": "node-gyp rebuild --jobs max",
     "test": "mocha test"
-  },
-  "binary": {
-    "module_name": "hdf5",
-    "module_path": "./lib/binding/",
-    "host": "https://hdf5.node.s3-us-west-2.amazonaws.com",
-    "remote_path": "./v{version}"
   },
   "contributors": [
     "Ryan Cole <ryan@rycole.com> (https://github.com/ryancole/)",

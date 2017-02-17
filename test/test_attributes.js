@@ -49,7 +49,7 @@ describe("testing atrribute interface ",function(){
             group.name.type.should.equal("variable-length");
             group.size.constructor.name.should.match('Float64Array');
             group.notes.constructor.name.should.match('Array');
-            console.dir(group.notes);
+            // console.dir(group.notes);
             group.close();
         });
 

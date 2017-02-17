@@ -34,10 +34,10 @@ static void make_image (const v8::FunctionCallbackInfo<Value>& args)
     String::Utf8Value dset_name (args[1]->ToString());
     Local<v8::Object> buffer =  args[2]->ToObject();
 //    Local<Number> buffer =  Local<Number>::Cast(args[2]);
-//    //std::cout<<"planes "<<buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->ToInt32()->Value()<<std::endl;
+//    //std::cout<<"planes "<<buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->Int32Value()<<std::endl;
     String::Utf8Value interlace (buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"))->ToString());
     herr_t err;
-    hsize_t dims[3]={(hsize_t) buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))->ToInt32()->Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->ToInt32()->Value()};
+    hsize_t dims[3]={(hsize_t) buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))->Int32Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))->Int32Value(), (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->Int32Value()};
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
     err=H5LTmake_dataset (idWrap->Value(), *dset_name, 3, dims, H5T_NATIVE_UCHAR,  (const char *)node::Buffer::Data(args[2]) );
     if(err<0)
@@ -55,15 +55,15 @@ static void make_image (const v8::FunctionCallbackInfo<Value>& args)
     rangeBuffer.get()[0]=(unsigned char)0;
     rangeBuffer.get()[1]=(unsigned char)255;
     H5LTset_attribute_uchar(idWrap->Value(), *dset_name, "IMAGE_MINMAXRANGE", rangeBuffer.get(), 2);
-//                hid_t dataset = H5Dopen(args[0]->ToInt32()->Value(), (*table_name), H5P_DEFAULT);
+//                hid_t dataset = H5Dopen(args[0]->Int32Value(), (*table_name), H5P_DEFAULT);
 //                H5Dclose(dataset);
 
-//    switch(buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->ToInt32()->Value())
+//    switch(buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->Int32Value())
 //    {
 //        case 4:
 //            break;
 //        case 3:
-//            err=H5IMmake_image_24bit (args[0]->ToInt32()->Value(), *dset_name,  buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))->ToInt32()->Value(), buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))->ToInt32()->Value(), *interlace, (const unsigned char *)buffer->Buffer()->Externalize().Data());
+//            err=H5IMmake_image_24bit (args[0]->Int32Value(), *dset_name,  buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))->Int32Value(), buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))->Int32Value(), *interlace, (const unsigned char *)buffer->Buffer()->Externalize().Data());
 //            if(err<0)
 //            {
 //                v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make image 24 bit")));
@@ -72,7 +72,7 @@ static void make_image (const v8::FunctionCallbackInfo<Value>& args)
 //            }
 //            break;
 //        case 1:
-//            err=H5IMmake_image_8bit (args[0]->ToInt32()->Value(), *dset_name,  buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))->ToInt32()->Value(), buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))->ToInt32()->Value(), (const unsigned char *)buffer->Buffer()->Externalize().Data());
+//            err=H5IMmake_image_8bit (args[0]->Int32Value(), *dset_name,  buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))->Int32Value(), buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))->Int32Value(), (const unsigned char *)buffer->Buffer()->Externalize().Data());
 //            if(err<0)
 //            {
 //                v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make image 8 bit")));
@@ -102,7 +102,7 @@ static void read_image (const v8::FunctionCallbackInfo<Value>& args)
         return;
     }
     std::unique_ptr<unsigned char[]> contentBuffer(new unsigned char[(size_t)(planes*width*height)]);
-//    err=H5IMread_image (args[0]->ToInt32()->Value(), *dset_name, contentBuffer.get() );
+//    err=H5IMread_image (args[0]->Int32Value(), *dset_name, contentBuffer.get() );
     err=H5LTread_dataset(idWrap->Value(), *dset_name, H5T_NATIVE_UCHAR, contentBuffer.get() );
     if(err<0)
     {
@@ -148,7 +148,6 @@ static void read_image_region (const v8::FunctionCallbackInfo<Value>& args)
     }
          Local<Array> names=args[2]->ToObject()->GetOwnPropertyNames();
          for(uint32_t index=0;index<names->Length();index++){
-             names->CloneElementAt(index);
             String::Utf8Value _name (names->Get(index));
             std::string name(*_name);
             if(name.compare("start")==0){
@@ -261,7 +260,7 @@ static void make_palette (const v8::FunctionCallbackInfo<Value>& args)
     Local<Uint8Array> buffer =  Local<Uint8Array>::Cast(args[2]);
     String::Utf8Value dset_name (args[1]->ToString());
     Local<Value> rankValue=args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "size"));
-    hsize_t pal_dims[1] { static_cast<hsize_t>(rankValue->ToInt32()->Value()) };
+    hsize_t pal_dims[1] { static_cast<hsize_t>(rankValue->Int32Value()) };
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
     /*herr_t err=*/H5IMmake_palette ( idWrap->Value(), *dset_name, pal_dims, (const unsigned char *)buffer->Buffer()->Externalize().Data());
     args.GetReturnValue().SetUndefined();

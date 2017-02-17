@@ -18,7 +18,7 @@ namespace NodeHDF5 {
 
     using namespace v8;
     using namespace node;
-    
+
 
     class Group : public Methods {
         friend class File;
@@ -31,9 +31,10 @@ namespace NodeHDF5 {
         std::vector<hid_t> hidPath;
 
         private:
-            static Persistent<FunctionTemplate> Constructor;
+            static Persistent<Function> Constructor;
             static void New (const v8::FunctionCallbackInfo<Value>& args);
-            
+            bool is_open;
+
         public:
             Group(hid_t id);
             static void Initialize ();
@@ -47,7 +48,7 @@ namespace NodeHDF5 {
             static void Link (const v8::FunctionCallbackInfo<Value>& args);
             static void Delete (const v8::FunctionCallbackInfo<Value>& args);
             static void Close (const v8::FunctionCallbackInfo<Value>& args);
-            
+
         protected:
 
     };

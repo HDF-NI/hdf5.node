@@ -13,14 +13,14 @@ namespace NodeHDF5{
         if(attr_space>=0){
             hid_t attr_type=H5Tcopy(type_id);
             hid_t attr_id=H5Acreate2(group_id, attribute_name, attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
-            
+
             H5Awrite(attr_id, attr_type, buffer->Buffer()->Externalize().Data());
             H5Aclose(attr_id);
             H5Tclose(attr_type);
             H5Sclose(attr_space);
         }
     }
-    
+
     void Attributes::make_attribute_from_array(const hid_t &group_id, const char *attribute_name, v8::Handle<v8::Array> array) {
         //hid_t dcpl=H5Pcreate(H5P_DATASET_CREATE);
         int rank=1;
@@ -40,7 +40,7 @@ namespace NodeHDF5{
             ////std::cout<<s<<std::endl;
             vl.get()[arrayIndex]=new char[s.length()+1];
             std::strncpy(vl.get()[arrayIndex], s.c_str(), s.length()+1);
-    
+
         }
             //if(arrayIndex==0){
         //std::cout<<"write the data "<<(vl.get())<<std::endl;
@@ -179,7 +179,7 @@ namespace NodeHDF5{
                         args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), buffer);
                         break;
                 }
-                
+
             }
                 break;
             case H5S_SCALAR:
@@ -214,7 +214,7 @@ namespace NodeHDF5{
                     case H5T_STRING:
                     {
                         htri_t isVlen = H5Tis_variable_str( attr_type );
-    
+
                         if (isVlen == -1) {
                             //std::cout << "The H5Tis_variable_str function did not return successfully" << std::endl;
                         } else if (isVlen == 0) {
@@ -227,11 +227,11 @@ namespace NodeHDF5{
                             args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str()));
                         } else {
                             //std::cout << "Variable-length string attribute encountered" << std::endl;
-    
+
                             H5A_info_t ainfo;
                             H5Aget_info(attr_id, &ainfo );
                             std::unique_ptr<char*[]> buffer(new char*[2]);
-    
+
                             /*
                              * Create the memory datatype.
                              */
@@ -242,9 +242,9 @@ namespace NodeHDF5{
                                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to set size variable")));
                                 args.GetReturnValue().SetUndefined();
                                 return;
-        
+
                             }
-    
+
                             hid_t type = H5Tget_native_type(attr_type, H5T_DIR_ASCEND);
                             /*
                              * Read the data.
@@ -254,7 +254,7 @@ namespace NodeHDF5{
                             v8::Local<v8::Value> varLenStrObject=v8::StringObject::New(varLenStr);
                             varLenStrObject->ToObject()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"), v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "variable-length") );
                             args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), varLenStrObject);
-    
+
                             /*
                              * Clean up the mess I made
                              */
@@ -374,7 +374,7 @@ namespace NodeHDF5{
                 }
                 else if(args.This()->Get(name)->IsUint32())
                 {
-                    uint32_t value=args.This()->Get(name)->ToUint32()->Uint32Value();
+                    uint32_t value=args.This()->Get(name)->Uint32Value();
                     if(attrExists)
                     {
                         H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
@@ -399,7 +399,7 @@ namespace NodeHDF5{
                 }
                 else if(args.This()->Get(name)->IsInt32())
                 {
-                    int32_t value=args.This()->Get(name)->ToInt32()->Int32Value();
+                    int32_t value=args.This()->Get(name)->Int32Value();
                     if(attrExists)
                     {
                         H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
@@ -424,7 +424,7 @@ namespace NodeHDF5{
                 }
                 else if(args.This()->Get(name)->IsNumber())
                 {
-                    double value=args.This()->Get(name)->ToNumber()->NumberValue();
+                    double value=args.This()->Get(name)->NumberValue();
 
                     if(attrExists)
                     {
@@ -485,7 +485,10 @@ namespace NodeHDF5{
                         H5Adelete(group->id, *v8::String::Utf8Value(name->ToString()));
                     }
                     hid_t attr_type=H5Tcopy(H5T_C_S1);
-                    H5Tset_size(attr_type, std::strlen(value.c_str()));
+                    size_t s = std::strlen(value.c_str());
+                    if (s) {
+                        H5Tset_size(attr_type, s);
+                    }
                     hid_t attr_space=H5Screate( H5S_SCALAR );
                     hid_t attr_id=H5Acreate2(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
                     if(attr_id<0)

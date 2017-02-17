@@ -8,6 +8,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <iostream>
 
 #include "file.h"
 #include "group.h"
@@ -52,7 +53,6 @@ namespace NodeHDF5 {
             error=true;
             return;
         }
-
     }
 
     File::File (const char* path, unsigned int flags) {
@@ -94,7 +94,6 @@ namespace NodeHDF5 {
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
             return;
         }
-
     }
 
     File::~File () {
@@ -102,7 +101,6 @@ namespace NodeHDF5 {
         if(id>0){
         H5Fclose(id);
         }
-
     }
 
     Persistent<FunctionTemplate> File::Constructor;
@@ -168,7 +166,7 @@ namespace NodeHDF5 {
         if(args.Length() <2)
             f=new File(*path);
         else
-            f=new File(*path,args[1]->ToUint32()->IntegerValue());
+            f=new File(*path,args[1]->Uint32Value());
         if(f->error)return;
         // extend target object with file
         f->Wrap(args.This());
@@ -191,7 +189,7 @@ namespace NodeHDF5 {
         Int64* idWrap = ObjectWrap::Unwrap<Int64>(idInstance);
         idWrap->value=f->id;
         //idWrap->Wrap(instance);
-        
+
         args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), idInstance);
 
         return;
@@ -259,7 +257,7 @@ namespace NodeHDF5 {
                 Group* group = new Group(hid);
                 group->name.assign(trail[index].c_str());
                 group->gcpl_id=H5Pcreate(H5P_GROUP_CREATE);
-                herr_t err = H5Pset_link_creation_order(group->gcpl_id, args[2]->ToUint32()->IntegerValue());
+                herr_t err = H5Pset_link_creation_order(group->gcpl_id, args[2]->Uint32Value());
                 if (err < 0) {
                     v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
                     args.GetReturnValue().SetUndefined();
@@ -267,7 +265,7 @@ namespace NodeHDF5 {
                 }
                 for (std::vector<hid_t>::iterator it = hidPath.begin() ; it != hidPath.end(); ++it)
                     group->hidPath.push_back(*it);
-                    
+
                 Local<Object> idInstance=Int64::Instantiate(args.This(), group->id);
                 Int64* idWrap = ObjectWrap::Unwrap<Int64>(idInstance);
                 idWrap->value=group->id;
@@ -285,7 +283,7 @@ namespace NodeHDF5 {
             Group* group = new Group(previous_hid);
             group->name.assign(trail[trail.size()-1].c_str());
             group->gcpl_id=H5Pcreate(H5P_GROUP_CREATE);
-            herr_t err = H5Pset_link_creation_order(group->gcpl_id, args[2]->ToUint32()->IntegerValue());
+            herr_t err = H5Pset_link_creation_order(group->gcpl_id, args[2]->Uint32Value());
             if (err < 0) {
                 v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
                 args.GetReturnValue().SetUndefined();
@@ -333,7 +331,7 @@ namespace NodeHDF5 {
 
         String::Utf8Value group_name (args[0]->ToString());
 
-        Local<Object> instance=Group::Instantiate(*group_name, args.This(), args[1]->ToUint32()->Uint32Value());
+        Local<Object> instance=Group::Instantiate(*group_name, args.This(), args[1]->Uint32Value());
         args.GetReturnValue().Set(instance);
         return;
 
@@ -353,7 +351,7 @@ namespace NodeHDF5 {
         File* file = ObjectWrap::Unwrap<File>(args.This());
         String::Utf8Value group_name (args[0]->ToString());
         String::Utf8Value dest_name (args[2]->ToString());
-        herr_t err=H5Lmove(file->id, *group_name, args[1]->ToUint32()->IntegerValue(), *dest_name, H5P_DEFAULT, H5P_DEFAULT);
+        herr_t err=H5Lmove(file->id, *group_name, args[1]->Uint32Value(), *dest_name, H5P_DEFAULT, H5P_DEFAULT);
         if (err < 0) {
             std::string str(*dest_name);
             std::string errStr="Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
@@ -393,6 +391,10 @@ namespace NodeHDF5 {
 
         // unwrap file object
         File* file = ObjectWrap::Unwrap<File>(args.This());
+        if (!file->id) {
+          return;
+        }
+
         H5Pclose(file->gcpl);
         ssize_t size = 0;
         if (H5Fget_obj_count(file->id, H5F_OBJ_FILE) == 1) {
@@ -450,16 +452,17 @@ namespace NodeHDF5 {
     //                    throw PersistenceException(ss.str());
             }
         }
+
         herr_t err=H5Fclose(file->id);
         if(err<0)
         {
             v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to close h5")));
             args.GetReturnValue().SetUndefined();
-            return;
         }
+
         file->id=0;
         return;
 
     }
-    
+
 };
