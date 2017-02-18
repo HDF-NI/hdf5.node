@@ -16,41 +16,41 @@
 
 namespace NodeHDF5 {
 
-    using namespace v8;
-    using namespace node;
+  using namespace v8;
+  using namespace node;
 
+  class Group : public Methods {
+    friend class File;
+    using Attributes::name;
+    using Attributes::id;
+    using Attributes::gcpl_id;
+    using Attributes::Refresh;
+    using Attributes::Flush;
 
-    class Group : public Methods {
-        friend class File;
-        using Attributes::name;
-        using Attributes::id;
-        using Attributes::gcpl_id;
-        using Attributes::Refresh;
-        using Attributes::Flush;
-    protected:
-        std::vector<hid_t> hidPath;
+  protected:
+    std::vector<hid_t> hidPath;
 
-        private:
-            static Persistent<Function> Constructor;
-            static void New (const v8::FunctionCallbackInfo<Value>& args);
-            bool is_open;
+  private:
+    static Persistent<Function> Constructor;
+    static void New(const v8::FunctionCallbackInfo<Value>& args);
 
-        public:
-            Group(hid_t id);
-            static void Initialize ();
-            static Local<Object> Instantiate (Local<Object> file);
-            static Local<Object> Instantiate (const char* path, Local<Object> file, unsigned long creationOrder = 0);
-            static void Create (const v8::FunctionCallbackInfo<Value>& args);
-            static void Open (const v8::FunctionCallbackInfo<Value>& args);
-            static void OpenGroup (const v8::FunctionCallbackInfo<Value>& args);
-            static void Copy (const v8::FunctionCallbackInfo<Value>& args);
-            static void Move (const v8::FunctionCallbackInfo<Value>& args);
-            static void Link (const v8::FunctionCallbackInfo<Value>& args);
-            static void Delete (const v8::FunctionCallbackInfo<Value>& args);
-            static void Close (const v8::FunctionCallbackInfo<Value>& args);
+    bool is_open;
 
-        protected:
+  public:
+    Group(hid_t id);
+    static void          Initialize();
+    static Local<Object> Instantiate(Local<Object> file);
+    static Local<Object> Instantiate(const char* path, Local<Object> file, unsigned long creationOrder = 0);
 
-    };
+    static void Create(const v8::FunctionCallbackInfo<Value>& args);
+    static void Open(const v8::FunctionCallbackInfo<Value>& args);
+    static void OpenGroup(const v8::FunctionCallbackInfo<Value>& args);
+    static void Copy(const v8::FunctionCallbackInfo<Value>& args);
+    static void Move(const v8::FunctionCallbackInfo<Value>& args);
+    static void Link(const v8::FunctionCallbackInfo<Value>& args);
+    static void Delete(const v8::FunctionCallbackInfo<Value>& args);
+    static void Close(const v8::FunctionCallbackInfo<Value>& args);
 
+  protected:
+  };
 };
