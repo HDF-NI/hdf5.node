@@ -16,44 +16,48 @@
 
 namespace NodeHDF5 {
 
-    using namespace v8;
-    using namespace node;
+  using namespace v8;
+  using namespace node;
 
-    class File : public Methods {
-        using Attributes::name;
-        using Attributes::id;
-        using Attributes::gcpl_id;
-        using Attributes::Refresh;
-        using Attributes::Flush;
-    protected:
-            //std::map<unsigned long, unsigned long> toAccessMap = {{0,H5F_ACC_RDONLY}, {1,H5F_ACC_RDWR}, {2,H5F_ACC_TRUNC}, {3,H5F_ACC_EXCL}, {4,H5F_ACC_DEBUG}, {5,H5F_ACC_CREAT}};
-            hid_t plist_id, gcpl, dtpl_id, dapl_id, dcpl_id;
+  class File : public Methods {
+    using Attributes::name;
+    using Attributes::id;
+    using Attributes::gcpl_id;
+    using Attributes::Refresh;
+    using Attributes::Flush;
 
-            unsigned int compression = 0;
-            bool error=false;
+  protected:
+    hid_t plist_id, gcpl, dtpl_id, dapl_id, dcpl_id;
 
-        public:
-            static void Initialize (Handle<Object> target);
-//            H5::H5File* FileObject();
-            hid_t getId(){return id;};
-            hid_t getGcpl(){return gcpl;};
-            std::string getFileName(){return name;};
+    unsigned int compression = 0;
+    bool         error       = false;
 
-        private:
-//            H5::H5File* m_file;
-            File(const char* path);
-            File(const char* path, unsigned int access);
-            ~File();
-            static Persistent<FunctionTemplate> Constructor;
-            static void New (const v8::FunctionCallbackInfo<Value>& args);
-            static void CreateGroup (const v8::FunctionCallbackInfo<Value>& args);
-            static void OpenGroup (const v8::FunctionCallbackInfo<Value>& args);
-            static void Move (const v8::FunctionCallbackInfo<Value>& args);
-            static void Delete (const v8::FunctionCallbackInfo<Value>& args);
-            static void Close (const v8::FunctionCallbackInfo<Value>& args);
+  public:
+    static void Initialize(Handle<Object> target);
 
-        protected:
+    hid_t getId() {
+      return id;
     };
 
+    hid_t getGcpl() {
+      return gcpl;
+    };
 
+    std::string getFileName() {
+      return name;
+    };
+
+  private:
+    File(const char* path);
+    File(const char* path, unsigned int access);
+    ~File();
+
+    static Persistent<FunctionTemplate> Constructor;
+    static void New(const v8::FunctionCallbackInfo<Value>& args);
+    static void CreateGroup(const v8::FunctionCallbackInfo<Value>& args);
+    static void OpenGroup(const v8::FunctionCallbackInfo<Value>& args);
+    static void Move(const v8::FunctionCallbackInfo<Value>& args);
+    static void Delete(const v8::FunctionCallbackInfo<Value>& args);
+    static void Close(const v8::FunctionCallbackInfo<Value>& args);
+  };
 };

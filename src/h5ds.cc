@@ -8,16 +8,14 @@ using namespace NodeHDF5;
 
 extern "C" {
 
-    static void init_ds (Handle<Object> target) {
-        
-        // create local scope
-        HandleScope scope(v8::Isolate::GetCurrent());
-        
-        // initialize wrapped objects
-        H5ds::Initialize(target);
-        
-    }
-    
-    NODE_MODULE(h5ds, init_ds)
+static void init_ds(Handle<Object> target) {
 
+  // create local scope
+  HandleScope scope(v8::Isolate::GetCurrent());
+
+  // initialize wrapped objects
+  H5ds::Initialize(target);
+}
+
+NODE_MODULE(h5ds, init_ds)
 }
