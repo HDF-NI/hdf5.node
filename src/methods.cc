@@ -222,6 +222,40 @@ namespace NodeHDF5 {
     return;
   }
 
+  void Methods::getDatasetDimensions(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    if (args.Length() != 1 || !args[0]->IsString()) {
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
+      args.GetReturnValue().SetUndefined();
+      return;
+    }
+
+    const String::Utf8Value dataset_name(args[0]->ToString());
+
+    Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
+    const hid_t location_id = idWrap->Value();
+
+    const hid_t dataset   = H5Dopen(location_id, *dataset_name, H5P_DEFAULT);
+    const hid_t dataspace = H5Dget_space(dataset);
+
+    const int rank = H5Sget_simple_extent_ndims(dataspace);
+
+    std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);
+    std::unique_ptr<hsize_t[]> maxdims(new hsize_t[rank]);
+    H5Sget_simple_extent_dims(dataspace, dims.get(), maxdims.get());
+
+    v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), rank);
+    for (int elementIndex = 0; elementIndex < rank; elementIndex++) {
+      array->Set(elementIndex, v8::Int32::New(v8::Isolate::GetCurrent(), dims.get()[elementIndex]));
+    }
+    args.GetReturnValue().Set(array);
+
+    H5Sclose(dataspace);
+    H5Dclose(dataset);
+
+    return;
+  }
+
   void Methods::getDataType(const v8::FunctionCallbackInfo<v8::Value>& args) {
     // fail out if arguments are not correct
     if (args.Length() != 1 || !args[0]->IsString()) {

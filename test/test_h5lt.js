@@ -530,6 +530,10 @@ describe("testing lite interface ", function() {
             }
 
             h5lt.makeDataset(group.id, 'Waldo', buffer);
+            var dimensions=group.getDatasetDimensions('Waldo');
+            dimensions.length.should.equal(2);
+            dimensions[0].should.equal(8);
+            dimensions[1].should.equal(10);
             const subsetBuffer=Buffer.alloc(3*4*8, "binary");
             subsetBuffer.rank=2;
             subsetBuffer.rows=3;

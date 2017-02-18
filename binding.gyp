@@ -26,8 +26,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5_serial',
-                        '-lhdf5_serial_hl'
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -131,8 +131,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5_serial',
-                        '-lhdf5_serial_hl'
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -222,8 +222,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5_serial',
-                        '-lhdf5_serial_hl'
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -313,8 +313,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5_serial',
-                        '-lhdf5_serial_hl'
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -406,8 +406,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5_serial',
-                        '-lhdf5_serial_hl'
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -497,8 +497,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '-lhdf5_serial',
-                        '-lhdf5_serial_hl'
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_linux)/lib'
@@ -570,17 +570,6 @@
                 }
             }]
           ]
-        } ,
-        {
-            "target_name": "action_after_build",
-            "type": "none",
-            "dependencies": [ "hdf5" ],
-            "copies": [
-            {
-              "files": [ "<(PRODUCT_DIR)/hdf5.node" ],
-              "destination": "./lib/binding/"
-            }
-            ]
         }
 
     ]

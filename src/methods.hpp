@@ -224,6 +224,7 @@ namespace NodeHDF5 {
     static void GetMemberNamesByCreationOrder(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetChildType(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void getDatasetType(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void getDatasetDimensions(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void getDataType(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void getDatasetAttributes(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void getByteOrder(const v8::FunctionCallbackInfo<v8::Value>& args);

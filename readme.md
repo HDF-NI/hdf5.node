@@ -11,15 +11,15 @@ HDF5 is a node module for reading and writing the
 API documentation is available at <http://hdf-ni.github.io/hdf5.node>
 
 ```bash
-npm install hdf5 --fallback-to-build
+npm install hdf5
 ```
 See <http://hdf-ni.github.io/hdf5.node/doc/install-setup.html> for the native 
 requirements and details. If your native hdf5 libraries aren't at the default 
-you can set the path with --hdf5_home_linux switch on tis project as well as 
+you can set the path with --hdf5_home_linux switch on this project as well as 
 dependent projects.
 
 ```bash
-npm install hdf5 --fallback-to-build --hdf5_home_linux=<your native hdf path>
+npm install hdf5 --hdf5_home_linux=<your native hdf path>
 ```
 For mac and windows the switches are --hdf5_home_mac & --hdf5_home_win
 
@@ -29,15 +29,18 @@ Note: If node-gyp isn't installed
 npm install -g node-gyp
 ```
 
+Quick start to open and read from an h5 file
 ```javascript
 var hdf5 = require('hdf5').hdf5;
 
 var Access = require('hdf5/lib/globals').Access;
 var file = new hdf5.File('/tmp/foo.h5', Access.ACC_RDONLY);
-var group = file.openGroup('pmc');
+var group = file.openGroup('bar');
 ```
 
 ### Notes on Recent Releases
+
+* Note: Release v0.3.1 is based on new V8 API changes coming with nodejs v7.
 
 * Note: Release v0.1.0 was built with nodejs v4.2.1. If you want nodejs v0.12.x 
 then stay with  release v0.0.20. npm will continue with nodejs v4.x.x line and 
@@ -92,12 +95,11 @@ yet are independent. They get picked up by native hdf5 from the
 HDF5_PLUGIN_PATH.
 
 
-## Experimental
+## Image
 
 The h5im namespace is being designed to meet the Image Spec 1.2 <http://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html>. Hyperslabs/regions
 of images can now be read.
 
-Any ideas for the design of the API and interface are welcome.
 
 [npm-image]: https://badge.fury.io/js/hdf5.svg
 [npm-url]: https://www.npmjs.com/package/hdf5
