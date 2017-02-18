@@ -8,49 +8,41 @@ date: 2015-05-02 12:02:34
 
 ## Status
 
-Currently testing with node v0.12.x and V8 3.28.73.  Prebuilt native modules for Ubuntu 14_04, Windows VS2013 and MacOSX 10.7.
-Resources leaks are being found when the h5 file is closed.  When found they are being eliminated.  Error handling component is being investigated; how to best leverage V8 and node from the native side.
+Currently testing with node v7.5.0 and V8 5.4.500.48.
 
 ```bash
- npm install --fallback-to-build
+ npm install
 ```
 
 If your native hdf5 libraries aren't at the default 
-you can set the path with --hdf5_home_linux switch on tis project as well as 
+you can set the path with --hdf5_home_linux switch on this project as well as 
 dependent projects.
 
 ```bash
- npm install hdf5 --fallback-to-build --hdf5_home_linux=<your native hdf path>
+ npm install hdf5 --hdf5_home_linux=<your native hdf path>
 ```
 For mac and windows the switches are --hdf5_home_mac & --hdf5_home_win
 
 ## Dependencies
 
-+ [HDF5 C Library](http://www.hdfgroup.org/downloads/index.html) v5-1.8.15-patch1
++ [HDF5 C Library](http://www.hdfgroup.org/downloads/index.html) v5-1.10.0-patch1
         (Prior v5-1.8.x's untested yet should work)
 
 
-## Compiling [if need be]
+## Compiling
 
-The code requires a gcc compiler supporting C++11 for linux. MacOSX & Windows build target has been added.  The binding.gyp defines the cflags with -std=c++11.
-The `binding.gyp` expects the HDF5_HOME environment variable set to your install.
+The code requires a gcc compiler supporting C++11 for linux, MacOSX & Windows.  The binding.gyp defines the cflags with -std=c++11.
 
 
 ### In a working copy of git
 
 ```bash
 export NODE_PATH=/home/user/NodeProjects/hdf5.node/build/Release:$NODE_PATH
-npm install  --build-from-source --hdf5_home_linux=<your native hdf path>
+npm install  --hdf5_home_linux=<your native hdf path>
 
 ```
 
 NODE_PATH is still used for the mocha tests.
-
-### Including as a node module
-
-An 'npm install hdf5 --fallback-to-build' will try to locate a prebuilt version or fall back to building the source
-in node_modules/hdf5. There is no need for the node-gyp step.
-
 
 ## Environment Variables
 

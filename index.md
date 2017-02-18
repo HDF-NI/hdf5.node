@@ -6,14 +6,14 @@ title: "HDF5 Docs"
 ## Get Started
 
 ```bash
-npm install hdf5 --fallback-to-build
+npm install hdf5
 ```
 If your native hdf5 libraries aren't at the default 
-you can set the path with --hdf5_home_linux switch on tis project as well as 
+you can set the path with --hdf5_home_linux switch on this project as well as 
 dependent projects.
 
 ```bash
-npm install hdf5 --fallback-to-build --hdf5_home_linux=<your native hdf path>
+npm install hdf5 --hdf5_home_linux=<your native hdf path>
 ```
 For mac and windows the switches are --hdf5_home_mac & --hdf5_home_win
 
