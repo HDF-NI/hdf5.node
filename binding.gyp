@@ -13,8 +13,8 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
-                    "/usr/include/hdf5/serial",
-                    '<(hdf5_home_linux)/include'
+                    '<(hdf5_home_linux)/include',
+                    "/usr/include/hdf5/serial"
                 ],
                 'sources': [
                     'src/int64.cc',
@@ -123,8 +123,8 @@
             ['OS=="linux"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
-                    "/usr/include/hdf5/serial",
-                    '<(hdf5_home_linux)/include'
+                    '<(hdf5_home_linux)/include',
+                    "/usr/include/hdf5/serial"
                 ],
                 'sources': [
                     'src/h5lt.cc'
@@ -214,8 +214,8 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
-                    "/usr/include/hdf5/serial",
-                    '<(hdf5_home_linux)/include'
+                    '<(hdf5_home_linux)/include',
+                    "/usr/include/hdf5/serial"
                 ],
                 'sources': [
                     'src/h5tb.cc'
@@ -303,8 +303,8 @@
             ['OS=="linux"', {
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
-                    "/usr/include/hdf5/serial",
-                    '<(hdf5_home_linux)/include'
+                    '<(hdf5_home_linux)/include',
+                    "/usr/include/hdf5/serial"
                 ],
                 'sources': [
                     'src/int64.cc',
@@ -398,8 +398,8 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
-                    "/usr/include/hdf5/serial",
-                    '<(hdf5_home_linux)/include'
+                    '<(hdf5_home_linux)/include',
+                    "/usr/include/hdf5/serial"
                 ],
                 'sources': [
                     'src/h5im.cc'
@@ -489,8 +489,8 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
                 'include_dirs': [
-                    "/usr/include/hdf5/serial",
-                    '<(hdf5_home_linux)/include'
+                    '<(hdf5_home_linux)/include',
+                    "/usr/include/hdf5/serial"
                 ],
                 'sources': [
                     'src/h5ds.cc'

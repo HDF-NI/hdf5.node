@@ -66,7 +66,7 @@ describe("testing lite interface ", function() {
             const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Dielectric Constant');
             readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
         });
-        it("should be node::Buffer io for double 2 rank data", function*() {
+        it("should be node::Buffer io for double rank data", function*() {
             const buffer=Buffer.alloc(6*8, "binary");
             buffer.type=H5Type.H5T_NATIVE_DOUBLE;
             buffer.writeDoubleLE(1.0, 0);
@@ -92,6 +92,55 @@ describe("testing lite interface ", function() {
             readAsBuffer.readDoubleLE(4*8).should.equal(2.0);
             readBuffer.rows.should.match(3);
             readBuffer.columns.should.match(2);
+        });
+        it("should be node::Buffer io for quadruple rank data", function*() {
+            const buffer=Buffer.alloc(2*2*6*8, "binary");
+            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
+            buffer.writeDoubleLE(1.0, 0);
+            buffer.writeDoubleLE(2.0, 8);
+            buffer.writeDoubleLE(3.0, 16);
+            buffer.writeDoubleLE(1.0, 24);
+            buffer.writeDoubleLE(2.0, 32);
+            buffer.writeDoubleLE(3.0, 40); //6
+            buffer.writeDoubleLE(2.0, 48);
+            buffer.writeDoubleLE(4.0, 56);
+            buffer.writeDoubleLE(6.0, 64);
+            buffer.writeDoubleLE(2.0, 72);
+            buffer.writeDoubleLE(4.0, 80);
+            buffer.writeDoubleLE(6.0, 88); //12
+            buffer.writeDoubleLE(3.0, 96);
+            buffer.writeDoubleLE(6.0, 104);
+            buffer.writeDoubleLE(9.0, 112);
+            buffer.writeDoubleLE(3.0, 120);
+            buffer.writeDoubleLE(6.0, 128);
+            buffer.writeDoubleLE(9.0, 136); //18
+            buffer.writeDoubleLE(4.0, 144);
+            buffer.writeDoubleLE(8.0, 152);
+            buffer.writeDoubleLE(12.0, 160);
+            buffer.writeDoubleLE(4.0, 168);
+            buffer.writeDoubleLE(8.0, 176);
+            buffer.writeDoubleLE(12.0, 184); //24
+            buffer.rank=4;
+            buffer.rows=3;
+            buffer.columns=2;
+            buffer.sections=2;
+            buffer.files=2;
+            h5lt.makeDataset(group.id, 'Quadruple Rank', buffer);
+            var byteOrder=group.getByteOrder('Quadruple Rank');
+            byteOrder.should.equal(0);
+            const readBuffer=h5lt.readDataset(group.id, 'Quadruple Rank', function(options) {
+                    JSON.stringify(options).should.equal('{"rank":4,"endian":0}')
+                });
+                // console.dir(" after options cb: ");
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(24);
+
+            const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Quadruple Rank');
+            readAsBuffer.readDoubleLE(4*8).should.equal(2.0);
+            readBuffer.rows.should.match(3);
+            readBuffer.columns.should.match(2);
+            readBuffer.sections.should.match(2);
+            readBuffer.files.should.match(2);
         });
         it("should be Float32Array io ", function*() {
             const buffer=new Float32Array(5);

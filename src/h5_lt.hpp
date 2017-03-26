@@ -33,7 +33,7 @@ static herr_t H5LT_make_dataset_numerical(hid_t          loc_id,
 
   /* Create the data space for the dataset. */
   const hsize_t maxsize = H5S_UNLIMITED;
-  if ((sid = H5Screate_simple(rank, dims, &maxsize)) < 0)
+  if ((sid = H5Screate_simple(rank, dims, NULL)) < 0)
     return -1;
 
   /* Create the dataset. */
@@ -188,7 +188,14 @@ namespace NodeHDF5 {
       std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);
       switch (rank) {
         case 1: dims.get()[0] = {node::Buffer::Length(buffer) / H5Tget_size(type_id)}; break;
-        case 3: dims.get()[2] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->Int32Value();
+        case 4: dims.get()[0] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"))->Int32Value();
+          dims.get()[1] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->Int32Value();
+          dims.get()[3] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->Int32Value();
+          dims.get()[2] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->Int32Value();
+          break;        case 3: dims.get()[0] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->Int32Value();
+          dims.get()[2] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->Int32Value();
+          dims.get()[1] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->Int32Value();
+          break;
         case 2:
           dims.get()[1] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->Int32Value();
           dims.get()[0] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->Int32Value();
@@ -917,6 +924,7 @@ namespace NodeHDF5 {
 
       hsize_t theSize = bufSize;
       switch (rank) {
+        case 4: theSize = values_dim.get()[0] * values_dim.get()[1] * values_dim.get()[2] * values_dim.get()[3]; break;
         case 3: theSize = values_dim.get()[0] * values_dim.get()[1] * values_dim.get()[2]; break;
         case 2: theSize = values_dim.get()[0] * values_dim.get()[1]; break;
         case 1: theSize = values_dim.get()[0]; break;
@@ -1116,6 +1124,16 @@ namespace NodeHDF5 {
           }
           buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"), Number::New(v8::Isolate::GetCurrent(), rank));
           switch (rank) {
+            case 4:
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[3]));
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+              break;
             case 3:
               buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
                           Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
@@ -1273,6 +1291,7 @@ namespace NodeHDF5 {
         }
       }
       switch (rank) {
+        case 4: theSize = values_dim.get()[0] * values_dim.get()[1] * values_dim.get()[2] * values_dim.get()[3]; break;
         case 3: theSize = values_dim.get()[0] * values_dim.get()[1] * values_dim.get()[2]; break;
         case 2: theSize = values_dim.get()[0] * values_dim.get()[1]; break;
         case 1: theSize = values_dim.get()[0]; break;
@@ -1362,6 +1381,16 @@ namespace NodeHDF5 {
           H5Dclose(did);
           buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"), Number::New(v8::Isolate::GetCurrent(), rank));
           switch (rank) {
+            case 4:
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[3]));
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+              break;
             case 3:
               buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
                           Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
