@@ -35,6 +35,9 @@
                 }
             }],
             ['OS=="win"', {
+				'defines': [
+					'H5_BUILT_AS_DYNAMIC_LIB'
+				],
                 'include_dirs': [
                     '<(hdf5_home_win)/include',
                     './win/include',
@@ -140,6 +143,9 @@
                 }
             }],
             ['OS=="win"', {
+                'defines': [
+					'H5_BUILT_AS_DYNAMIC_LIB'
+				],
                 'include_dirs': [
                     '<(hdf5_home_win)/include',
                     './win/include',
@@ -231,6 +237,9 @@
                 }
             }],
             ['OS=="win"', {
+                'defines': [
+					'H5_BUILT_AS_DYNAMIC_LIB'
+				],
                 'include_dirs': [
                     '<(hdf5_home_win)/include',
                     './win/include',
@@ -322,6 +331,9 @@
                 }
             }],
             ['OS=="win"', {
+                'defines': [
+					'H5_BUILT_AS_DYNAMIC_LIB'
+				],
                 'include_dirs': [
                     '<(hdf5_home_win)/include',
                     './win/include',
@@ -330,6 +342,7 @@
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
+                    'src/int64.cc',
                     'src/h5pt.cc',
                     'src/h5_pt.cc'
                 ],
@@ -415,6 +428,9 @@
                 }
             }],
             ['OS=="win"', {
+                'defines': [
+					'H5_BUILT_AS_DYNAMIC_LIB'
+				],
                 'include_dirs': [
                     '<(hdf5_home_win)/include',
                     './win/include',
@@ -506,6 +522,9 @@
                 }
             }],
             ['OS=="win"', {
+                'defines': [
+					'H5_BUILT_AS_DYNAMIC_LIB'
+				],
                 'include_dirs': [
                     '<(hdf5_home_win)/include',
                     './win/include',
