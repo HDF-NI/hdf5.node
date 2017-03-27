@@ -561,7 +561,7 @@ describe("testing lite interface ", function() {
           file = new hdf5.File('./roothaan.h5', Access.ACC_TRUNC);
         });
 
-        it("should be node::Buffer io for double 2 rank hyperslab", function*() {
+        it("should be node::Buffer io for double rank hyperslab", function*() {
             const group=file.createGroup('pmcservices');
             const buffer=Buffer.alloc(8*10*8, "binary");
             buffer.rank=2;
@@ -607,6 +607,64 @@ describe("testing lite interface ", function() {
             readAsBuffer.readDoubleLE(0*8).should.equal(5.0);
             readAsBuffer.readDoubleLE(1*8).should.equal(5.0);
             readAsBuffer.readDoubleLE(2*8).should.equal(1.0);
+            readAsBuffer.readDoubleLE(3*8).should.equal(2.0);
+            readAsBuffer.type.should.equal(H5Type.H5T_IEEE_F64LE);
+            group.close();
+        });
+        it("should be node::Buffer io for triple rank hyperslab", function*() {
+            const group=file.createGroup('pmcservices');
+            const buffer=Buffer.alloc(3*8*10*8, "binary");
+            buffer.rank=3;
+            buffer.rows=8;
+            buffer.columns=10;
+            buffer.sections=3;
+            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
+            for (let k = 0; k < buffer.sections; k++) {
+                for (let j = 0; j < buffer.columns; j++) {
+                    for (let i = 0; i < buffer.rows; i++){
+                            if (j< (buffer.columns/2)) {
+                                buffer.writeDoubleLE(1.0, 8*(k*buffer.columns*buffer.rows+i*buffer.columns+j));
+                            } else {
+                                buffer.writeDoubleLE(2.0, 8*(k*buffer.columns*buffer.rows+i*buffer.columns+j));
+                            }
+                    }
+                }
+            }
+            console.dir("waldo");
+            h5lt.makeDataset(group.id, 'Waldo', buffer);
+            var dimensions=group.getDatasetDimensions('Waldo');
+            dimensions.length.should.equal(3);
+            dimensions[0].should.equal(3);
+            dimensions[1].should.equal(8);
+            dimensions[2].should.equal(10);
+            const subsetBuffer=Buffer.alloc(3*4*8, "binary");
+            subsetBuffer.rank=3;
+            subsetBuffer.rows=3;
+            subsetBuffer.columns=4;
+            subsetBuffer.sections=1;
+            subsetBuffer.type=H5Type.H5T_NATIVE_DOUBLE;
+            for (let k = 0; k < subsetBuffer.sections; k++) {
+                for (let j = 0; j < subsetBuffer.columns; j++) {
+                    for (let i = 0; i < subsetBuffer.rows; i++){
+                                subsetBuffer.writeDoubleLE(5.0, 8*(k*buffer.columns*buffer.rows+i*subsetBuffer.columns+j));
+                    }
+                }
+            }
+//
+            h5lt.writeDataset(group.id, 'Waldo', subsetBuffer, {start: [1,2,1], stride: [1,1,1], count: [1,3,4]});
+            let theType=group.getDataType('Waldo');
+            theType.should.equal(H5Type.H5T_IEEE_F64LE);
+            const readBuffer=h5lt.readDataset(group.id, 'Waldo');
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(3*8*10);
+            readBuffer.rows.should.match(8);
+            readBuffer.columns.should.match(10);
+            readBuffer.sections.should.match(3);
+
+            const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Waldo', {start: [1,3,4], stride: [1,1,1], count: [1,2,2]});
+            readAsBuffer.readDoubleLE(0*8).should.equal(5.0);
+            readAsBuffer.readDoubleLE(1*8).should.equal(2.0);
+            readAsBuffer.readDoubleLE(2*8).should.equal(5.0);
             readAsBuffer.readDoubleLE(3*8).should.equal(2.0);
             readAsBuffer.type.should.equal(H5Type.H5T_IEEE_F64LE);
             group.close();
