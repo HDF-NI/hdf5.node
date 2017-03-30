@@ -9,6 +9,7 @@ namespace NodeHDF5 {
     v8::Local<v8::FunctionTemplate> t = v8::FunctionTemplate::New(v8::Isolate::GetCurrent(), New);
     t->SetClassName(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Int64"));
     t->InstanceTemplate()->SetInternalFieldCount(1);
+    NODE_SET_PROTOTYPE_METHOD(t, "toString", toString);
     Constructor.Reset(v8::Isolate::GetCurrent(), t->GetFunction());
 
     // append this function to the target object
@@ -32,5 +33,12 @@ namespace NodeHDF5 {
 
     // return new group instance
     return v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), 2, argv).ToLocalChecked();
+  }
+
+  void Int64::toString(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    // unwrap group
+    Int64* theId = ObjectWrap::Unwrap<Int64>(args.This());
+
+    args.GetReturnValue().Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), std::to_string(theId->Value()).c_str()));
   }
 }

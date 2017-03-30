@@ -26,6 +26,8 @@ namespace NodeHDF5 {
       return value;
     };
 
+    static void toString(const v8::FunctionCallbackInfo<v8::Value>& args);
+
   protected:
     Int64()
         : Int64(0){
