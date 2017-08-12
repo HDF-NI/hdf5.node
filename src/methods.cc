@@ -381,7 +381,7 @@ namespace NodeHDF5 {
           attrs->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()), array);
         } break;
         case H5T_INTEGER: {
-          std::unique_ptr<long long> buf(new long long[num_elements]);
+          std::unique_ptr<long long[]> buf(new long long[num_elements]);
           H5Aread(attr_id, attr_type, buf.get());
           if (num_elements > 1) {
             v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), num_elements);
@@ -404,7 +404,7 @@ namespace NodeHDF5 {
 
           if (H5Tget_class(super_type) == H5T_REFERENCE) {
             H5O_type_t             obj_type;
-            std::unique_ptr<hvl_t> vl(new hvl_t[num_elements]);
+            std::unique_ptr<hvl_t[]> vl(new hvl_t[num_elements]);
             H5Aread(attr_id, attr_type, (void*)vl.get());
             if (num_elements > 0) {
               v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), num_elements);
@@ -430,7 +430,7 @@ namespace NodeHDF5 {
                          v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), (char*)(ref.c_str()), v8::String::kNormalString, ref.length()));
             }
           } else {
-            std::unique_ptr<hvl_t> vl(new hvl_t[num_elements]);
+            std::unique_ptr<hvl_t[]> vl(new hvl_t[num_elements]);
             H5Aread(attr_id, attr_type, (void*)vl.get());
             attrs->Set(
                 v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()),

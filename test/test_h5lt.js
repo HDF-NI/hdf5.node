@@ -26,11 +26,12 @@ describe("testing lite interface ", function() {
           file = new hdf5.File('./h5lt.h5', Access.ACC_TRUNC);
         });
         let group;
-        it("should be >0 ", function*() {
+        it("should be >0 ", function(done) {
             group=file.createGroup('pmc');
             group.id.should.not.equal(-1);
+            done();
         });
-        it("should be Float64Array io ", function*() {
+        it("should be Float64Array io ", function(done) {
             const buffer=new Float64Array(5);
             buffer[0]=1.0;
             buffer[1]=2.0;
@@ -47,8 +48,9 @@ describe("testing lite interface ", function() {
             buffer.should.match(readBuffer);
             const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Refractive Index');
             readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
+            done();
         });
-        it("should be node::Buffer io for double le", function*() {
+        it("should be node::Buffer io for double le", function(done) {
             const buffer=Buffer.alloc(5*8, "binary");
             buffer.type=H5Type.H5T_NATIVE_DOUBLE;
             buffer.writeDoubleLE(1.0, 0);
@@ -65,8 +67,9 @@ describe("testing lite interface ", function() {
 
             const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Dielectric Constant');
             readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
+            done();
         });
-        it("should be node::Buffer io for double rank data", function*() {
+        it("should be node::Buffer io for double rank data", function(done) {
             const buffer=Buffer.alloc(6*8, "binary");
             buffer.type=H5Type.H5T_NATIVE_DOUBLE;
             buffer.writeDoubleLE(1.0, 0);
@@ -92,8 +95,9 @@ describe("testing lite interface ", function() {
             readAsBuffer.readDoubleLE(4*8).should.equal(2.0);
             readBuffer.rows.should.match(3);
             readBuffer.columns.should.match(2);
+            done();
         });
-        it("should be node::Buffer io for quadruple rank data", function*() {
+        it("should be node::Buffer io for quadruple rank data", function(done) {
             const buffer=Buffer.alloc(2*2*6*8, "binary");
             buffer.type=H5Type.H5T_NATIVE_DOUBLE;
             buffer.writeDoubleLE(1.0, 0);
@@ -141,8 +145,9 @@ describe("testing lite interface ", function() {
             readBuffer.columns.should.match(2);
             readBuffer.sections.should.match(2);
             readBuffer.files.should.match(2);
+            done();
         });
-        it("should be Float32Array io ", function*() {
+        it("should be Float32Array io ", function(done) {
             const buffer=new Float32Array(5);
             buffer[0]=5.0;
             buffer[1]=4.0;
@@ -156,8 +161,9 @@ describe("testing lite interface ", function() {
             buffer.rank=1;
             buffer.rows=5;
             buffer.should.match(readBuffer);
+            done();
         });
-        it("should be Int32Array io ", function*() {
+        it("should be Int32Array io ", function(done) {
             const buffer=new Int32Array(5);
             buffer[0]=5;
             buffer[1]=4;
@@ -171,8 +177,9 @@ describe("testing lite interface ", function() {
             buffer.rank=1;
             buffer.rows=5;
             buffer.should.match(readBuffer);
+            done();
         });
-        it("should be Uint32Array io ", function*() {
+        it("should be Uint32Array io ", function(done) {
             const buffer=new Uint32Array(5);
             buffer[0]=5;
             buffer[1]=4;
@@ -186,8 +193,9 @@ describe("testing lite interface ", function() {
             buffer.rank=1;
             buffer.rows=5;
             buffer.should.match(readBuffer);
+            done();
         });
-        it("should be Int16Array io ", function*() {
+        it("should be Int16Array io ", function(done) {
             const buffer=new Int16Array(5);
             buffer[0]=5;
             buffer[1]=4;
@@ -201,8 +209,9 @@ describe("testing lite interface ", function() {
             buffer.rank=1;
             buffer.rows=5;
             buffer.should.match(readBuffer);
+            done();
         });
-        it("should be Uint16Array io ", function*() {
+        it("should be Uint16Array io ", function(done) {
             const buffer=new Uint16Array(5);
             buffer[0]=5;
             buffer[1]=4;
@@ -216,8 +225,9 @@ describe("testing lite interface ", function() {
             buffer.rank=1;
             buffer.rows=5;
             buffer.should.match(readBuffer);
+            done();
         });
-        it("should be Int8Array io ", function*() {
+        it("should be Int8Array io ", function(done) {
             const buffer=new Int8Array(5);
             buffer[0]=5;
             buffer[1]=4;
@@ -231,8 +241,9 @@ describe("testing lite interface ", function() {
             buffer.rank=1;
             buffer.rows=5;
             buffer.should.match(readBuffer);
+            done();
         });
-        it("should be Uint8Array io ", function*() {
+        it("should be Uint8Array io ", function(done) {
             const buffer=new Uint8Array(5);
             buffer[0]=5;
             buffer[1]=4;
@@ -249,9 +260,10 @@ describe("testing lite interface ", function() {
             buffer.rank=1;
             buffer.rows=5;
             buffer.should.match(readBuffer);
+            done();
         });
 
-        it("should be make a dataset with compression ", function*() {
+        it("should be make a dataset with compression ", function(done) {
             const buffer=new Float64Array(5);
             buffer[0]=1.0;
             buffer[1]=2.0;
@@ -268,9 +280,10 @@ describe("testing lite interface ", function() {
             buffer.should.match(readBuffer);
             const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Refractive Index');
             readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
+            done();
         });
 
-        it("should be make a dataset with cutom chunk size ", function*() {
+        it("should be make a dataset with cutom chunk size ", function(done) {
             const buffer=new Float64Array(5);
             buffer[0]=1.0;
             buffer[1]=2.0;
@@ -287,6 +300,7 @@ describe("testing lite interface ", function() {
             buffer.should.match(readBuffer);
             const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Refractive Index');
             readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
+            done();
         });
 
         it("flush properties to h5 ", function(done){
@@ -323,7 +337,7 @@ describe("testing lite interface ", function() {
           file = new hdf5.File('./roothaan.h5', Access.ACC_TRUNC);
         });
 
-        it("open of Geometries should be >0", function*() {
+        it("open of Geometries should be >0", function(done) {
             const groupPMCServices=file.createGroup('pmcservices');
             const groupTargets=file.createGroup('pmcservices/sodium-icosanoate');
             groupTargets[ 'Computed Heat of Formation' ]=-221.78436098572274;
@@ -424,6 +438,7 @@ describe("testing lite interface ", function() {
             });
             groupTargets.close();
             groupPMCServices.close();
+            done();
         });
 
         it("Existing group should throw exception when trying to create again ", function(done){
@@ -455,22 +470,25 @@ describe("testing lite interface ", function() {
           file = new hdf5.File('./roothaan.h5', Access.ACC_RDONLY);
         });
         let groupTarget;
-        it("open of target should be >0", function*() {
+        it("open of target should be >0", function(done) {
             groupTarget=file.openGroup('pmcservices/sodium-icosanoate', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.id.should.not.equal(-1);
+            done();
         });
-        it("getNumAttrs of groupTarget should be 3", function*() {
+        it("getNumAttrs of groupTarget should be 3", function(done) {
             groupTarget.getNumAttrs().should.equal(3);
             groupTarget.refresh();
 
-            it("readAttribute Computed Heat Of Formation should be -221.78436098572274", function*() {
+            it("readAttribute Computed Heat Of Formation should be -221.78436098572274", function(done) {
                 groupTarget.refresh();
                 groupTarget[ 'Computed Heat Of Formation' ].should.equal(-221.78436098572274);
                 groupTarget[ 'Computed Ionization Potential' ].should.equal(9.57689311885752);
                 groupTarget[ 'Computed Total Energy' ].should.equal(-3573.674399276322);
+                done();
             });
+            done();
         });
-        it("open of Geometries should be >0", function*(){
+        it("open of Geometries should be >0", function(done){
             const groupDocuments = file.openGroup('pmcservices/sodium-icosanoate/Documents');
             const xmlDocument    = h5lt.readDataset(groupDocuments.id, 'sodium-icosanoate.xml');
             parseString(xmlDocument, function (err, result) {
@@ -519,24 +537,29 @@ describe("testing lite interface ", function() {
                 groupTarget.close();
             });
             groupDocuments.close();
+            done();
         });
 
         let groupGeometries;
-        it("open of Geometries should be >0", function*(){
+        it("open of Geometries should be >0", function(done){
             groupGeometries=file.openGroup('pmcservices/sodium-icosanoate/Trajectories/Geometries');
             groupGeometries.id.should.not.equal(-1);
+            done();
         });
-        it("getNumAttrs of Geometries should be 0", function*(){
+        it("getNumAttrs of Geometries should be 0", function(done){
             groupGeometries.getNumAttrs().should.equal(0);
+            done();
         });
-        it("getNumObjs of Geometries should be 2", function*(){
+        it("getNumObjs of Geometries should be 2", function(done){
             groupGeometries.getNumObjs().should.equal(2);
+            done();
         });
-        it("getMemberNames of Geometries should be 240 names in creation order", function*(){
+        it("getMemberNames of Geometries should be 240 names in creation order", function(done){
             const array=groupGeometries.getMemberNamesByCreationOrder();
             array[1].should.equal("1");
+            done();
         });
-        it("Size of dataset '0' should be 186 ", function*() {
+        it("Size of dataset '0' should be 186 ", function(done) {
             groupGeometries.getDatasetType('0').should.equal(HLType.HL_TYPE_LITE);
             const readBuffer=h5lt.readDataset(groupGeometries.id, '0');
             'Float64Array'.should.match(readBuffer.constructor.name);
@@ -545,10 +568,12 @@ describe("testing lite interface ", function() {
             const value=2.9;
             value.should.match(readBuffer.Dipole);
             groupGeometries.close();
+            done();
         });
-        it("getNumAttrs of file should be 3", function*() {
+        it("getNumAttrs of file should be 3", function(done) {
             file.getNumAttrs().should.equal(0);
             file.refresh();
+            done();
         });
         after(function*() {
           file.close();
@@ -561,7 +586,7 @@ describe("testing lite interface ", function() {
           file = new hdf5.File('./roothaan.h5', Access.ACC_TRUNC);
         });
 
-        it("should be node::Buffer io for double rank hyperslab", function*() {
+        it("should be node::Buffer io for double rank hyperslab", function(done) {
             const group=file.createGroup('pmcservices');
             const buffer=Buffer.alloc(8*10*8, "binary");
             buffer.rank=2;
@@ -610,8 +635,9 @@ describe("testing lite interface ", function() {
             readAsBuffer.readDoubleLE(3*8).should.equal(2.0);
             readAsBuffer.type.should.equal(H5Type.H5T_IEEE_F64LE);
             group.close();
+            done();
         });
-        it("should be node::Buffer io for triple rank hyperslab", function*() {
+        it("should be node::Buffer io for triple rank hyperslab", function(done) {
             const group=file.createGroup('pmcservices');
             const buffer=Buffer.alloc(3*8*10*8, "binary");
             buffer.rank=3;
@@ -668,6 +694,7 @@ describe("testing lite interface ", function() {
             readAsBuffer.readDoubleLE(3*8).should.equal(2.0);
             readAsBuffer.type.should.equal(H5Type.H5T_IEEE_F64LE);
             group.close();
+            done();
         });
         after(function*() {
           file.close();
@@ -679,7 +706,7 @@ describe("testing lite interface ", function() {
         before(function*() {
           file = new hdf5.File('./roothaan.h5', Access.ACC_RDWR);
         });
-        it("create array of varlen's", function() {
+        it("create array of varlen's", function(done) {
             let group=file.createGroup('pmcservices/Quotes');
             const quotes=new Array(7);
             quotes[0]="Never put off till tomorrow what may be done day after tomorrow just as well.";
@@ -696,6 +723,7 @@ describe("testing lite interface ", function() {
             group=file.openGroup('pmcservices/Quotes');
             const array=h5lt.readDataset(group.id, 'Mark Twain');
             group.close();
+            done();
         });
         after(function*() {
           file.close();
@@ -707,7 +735,7 @@ describe("testing lite interface ", function() {
         before(function*() {
           file = new hdf5.File('./test/examples/nba.h5', Access.ACC_RDWR);
         });
-        it("read varlen's", function() {
+        it("read varlen's", function(done) {
             const array=h5lt.readDataset(file.id, 'player');
             array.length.should.equal(500);
             if(array.constructor.name==='Array'){
@@ -715,6 +743,7 @@ describe("testing lite interface ", function() {
                     //console.dir(array[mIndex]);
                 }
             }
+            done();
         });
         after(function*() {
           file.close();
