@@ -32,7 +32,7 @@ static herr_t H5LT_make_dataset_numerical(hid_t          loc_id,
     return -1;
 
   /* Create the data space for the dataset. */
-  const hsize_t maxsize = H5S_UNLIMITED;
+  //@todo const hsize_t maxsize = H5S_UNLIMITED;
   if ((sid = H5Screate_simple(rank, dims, NULL)) < 0)
     return -1;
 
