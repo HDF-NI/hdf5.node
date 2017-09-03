@@ -22,8 +22,9 @@ describe("testing lite interface ", function() {
     describe("create an h5, group and some datasets ", function() {
         // open hdf file
         let file;
-        before(function*() {
+        before(function(done) {
           file = new hdf5.File('./h5lt.h5', Access.ACC_TRUNC);
+          done();
         });
         let group;
         it("should be >0 ", function(done) {
@@ -326,15 +327,17 @@ describe("testing lite interface ", function() {
             group.close();
             done();
         });
-        after(function*() {
+        after(function(done) {
           file.close();
+          done();
         });
     });
 
     describe("create an h5, group and some documents ", function() {
         let file;
-        before(function*() {
-          file = new hdf5.File('./roothaan.h5', Access.ACC_TRUNC);
+        before(function(done) {
+          file = new hdf5.File('./pmc.h5', Access.ACC_TRUNC);
+          done();
         });
 
         it("open of Geometries should be >0", function(done) {
@@ -459,15 +462,232 @@ describe("testing lite interface ", function() {
             done();
         });
 
-        after(function*() {
+        after(function(done) {
           file.close();
+          done();
+        });
+    });
+
+    describe("create dataset and extract subset", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5.File('./pmc.h5', Access.ACC_RDWR);
+          done();
+        });
+
+        it("should be node::Buffer io for double rank hyperslab", function(done) {
+            const group=file.createGroup('pmcservices/Double');
+            const buffer=Buffer.alloc(8*10*8, "binary");
+            buffer.rank=2;
+            buffer.rows=8;
+            buffer.columns=10;
+            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
+            for (let j = 0; j < buffer.columns; j++) {
+                for (let i = 0; i < buffer.rows; i++){
+                        if (j< (buffer.columns/2)) {
+                            buffer.writeDoubleLE(1.0, 8*(i*buffer.columns+j));
+                        } else {
+                            buffer.writeDoubleLE(2.0, 8*(i*buffer.columns+j));
+                        }
+                }
+            }
+
+            h5lt.makeDataset(group.id, 'Waldo', buffer);
+            var dimensions=group.getDatasetDimensions('Waldo');
+            dimensions.length.should.equal(2);
+            dimensions[0].should.equal(8);
+            dimensions[1].should.equal(10);
+            const subsetBuffer=Buffer.alloc(3*4*8, "binary");
+            subsetBuffer.rank=2;
+            subsetBuffer.rows=3;
+            subsetBuffer.columns=4;
+            subsetBuffer.type=H5Type.H5T_NATIVE_DOUBLE;
+            for (let j = 0; j < subsetBuffer.columns; j++) {
+                for (let i = 0; i < subsetBuffer.rows; i++){
+                            subsetBuffer.writeDoubleLE(5.0, 8*(i*subsetBuffer.columns+j));
+                }
+            }
+
+            h5lt.writeDataset(group.id, 'Waldo', subsetBuffer, {start: [1,2], stride: [1,1], count: [3,4]});
+            let theType=group.getDataType('Waldo');
+            theType.should.equal(H5Type.H5T_IEEE_F64LE);
+            const readBuffer=h5lt.readDataset(group.id, 'Waldo');
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(8*10);
+            readBuffer.rows.should.match(8);
+            readBuffer.columns.should.match(10);
+
+            const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Waldo', {start: [3,4], stride: [1,1], count: [2,2]});
+            readAsBuffer.readDoubleLE(0*8).should.equal(5.0);
+            readAsBuffer.readDoubleLE(1*8).should.equal(5.0);
+            readAsBuffer.readDoubleLE(2*8).should.equal(1.0);
+            readAsBuffer.readDoubleLE(3*8).should.equal(2.0);
+            readAsBuffer.type.should.equal(H5Type.H5T_IEEE_F64LE);
+            group.close();
+            done();
+        });
+        it("should be node::Buffer io for triple rank hyperslab", function(done) {
+            const group=file.createGroup('pmcservices/Triple');
+            const buffer=Buffer.alloc(3*8*10*8, "binary");
+            buffer.rank=3;
+            buffer.rows=8;
+            buffer.columns=10;
+            buffer.sections=3;
+            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
+            for (let k = 0; k < buffer.sections; k++) {
+                for (let j = 0; j < buffer.columns; j++) {
+                    for (let i = 0; i < buffer.rows; i++){
+                            if (j< (buffer.columns/2)) {
+                                buffer.writeDoubleLE(1.0, 8*(k*buffer.columns*buffer.rows+i*buffer.columns+j));
+                            } else {
+                                buffer.writeDoubleLE(2.0, 8*(k*buffer.columns*buffer.rows+i*buffer.columns+j));
+                            }
+                    }
+                }
+            }
+            console.dir("waldo");
+            h5lt.makeDataset(group.id, 'Waldo', buffer);
+            var dimensions=group.getDatasetDimensions('Waldo');
+            dimensions.length.should.equal(3);
+            dimensions[0].should.equal(3);
+            dimensions[1].should.equal(8);
+            dimensions[2].should.equal(10);
+            const subsetBuffer=Buffer.alloc(3*4*8, "binary");
+            subsetBuffer.rank=3;
+            subsetBuffer.rows=3;
+            subsetBuffer.columns=4;
+            subsetBuffer.sections=1;
+            subsetBuffer.type=H5Type.H5T_NATIVE_DOUBLE;
+            for (let k = 0; k < subsetBuffer.sections; k++) {
+                for (let j = 0; j < subsetBuffer.columns; j++) {
+                    for (let i = 0; i < subsetBuffer.rows; i++){
+                                subsetBuffer.writeDoubleLE(5.0, 8*(k*buffer.columns*buffer.rows+i*subsetBuffer.columns+j));
+                    }
+                }
+            }
+//
+            h5lt.writeDataset(group.id, 'Waldo', subsetBuffer, {start: [1,2,1], stride: [1,1,1], count: [1,3,4]});
+            let theType=group.getDataType('Waldo');
+            theType.should.equal(H5Type.H5T_IEEE_F64LE);
+            const readBuffer=h5lt.readDataset(group.id, 'Waldo');
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(3*8*10);
+            readBuffer.rows.should.match(8);
+            readBuffer.columns.should.match(10);
+            readBuffer.sections.should.match(3);
+
+            const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Waldo', {start: [1,3,4], stride: [1,1,1], count: [1,2,2]});
+            readAsBuffer.readDoubleLE(0*8).should.equal(5.0);
+            readAsBuffer.readDoubleLE(1*8).should.equal(2.0);
+            readAsBuffer.readDoubleLE(2*8).should.equal(5.0);
+            readAsBuffer.readDoubleLE(3*8).should.equal(2.0);
+            readAsBuffer.type.should.equal(H5Type.H5T_IEEE_F64LE);
+            group.close();
+            done();
+        });
+        after(function(done) {
+          file.close();
+          done();
+        });
+    });
+
+    describe("varlen char arrays", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5.File('./pmc.h5', Access.ACC_RDWR);
+          done();
+        });
+        it("create array of varlen's", function(done) {
+            let group=file.createGroup('pmcservices/Quotes');
+            const quotes=new Array(7);
+            quotes[0]="Never put off till tomorrow what may be done day after tomorrow just as well.";
+            quotes[1]="I have never let my schooling interfere with my education";
+            quotes[2]="Reader, suppose you were an idiot. And suppose you were a member of Congress. But I repeat myself.";
+            quotes[3]="Substitute 'damn' every time you're inclined to write 'very;' your editor will delete it and the writing will be just as it should be.";
+            quotes[4]="Don’t go around saying the world owes you a living. The world owes you nothing. It was here first.";
+            quotes[5]="Loyalty to country ALWAYS. Loyalty to government, when it deserves it.";
+            quotes[6]="What would men be without women? Scarce, sir...mighty scarce.";
+            h5lt.makeDataset(group.id, "Mark Twain", quotes);
+            group.close();
+            file.close();
+            file = new hdf5.File('./pmc.h5', Access.ACC_RDWR);
+            group=file.openGroup('pmcservices/Quotes');
+            const array=h5lt.readDataset(group.id, 'Mark Twain');
+            group.close();
+            done();
+        });
+        after(function(done) {
+          file.close();
+          done();
+        });
+    });
+
+    describe.skip("huge varlen char arrays", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5.File('./pmc.h5', Access.ACC_RDWR);
+          done();
+        });
+        it("create huge array of varlen's", function(done) {
+            let group=file.createGroup('pmcservices/Huge Quotes');
+            const quotes=new Array(7);
+            quotes[0]="Never put off till tomorrow what may be done day after tomorrow just as well.";
+            quotes[1]="I have never let my schooling interfere with my education";
+            quotes[2]="Reader, suppose you were an idiot. And suppose you were a member of Congress. But I repeat myself.";
+            quotes[3]="Substitute 'damn' every time you're inclined to write 'very;' your editor will delete it and the writing will be just as it should be.";
+            quotes[4]="Don’t go around saying the world owes you a living. The world owes you nothing. It was here first.";
+            quotes[5]="Loyalty to country ALWAYS. Loyalty to government, when it deserves it.";
+            quotes[6]="What would men be without women? Scarce, sir...mighty scarce.";
+
+            const hugeQuotes=new Array(2500000*5);
+            for(var i =0;i<2500000*5;i++){
+                hugeQuotes[i]=quotes[i % 7];
+            }
+            h5lt.makeDataset(group.id, "Mark Twain", hugeQuotes);
+            group.close();
+            file.close();
+            file = new hdf5.File('./pmc.h5', Access.ACC_RDWR);
+            group=file.openGroup('pmcservices/Huge Quotes');
+            const array=h5lt.readDataset(group.id, 'Mark Twain', {start: [1000], stride: [1], count: [21]});
+            console.dir(array.length);
+            console.dir(array[0]);
+            array.length.should.equal(21);
+            group.close();
+            done();
+        });
+        after(function(done) {
+          file.close();
+          done();
+        });
+    });
+    
+    describe("varlen chars", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5.File('./test/examples/nba.h5', Access.ACC_RDONLY);
+          done();
+        });
+        it("read varlen's", function(done) {
+            const array=h5lt.readDataset(file.id, 'player');
+            array.length.should.equal(500);
+            if(array.constructor.name==='Array'){
+                for(let mIndex=0;mIndex<array.length;mIndex++){
+                    //console.dir(array[mIndex]);
+                }
+            }
+            done();
+        });
+        after(function(done) {
+          file.close();
+          done();
         });
     });
 
     describe("create an xmol with frequency pulled from h5 ", function() {
         let file;
-        before(function*() {
-          file = new hdf5.File('./roothaan.h5', Access.ACC_RDONLY);
+        before(function(done) {
+          file = new hdf5.File('./pmc.h5', Access.ACC_RDONLY);
+          done();
         });
         let groupTarget;
         it("open of target should be >0", function(done) {
@@ -575,178 +795,9 @@ describe("testing lite interface ", function() {
             file.refresh();
             done();
         });
-        after(function*() {
+        after(function(done) {
           file.close();
-        });
-    });
-
-    describe("create dataset and extract subset", function() {
-        let file;
-        before(function*() {
-          file = new hdf5.File('./roothaan.h5', Access.ACC_TRUNC);
-        });
-
-        it("should be node::Buffer io for double rank hyperslab", function(done) {
-            const group=file.createGroup('pmcservices');
-            const buffer=Buffer.alloc(8*10*8, "binary");
-            buffer.rank=2;
-            buffer.rows=8;
-            buffer.columns=10;
-            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
-            for (let j = 0; j < buffer.columns; j++) {
-                for (let i = 0; i < buffer.rows; i++){
-                        if (j< (buffer.columns/2)) {
-                            buffer.writeDoubleLE(1.0, 8*(i*buffer.columns+j));
-                        } else {
-                            buffer.writeDoubleLE(2.0, 8*(i*buffer.columns+j));
-                        }
-                }
-            }
-
-            h5lt.makeDataset(group.id, 'Waldo', buffer);
-            var dimensions=group.getDatasetDimensions('Waldo');
-            dimensions.length.should.equal(2);
-            dimensions[0].should.equal(8);
-            dimensions[1].should.equal(10);
-            const subsetBuffer=Buffer.alloc(3*4*8, "binary");
-            subsetBuffer.rank=2;
-            subsetBuffer.rows=3;
-            subsetBuffer.columns=4;
-            subsetBuffer.type=H5Type.H5T_NATIVE_DOUBLE;
-            for (let j = 0; j < subsetBuffer.columns; j++) {
-                for (let i = 0; i < subsetBuffer.rows; i++){
-                            subsetBuffer.writeDoubleLE(5.0, 8*(i*subsetBuffer.columns+j));
-                }
-            }
-
-            h5lt.writeDataset(group.id, 'Waldo', subsetBuffer, {start: [1,2], stride: [1,1], count: [3,4]});
-            let theType=group.getDataType('Waldo');
-            theType.should.equal(H5Type.H5T_IEEE_F64LE);
-            const readBuffer=h5lt.readDataset(group.id, 'Waldo');
-            readBuffer.constructor.name.should.match('Float64Array');
-            readBuffer.length.should.match(8*10);
-            readBuffer.rows.should.match(8);
-            readBuffer.columns.should.match(10);
-
-            const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Waldo', {start: [3,4], stride: [1,1], count: [2,2]});
-            readAsBuffer.readDoubleLE(0*8).should.equal(5.0);
-            readAsBuffer.readDoubleLE(1*8).should.equal(5.0);
-            readAsBuffer.readDoubleLE(2*8).should.equal(1.0);
-            readAsBuffer.readDoubleLE(3*8).should.equal(2.0);
-            readAsBuffer.type.should.equal(H5Type.H5T_IEEE_F64LE);
-            group.close();
-            done();
-        });
-        it("should be node::Buffer io for triple rank hyperslab", function(done) {
-            const group=file.createGroup('pmcservices');
-            const buffer=Buffer.alloc(3*8*10*8, "binary");
-            buffer.rank=3;
-            buffer.rows=8;
-            buffer.columns=10;
-            buffer.sections=3;
-            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
-            for (let k = 0; k < buffer.sections; k++) {
-                for (let j = 0; j < buffer.columns; j++) {
-                    for (let i = 0; i < buffer.rows; i++){
-                            if (j< (buffer.columns/2)) {
-                                buffer.writeDoubleLE(1.0, 8*(k*buffer.columns*buffer.rows+i*buffer.columns+j));
-                            } else {
-                                buffer.writeDoubleLE(2.0, 8*(k*buffer.columns*buffer.rows+i*buffer.columns+j));
-                            }
-                    }
-                }
-            }
-            console.dir("waldo");
-            h5lt.makeDataset(group.id, 'Waldo', buffer);
-            var dimensions=group.getDatasetDimensions('Waldo');
-            dimensions.length.should.equal(3);
-            dimensions[0].should.equal(3);
-            dimensions[1].should.equal(8);
-            dimensions[2].should.equal(10);
-            const subsetBuffer=Buffer.alloc(3*4*8, "binary");
-            subsetBuffer.rank=3;
-            subsetBuffer.rows=3;
-            subsetBuffer.columns=4;
-            subsetBuffer.sections=1;
-            subsetBuffer.type=H5Type.H5T_NATIVE_DOUBLE;
-            for (let k = 0; k < subsetBuffer.sections; k++) {
-                for (let j = 0; j < subsetBuffer.columns; j++) {
-                    for (let i = 0; i < subsetBuffer.rows; i++){
-                                subsetBuffer.writeDoubleLE(5.0, 8*(k*buffer.columns*buffer.rows+i*subsetBuffer.columns+j));
-                    }
-                }
-            }
-//
-            h5lt.writeDataset(group.id, 'Waldo', subsetBuffer, {start: [1,2,1], stride: [1,1,1], count: [1,3,4]});
-            let theType=group.getDataType('Waldo');
-            theType.should.equal(H5Type.H5T_IEEE_F64LE);
-            const readBuffer=h5lt.readDataset(group.id, 'Waldo');
-            readBuffer.constructor.name.should.match('Float64Array');
-            readBuffer.length.should.match(3*8*10);
-            readBuffer.rows.should.match(8);
-            readBuffer.columns.should.match(10);
-            readBuffer.sections.should.match(3);
-
-            const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Waldo', {start: [1,3,4], stride: [1,1,1], count: [1,2,2]});
-            readAsBuffer.readDoubleLE(0*8).should.equal(5.0);
-            readAsBuffer.readDoubleLE(1*8).should.equal(2.0);
-            readAsBuffer.readDoubleLE(2*8).should.equal(5.0);
-            readAsBuffer.readDoubleLE(3*8).should.equal(2.0);
-            readAsBuffer.type.should.equal(H5Type.H5T_IEEE_F64LE);
-            group.close();
-            done();
-        });
-        after(function*() {
-          file.close();
-        });
-    });
-
-    describe("varlen char arrays", function() {
-        let file;
-        before(function*() {
-          file = new hdf5.File('./roothaan.h5', Access.ACC_RDWR);
-        });
-        it("create array of varlen's", function(done) {
-            let group=file.createGroup('pmcservices/Quotes');
-            const quotes=new Array(7);
-            quotes[0]="Never put off till tomorrow what may be done day after tomorrow just as well.";
-            quotes[1]="I have never let my schooling interfere with my education";
-            quotes[2]="Reader, suppose you were an idiot. And suppose you were a member of Congress. But I repeat myself.";
-            quotes[3]="Substitute 'damn' every time you're inclined to write 'very;' your editor will delete it and the writing will be just as it should be.";
-            quotes[4]="Don’t go around saying the world owes you a living. The world owes you nothing. It was here first.";
-            quotes[5]="Loyalty to country ALWAYS. Loyalty to government, when it deserves it.";
-            quotes[6]="What would men be without women? Scarce, sir...mighty scarce.";
-            h5lt.makeDataset(group.id, "Mark Twain", quotes);
-            group.close();
-            file.close();
-            file = new hdf5.File('./roothaan.h5', Access.ACC_RDWR);
-            group=file.openGroup('pmcservices/Quotes');
-            const array=h5lt.readDataset(group.id, 'Mark Twain');
-            group.close();
-            done();
-        });
-        after(function*() {
-          file.close();
-        });
-    });
-
-    describe("varlen chars", function() {
-        let file;
-        before(function*() {
-          file = new hdf5.File('./test/examples/nba.h5', Access.ACC_RDWR);
-        });
-        it("read varlen's", function(done) {
-            const array=h5lt.readDataset(file.id, 'player');
-            array.length.should.equal(500);
-            if(array.constructor.name==='Array'){
-                for(let mIndex=0;mIndex<array.length;mIndex++){
-                    //console.dir(array[mIndex]);
-                }
-            }
-            done();
-        });
-        after(function*() {
-          file.close();
+          done();
         });
     });
 

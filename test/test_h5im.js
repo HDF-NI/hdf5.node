@@ -28,7 +28,7 @@ describe("testing images ",function() {
 
         it("should be 1.10.0 ", function*() {
             var version=hdf5.getLibVersion();
-            version.should.equal('1.10.0');
+            version.should.equal('1.10.1');
         });
 
         let group;
