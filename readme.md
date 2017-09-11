@@ -40,6 +40,13 @@ var group = file.openGroup('bar');
 
 ### Notes on Recent Releases
 
+* Note: asynchronous i/o is coming but not in this release
+
+* Note: Release v0.3.2 tested with ndejs v6.11.2, v7.5.0 and v8.4.0. Code was changed 
+to allow v8.4.0 to work while still working with the earlier versions. It may work back v4.2.1 
+let me know if you have a version in between that needs testing. Variable length array of 
+strings can be be read as regions.
+
 * Note: Release v0.3.1 is based on new V8 API changes coming with nodejs v7.
 
 * Note: Release v0.1.0 was built with nodejs v4.2.1. If you want nodejs v0.12.x 
