@@ -683,6 +683,35 @@ describe("testing lite interface ", function() {
         });
     });
 
+    describe.skip("reading inchies", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5.File('/home/roger/Downloads/inchies/inchies_2.h5', Access.ACC_RDWR);
+          done();
+        });
+        it("read an inchie data", function(done) {
+var start = process.hrtime();
+            const array=h5lt.readDataset(file.id, 'inchies');
+    var elapsed = process.hrtime(start)[1] / 1000000; // divide by a million to get nano to milli
+    console.log(process.hrtime(start)[0] + " s, " + elapsed.toFixed(4) + " ms"); // print message + time
+            console.dir(array.length);
+            console.dir(array[0]);
+            array.length.should.equal(1000000);
+            var ll=27;
+            var hl=0;
+            for(var i in array){
+                if(array[i].length<ll)ll=array[i].length;
+                if(array[i].length>hl)hl=array[i].length;
+            }
+            console.dir(ll+" "+hl);
+            done();
+        });
+        after(function(done) {
+          file.close();
+          done();
+        });
+    });
+    
     describe("create an xmol with frequency pulled from h5 ", function() {
         let file;
         before(function(done) {

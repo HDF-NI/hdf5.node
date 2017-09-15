@@ -1090,18 +1090,22 @@ namespace NodeHDF5 {
             }
             hsize_t arrayStart=0;
             hsize_t arrayMaximum=values_dim.get()[0];
+            hsize_t realLength=0;
             if(subsetOn){
               arrayStart=start.get()[0];
               arrayMaximum=std::min(values_dim.get()[0], arrayStart+count.get()[0]);
             }
             Local<Array> array = Array::New(v8::Isolate::GetCurrent(), std::min(values_dim.get()[0], count.get()[0]));
             for (unsigned int arrayIndex = arrayStart; arrayIndex < arrayMaximum; arrayIndex++) {
-              //std::string s(&tbuffer.get()[typeSize * arrayIndex]);
+              realLength=0;
+              while(realLength<typeSize && ((char)tbuffer.get()[typeSize * arrayIndex+realLength])!=0){
+                realLength++;
+              }
               array->Set(arrayIndex-arrayStart,
                          String::NewFromUtf8(v8::Isolate::GetCurrent(),
                                              &tbuffer.get()[typeSize * arrayIndex],
                                              String::kNormalString,
-                                             std::min(typeSize, (size_t)std::strlen(&tbuffer.get()[typeSize * arrayIndex]))));
+                                             realLength));
             }
             args.GetReturnValue().Set(array);
           } else {
