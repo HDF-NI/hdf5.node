@@ -457,11 +457,13 @@ namespace NodeHDF5 {
               attrs->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()), array);
 
             } else {
-              std::unique_ptr<char> buf(new char[H5Aget_storage_size(attr_id)]);
-              H5Aread(attr_id, attr_type, buf.get());
+              char *buf = NULL;
+              H5Aread(attr_id, attr_type, &buf);
               std::string attrValue = "";
-              if (buf.get() != NULL)
-                attrValue = buf.get();
+              if (buf != NULL) {
+                attrValue = buf;
+                H5free_memory(buf);
+	      }
               attrs->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()),
                          v8::String::NewFromUtf8(
                              v8::Isolate::GetCurrent(), (char*)(attrValue.c_str()), v8::String::kNormalString, attrValue.length()));
