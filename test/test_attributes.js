@@ -58,5 +58,42 @@ describe("testing atrribute interface ",function(){
         });
     });
 
+    describe.skip("read variable string attributes", function() {
+        let file;
+        before(function*() {
+          file = new hdf5Lib.hdf5.File('/home/roger/Downloads/sample.h5', globs.Access.ACC_RDONLY);
+        });
+
+        it("should be variable string info", function*() {
+            const group   = file.openGroup('scada');
+            group.refresh();
+            var attrs = group.getDatasetAttributes("active_power");
+            var attrText = '';
+            Object.getOwnPropertyNames(attrs).forEach(function(val, idx, array) {
+//              if (val !=  'id') {
+                if (attrs[val].constructor.name === Array) {
+                  attrText += val + ' :  ';
+                  for (var mIndex = 0; mIndex < attrs[val].Length(); mIndex++) {
+                    attrText += attrs[val][mIndex];
+                    if (mIndex < attrs[val].Length() - 1) {
+                      attrText += ',';
+                    }
+                  }
+                }
+                else{
+                  attrText += val + ' :  ' + attrs[val] + '\n';
+                  console.dir("directly a string ");
+                }
+//              }
+            });
+            console.dir(attrText);
+            group.close();
+        });
+
+        after(function*(){
+            file.close();
+        });
+    });
+
 });
 

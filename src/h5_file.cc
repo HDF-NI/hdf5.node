@@ -102,6 +102,7 @@ namespace NodeHDF5 {
     t->InstanceTemplate()->SetInternalFieldCount(1);
     Constructor.Reset(v8::Isolate::GetCurrent(), t);
     // member method prototypes
+    NODE_SET_PROTOTYPE_METHOD(t, "enableSingleWriteMumltiRead", EnableSingleWriteMumltiRead);
     NODE_SET_PROTOTYPE_METHOD(t, "createGroup", CreateGroup);
     NODE_SET_PROTOTYPE_METHOD(t, "openGroup", OpenGroup);
     NODE_SET_PROTOTYPE_METHOD(t, "getNumAttrs", GetNumAttrs);
@@ -183,6 +184,23 @@ namespace NodeHDF5 {
     idWrap->value            = f->id;
 
     args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), idInstance);
+  }
+
+  void File::EnableSingleWriteMumltiRead(const v8::FunctionCallbackInfo<Value>& args) {
+    // fail out if arguments are not correct
+    if (args.Length() != 0) {
+
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected no arguments")));
+      args.GetReturnValue().SetUndefined();
+      return;
+    }
+
+    // unwrap group
+    File* file = ObjectWrap::Unwrap<File>(args.This());
+#ifdef  H5_VERSION_GE(1,10,0)
+    if(file->id>=0)H5Fstart_swmr_write(file->id);
+#endif
   }
 
   void File::CreateGroup(const v8::FunctionCallbackInfo<Value>& args) {

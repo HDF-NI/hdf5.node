@@ -40,6 +40,8 @@ var group = file.openGroup('bar');
 
 ### Notes on Recent Releases
 
+* Added a file method enableSingleWriteMumltiRead (if older version than 1.10.x it is a noop).
+
 * Note: asynchronous i/o is coming but not in this release
 
 * Note: Release v0.3.3 Minor fix on fixed length of strings in array. Handles the situation where 
