@@ -121,6 +121,7 @@ namespace NodeHDF5 {
     NODE_SET_PROTOTYPE_METHOD(t, "getDatasetAttributes", getDatasetAttributes);
     NODE_SET_PROTOTYPE_METHOD(t, "getByteOrder", getByteOrder);
     NODE_SET_PROTOTYPE_METHOD(t, "getFilters", getFilters);
+    NODE_SET_PROTOTYPE_METHOD(t, "iterate", iterate);
 
     // append this function to the target object
     target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "File"), t->GetFunction());
@@ -198,9 +199,9 @@ namespace NodeHDF5 {
 
     // unwrap group
     File* file = ObjectWrap::Unwrap<File>(args.This());
-#ifdef  H5_VERSION_GE(1,10,0)
-    if(file->id>=0)H5Fstart_swmr_write(file->id);
-#endif
+//#ifdef  H5_VERSION_GE(1,10,0)
+//    if(file->id>=0)H5Fstart_swmr_write(file->id);
+//#endif
   }
 
   void File::CreateGroup(const v8::FunctionCallbackInfo<Value>& args) {

@@ -829,5 +829,30 @@ var start = process.hrtime();
           done();
         });
     });
+    
+    describe("iterations on h5 ", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5.File('/home/roger/Downloads/sample.h5', Access.ACC_RDONLY);
+          done();
+        });
+        let groupTarget;
+        it("iterate thru", function(done) {
+            groupTarget=file.openGroup('scada', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
+            groupTarget.id.should.not.equal(-1);
+            try {
+                groupTarget.iterate(1, function(r, name) {
+                    console.dir("name: "+name);
+                });
+            } catch (e) {
+
+            }
+            done();
+        });
+        after(function(done) {
+          file.close();
+          done();
+        });
+    });
 
 });
