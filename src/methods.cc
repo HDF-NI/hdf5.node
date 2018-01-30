@@ -578,9 +578,9 @@ namespace NodeHDF5 {
 
       String::Utf8Value dset_name(args[1]->ToString());
       Methods*                group = ObjectWrap::Unwrap<Methods>(args.This());
-      hsize_t                          idx = args[0]->Int32Value();
+//      hsize_t                          idx = args[0]->Int32Value();
       v8::Persistent<v8::Function> callback;
-      const unsigned               argc = 2;
+//      const unsigned               argc = 2;
       callback.Reset(v8::Isolate::GetCurrent(), args[1].As<Function>());
 //      std::function<herr_t(hid_t did, unsigned int dim, hid_t dsid, void* visitor_data)> f =
 //          [&](hid_t group, const char *name, const H5L_info_t *info, void *op_data) {
