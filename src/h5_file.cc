@@ -1,14 +1,11 @@
 
-//#include <iostream>
 
 #include <node.h>
 #include <string>
 #include <cstring>
-#include <iostream>
 #include <sstream>
 #include <fstream>
 #include <vector>
-#include <iostream>
 
 #include "file.h"
 #include "group.h"

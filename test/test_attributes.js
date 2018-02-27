@@ -6,7 +6,7 @@ require('should');
 const hdf5Lib = require('..');
 const globs   = require('../lib/globals');
 
-describe("testing atrribute interface ",function(){
+describe("testing attribute interface ",function(){
 
     describe("create an h5, group and some attributes ", function() {
         // open hdf file
@@ -51,6 +51,28 @@ describe("testing atrribute interface ",function(){
             group.notes.constructor.name.should.match('Array');
             // console.dir(group.notes);
             group.close();
+        });
+
+        after(function*(){
+            file.close();
+        });
+    });
+
+    describe("should read biom attributes", function() {
+        let file;
+        before(function*() {
+          file = new hdf5Lib.hdf5.File('/home/roger/Downloads/rich_sparse_otu_table_hdf5.biom', globs.Access.ACC_RDONLY);
+        });
+
+        it("should be attribute info ", function*() {
+            console.log(file);
+            console.log(file.getNumAttrs());
+            file.refresh();
+            for (var property in file) {
+                if (file.hasOwnProperty(property)) {
+                    console.log(property+": "+file[property]);
+                }
+            }            
         });
 
         after(function*(){

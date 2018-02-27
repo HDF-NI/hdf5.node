@@ -11,13 +11,14 @@
             ['OS=="linux"', {
                 'cflags!': [ '-fno-exceptions' ],
                 'cflags_cc!': [ '-fno-exceptions' ],
-                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'include_dirs': [
                     '<(hdf5_home_linux)/include',
                     "/usr/include/hdf5/serial"
                 ],
                 'sources': [
                     'src/int64.cc',
+                    'src/uint64.cc',
                     'src/hdf5.cc',
                     'src/attributes.cc',
                     'src/methods.cc',
@@ -47,6 +48,7 @@
                 ],
                 'sources': [
                     'src/int64.cc',
+                    'src/uint64.cc',
                     'src/hdf5.cc',
                     'src/attributes.cc',
                     'src/methods.cc',
@@ -87,7 +89,7 @@
             ['OS=="mac"', {
                 'cflags!': [ '-fno-exceptions' ],
                 'cflags_cc!': [ '-fno-exceptions' ],
-                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'xcode_settings': {
                     'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
                     'OTHER_LDFLAGS': [],
@@ -98,6 +100,7 @@
                 ],
                 'sources': [
                     'src/int64.cc',
+                    'src/uint64.cc',
                     'src/hdf5.cc',
                     'src/attributes.cc',
                     'src/methods.cc',
@@ -124,7 +127,7 @@
             'target_name': 'h5lt',
             'conditions': [
             ['OS=="linux"', {
-                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'include_dirs': [
                     '<(hdf5_home_linux)/include',
                     "/usr/include/hdf5/serial"
@@ -188,7 +191,7 @@
                 }
             }],
             ['OS=="mac"', {
-                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'xcode_settings': {
                     'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
                     'OTHER_LDFLAGS': [],
@@ -218,7 +221,7 @@
             ['OS=="linux"', {
                 'cflags!': [ '-fno-exceptions' ],
                 'cflags_cc!': [ '-fno-exceptions' ],
-                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'include_dirs': [
                     '<(hdf5_home_linux)/include',
                     "/usr/include/hdf5/serial"
@@ -282,7 +285,7 @@
                 }
             }],
             ['OS=="mac"', {
-                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'xcode_settings': {
                     'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
                     'OTHER_LDFLAGS': [],
@@ -310,13 +313,14 @@
             'target_name': 'h5pt',
             'conditions': [
             ['OS=="linux"', {
-                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'include_dirs': [
                     '<(hdf5_home_linux)/include',
                     "/usr/include/hdf5/serial"
                 ],
                 'sources': [
                     'src/int64.cc',
+                    'src/uint64.cc',
                     'src/h5pt.cc',
                     'src/h5_pt.cc'
                 ],
@@ -343,6 +347,7 @@
                 ],
                 'sources': [
                     'src/int64.cc',
+                    'src/uint64.cc',
                     'src/h5pt.cc',
                     'src/h5_pt.cc'
                 ],
@@ -378,7 +383,7 @@
                 }
             }],
             ['OS=="mac"', {
-                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'xcode_settings': {
                     'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
                     'OTHER_LDFLAGS': [],
@@ -409,7 +414,7 @@
             ['OS=="linux"', {
                 'cflags!': [ '-fno-exceptions' ],
                 'cflags_cc!': [ '-fno-exceptions' ],
-                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'include_dirs': [
                     '<(hdf5_home_linux)/include',
                     "/usr/include/hdf5/serial"
@@ -473,7 +478,7 @@
                 }
             }],
             ['OS=="mac"', {
-                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'xcode_settings': {
                     'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
                     'OTHER_LDFLAGS': [],
@@ -503,7 +508,7 @@
             ['OS=="linux"', {
                 'cflags!': [ '-fno-exceptions' ],
                 'cflags_cc!': [ '-fno-exceptions' ],
-                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions"],
+                'cflags': ['-fPIC', "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'include_dirs': [
                     '<(hdf5_home_linux)/include',
                     "/usr/include/hdf5/serial"

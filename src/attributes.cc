@@ -4,6 +4,9 @@
 
 #include "attributes.hpp"
 
+#include "int64.hpp"
+#include "uint64.hpp"
+
 namespace NodeHDF5 {
 
   void Attributes::make_attribute_from_typed_array(const hid_t&               group_id,
@@ -80,7 +83,7 @@ namespace NodeHDF5 {
                  return 0;
                },
                &holder);
-
+    bool indexedArray=true;
     for (index = 0; index < (uint32_t)group->getNumAttrs(); index++) {
       hid_t attr_id   = H5Aopen(group->id, holder[index].c_str(), H5P_DEFAULT);
       hid_t attr_type = H5Aget_type(attr_id);
@@ -127,6 +130,49 @@ namespace NodeHDF5 {
               } else if (class_id == H5T_FLOAT && size == 4) {
                 arrayBuffer = v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), 4 * numberOfElements);
                 buffer      = v8::Float32Array::New(arrayBuffer, 0, numberOfElements);
+              } else if (class_id == H5T_INTEGER && size == 8  && numberOfElements>1) {
+                v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), numberOfElements);
+                if (H5Tget_sign(attr_type) == H5T_SGN_2) {
+                  std::unique_ptr<int64_t[]> intValue(new int64_t[numberOfElements]);
+                  H5Aread(attr_id, attr_type, intValue.get());
+                  for (unsigned int i = 0; i < numberOfElements; i++) {
+                    v8::Local<v8::Object> int64Instance = Int64::Instantiate(args.This(), intValue[i]);
+                    Int64*        idWrap   = ObjectWrap::Unwrap<Int64>(int64Instance);
+                    idWrap->value          = intValue[i];
+                    array->Set(i, int64Instance);
+                  }
+                } else {
+                  std::unique_ptr<uint64_t[]> uintValue(new uint64_t[numberOfElements]);
+                  H5Aread(attr_id, attr_type, uintValue.get());
+                  for (unsigned int i = 0; i < numberOfElements; i++) {
+                    v8::Local<v8::Object> uint64Instance = Uint64::Instantiate(args.This(), uintValue[i]);
+                    Uint64*        idWrap   = ObjectWrap::Unwrap<Uint64>(uint64Instance);
+                    idWrap->value          = uintValue[i];
+                    array->Set(i, uint64Instance);
+                  }
+                }
+                args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
+                               array);
+                indexedArray=false;
+              } else if (class_id == H5T_INTEGER && size == 8) {
+                if (H5Tget_sign(attr_type) == H5T_SGN_2) {
+                  std::unique_ptr<int64_t[]> intValue(new int64_t[numberOfElements]);
+                  H5Aread(attr_id, attr_type, intValue.get());
+                  v8::Local<v8::Object> int64Instance = Int64::Instantiate(args.This(), intValue[0]);
+                  Int64*        idWrap   = ObjectWrap::Unwrap<Int64>(int64Instance);
+                  idWrap->value          = intValue[0];
+                  args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
+                               int64Instance);
+                } else {
+                  std::unique_ptr<uint64_t[]> uintValue(new uint64_t[numberOfElements]);
+                  H5Aread(attr_id, attr_type, uintValue.get());
+                  v8::Local<v8::Object> uint64Instance = Uint64::Instantiate(args.This(), uintValue[0]);
+                  Uint64*        idWrap   = ObjectWrap::Unwrap<Uint64>(uint64Instance);
+                  idWrap->value          = uintValue[0];
+                  args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
+                               uint64Instance);
+                }
+                indexedArray=false;
               } else if (class_id == H5T_INTEGER && size == 4) {
                 if (H5Tget_sign(attr_type) == H5T_SGN_2) {
                   arrayBuffer = v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), 4 * numberOfElements);
@@ -153,15 +199,17 @@ namespace NodeHDF5 {
                 }
               } else {
                 v8::Isolate::GetCurrent()->ThrowException(
-                    v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
+                    v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type ")));
                 args.GetReturnValue().SetUndefined();
                 H5Sclose(space);
                 H5Tclose(attr_type);
                 H5Aclose(attr_id);
                 return;
               }
-              H5Aread(attr_id, attr_type, buffer->Buffer()->Externalize().Data());
-              args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), buffer);
+              if(indexedArray){
+                H5Aread(attr_id, attr_type, buffer->Buffer()->Externalize().Data());
+                args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), buffer);
+              }
               break;
           }
 

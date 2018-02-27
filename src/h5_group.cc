@@ -1,7 +1,6 @@
 #include <node.h>
 #include <string>
 #include <cstring>
-//#include <iostream>
 #include <sstream>
 #include <vector>
 #include <memory>

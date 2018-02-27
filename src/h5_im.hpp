@@ -5,7 +5,6 @@
 #include <node_buffer.h>
 
 #include <memory>
-//#include <iostream>
 
 #include "file.h"
 #include "group.h"

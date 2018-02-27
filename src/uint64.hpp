@@ -11,7 +11,7 @@
 
 namespace NodeHDF5 {
 
-  class Int64 : public node::ObjectWrap {
+  class Uint64 : public node::ObjectWrap {
     friend class File;
     friend class Group;
     friend class Filters;
@@ -30,28 +30,28 @@ namespace NodeHDF5 {
     static void toString(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   protected:
-    Int64()
-        : Int64(0){
+    Uint64()
+        : Uint64(0){
 
           };
 
-    Int64(long long l) {
+    Uint64(long long l) {
       value = l;
     };
 
-    ~Int64(){};
+    ~Uint64(){};
 
   private:
     static v8::Persistent<v8::Function> Constructor;
 
     static void New(const v8::FunctionCallbackInfo<v8::Value>& args) {
       // Xdm value object
-      Int64* xp;
+      Uint64* xp;
       if (args.Length() < 1)
-        xp = new Int64(-1);
+        xp = new Uint64(-1);
       else {
 
-        xp = new Int64((long long)args[args.Length() - 1]->Int32Value());
+        xp = new Uint64((long long)args[args.Length() - 1]->Int32Value());
       }
 
       xp->value = 0;

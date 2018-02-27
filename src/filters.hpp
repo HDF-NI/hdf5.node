@@ -3,7 +3,6 @@
 #include <uv.h>
 #include <node.h>
 
-//#include <iostream>
 #include <cstring>
 #include <vector>
 #include <functional>

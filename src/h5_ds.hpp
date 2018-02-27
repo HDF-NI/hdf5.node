@@ -5,7 +5,6 @@
 
 #include <functional>
 #include <memory>
-//#include <iostream>
 
 #include "file.h"
 #include "group.h"
