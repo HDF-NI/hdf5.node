@@ -58,7 +58,7 @@ describe("testing attribute interface ",function(){
         });
     });
 
-    describe("should read biom attributes", function() {
+    describe.skip("should read biom attributes", function() {
         let file;
         before(function*() {
           file = new hdf5Lib.hdf5.File('/home/roger/Downloads/rich_sparse_otu_table_hdf5.biom', globs.Access.ACC_RDONLY);
