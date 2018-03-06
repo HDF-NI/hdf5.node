@@ -195,10 +195,10 @@ namespace NodeHDF5 {
     }
 
     // unwrap group
-//#ifdef  H5_VERSION_GE(1,10,0)
-//    File* file = ObjectWrap::Unwrap<File>(args.This());
-//    if(file->id>=0)H5Fstart_swmr_write(file->id);
-//#endif
+#if  H5_VERSION_GE(1,10,0)
+    File* file = ObjectWrap::Unwrap<File>(args.This());
+    if(file->id>=0)H5Fstart_swmr_write(file->id);
+#endif
   }
 
   void File::CreateGroup(const v8::FunctionCallbackInfo<Value>& args) {
