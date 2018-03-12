@@ -59,6 +59,7 @@ namespace NodeHDF5 {
     NODE_SET_PROTOTYPE_METHOD(t, "getByteOrder", getByteOrder);
     NODE_SET_PROTOTYPE_METHOD(t, "getFilters", getFilters);
     NODE_SET_PROTOTYPE_METHOD(t, "iterate", iterate);
+    NODE_SET_PROTOTYPE_METHOD(t, "visit", visit);
 
     // initialize constructor reference
     Constructor.Reset(v8::Isolate::GetCurrent(), t->GetFunction());

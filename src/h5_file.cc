@@ -119,6 +119,7 @@ namespace NodeHDF5 {
     NODE_SET_PROTOTYPE_METHOD(t, "getByteOrder", getByteOrder);
     NODE_SET_PROTOTYPE_METHOD(t, "getFilters", getFilters);
     NODE_SET_PROTOTYPE_METHOD(t, "iterate", iterate);
+    NODE_SET_PROTOTYPE_METHOD(t, "visit", visit);
 
     // append this function to the target object
     target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "File"), t->GetFunction());
