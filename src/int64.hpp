@@ -22,7 +22,9 @@ namespace NodeHDF5 {
   public:
     static void Initialize(v8::Handle<v8::Object> target);
     static v8::Local<v8::Object> Instantiate(long long value);
+    static v8::Local<v8::Object> Instantiate(std::string value = "0");
     static v8::Local<v8::Object> Instantiate(v8::Local<v8::Object> parent, long long value = 0);
+    static v8::Local<v8::Object> Instantiate(v8::Local<v8::Object> parent, std::string value = "0");
     long long Value() {
       return value;
     };
@@ -49,12 +51,18 @@ namespace NodeHDF5 {
       Int64* xp;
       if (args.Length() < 1)
         xp = new Int64(-1);
+      else if((args.Length() == 1 || args.Length() == 2) && args[args.Length() - 1]->IsString()){
+        std::string value = args[args.Length() - 1]->IsUndefined() ? std::string("0") : std::string(*v8::String::Utf8Value(args[args.Length() - 1]->ToString()));
+        char *end;
+        xp = new Int64((long long)std::strtoll(value.c_str(), &end, 10));
+          
+      }
       else {
 
         xp = new Int64((long long)args[args.Length() - 1]->Int32Value());
       }
 
-      xp->value = 0;
+//      xp->value = 0;
       // extend target object
       xp->Wrap(args.This());
     };

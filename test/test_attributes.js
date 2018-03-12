@@ -58,13 +58,28 @@ describe("testing attribute interface ",function(){
         });
     });
 
-    describe.skip("should read biom attributes", function() {
+    describe("should read biom attributes", function() {
         let file;
         before(function*() {
-          file = new hdf5Lib.hdf5.File('/home/roger/Downloads/rich_sparse_otu_table_hdf5.biom', globs.Access.ACC_RDONLY);
+          file = new hdf5Lib.hdf5.File('./long_attributes.biom', globs.Access.ACC_TRUNC);
         });
 
-        it("should be attribute info ", function*() {
+        it("write attribute info", function(done) {
+            file.nnz=new hdf5Lib.hdf5.Int64("15");
+            file.unnz=new hdf5Lib.hdf5.Uint64("40");
+            var fv=new Array(2);
+            fv[0]=new hdf5Lib.hdf5.Int64("2");
+            fv[1]=new hdf5Lib.hdf5.Int64("1");
+            file["formart-version"]=fv;
+            var ufv=new Array(2);
+            ufv[0]=new hdf5Lib.hdf5.Uint64("20");
+            ufv[1]=new hdf5Lib.hdf5.Uint64("10");
+            file["uformart-version"]=ufv;
+            file.flush();
+            done();
+        });
+        
+        it("should be attribute info ", function(done) {
             console.log(file);
             console.log(file.getNumAttrs());
             file.refresh();
@@ -72,7 +87,8 @@ describe("testing attribute interface ",function(){
                 if (file.hasOwnProperty(property)) {
                     console.log(property+": "+file[property]);
                 }
-            }            
+            }
+            done();
         });
 
         after(function*(){

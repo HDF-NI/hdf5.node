@@ -10,6 +10,7 @@
 #include "file.h"
 #include "group.h"
 #include "int64.hpp"
+#include "uint64.hpp"
 #include "H5Zpublic.h"
 
 namespace NodeHDF5 {

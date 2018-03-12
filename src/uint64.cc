@@ -16,7 +16,7 @@ namespace NodeHDF5 {
     target->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Uint64"), t->GetFunction());
   };
 
-  v8::Local<v8::Object> Uint64::Instantiate(long long value) {
+  v8::Local<v8::Object> Uint64::Instantiate(unsigned long long value) {
     auto isolate = v8::Isolate::GetCurrent();
 
     v8::Local<v8::Value> argv[1] = {v8::Int32::New(v8::Isolate::GetCurrent(), value)
@@ -25,11 +25,30 @@ namespace NodeHDF5 {
     return v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), 1, argv).ToLocalChecked();
   }
 
-  v8::Local<v8::Object> Uint64::Instantiate(v8::Local<v8::Object> parent, long long value) {
+  v8::Local<v8::Object> Uint64::Instantiate(std::string value) {
+    auto isolate = v8::Isolate::GetCurrent();
+
+    v8::Local<v8::Value> argv[1] = {v8::String::NewFromUtf8(isolate, value.c_str())
+
+    };
+    return v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), 1, argv).ToLocalChecked();
+  }
+
+  v8::Local<v8::Object> Uint64::Instantiate(v8::Local<v8::Object> parent, unsigned long long value) {
     auto isolate = v8::Isolate::GetCurrent();
 
     // group name and parent reference
     v8::Local<v8::Value> argv[2] = {parent, v8::Int32::New(isolate, value)};
+
+    // return new group instance
+    return v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), 2, argv).ToLocalChecked();
+  }
+
+  v8::Local<v8::Object> Uint64::Instantiate(v8::Local<v8::Object> parent, std::string value) {
+    auto isolate = v8::Isolate::GetCurrent();
+
+    // group name and parent reference
+    v8::Local<v8::Value> argv[2] = {parent, v8::String::NewFromUtf8(isolate, value.c_str())};
 
     // return new group instance
     return v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), 2, argv).ToLocalChecked();
