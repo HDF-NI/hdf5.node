@@ -863,7 +863,7 @@ var start = process.hrtime();
         });
     });
     
-    describe("iterations on h5 ", function() {
+    describe.skip("iterations on h5 ", function() {
         let file;
         before(function(done) {
           file = new hdf5.File('/home/roger/Downloads/sample.h5', Access.ACC_RDONLY);
@@ -880,6 +880,19 @@ var start = process.hrtime();
             } catch (e) {
 
             }
+            done();
+        });
+        it("visit thru", function(done) {
+            groupTarget=file.openGroup('scada', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
+            groupTarget.id.should.not.equal(-1);
+            try {
+                file.visit(1, function(r, name) {
+                    console.dir("visiting name: "+name);
+                });
+            } catch (e) {
+
+            }
+            groupTarget.close();
             done();
         });
         after(function(done) {

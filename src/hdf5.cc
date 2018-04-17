@@ -20,6 +20,7 @@ static void init(Handle<Object> target) {
   File::Initialize(target);
   Filters::Init(target);
   Int64::Initialize(target);
+  Uint64::Initialize(target);
 
   // initialize wrapped object factories
   Group::Initialize();

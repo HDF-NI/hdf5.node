@@ -230,6 +230,7 @@ namespace NodeHDF5 {
     static void getByteOrder(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void getFilters(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void iterate(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void visit(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   protected:
     int        getNumAttrs();
