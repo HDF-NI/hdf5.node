@@ -40,11 +40,11 @@ var group = file.openGroup('bar');
 
 ### Notes on Recent Releases
 
-* link_type binding.gyp variable put in for choosing static linking to native hdf5 libraries
+* link_type binding.gyp variable put in for choosing static linking to native hdf5 libraries(darwin untested)
 
 * 64 bit signed and unsigned integer attributes read
 
-* Added a file method enableSingleWriteMumltiRead (if older version than 1.10.x it is a noop).
+* Added a file method enableSingleWriteMumltiRead (if native version older than 1.10.x it is a noop).
 
 * Note: asynchronous i/o is coming but not in this release
 

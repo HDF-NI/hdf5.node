@@ -576,20 +576,11 @@ namespace NodeHDF5 {
   
     void Methods::iterate(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
       Methods*                group = ObjectWrap::Unwrap<Methods>(args.This());
 //      hsize_t                          idx = args[0]->Int32Value();
       v8::Persistent<v8::Function> callback;
 //      const unsigned               argc = 2;
       callback.Reset(v8::Isolate::GetCurrent(), args[1].As<Function>());
-//      std::function<herr_t(hid_t did, unsigned int dim, hid_t dsid, void* visitor_data)> f =
-//          [&](hid_t group, const char *name, const H5L_info_t *info, void *op_data) {
-//            v8::Local<v8::Value> argv[2] = {v8::Int32::New(v8::Isolate::GetCurrent(), dim),
-//                                            v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "success")};
-//            v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)
-//                ->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), argc, argv);
-//            return (herr_t)0;
-//          };
       v8::Local<v8::Function> func = v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback);
       herr_t                  err  = H5Literate(group->id,
                                       H5_INDEX_NAME,H5_ITER_NATIVE,
