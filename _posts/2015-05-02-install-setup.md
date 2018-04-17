@@ -21,6 +21,13 @@ dependent projects.
 ```bash
  npm install hdf5 --hdf5_home_linux=<your native hdf path>
 ```
+
+If you want static native linking set --link_type to static
+
+```bash
+ npm install hdf5 --link_type=static --hdf5_home_linux=<your native hdf path>
+```
+
 For mac and windows the switches are --hdf5_home_mac & --hdf5_home_win
 
 ## Dependencies
