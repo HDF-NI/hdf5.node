@@ -661,16 +661,18 @@ namespace NodeHDF5 {
             args.GetReturnValue().SetUndefined();
             return;
           }
-          hsize_t dims;
-          hsize_t maxdims;
-          H5Sget_simple_extent_dims(dataspace_id, &dims, &maxdims);
+          hsize_t* dims    = new hsize_t[rank];
+          hsize_t* maxdims = new hsize_t[rank];
+          H5Sget_simple_extent_dims(dataspace_id, dims, maxdims);
 
-          int remainingRows = dims - (*start.get() + *count.get());
+          int remainingRows = dims[0] - (*start.get() + *count.get());
           if (remainingRows < 0) {
-            dims -= remainingRows;
-            H5Dset_extent(did, &dims);
-            H5Sset_extent_simple(dataspace_id, rank, &dims, &maxdims);
+            dims[0] -= remainingRows;
+            H5Dset_extent(did, dims);
+            H5Sset_extent_simple(dataspace_id, rank, dims, maxdims);
           }
+          delete[] dims;
+          delete[] maxdims;
         }
         herr_t err = H5Dwrite(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, node::Buffer::Data(args[2]));
         if (err < 0) {
