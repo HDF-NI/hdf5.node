@@ -691,18 +691,16 @@ namespace NodeHDF5 {
             args.GetReturnValue().SetUndefined();
             return;
           }
-          hsize_t* dims    = new hsize_t[rank];
-          hsize_t* maxdims = new hsize_t[rank];
-          H5Sget_simple_extent_dims(dataspace_id, dims, maxdims);
+          std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);
+          std::unique_ptr<hsize_t[]> maxdims(new hsize_t[rank]);
+          H5Sget_simple_extent_dims(dataspace_id, dims.get(), maxdims.get());
 
           int remainingRows = dims[0] - (*start.get() + *count.get());
           if (remainingRows < 0) {
             dims[0] -= remainingRows;
-            H5Dset_extent(did, dims);
-            H5Sset_extent_simple(dataspace_id, rank, dims, maxdims);
+            H5Dset_extent(did, dims.get());
+            H5Sset_extent_simple(dataspace_id, rank, dims.get(), maxdims.get());
           }
-          delete[] dims;
-          delete[] maxdims;
         }
         herr_t err = H5Dwrite(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, node::Buffer::Data(args[2]));
         if (err < 0) {
@@ -914,17 +912,14 @@ namespace NodeHDF5 {
 
       const int rank = H5Sget_simple_extent_ndims(dataspace);
 
-      hsize_t* dims    = new hsize_t[rank];
-      hsize_t* maxdims = new hsize_t[rank];
-      H5Sget_simple_extent_dims(dataspace, dims, maxdims);
+      std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);
+      std::unique_ptr<hsize_t[]> maxdims(new hsize_t[rank]);
+      H5Sget_simple_extent_dims(dataspace, dims.get(), maxdims.get());
 
       args.GetReturnValue().Set(Int32::New(v8::Isolate::GetCurrent(), dims[0]));
 
       H5Sclose(dataspace);
       H5Dclose(dataset);
-
-      delete[] dims;
-      delete[] maxdims;
     }
 
     static void read_dataset_datatype(const v8::FunctionCallbackInfo<Value>& args) {
@@ -1070,8 +1065,10 @@ namespace NodeHDF5 {
             hid_t                     memspace_id  = H5S_ALL;
             hid_t                     basetype_id  = H5Tget_super(type_id);
             if(subsetOn){
-              const hsize_t maxsize = H5S_UNLIMITED;
-              memspace_id           = H5Screate_simple(rank, count.get(), &maxsize);
+              std::unique_ptr<hsize_t[]> maxsize(new hsize_t[rank]);
+              for(int rankIndex=0;rankIndex<rank;rankIndex++)
+                  maxsize[rankIndex]=H5S_UNLIMITED;
+              memspace_id           = H5Screate_simple(rank, count.get(), maxsize.get());
               dataspace_id          = H5Dget_space(did);
               herr_t err            = H5Sselect_hyperslab(dataspace_id, H5S_SELECT_SET, start.get(), stride.get(), count.get(), NULL);
               if (err < 0) {
@@ -1169,7 +1166,7 @@ namespace NodeHDF5 {
             buffer  = Float32Array::New(arrayBuffer, 0, theSize);
           } else if (class_id == H5T_INTEGER && bufSize == 8) {
 
-            hid_t did                  = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
+           hid_t did                  = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
             type_id                    = H5Dget_type(did);
             Handle<Object> int64Buffer = node::Buffer::New(v8::Isolate::GetCurrent(), bufSize * theSize).ToLocalChecked();
             H5LTread_dataset(idWrap->Value(), *dset_name, type_id, (char*)node::Buffer::Data(int64Buffer));
@@ -1268,9 +1265,8 @@ namespace NodeHDF5 {
               break;
           }
           if ((args.Length() == 3 && args[2]->IsFunction()) || (args.Length() == 4 && args[3]->IsFunction())) {
-            v8::Persistent<v8::Function> callback;
-            const unsigned               argc = 2;
-            callback.Reset(v8::Isolate::GetCurrent(), args[args.Length()-1].As<Function>());
+            const unsigned               argc = 1;
+            v8::Persistent<v8::Function> callback(v8::Isolate::GetCurrent(), args[args.Length()-1].As<Function>());
             v8::Local<v8::Object> options = v8::Object::New(v8::Isolate::GetCurrent());
             options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"), Number::New(v8::Isolate::GetCurrent(), rank));
             H5T_order_t order = H5Tget_order(type_id);

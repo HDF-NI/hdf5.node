@@ -8,8 +8,8 @@
     "url": "https://github.com/HDF-NI/hdf5.node.git"
   },
   "devDependencies": {
-    "co-mocha": "^1.2.0",
-    "mocha": "5.1.0",
+    "co-mocha": "^1.2.2",
+    "mocha": "5.1.1",
     "should": "*",
     "xml2js": "*"
   },
