@@ -20,6 +20,7 @@ static herr_t H5LT_make_dataset_numerical(hid_t          loc_id,
                                           const char*    dset_name,
                                           int            rank,
                                           const hsize_t* dims,
+                                          const hsize_t* maxdims,
                                           hid_t          tid,
                                           hid_t          lcpl_id,
                                           hid_t          dcpl_id,
@@ -32,8 +33,7 @@ static herr_t H5LT_make_dataset_numerical(hid_t          loc_id,
     return -1;
 
   /* Create the data space for the dataset. */
-  //@todo const hsize_t maxsize = H5S_UNLIMITED;
-  if ((sid = H5Screate_simple(rank, dims, NULL)) < 0)
+  if ((sid = H5Screate_simple(rank, dims, maxdims)) < 0)
     return -1;
 
   /* Create the dataset. */
@@ -147,6 +147,20 @@ namespace NodeHDF5 {
       return options->Get(name)->Uint32Value();
     }
 
+    static int get_option_int(Handle<Object> options,const char * option_name, int default_value) {
+      if (options.IsEmpty()) {
+        return default_value;
+      }
+
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), option_name));
+
+      if (!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
+        return default_value;
+      }
+
+      return options->Get(name)->Int32Value();
+    }
+
     static unsigned int get_chunk_size(Handle<Object> options) {
       if (options.IsEmpty()) {
         return 0;
@@ -245,19 +259,35 @@ namespace NodeHDF5 {
         rank                   = rankValue->Int32Value();
       }
       std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);
+      std::unique_ptr<hsize_t[]> maxdims(new hsize_t[rank]);
       switch (rank) {
-        case 1: dims.get()[0] = {node::Buffer::Length(buffer) / H5Tget_size(type_id)}; break;
-        case 4: dims.get()[0] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"))->Int32Value();
+        case 1: 
+          dims.get()[0] = {node::Buffer::Length(buffer) / H5Tget_size(type_id)}; 
+          maxdims.get()[0] = get_option_int(options,"maxRows",dims.get()[0]);
+          break;
+        case 4: 
+          dims.get()[0] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"))->Int32Value();
           dims.get()[1] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->Int32Value();
           dims.get()[3] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->Int32Value();
           dims.get()[2] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->Int32Value();
-          break;        case 3: dims.get()[0] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->Int32Value();
+          maxdims.get()[0] = get_option_int(options,"maxFiles",dims.get()[0]);
+          maxdims.get()[1] = get_option_int(options,"maxSections",dims.get()[1]);
+          maxdims.get()[3] = get_option_int(options,"maxColumns",dims.get()[3]);
+          maxdims.get()[2] = get_option_int(options,"maxRows",dims.get()[2]);
+          break;        
+        case 3: 
+          dims.get()[0] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->Int32Value();
           dims.get()[2] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->Int32Value();
           dims.get()[1] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->Int32Value();
+          maxdims.get()[0] = get_option_int(options,"maxSections",dims.get()[0]);
+          maxdims.get()[2] = get_option_int(options,"maxColumns",dims.get()[2]);
+          maxdims.get()[1] = get_option_int(options,"maxRows",dims.get()[1]);
           break;
         case 2:
           dims.get()[1] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->Int32Value();
           dims.get()[0] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->Int32Value();
+          maxdims.get()[1] = get_option_int(options,"maxColumns",dims.get()[1]);
+          maxdims.get()[0] = get_option_int(options,"maxRows",dims.get()[0]);
           break;
         default:
           v8::Isolate::GetCurrent()->ThrowException(
@@ -279,7 +309,7 @@ namespace NodeHDF5 {
       }
 
       herr_t err = H5LT_make_dataset_numerical(
-          group_id, dset_name, rank, dims.get(), type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, node::Buffer::Data(buffer));
+          group_id, dset_name, rank, dims.get(), maxdims.get(), type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, node::Buffer::Data(buffer));
       if (err < 0) {
         H5Pclose(dcpl);
         v8::Isolate::GetCurrent()->ThrowException(
@@ -358,7 +388,7 @@ namespace NodeHDF5 {
         }
 
         herr_t err = H5LT_make_dataset_numerical(
-            group_id, dset_name, rank, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data());
+            group_id, dset_name, rank, dims, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data());
         if (err < 0) {
           H5Pclose(dcpl);
           v8::Isolate::GetCurrent()->ThrowException(
@@ -385,7 +415,7 @@ namespace NodeHDF5 {
         }
 
         herr_t err = H5LT_make_dataset_numerical(
-            group_id, dset_name, rank, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data());
+            group_id, dset_name, rank, dims, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data());
         if (err < 0) {
           H5Pclose(dcpl);
           v8::Isolate::GetCurrent()->ThrowException(
@@ -413,7 +443,7 @@ namespace NodeHDF5 {
         }
 
         herr_t err = H5LT_make_dataset_numerical(
-            group_id, dset_name, rank, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data());
+            group_id, dset_name, rank, dims, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data());
         if (err < 0) {
           H5Pclose(dcpl);
           v8::Isolate::GetCurrent()->ThrowException(
@@ -661,16 +691,18 @@ namespace NodeHDF5 {
             args.GetReturnValue().SetUndefined();
             return;
           }
-          hsize_t dims;
-          hsize_t maxdims;
-          H5Sget_simple_extent_dims(dataspace_id, &dims, &maxdims);
+          hsize_t* dims    = new hsize_t[rank];
+          hsize_t* maxdims = new hsize_t[rank];
+          H5Sget_simple_extent_dims(dataspace_id, dims, maxdims);
 
-          int remainingRows = dims - (*start.get() + *count.get());
+          int remainingRows = dims[0] - (*start.get() + *count.get());
           if (remainingRows < 0) {
-            dims -= remainingRows;
-            H5Dset_extent(did, &dims);
-            H5Sset_extent_simple(dataspace_id, rank, &dims, &maxdims);
+            dims[0] -= remainingRows;
+            H5Dset_extent(did, dims);
+            H5Sset_extent_simple(dataspace_id, rank, dims, maxdims);
           }
+          delete[] dims;
+          delete[] maxdims;
         }
         herr_t err = H5Dwrite(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, node::Buffer::Data(args[2]));
         if (err < 0) {
