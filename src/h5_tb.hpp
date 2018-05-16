@@ -75,6 +75,13 @@ namespace NodeHDF5 {
           field_sizes[i]                = 8;
           type_size += 8;
           field_types[i] = H5T_NATIVE_DOUBLE;
+        } else if (table->Get(i)->IsFloat32Array()) {
+          Local<v8::Float32Array> field = Local<v8::Float32Array>::Cast(table->Get(i));
+          nrecords                     = field->Length();
+          field_offsets[i]             = type_size;
+          field_sizes[i]               = 4;
+          type_size += 4;
+          field_types[i] = H5T_NATIVE_FLOAT;
         } else if (table->Get(i)->IsUint32Array()) {
           Local<v8::Uint32Array> field = Local<v8::Uint32Array>::Cast(table->Get(i));
           nrecords                     = field->Length();
@@ -143,6 +150,12 @@ namespace NodeHDF5 {
           Local<v8::Float64Array> field = Local<v8::Float64Array>::Cast(table->Get(i));
           for (uint32_t j = 0; j < nrecords; j++) {
             ((double*)&data[j * type_size + field_offsets[i]])[0] = field->Get(j)->NumberValue();
+          }
+
+        } else if (table->Get(i)->IsFloat32Array()) {
+          Local<v8::Float32Array> field = Local<v8::Float32Array>::Cast(table->Get(i));
+          for (uint32_t j = 0; j < nrecords; j++) {
+            ((float*)&data[j * type_size + field_offsets[i]])[0] = field->Get(j)->NumberValue();
           }
 
         } else if (table->Get(i)->IsUint32Array()) {
