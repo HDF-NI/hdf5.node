@@ -8,11 +8,13 @@ import { Access, H5OType, HLType, H5Type, H5TOrder, H5SType } from "hdf5/lib/glo
 
 type TypedArray = Int8Array | Uint8Array | Int16Array | Uint16Array | Int32Array | Uint32Array | Uint8ClampedArray | Float32Array | Float64Array;
 
-type TableArray = TableTypedArray | TableStringArray;
+type TableArray = TableTypedArray | TableStringArray | TableNumberArray;
 
 type TableTypedArray = TypedArray & { name?: string };
 
 type TableStringArray = { name?: string, [key: number]: string };
+
+type TableNumberArray = { name?: string, [key: number]: number, type?: H5Type };
 
 export declare class Hdf5Buffer extends Buffer {
     rank?: number;
