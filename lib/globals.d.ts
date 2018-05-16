@@ -1,7 +1,6 @@
 // Type definitions for hdf5 0.3
 // Project: https://github.com/HDF-NI/hdf5.node#readme
 // Definitions by: NINI1988 <https://github.com/NINI1988>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 export declare enum Access {
     /** absence of rdwr => rd-only */

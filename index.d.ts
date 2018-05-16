@@ -8,6 +8,12 @@ import { Access, H5OType, HLType, H5Type, H5TOrder, H5SType } from "hdf5/lib/glo
 
 type TypedArray = Int8Array | Uint8Array | Int16Array | Uint16Array | Int32Array | Uint32Array | Uint8ClampedArray | Float32Array | Float64Array;
 
+type TableArray = TableTypedArray | TableStringArray;
+
+type TableTypedArray = TypedArray & { name?: string };
+
+type TableStringArray = { name?: string, [key: number]: string };
+
 export declare class Hdf5Buffer extends Buffer {
     rank?: number;
     type?: H5Type;
@@ -173,6 +179,7 @@ export declare namespace hdf5 {
 
     }
 
+    // TODO
     class Int64 {
 
     }
@@ -211,6 +218,7 @@ export declare namespace hdf5 {
 
     }
 
+    // TODO
     class Filters {
 
     }
@@ -310,10 +318,12 @@ export declare namespace h5lt {
      */
     function readDatasetAsBuffer(id: hdf5.Int64, name: string, options: DatasetOptions): Hdf5Buffer;
 
+    // TODO
     function readDatasetDatatype(): any;
     function readDatasetLength(): any;
 }
 
+// TODO
 export interface h5ds {
     attachScale: any;
     detachScale: any;
@@ -327,6 +337,7 @@ export interface h5ds {
     setScale: any;
 }
 
+// TODO
 export interface h5im {
     getImageInfo: any;
     isImage: any;
@@ -336,6 +347,7 @@ export interface h5im {
     readImageRegion: any;
 }
 
+// TODO
 export interface h5pt {
     Int64: any;
     PacketTable: any;
@@ -343,22 +355,44 @@ export interface h5pt {
     readTable: any;
 }
 
-export interface h5tb {
-    addRecordsFrom: any;
-    appendRecords: any;
-    combineTables: any;
-    deleteField: any;
-    deleteRecord: any;
-    getFieldInfo: any;
-    getTableInfo: any;
-    insertField: any;
-    insertRecord: any;
-    makeTable: any;
-    readFieldsIndex: any;
-    readFieldsName: any;
-    readRecords: any;
-    readTable: any;
-    writeFieldsIndex: any;
-    writeFieldsName: any;
-    writeRecords: any;
+export declare namespace h5tb {
+
+    /**
+     * 
+     * @param id the group or file id location. Every group and the file return with an id attribute
+     * @param name The table name
+     * @param model a model composed of an Array of typed arrays and Array of strings each representing a column in the table. Each column has a name attribute to name it.
+     */
+    function makeTable(id: hdf5.Int64, name: string, model: TableArray[]): void;
+
+    /**
+     * @param id the group or file id location. Every group and the file return with an id attribute
+     * @param name The table name
+     * @param model a model composed of an Array of typed arrays and Array of strings each representing a column in the table. Each column has a name attribute to name it.
+     */
+    function appendRecords(id: hdf5.Int64, name: string, model: TableArray[]): void;
+
+    /**
+     * @param id the group or file id location. Every group and the file return with an id attribute
+     * @param name The table name
+     * @param start &rarr starting record index
+     * @param model a model composed of an Array of typed arrays and Array of strings each representing a column in the table. Each column has a name attribute to name it. . This is a sub model where the length of columns and start are less than the whole table
+    */
+    function writeRecords(id: hdf5.Int64, name: string, start: number, model: TableArray[]): void;
+
+    // TODO
+    function addRecordsFrom(): any;
+    function combineTables(): any;
+    function deleteField(): any;
+    function deleteRecord(): any;
+    function getFieldInfo(): any;
+    function getTableInfo(): any;
+    function insertField(): any;
+    function insertRecord(): any;
+    function readFieldsIndex(): any;
+    function readFieldsName(): any;
+    function readRecords(): any;
+    function readTable(): any;
+    function writeFieldsIndex(): any;
+    function writeFieldsName(): any;
 }
