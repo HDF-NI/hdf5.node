@@ -128,17 +128,30 @@ namespace NodeHDF5 {
           Local<v8::Array> field = Local<v8::Array>::Cast(table->Get(i));
           nrecords               = field->Length();
           field_offsets[i]       = type_size;
-          size_t max             = 0;
-          for (uint32_t j = 0; j < nrecords; j++) {
-            size_t len = field->Get(j)->ToString()->Length();
-            if (max < len)
-              max = len;
+
+          if (field->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))) { // typed array
+            hid_t type_id = toTypeMap[(H5T)field->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))->Int32Value()];
+            if (type_id==H5T_NATIVE_LLONG || type_id==H5T_NATIVE_ULLONG) {
+              field_sizes[i] = 8;
+              type_size += 8;
+              field_types[i] = type_id;
+            } else {
+              throw std::invalid_argument("unsupported data type");
+            }
+
+          } else { // string array
+            size_t max = 0;
+            for (uint32_t j = 0; j < nrecords; j++) {             
+              size_t len = field->Get(j)->ToString()->Length();
+              if (max < len)
+                max = len;
+            }
+            field_sizes[i] = max;
+            type_size += max;
+            hid_t string_type = H5Tcopy(H5T_C_S1);
+            H5Tset_size(string_type, max);
+            field_types[i] = string_type;
           }
-          field_sizes[i] = max;
-          type_size += max;
-          hid_t string_type = H5Tcopy(H5T_C_S1);
-          H5Tset_size(string_type, max);
-          field_types[i] = string_type;
         } else {
           throw std::invalid_argument("unsupported data type");
         }
@@ -196,9 +209,24 @@ namespace NodeHDF5 {
 
         } else if (table->Get(i)->IsArray()) {
           Local<v8::Array> field = Local<v8::Array>::Cast(table->Get(i));
-          for (uint32_t j = 0; j < nrecords; j++) {
-            String::Utf8Value value(field->Get(j)->ToString());
-            std::memcpy(&data[j * type_size + field_offsets[i]], (*value), H5Tget_size(field_types[i]));
+
+          if (field->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))) { // typed array
+            hid_t type_id = toTypeMap[(H5T)field->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))->Int32Value()];
+            if (type_id==H5T_NATIVE_LLONG) {
+              for (uint32_t j = 0; j < nrecords; j++) {
+                ((long long*)&data[j * type_size + field_offsets[i]])[0] = field->Get(j)->NumberValue();
+              }
+            } else if(type_id==H5T_NATIVE_ULLONG) {
+              for (uint32_t j = 0; j < nrecords; j++) {
+                ((unsigned long long*)&data[j * type_size + field_offsets[i]])[0] = field->Get(j)->NumberValue();
+              }
+            }
+
+          } else { // string array
+            for (uint32_t j = 0; j < nrecords; j++) {
+              String::Utf8Value value(field->Get(j)->ToString());
+              std::memcpy(&data[j * type_size + field_offsets[i]], (*value), H5Tget_size(field_types[i]));
+            }
           }
         }
       }
