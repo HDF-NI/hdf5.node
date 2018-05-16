@@ -40,11 +40,11 @@ var group = file.openGroup('bar');
 
 ### Notes on Recent Releases
 
-* link_type binding.gyp variable put in for choosing static linking to native hdf5 libraries(darwin untested)
-
-* 64 bit signed and unsigned integer attributes read
-
-* Added a file method enableSingleWriteMumltiRead (if native version older than 1.10.x it is a noop).
+* Note: Release v0.3.4 For static native linkng, link_type command line switch is provided in 
+binding.gyp(darwin,win untested).  Added custom 64 bit signed (Int64) and unsigned (Uint64) integer 
+attributes read/write since tey are't yet supported by javascript.  Added a file method 
+enableSingleWriteMumltiRead (if native version older than 1.10.x it is a noop). Synchronous iterate 
+and visit is now available on file and group children.
 
 * Note: asynchronous i/o is coming but not in this release
 

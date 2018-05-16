@@ -11,11 +11,12 @@ describe("testing attribute interface ",function(){
     describe("create an h5, group and some attributes ", function() {
         // open hdf file
         let file;
-        before(function*() {
+        before(function(done) {
           file = new hdf5Lib.hdf5.File('./attributes.h5', globs.Access.ACC_TRUNC);
+          done();
         });
 
-        it("should set filter ", function*() {
+        it("should set filter ", function(done) {
             const group = file.createGroup('pmc/refinement');
             group.id.should.not.equal(-1);
             var name=new String("3FVA");
@@ -26,23 +27,28 @@ describe("testing attribute interface ",function(){
             notes[0]="Pick up dry cleaning";
             notes[1]="Prefry the refried beans";
             notes[2]="Remember Mother's Day";
-            group.notes=notes;
+            //group.notes=notes;
+            console.dir("flush");
             group.flush();
+            console.dir("flushed");
             group.close();
+            done();
         });
 
-        after(function*(){
+        after(function(done){
             file.close();
+            done();
         });
     });
 
     describe("should read attributes", function() {
         let file;
-        before(function*() {
+        before(function(done) {
           file = new hdf5Lib.hdf5.File('./attributes.h5', globs.Access.ACC_RDONLY);
+          done();
         });
 
-        it("should be attribute info ", function*() {
+        it("should be attribute info ", function(done) {
             const group   = file.openGroup('pmc/refinement');
             group.refresh();
             group.name.should.equal("3FVA");
@@ -51,14 +57,16 @@ describe("testing attribute interface ",function(){
             group.notes.constructor.name.should.match('Array');
             // console.dir(group.notes);
             group.close();
+            done();
         });
 
-        after(function*(){
+        after(function(done){
             file.close();
+            done();
         });
     });
 
-    describe("should read biom attributes", function() {
+    describe.skip("should read biom attributes", function() {
         let file;
         before(function*() {
           file = new hdf5Lib.hdf5.File('./long_attributes.biom', globs.Access.ACC_TRUNC);

@@ -52,7 +52,7 @@ describe("testing lite interface ", function() {
             done();
         });
         it("should be node::Buffer io for double le", function(done) {
-            const buffer=Buffer.alloc(5*8, "binary");
+            const buffer=Buffer.alloc(5*8, "\0", "binary");
             buffer.type=H5Type.H5T_NATIVE_DOUBLE;
             buffer.writeDoubleLE(1.0, 0);
             buffer.writeDoubleLE(2.0, 8);
@@ -71,7 +71,7 @@ describe("testing lite interface ", function() {
             done();
         });
         it("should be node::Buffer io for double rank data", function(done) {
-            const buffer=Buffer.alloc(6*8, "binary");
+            const buffer=Buffer.alloc(6*8, "\0", "binary");
             buffer.type=H5Type.H5T_NATIVE_DOUBLE;
             buffer.writeDoubleLE(1.0, 0);
             buffer.writeDoubleLE(2.0, 8);
@@ -99,7 +99,7 @@ describe("testing lite interface ", function() {
             done();
         });
         it("should be node::Buffer io for quadruple rank data", function(done) {
-            const buffer=Buffer.alloc(2*2*6*8, "binary");
+            const buffer=Buffer.alloc(2*2*6*8, "\0", "binary");
             buffer.type=H5Type.H5T_NATIVE_DOUBLE;
             buffer.writeDoubleLE(1.0, 0);
             buffer.writeDoubleLE(2.0, 8);
@@ -477,7 +477,7 @@ describe("testing lite interface ", function() {
 
         it("should be node::Buffer io for double rank hyperslab", function(done) {
             const group=file.createGroup('pmcservices/Double');
-            const buffer=Buffer.alloc(8*10*8, "binary");
+            const buffer=Buffer.alloc(8*10*8, "\0", "binary");
             buffer.rank=2;
             buffer.rows=8;
             buffer.columns=10;
@@ -497,7 +497,7 @@ describe("testing lite interface ", function() {
             dimensions.length.should.equal(2);
             dimensions[0].should.equal(8);
             dimensions[1].should.equal(10);
-            const subsetBuffer=Buffer.alloc(3*4*8, "binary");
+            const subsetBuffer=Buffer.alloc(3*4*8, "\0", "binary");
             subsetBuffer.rank=2;
             subsetBuffer.rows=3;
             subsetBuffer.columns=4;
@@ -528,7 +528,7 @@ describe("testing lite interface ", function() {
         });
         it("should be node::Buffer io for triple rank hyperslab", function(done) {
             const group=file.createGroup('pmcservices/Triple');
-            const buffer=Buffer.alloc(3*8*10*8, "binary");
+            const buffer=Buffer.alloc(3*8*10*8, "\0", "binary");
             buffer.rank=3;
             buffer.rows=8;
             buffer.columns=10;
@@ -552,7 +552,7 @@ describe("testing lite interface ", function() {
             dimensions[0].should.equal(3);
             dimensions[1].should.equal(8);
             dimensions[2].should.equal(10);
-            const subsetBuffer=Buffer.alloc(3*4*8, "binary");
+            const subsetBuffer=Buffer.alloc(3*4*8, "\0", "binary");
             subsetBuffer.rank=3;
             subsetBuffer.rows=3;
             subsetBuffer.columns=4;
@@ -886,8 +886,8 @@ var start = process.hrtime();
             groupTarget=file.openGroup('scada', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.id.should.not.equal(-1);
             try {
-                file.visit(1, function(r, name) {
-                    console.dir("visiting name: "+name);
+                file.visit(1, function(r, xpath) {
+                    console.dir("visiting name: "+xpath);
                 });
             } catch (e) {
 

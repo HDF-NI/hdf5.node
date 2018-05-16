@@ -15,14 +15,15 @@ describe("testing dimension scale interface ", function() {
     describe("create an h5, group and some dimension scales ", function() {
         // open hdf file
         let file;
-        before(function*() {
+        before(function(done) {
           file = new hdf5.File('./h5ds.h5', globs.Access.ACC_TRUNC);
+          done();
         });
 
-        it("should set scale ", function*() {
+        it("should set scale ", function(done) {
             const group=file.createGroup('pmc/refinement');
             group.id.should.not.equal(-1);
-            const buffer=Buffer.alloc(4096*4, "binary");
+            const buffer=Buffer.alloc(4096*4, "\0", "binary");
             buffer.type=H5Type.H5T_NATIVE_UINT;
             buffer.rank=2;
             buffer.rows=64;
@@ -36,7 +37,7 @@ describe("testing dimension scale interface ", function() {
             readAsBuffer.length.should.equal(16384);
             readAsBuffer.rows.should.equal(64);
 
-            const scaleBuffer=Buffer.alloc(64*8, "binary");
+            const scaleBuffer=Buffer.alloc(64*8, "\0", "binary");
             scaleBuffer.type=H5Type.H5T_NATIVE_DOUBLE;
             for(let index=0;index<64;index++) {
                 scaleBuffer.writeDoubleLE(index, index*8);
@@ -50,7 +51,7 @@ describe("testing dimension scale interface ", function() {
             h5ds.attachScale(group.id, 'Data', 'X(dim)', 0);
             h5ds.isAttached(group.id, 'Data', 'X(dim)', 0).should.equal(true);
 
-            const scaleYBuffer=Buffer.alloc(64*8, "binary");
+            const scaleYBuffer=Buffer.alloc(64*8, "\0", "binary");
             scaleYBuffer.type=H5Type.H5T_NATIVE_DOUBLE;
             for(let index=0;index<64;index++) {
                 scaleYBuffer.writeDoubleLE(index-31, index*8);
@@ -77,20 +78,23 @@ describe("testing dimension scale interface ", function() {
 
             }
             group.close();
+            done();
         });
 
-        after(function*() {
+        after(function(done) {
             file.close();
+            done();
         });
     });
 
     describe("should read dimension scales ", function() {
         let file;
-        before(function*() {
+        before(function(done) {
           file = new hdf5.File('./h5ds.h5', globs.Access.ACC_RDONLY);
+          done();
         });
 
-        it("should be dimension scales info ", function*() {
+        it("should be dimension scales info ", function(done) {
             const group  = file.openGroup('pmc/refinement');
             let attrs    = group.getDatasetAttributes("Data");
             let attrText = "";
@@ -127,10 +131,13 @@ describe("testing dimension scale interface ", function() {
             });
             attrText.should.equal('CLASS :  DIMENSION_SCALE\nNAME :  The X Scale\nREFERENCE_LIST :  ->/pmc/refinement/Data,0\n');
             group.close();
+            console.log("ds info done ");
+            done();
         });
 
-        after(function*() {
+        after(function(done) {
             file.close();
+            done();
         });
     });
 
