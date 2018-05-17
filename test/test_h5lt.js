@@ -611,6 +611,66 @@ describe("testing lite interface ", function() {
         });
     });
 
+    describe("create dataset and fail extracting subset", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5.File('./pmc.h5', Access.ACC_RDWR);
+          done();
+        });
+
+        it("should fail when count is not given for the subset", function(done) {
+            const group=file.createGroup('pmcservices/Forest');
+            const buffer=Buffer.alloc(8*10*8);
+            for (let j = 0; j < 10; j++) {
+                for (let i = 0; i < 8; i++){
+                        if (j< (10/2)) {
+                            buffer.writeDoubleLE(1.0, 8*(i*10+j));
+                        } else {
+                            buffer.writeDoubleLE(2.0, 8*(i*10+j));
+                        }
+                }
+            }
+
+            h5lt.makeDataset(group.id, 'Waldo', buffer, {type: H5Type.H5T_NATIVE_DOUBLE, rank: 2, rows: 8, columns: 10});
+            var dimensions=group.getDatasetDimensions('Waldo');
+            dimensions.length.should.equal(2);
+            dimensions[0].should.equal(8);
+            dimensions[1].should.equal(10);
+            const subsetBuffer=Buffer.alloc(3*4*8, "\0", "binary");
+            subsetBuffer.type=H5Type.H5T_NATIVE_DOUBLE;
+            for (let j = 0; j < 4; j++) {
+                for (let i = 0; i < 3; i++){
+                            subsetBuffer.writeDoubleLE(5.0, 8*(i*4+j));
+                }
+            }
+
+            h5lt.writeDataset(group.id, 'Waldo', subsetBuffer, {start: [1,2], stride: [1,1], count: [3,4]});
+            let theType=group.getDataType('Waldo');
+            theType.should.equal(H5Type.H5T_IEEE_F64LE);
+            const readBuffer=h5lt.readDataset(group.id, 'Waldo', function(options) {
+                options.rank.should.equal(2);
+                options.rows.should.match(8);
+                options.columns.should.equal(10);
+            });
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(8*10);
+
+            try{
+              const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Waldo', {start: [3,4], stride: [1,1]});
+            }
+            catch (e) {
+                console.log(e);
+                e.message.should.equal("Need to supply the subspace count dimensions. Start and stride are optional.");
+            }
+            group.close();
+            done();
+        });
+        after(function(done) {
+          file.close();
+          done();
+        });
+    });
+    
     describe("varlen char arrays", function() {
         let file;
         before(function(done) {

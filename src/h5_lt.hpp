@@ -89,6 +89,10 @@ namespace NodeHDF5 {
 
     inline static bool get_dimensions(const v8::FunctionCallbackInfo<Value>& args, unsigned int argIndex, std::unique_ptr<hsize_t[]>& start, std::unique_ptr<hsize_t[]>& stride, std::unique_ptr<hsize_t[]>& count, int rank){
         bool subsetOn=false;
+        bool gotStart=false;
+        bool gotStride=false;
+        bool gotCount=false;
+        unsigned int size=0;
         Local<Array> names = args[argIndex]->ToObject()->GetOwnPropertyNames();
         for (uint32_t index = 0; index < names->Length(); index++) {
           String::Utf8Value _name(names->Get(index));
@@ -100,6 +104,7 @@ namespace NodeHDF5 {
                  arrayIndex++) {
               start.get()[arrayIndex] = starts->Get(arrayIndex)->Uint32Value();
             }
+            gotStart=true;
           } else if (name.compare("stride") == 0) {
             Local<Object> strides = args[argIndex]->ToObject()->Get(names->Get(index))->ToObject();
             for (unsigned int arrayIndex = 0;
@@ -107,16 +112,38 @@ namespace NodeHDF5 {
                  arrayIndex++) {
               stride.get()[arrayIndex] = strides->Get(arrayIndex)->Uint32Value();
             }
+            gotStride=true;
           } else if (name.compare("count") == 0) {
             Local<Object> counts = args[argIndex]->ToObject()->Get(names->Get(index))->ToObject();
             for (unsigned int arrayIndex = 0;
                  arrayIndex < counts->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length"))->ToObject()->Uint32Value();
                  arrayIndex++) {
               count.get()[arrayIndex] = counts->Get(arrayIndex)->Uint32Value();
+              size++;
             }
+            gotCount=true;
             subsetOn = true;
           }
         }
+        if(!gotStart && !gotStride && !gotCount)
+          return false;
+        if(!gotCount)v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Need to supply the subspace count dimensions. Start and stride are optional.")));
+        if(!gotStart){
+          for (unsigned int arrayIndex = 0;
+             arrayIndex < size;
+             arrayIndex++) {
+                start.get()[arrayIndex] = 0;
+          }
+        }
+        if(!gotStride){
+          for (unsigned int arrayIndex = 0;
+             arrayIndex < size;
+             arrayIndex++) {
+                stride.get()[arrayIndex] = 1;
+          }
+        }
+              
         return subsetOn;
     }
     
