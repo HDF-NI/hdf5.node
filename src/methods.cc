@@ -563,14 +563,13 @@ namespace NodeHDF5 {
     ssize_t name_len = H5Lget_name_by_idx(id, ".", H5_INDEX_NAME, H5_ITER_INC, idx, NULL, 0, H5P_DEFAULT);
 
     // now, allocate C buffer to get the name
-    char* name_C = new char[name_len + 1];
-    std::memset(name_C, 0, name_len + 1); // clear buffer
+    std::unique_ptr<char[]> name_C(new char[name_len + 1]);
+    std::memset(name_C.get(), 0, name_len + 1); // clear buffer
 
-    name_len = H5Lget_name_by_idx(id, ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C, name_len + 1, H5P_DEFAULT);
+    name_len = H5Lget_name_by_idx(id, ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C.get(), name_len + 1, H5P_DEFAULT);
 
     // clean up and return the string
-    std::string name = std::string(name_C);
-    delete[] name_C;
+    std::string name = std::string(name_C.get());
     return name;
   }
   
