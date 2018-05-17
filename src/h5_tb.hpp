@@ -162,49 +162,57 @@ namespace NodeHDF5 {
         if (table->Get(i)->IsFloat64Array()) {
           Local<v8::Float64Array> field = Local<v8::Float64Array>::Cast(table->Get(i));
           for (uint32_t j = 0; j < nrecords; j++) {
-            ((double*)&data[j * type_size + field_offsets[i]])[0] = field->Get(j)->NumberValue();
+            double value = field->Get(j)->NumberValue();
+            std::memcpy(&data[j * type_size + field_offsets[i]], &value, 8);
           }
 
         } else if (table->Get(i)->IsFloat32Array()) {
           Local<v8::Float32Array> field = Local<v8::Float32Array>::Cast(table->Get(i));
           for (uint32_t j = 0; j < nrecords; j++) {
-            ((float*)&data[j * type_size + field_offsets[i]])[0] = field->Get(j)->NumberValue();
+            float value = field->Get(j)->NumberValue();
+            std::memcpy(&data[j * type_size + field_offsets[i]], &value, 4);
           }
 
         } else if (table->Get(i)->IsUint32Array()) {
           Local<v8::Uint32Array> field = Local<v8::Uint32Array>::Cast(table->Get(i));
           for (uint32_t j = 0; j < nrecords; j++) {
-            ((unsigned int*)&data[j * type_size + field_offsets[i]])[0] = field->Get(j)->Uint32Value();
+            unsigned int value = field->Get(j)->Uint32Value();
+            std::memcpy(&data[j * type_size + field_offsets[i]], &value, 4);
           }
 
         } else if (table->Get(i)->IsInt32Array()) {
           Local<v8::Int32Array> field = Local<v8::Int32Array>::Cast(table->Get(i));
           for (uint32_t j = 0; j < nrecords; j++) {
-            ((unsigned int*)&data[j * type_size + field_offsets[i]])[0] = field->Get(j)->Int32Value();
+            unsigned int value = field->Get(j)->Int32Value();
+            std::memcpy(&data[j * type_size + field_offsets[i]], &value, 4);
           }
 
         } else if (table->Get(i)->IsUint16Array()) {
           Local<v8::Uint16Array> field = Local<v8::Uint16Array>::Cast(table->Get(i));
           for (uint32_t j = 0; j < nrecords; j++) {
-            ((unsigned short*)&data[j * type_size + field_offsets[i]])[0] = field->Get(j)->ToInteger()->Value();
+            unsigned short value = field->Get(j)->IntegerValue();
+            std::memcpy(&data[j * type_size + field_offsets[i]], &value, 2);
           }
 
         } else if (table->Get(i)->IsInt16Array()) {
           Local<v8::Int16Array> field = Local<v8::Int16Array>::Cast(table->Get(i));
           for (uint32_t j = 0; j < nrecords; j++) {
-            ((unsigned short*)&data[j * type_size + field_offsets[i]])[0] = field->Get(j)->ToInteger()->Value();
+            unsigned short value = field->Get(j)->IntegerValue();
+            std::memcpy(&data[j * type_size + field_offsets[i]], &value, 2);
           }
 
         } else if (table->Get(i)->IsUint8Array()) {
           Local<v8::Uint8Array> field = Local<v8::Uint8Array>::Cast(table->Get(i));
           for (uint32_t j = 0; j < nrecords; j++) {
-            ((unsigned char*)&data[j * type_size + field_offsets[i]])[0] = field->Get(j)->ToInteger()->Value();
+            unsigned char value = field->Get(j)->IntegerValue();
+            std::memcpy(&data[j * type_size + field_offsets[i]], &value, 1);
           }
 
         } else if (table->Get(i)->IsInt8Array()) {
           Local<v8::Int8Array> field = Local<v8::Int8Array>::Cast(table->Get(i));
           for (uint32_t j = 0; j < nrecords; j++) {
-            ((unsigned char*)&data[j * type_size + field_offsets[i]])[0] = field->Get(j)->ToInteger()->Value();
+            unsigned char value = field->Get(j)->IntegerValue();
+            std::memcpy(&data[j * type_size + field_offsets[i]], &value, 1);
           }
 
         } else if (table->Get(i)->IsArray()) {
@@ -214,11 +222,13 @@ namespace NodeHDF5 {
             hid_t type_id = toTypeMap[(H5T)field->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))->Int32Value()];
             if (type_id==H5T_NATIVE_LLONG) {
               for (uint32_t j = 0; j < nrecords; j++) {
-                ((long long*)&data[j * type_size + field_offsets[i]])[0] = field->Get(j)->NumberValue();
+                long long value = field->Get(j)->NumberValue();
+                std::memcpy(&data[j * type_size + field_offsets[i]], &value, 8);
               }
             } else if(type_id==H5T_NATIVE_ULLONG) {
               for (uint32_t j = 0; j < nrecords; j++) {
-                ((unsigned long long*)&data[j * type_size + field_offsets[i]])[0] = field->Get(j)->NumberValue();
+                unsigned long long value = field->Get(j)->NumberValue();
+                std::memcpy(&data[j * type_size + field_offsets[i]], &value, 8);
               }
             }
 
