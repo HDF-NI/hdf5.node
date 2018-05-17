@@ -1407,8 +1407,10 @@ namespace NodeHDF5 {
           hid_t dataspace_id = H5S_ALL;
           hid_t memspace_id  = H5S_ALL;
           if (subsetOn) {
-            const hsize_t maxsize = H5S_UNLIMITED;
-            memspace_id           = H5Screate_simple(rank, count.get(), &maxsize);
+              std::unique_ptr<hsize_t[]> maxsize(new hsize_t[rank]);
+              for(int rankIndex=0;rankIndex<rank;rankIndex++)
+                  maxsize[rankIndex]=H5S_UNLIMITED;
+            memspace_id           = H5Screate_simple(rank, count.get(), maxsize.get());
             dataspace_id          = H5Dget_space(did);
             herr_t err            = H5Sselect_hyperslab(dataspace_id, H5S_SELECT_SET, start.get(), stride.get(), count.get(), NULL);
             if (err < 0) {

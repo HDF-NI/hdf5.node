@@ -593,11 +593,12 @@ describe("testing lite interface ", function() {
 
     describe.skip("should read loom attributes", function() {
         let file;
-        before(function*() {
+        before(function(done) {
           file = new hdf5Lib.hdf5.File('/home/roger/Downloads/hgForebrainGlut.loom', globs.Access.ACC_RDONLY);
+          done();
         });
 
-        it("should be slab info ", function*() {
+        it("should be slab info ", function(done) {
             console.log(file);
             console.log(file.getNumAttrs());
             file.refresh();
@@ -609,18 +610,19 @@ describe("testing lite interface ", function() {
             var dim = file.getDatasetDimensions('matrix');
             console.log(dim.length);
             console.log(dim);
-            for (var i = 0; i < dim[0]; i++) {
-                console.log(i);
+            for (var i = 0; i < dim[0]/1000; i++) {
               var buffer = h5lt.readDatasetAsBuffer(file.id, 'matrix', {
                   start: [i, 0],
                   stride: [1, 1],
                   count: [1, dim[1]]
                 });
             }
+            done();
         });
 
-        after(function*(){
+        after(function(done){
             file.close();
+            done();
         });
     });
 
