@@ -15,7 +15,7 @@ describe("testing images ",function() {
         let file;
         let file2;
         let image;
-        before(function*() {
+        before(function(done) {
             try {
             file  = new hdf5.File('./h5im.h5', Access.ACC_TRUNC);
             file2 = new hdf5.File('./test/examples/hdf5.h5', Access.ACC_RDONLY);
@@ -24,62 +24,75 @@ describe("testing images ",function() {
                 err.message.should.equal("");
                 console.dir(err.message);
             }
+            done();
         });
 
-        it("should be 1.10.0 ", function*() {
+        it("should be 1.10.0 ", function(done) {
             var version=hdf5.getLibVersion();
             version.should.equal('1.10.1');
+            done();
         });
 
         let group;
-        it("should be >0 ", function*() {
+        it("should be >0 ", function(done) {
             group = file.createGroup('pmc');
             group.id.should.not.equal(-1);
+            done();
         });
 
-        it("should be an image ", function*() {
+        it("should be an image ", function(done) {
             const res = h5im.isImage(file2.id, 'hdf_logo.jpg');
             res.should.equal(true);
+            done();
         });
 
-        it("image width should be 48 ", function*() {
+        it("image width should be 48 ", function(done) {
             image.width.should.equal(48);
+            done();
         });
 
-        it("image height should be 45 ", function*() {
+        it("image height should be 45 ", function(done) {
             image.height.should.equal(45);
+            done();
         });
 
-        it("image interlace should be INTERLACE_PIXEL ", function*() {
+        it("image interlace should be INTERLACE_PIXEL ", function(done) {
             image.interlace.should.equal('INTERLACE_PIXEL');
+            done();
         });
 
-        it("image planes should be 3 ", function*() {
+        it("image planes should be 3 ", function(done) {
             image.planes.should.equal(3);
+            done();
         });
 
-        it("image length should be 6480 ", function*() {
+        it("image length should be 6480 ", function(done) {
             image.length.should.equal(6480);
+            done();
         });
 
-        it("make image  ", function*() {
+        it("make image  ", function(done) {
             h5im.makeImage(group.id, 'hdf_logo.jpg', image);
+            done();
         });
 
         let imageAgain;
-        it("again image width should be 48 ", function*() {
+        it("again image width should be 48 ", function(done) {
             imageAgain=h5im.readImage(group.id, 'hdf_logo.jpg');
             imageAgain.width.should.equal(48);
+            done();
         });
 
-        it("again make image  ", function*() {
+        it("again make image  ", function(done) {
             h5im.makeImage(group.id, 'repeat.jpg', imageAgain);
+            done();
         });
 
-        after(function*() {
+        after(function(done) {
             group.close();
             file.close();
             file2.close();
+            done();
         });
     });
 });

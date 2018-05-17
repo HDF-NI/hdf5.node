@@ -3,6 +3,7 @@
 #include "hdf5_hl.h"
 
 #include "attributes.hpp"
+#include <node_buffer.h>
 
 #include "int64.hpp"
 #include "uint64.hpp"
@@ -20,7 +21,7 @@ namespace NodeHDF5 {
       hid_t attr_type = H5Tcopy(type_id);
       hid_t attr_id   = H5Acreate2(group_id, attribute_name, attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
 
-      H5Awrite(attr_id, attr_type, buffer->Buffer()->Externalize().Data());
+      H5Awrite(attr_id, attr_type, node::Buffer::Data(buffer->ToObject()));
       H5Aclose(attr_id);
       H5Tclose(attr_type);
       H5Sclose(attr_space);
@@ -257,7 +258,7 @@ namespace NodeHDF5 {
                 return;
               }
               if(indexedArray){
-                H5Aread(attr_id, attr_type, buffer->Buffer()->Externalize().Data());
+                H5Aread(attr_id, attr_type, node::Buffer::Data(buffer->ToObject()));
                 args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), buffer);
               }
               break;

@@ -86,7 +86,7 @@ describe("testing lite interface ", function() {
             var byteOrder=group.getByteOrder('Two Rank');
             byteOrder.should.equal(0);
             const readBuffer=h5lt.readDataset(group.id, 'Two Rank', function(options) {
-                    JSON.stringify(options).should.equal('{"rank":2,"endian":0}')
+                    JSON.stringify(options).should.equal('{"rank":2,"endian":0,"rows":3,"columns":2}')
                 });
                 // console.dir(" after options cb: ");
             readBuffer.constructor.name.should.match('Float64Array');
@@ -134,7 +134,7 @@ describe("testing lite interface ", function() {
             var byteOrder=group.getByteOrder('Quadruple Rank');
             byteOrder.should.equal(0);
             const readBuffer=h5lt.readDataset(group.id, 'Quadruple Rank', function(options) {
-                    JSON.stringify(options).should.equal('{"rank":4,"endian":0}')
+                    JSON.stringify(options).should.equal('{"rank":4,"endian":0,"rows":3,"columns":2,"sections":2,"files":2}')
                 });
                 // console.dir(" after options cb: ");
             readBuffer.constructor.name.should.match('Float64Array');
@@ -409,15 +409,9 @@ describe("testing lite interface ", function() {
                         {
                             try{
                             const groupGeometries=file.createGroup('pmcservices/sodium-icosanoate/Trajectories/Geometries');
-                            firstTrajectory.rank=2;
-                            firstTrajectory.rows=numberOfDataLines;
-                            firstTrajectory.columns=3;
                             firstTrajectory.Dipole=2.9;
-                            h5lt.makeDataset(groupGeometries.id, '0', firstTrajectory);
-                            lastTrajectory.rank=2;
-                            lastTrajectory.rows=numberOfDataLines;
-                            lastTrajectory.columns=3;
-                            h5lt.makeDataset(groupGeometries.id, '1', lastTrajectory);
+                            h5lt.makeDataset(groupGeometries.id, '0', firstTrajectory, {rank: 2, rows: numberOfDataLines, columns: 3});
+                            h5lt.makeDataset(groupGeometries.id, '1', lastTrajectory, {rank: 2, rows: numberOfDataLines, columns: 3});
                             const groupFrequencies=file.createGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
                             groupGeometries.close();
                             groupFrequencies.close();
@@ -428,10 +422,7 @@ describe("testing lite interface ", function() {
                             }
                         }
                             const groupFrequencies=file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
-                            frequency.rank=2;
-                            frequency.rows=numberOfDataLines;
-                            frequency.columns=3;
-                            h5lt.makeDataset(groupFrequencies.id, title, frequency);
+                            h5lt.makeDataset(groupFrequencies.id, title, frequency, {rank: 2, rows: numberOfDataLines, columns: 3});
                             state=State.COUNT;
                             groupFrequencies.close();
                         }
@@ -477,45 +468,40 @@ describe("testing lite interface ", function() {
 
         it("should be node::Buffer io for double rank hyperslab", function(done) {
             const group=file.createGroup('pmcservices/Double');
-            const buffer=Buffer.alloc(8*10*8, "\0", "binary");
-            buffer.rank=2;
-            buffer.rows=8;
-            buffer.columns=10;
-            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
-            for (let j = 0; j < buffer.columns; j++) {
-                for (let i = 0; i < buffer.rows; i++){
-                        if (j< (buffer.columns/2)) {
-                            buffer.writeDoubleLE(1.0, 8*(i*buffer.columns+j));
+            const buffer=Buffer.alloc(8*10*8);
+            for (let j = 0; j < 10; j++) {
+                for (let i = 0; i < 8; i++){
+                        if (j< (10/2)) {
+                            buffer.writeDoubleLE(1.0, 8*(i*10+j));
                         } else {
-                            buffer.writeDoubleLE(2.0, 8*(i*buffer.columns+j));
+                            buffer.writeDoubleLE(2.0, 8*(i*10+j));
                         }
                 }
             }
 
-            h5lt.makeDataset(group.id, 'Waldo', buffer);
+            h5lt.makeDataset(group.id, 'Waldo', buffer, {type: H5Type.H5T_NATIVE_DOUBLE, rank: 2, rows: 8, columns: 10});
             var dimensions=group.getDatasetDimensions('Waldo');
             dimensions.length.should.equal(2);
             dimensions[0].should.equal(8);
             dimensions[1].should.equal(10);
             const subsetBuffer=Buffer.alloc(3*4*8, "\0", "binary");
-            subsetBuffer.rank=2;
-            subsetBuffer.rows=3;
-            subsetBuffer.columns=4;
             subsetBuffer.type=H5Type.H5T_NATIVE_DOUBLE;
-            for (let j = 0; j < subsetBuffer.columns; j++) {
-                for (let i = 0; i < subsetBuffer.rows; i++){
-                            subsetBuffer.writeDoubleLE(5.0, 8*(i*subsetBuffer.columns+j));
+            for (let j = 0; j < 4; j++) {
+                for (let i = 0; i < 3; i++){
+                            subsetBuffer.writeDoubleLE(5.0, 8*(i*4+j));
                 }
             }
 
             h5lt.writeDataset(group.id, 'Waldo', subsetBuffer, {start: [1,2], stride: [1,1], count: [3,4]});
             let theType=group.getDataType('Waldo');
             theType.should.equal(H5Type.H5T_IEEE_F64LE);
-            const readBuffer=h5lt.readDataset(group.id, 'Waldo');
+            const readBuffer=h5lt.readDataset(group.id, 'Waldo', function(options) {
+                options.rank.should.equal(2);
+                options.rows.should.match(8);
+                options.columns.should.equal(10);
+            });
             readBuffer.constructor.name.should.match('Float64Array');
             readBuffer.length.should.match(8*10);
-            readBuffer.rows.should.match(8);
-            readBuffer.columns.should.match(10);
 
             const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Waldo', {start: [3,4], stride: [1,1], count: [2,2]});
             readAsBuffer.readDoubleLE(0*8).should.equal(5.0);
@@ -545,7 +531,6 @@ describe("testing lite interface ", function() {
                     }
                 }
             }
-            console.dir("waldo");
             h5lt.makeDataset(group.id, 'Waldo', buffer);
             var dimensions=group.getDatasetDimensions('Waldo');
             dimensions.length.should.equal(3);
@@ -799,7 +784,10 @@ var start = process.hrtime();
             array[1].should.equal("1");
             let xmolDocument="";
             groupGeometries.getDatasetType(array[1]).should.equal(HLType.HL_TYPE_LITE);
-            const lastTrajectory=h5lt.readDataset(groupGeometries.id, array[1]);
+            const lastTrajectory=h5lt.readDataset(groupGeometries.id, array[1],  function(options) {
+              options.rank.should.equal(2);
+              options.columns.should.equal(3);
+            });
             lastTrajectory.rank.should.equal(2);
             lastTrajectory.columns.should.equal(3);
                 for (let frequencyIndex = 0; frequencyIndex < frequencyNames.length; frequencyIndex++)

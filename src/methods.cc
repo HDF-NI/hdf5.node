@@ -458,11 +458,13 @@ namespace NodeHDF5 {
 
             } else {
             std::unique_ptr<char[]>data(new char[H5Aget_storage_size(attr_id) + 1]);
+            std::memset(data.get(), 0, H5Aget_storage_size(attr_id) + 1); // clear buffer
               H5Aread(attr_id, attr_type, data.get());
               std::string attrValue = "";
+              ssize_t value_len = (H5Aget_storage_size(attr_id)>0) ? H5Aget_storage_size(attr_id)-1: H5Aget_storage_size(attr_id);
               attrs->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()),
                          v8::String::NewFromUtf8(
-                             v8::Isolate::GetCurrent(), (char*)data.get(), v8::String::kNormalString, H5Aget_storage_size(attr_id)));
+                             v8::Isolate::GetCurrent(), (char*)data.get(), v8::String::kNormalString, value_len));
             }
           } else {
             std::string strValue(H5Aget_storage_size(attr_id) + 1, '\0');
@@ -566,7 +568,7 @@ namespace NodeHDF5 {
     std::unique_ptr<char[]> name_C(new char[name_len + 1]);
     std::memset(name_C.get(), 0, name_len + 1); // clear buffer
 
-    name_len = H5Lget_name_by_idx(id, ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C.get(), name_len + 1, H5P_DEFAULT);
+    name_len = H5Lget_name_by_idx(id, ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C.get(), name_len, H5P_DEFAULT);
 
     // clean up and return the string
     std::string name = std::string(name_C.get());

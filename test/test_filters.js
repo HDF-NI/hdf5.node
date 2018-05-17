@@ -11,11 +11,12 @@ describe("testing fiter interface ",function(){
     describe("create an h5, group and some compressed datasets ", function() {
         // open hdf file
         let file;
-        before(function*() {
+        before(function(done) {
           file = new hdf5Lib.hdf5.File('./filters.h5', globs.Access.ACC_TRUNC);
+          done();
         });
 
-        it("should set filter ", function*() {
+        it("should set filter ", function(done) {
             const group = file.createGroup('pmc/refinement');
             group.id.should.not.equal(-1);
             const buffer = Buffer.alloc(5000*8, "\0", "binary");
@@ -35,29 +36,34 @@ describe("testing fiter interface ",function(){
             readAsBuffer.length.should.equal(40000);
             readAsBuffer.rows.should.equal(5000);
             group.close();
+            done();
         });
 
-        after(function*(){
+        after(function(done){
             file.close();
+            done();
         });
     });
 
     describe("should read compressed dataset", function() {
         let file;
-        before(function*() {
+        before(function(done) {
           file = new hdf5Lib.hdf5.File('./filters.h5', globs.Access.ACC_RDONLY);
+          done();
         });
 
-        it("should be compression filter info ", function*() {
+        it("should be compression filter info ", function(done) {
             const group   = file.openGroup('pmc/refinement');
             const filters = group.getFilters('Data');
             filters.isAvailable(globs.H5ZType.H5Z_FILTER_DEFLATE).should.be.true;
             filters.getNFilters().should.equal(1);
             group.close();
+            done();
         });
 
-        after(function*(){
+        after(function(done){
             file.close();
+            done();
         });
     });
 

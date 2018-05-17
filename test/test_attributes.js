@@ -54,7 +54,7 @@ describe("testing attribute interface ",function(){
             group.name.should.equal("3FVA");
             group.name.type.should.equal("variable-length");
             group.size.constructor.name.should.match('Float64Array');
-            group.notes.constructor.name.should.match('Array');
+            //group.notes.constructor.name.should.match('Array');
             // console.dir(group.notes);
             group.close();
             done();
@@ -68,8 +68,9 @@ describe("testing attribute interface ",function(){
 
     describe.skip("should read biom attributes", function() {
         let file;
-        before(function*() {
+        before(function(done) {
           file = new hdf5Lib.hdf5.File('./long_attributes.biom', globs.Access.ACC_TRUNC);
+          done();
         });
 
         it("write attribute info", function(done) {
@@ -99,18 +100,20 @@ describe("testing attribute interface ",function(){
             done();
         });
 
-        after(function*(){
+        after(function(done){
             file.close();
+            done();
         });
     });
 
     describe.skip("read variable string attributes", function() {
         let file;
-        before(function*() {
+        before(function(done) {
           file = new hdf5Lib.hdf5.File('/home/roger/Downloads/sample.h5', globs.Access.ACC_RDONLY);
+          done();
         });
 
-        it("should be variable string info", function*() {
+        it("should be variable string info", function(done) {
             const group   = file.openGroup('scada');
             group.refresh();
             var attrs = group.getDatasetAttributes("active_power");
@@ -134,10 +137,12 @@ describe("testing attribute interface ",function(){
             });
             console.dir(attrText);
             group.close();
+            done();
         });
 
-        after(function*(){
+        after(function(done){
             file.close();
+            done();
         });
     });
 

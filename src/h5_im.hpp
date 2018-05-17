@@ -245,7 +245,7 @@ namespace NodeHDF5 {
       Local<Value>      rankValue = args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "size"));
       hsize_t           pal_dims[1]{static_cast<hsize_t>(rankValue->Int32Value())};
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
-      H5IMmake_palette(idWrap->Value(), *dset_name, pal_dims, (const unsigned char*)buffer->Buffer()->Externalize().Data());
+      H5IMmake_palette(idWrap->Value(), *dset_name, pal_dims, (const unsigned char*)node::Buffer::Data(buffer->ToObject()));
       args.GetReturnValue().SetUndefined();
     }
   };
