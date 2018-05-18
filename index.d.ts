@@ -283,7 +283,7 @@ export declare namespace h5lt {
      * @param buffer Typed array, string or a node::Buffer. The buffer can have attributes describing its shape. When using a node::Buffer the data is expected to be homogeneous and the type attribute set to choice in H5Type
      * @param options optional: start, stride and count
      */
-    function writeDataset(id: Hdf5Id, name: string, buffer: string | Hdf5Buffer, options: DatasetOptions): void;
+    function writeDataset(id: Hdf5Id, name: string, buffer: TypedArray | string | Hdf5Buffer, options: DatasetOptions): void;
 
     /**
      * 
