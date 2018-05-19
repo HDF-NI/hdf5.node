@@ -8,7 +8,7 @@ date: 2015-05-02 12:02:34
 
 ## Status
 
-Currently testing with node v7.5.0 and V8 5.4.500.48.
+Currently testing with nodejs v9.9.0 and V8 6.2.414.46-node.22.
 
 ```bash
  npm install
@@ -34,6 +34,13 @@ For mac and windows the switches are --hdf5_home_mac & --hdf5_home_win
 
 + [HDF5 C Library](http://www.hdfgroup.org/downloads/index.html) v5-1.10.0-patch1
         (Prior v5-1.8.x's untested yet should work)
+
+#### native install on Ubuntu
+If you don't already have and don't know where your native hdf5 install is located:
+```
+sudo apt install libhdf5-dev
+```
+The installed location could be /usr/lib/x86_64-linux-gnu/hdf5/serial
 
 
 ## Compiling
@@ -84,7 +91,7 @@ export HDF5_PLUGIN_PATH=/home/user/NodeProjects/HDF5Plugin
 The tests are based on co-mocha
 
 ```bash
-mocha --require should  --require co-mocha
+mocha --harmony --require should  --require co-mocha
 ```
 
 

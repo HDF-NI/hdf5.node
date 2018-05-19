@@ -19,23 +19,19 @@ var Access = require('hdf5/lib/globals').Access;
 
 var file = new hdf5.File('./roothaan.h5', Access.ACC_TRUNC);
 var group=file.createGroup('pmcservices');
-var buffer=new Buffer(8*10*8, "binary");
-buffer.rank=2;
-buffer.rows=8;
-buffer.columns=10;
-buffer.type=H5Type.H5T_NATIVE_DOUBLE;
-for (j = 0; j < buffer.columns; j++) {
-  for (i = 0; i < buffer.rows; i++){
-    if (j< (buffer.columns/2)) {
-      buffer.writeDoubleLE(1.0, 8*(i*buffer.columns+j));
+var buffer=Buffer.alloc(8*10*8, "\0", "binary");
+for (j = 0; j < 10; j++) {
+  for (i = 0; i < 8; i++){
+    if (j< (10/2)) {
+      buffer.writeDoubleLE(1.0, 8*(i*10+j));
     }
     else {
-      buffer.writeDoubleLE(2.0, 8*(i*buffer.columns+j));
+      buffer.writeDoubleLE(2.0, 8*(i*10+j));
     }
   }
 }
 
-h5lt.makeDataset(group.id, 'Waldo', buffer);
+h5lt.makeDataset(group.id, 'Waldo', buffer, {type: H5Type.H5T_NATIVE_DOUBLE, rank: 2, rows: 8, colmns: 10});
 ```
 
 View your h5 file and there should be a dataset with data looking like:
@@ -69,18 +65,14 @@ View your h5 file and there should be a dataset with data looking like:
 To write a subset use the options on the writeDataset method.
 
 ``` javascript
-var subsetBuffer=new Buffer(3*4*8, "binary");
-subsetBuffer.rank=2;
-subsetBuffer.rows=3;
-subsetBuffer.columns=4;
-subsetBuffer.type=H5Type.H5T_NATIVE_DOUBLE;
+var subsetBuffer=Buffer.alloc(3*4*8, "\0", "binary");
 for (j = 0; j < subsetBuffer.columns; j++) {
   for (i = 0; i < subsetBuffer.rows; i++){
     subsetBuffer.writeDoubleLE(5.0, 8*(i*subsetBuffer.columns+j));
   }
 }
 
-h5lt.writeDataset(group.id, 'Waldo', subsetBuffer, {start: [1,2], stride: [1,1], count: [3,4]});
+h5lt.writeDataset(group.id, 'Waldo', subsetBuffer, {type: H5Type.H5T_NATIVE_DOUBLE, rank: 2, rows: 2, columns: 4, start: [1,2], stride: [1,1], count: [3,4]});
 ```
 
 The subset of 5.0's is down a row and over 2 columns and 4 wide and 3 in height.

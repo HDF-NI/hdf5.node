@@ -23,11 +23,7 @@ var buffer=h5im.readImage(parent.id, name);
 //buffer.width, buffer.height, buffer.planes
 
 var image = Buffer.concat(buffers);
-image.interlace=Interlace.INTERLACE_PIXEL; //"INTERLACE_PIXEL" or "INTERLACE_PLANE";
-image.planes=4;
-image.width=meta.width;
-image.height=meta.height;
-h5im.makeImage(group.id, name, image);
+h5im.makeImage(group.id, name, image, {interlace: Interlace.INTERLACE_PIXEL, planes: 4, width: meta.width, height: meta.height});
 ```
 
 

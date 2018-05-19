@@ -30,10 +30,7 @@ var readBuffer=h5lt.readDataset(group.id, 'Refractive Index');
 var frequency=new Float64Array(3*numberOfDataLines);
 var groupFrequencies=file.openGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
 groupFrequencies.open('pmcservices/sodium-icosanoate/Frequency Data/Frequencies', file);
-frequency.rank=2;
-frequency.rows=numberOfDataLines;
-frequency.columns=3;
-h5lt.makeDataset(groupFrequencies.id, title, frequency);
+h5lt.makeDataset(groupFrequencies.id, title, frequency, {rank: 2, rows: numberOfDataLines, columns: 3});
 ```
 
 The dataset members of a group can be retrieved in order of creation. Something
@@ -102,7 +99,7 @@ If a [Buffer](https://nodejs.org/api/buffer.html) is filled with pure datatype
 ```javascript
 var H5Type = require('hdf5/lib/globals.js').H5Type;
 
-var buffer=new Buffer(5*8, "binary");
+var buffer=Buffer.alloc(5*8, "\0", "binary");
 buffer.type=H5Type.H5T_NATIVE_DOUBLE;
 buffer.writeDoubleLE(1.0, 0);
 buffer.writeDoubleLE(2.0, 8);
@@ -112,23 +109,19 @@ buffer.writeDoubleLE(5.0, 32);
 h5lt.makeDataset(group.id, 'Dielectric Constant', buffer);
 ```
 
-will assume the rank is one. Rank, rows, columns and sections can be set to
-shape the dataset.
+will assume the rank is one. Rank, rows, columns, sections and files can be set to
+shape the dataset. The files property is the fourth dimension.
 
 ```javascript
 var H5Type = require('hdf5/lib/globals.js').H5Type;
-var buffer=new Buffer(6*8, "binary");
-buffer.type=H5Type.H5T_NATIVE_DOUBLE;
+var buffer=Buffer.alloc(6*8, "\0", "binary");
 buffer.writeDoubleLE(1.0, 0);
 buffer.writeDoubleLE(2.0, 8);
 buffer.writeDoubleLE(3.0, 16);
 buffer.writeDoubleLE(1.0, 24);
 buffer.writeDoubleLE(2.0, 32);
 buffer.writeDoubleLE(3.0, 40);
-buffer.rank=2;
-buffer.rows=3;
-buffer.columns=2;
-h5lt.makeDataset(group.id, 'Two Rank', buffer);
+h5lt.makeDataset(group.id, 'Two Rank', buffer, {type: H5Type.H5T_NATIVE_DOUBLE, rank: 2, rows: 3, columns: 2});
 ```
 
 is 3 by 2 dataset.  To read from h5 the dataset can still transfer to a
@@ -136,7 +129,10 @@ javascript array or with the method readDatasetAsBuffer the return is a nodejs
 Buffer with the shape properties set.
 
 ```javascript
-var readBuffer = h5lt.readDataset(group.id, 'Two Rank');
+var readBuffer = h5lt.readDataset(group.id, 'Two Rank', function(options){
+                options.rank; //a synchronous return of the options properties
+                options.rows;
+            });
 readBuffer.constructor.name.should.match('Float64Array');
 
 var readAsBuffer = h5lt.readDatasetAsBuffer(group.id, 'Two Rank');
