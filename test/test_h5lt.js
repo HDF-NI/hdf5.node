@@ -40,12 +40,13 @@ describe("testing lite interface ", function() {
             buffer[3]=4.0;
             buffer[4]=5.0;
             h5lt.makeDataset(group.id, 'Refractive Index', buffer);
-            const readBuffer=h5lt.readDataset(group.id, 'Refractive Index');
+            const readBuffer=h5lt.readDataset(group.id, 'Refractive Index', function(options){
+                options.rank.should.equal(1);
+                options.rows.should.equal(5);
+            });
             readBuffer.constructor.name.should.match('Float64Array');
             readBuffer.length.should.match(5);
             readBuffer.buffer.byteLength.should.match(buffer.buffer.byteLength);
-            buffer.rank=1;
-            buffer.rows=5;
             buffer.should.match(readBuffer);
             const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Refractive Index');
             readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
@@ -60,11 +61,12 @@ describe("testing lite interface ", function() {
             buffer.writeDoubleLE(4.0, 24);
             buffer.writeDoubleLE(5.0, 32);
             h5lt.makeDataset(group.id, 'Dielectric Constant', buffer);
-            const readBuffer=h5lt.readDataset(group.id, 'Dielectric Constant');
+            const readBuffer=h5lt.readDataset(group.id, 'Dielectric Constant', function(options){
+                options.rank.should.equal(1);
+                options.rows.should.equal(5);
+            });
             readBuffer.constructor.name.should.match('Float64Array');
             readBuffer.length.should.match(5);
-            buffer.rank=1;
-            buffer.rows=5;
 
             const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Dielectric Constant');
             readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
@@ -72,17 +74,13 @@ describe("testing lite interface ", function() {
         });
         it("should be node::Buffer io for double rank data", function(done) {
             const buffer=Buffer.alloc(6*8, "\0", "binary");
-            buffer.type=H5Type.H5T_NATIVE_DOUBLE;
             buffer.writeDoubleLE(1.0, 0);
             buffer.writeDoubleLE(2.0, 8);
             buffer.writeDoubleLE(3.0, 16);
             buffer.writeDoubleLE(1.0, 24);
             buffer.writeDoubleLE(2.0, 32);
             buffer.writeDoubleLE(3.0, 40);
-            buffer.rank=2;
-            buffer.rows=3;
-            buffer.columns=2;
-            h5lt.makeDataset(group.id, 'Two Rank', buffer);
+            h5lt.makeDataset(group.id, 'Two Rank', buffer, {type: H5Type.H5T_NATIVE_DOUBLE, rank: 2, rows: 3, columns: 2});
             var byteOrder=group.getByteOrder('Two Rank');
             byteOrder.should.equal(0);
             const readBuffer=h5lt.readDataset(group.id, 'Two Rank', function(options) {
@@ -94,8 +92,8 @@ describe("testing lite interface ", function() {
 
             const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Two Rank');
             readAsBuffer.readDoubleLE(4*8).should.equal(2.0);
-            readBuffer.rows.should.match(3);
-            readBuffer.columns.should.match(2);
+            readAsBuffer.rows.should.match(3);
+            readAsBuffer.columns.should.match(2);
             done();
         });
         it("should be node::Buffer io for quadruple rank data", function(done) {
@@ -142,10 +140,10 @@ describe("testing lite interface ", function() {
 
             const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Quadruple Rank');
             readAsBuffer.readDoubleLE(4*8).should.equal(2.0);
-            readBuffer.rows.should.match(3);
-            readBuffer.columns.should.match(2);
-            readBuffer.sections.should.match(2);
-            readBuffer.files.should.match(2);
+            readAsBuffer.rows.should.match(3);
+            readAsBuffer.columns.should.match(2);
+            readAsBuffer.sections.should.match(2);
+            readAsBuffer.files.should.match(2);
             done();
         });
         it("should be Float32Array io ", function(done) {
@@ -848,8 +846,6 @@ var start = process.hrtime();
               options.rank.should.equal(2);
               options.columns.should.equal(3);
             });
-            lastTrajectory.rank.should.equal(2);
-            lastTrajectory.columns.should.equal(3);
                 for (let frequencyIndex = 0; frequencyIndex < frequencyNames.length; frequencyIndex++)
                 {
                     xmolDocument+=elements.length+'\n';

@@ -1387,38 +1387,6 @@ namespace NodeHDF5 {
             args.GetReturnValue().SetUndefined();
             return;
           }
-          buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"), Number::New(v8::Isolate::GetCurrent(), rank));
-          switch (rank) {
-            case 4:
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
-                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"),
-                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[3]));
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"),
-                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"),
-                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
-              break;
-            case 3:
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
-                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"),
-                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"),
-                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
-              break;
-            case 2:
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
-                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
-              if (rank > 1)
-                buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"),
-                            Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
-              break;
-            case 1:
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
-                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
-              break;
-          }
           if ((args.Length() == 3 && args[2]->IsFunction()) || (args.Length() == 4 && args[3]->IsFunction())) {
             const unsigned               argc = 1;
             v8::Persistent<v8::Function> callback(v8::Isolate::GetCurrent(), args[args.Length()-1].As<Function>());
@@ -1449,6 +1417,39 @@ namespace NodeHDF5 {
             v8::Local<v8::Value> argv[1] = {options};
             v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)
                 ->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), argc, argv);
+          } else{
+            buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"), Number::New(v8::Isolate::GetCurrent(), rank));
+            switch (rank) {
+            case 4:
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[3]));
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+              break;
+            case 3:
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+              break;
+            case 2:
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+              if (rank > 1)
+                buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"),
+                            Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+              break;
+            case 1:
+              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
+                          Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+              break;
+          }
           }
 
           // Attributes
@@ -1508,10 +1509,22 @@ namespace NodeHDF5 {
     }
     static void readDatasetAsBuffer(const v8::FunctionCallbackInfo<Value>& args) {
       // fail out if arguments are not correct
-      if (args.Length() < 2 || args.Length() > 3 || !args[0]->IsObject() || !args[1]->IsString()) {
+      if (args.Length() == 4 && (!args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsObject() || !args[3]->IsFunction())) {
+        v8::Isolate::GetCurrent()->ThrowException(
+            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, [options], callback")));
+        args.GetReturnValue().SetUndefined();
+        return;
+
+      } else if (args.Length() == 3 && (!args[0]->IsObject() || !args[1]->IsString() || (!args[2]->IsObject() && !args[2]->IsFunction()))) {
+        v8::Isolate::GetCurrent()->ThrowException(
+            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, callback[options]")));
+        args.GetReturnValue().SetUndefined();
+        return;
+
+      } else if (args.Length() == 2 && (!args[0]->IsObject() || !args[1]->IsString())) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, [options]")));
+            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1575,7 +1588,7 @@ namespace NodeHDF5 {
         case H5T_BITFIELD: {
 
           hid_t did          = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
-          hid_t t            = H5Dget_type(did);
+          hid_t  type_id            = H5Dget_type(did);
           hid_t dataspace_id = H5S_ALL;
           hid_t memspace_id  = H5S_ALL;
           if (subsetOn) {
@@ -1602,13 +1615,13 @@ namespace NodeHDF5 {
             }
           }
           v8::Local<v8::Object> buffer = node::Buffer::New(v8::Isolate::GetCurrent(), bufSize * theSize).ToLocalChecked();
-          err                          = H5Dread(did, t, memspace_id, dataspace_id, H5P_DEFAULT, (char*)node::Buffer::Data(buffer));
+          err                          = H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, (char*)node::Buffer::Data(buffer));
           if (err < 0) {
             if (subsetOn) {
               H5Sclose(memspace_id);
               H5Sclose(dataspace_id);
             }
-            H5Tclose(t);
+            H5Tclose( type_id);
             H5Dclose(did);
             v8::Isolate::GetCurrent()->ThrowException(
                 v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset")));
@@ -1619,14 +1632,13 @@ namespace NodeHDF5 {
           H5T  etype = NODE_H5T_UNKNOWN;
           for (std::map<H5T, hid_t>::iterator it = toTypeMap.begin(); !hit && it != toTypeMap.end(); it++) {
 
-            if (H5Tequal(t, toTypeMap[(*it).first])) {
+            if (H5Tequal(type_id, toTypeMap[(*it).first])) {
               etype = (*it).first;
               hit   = true;
             }
           }
 
           buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"), Int32::New(v8::Isolate::GetCurrent(), etype));
-          H5Tclose(t);
           if (subsetOn) {
             H5Sclose(memspace_id);
             H5Sclose(dataspace_id);
@@ -1634,9 +1646,39 @@ namespace NodeHDF5 {
             args.GetReturnValue().Set(buffer);
             return;
           }
-          H5Dclose(did);
-          buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"), Number::New(v8::Isolate::GetCurrent(), rank));
-          switch (rank) {
+          if ((args.Length() == 3 && args[2]->IsFunction()) || (args.Length() == 4 && args[3]->IsFunction())) {
+            const unsigned               argc = 1;
+            v8::Persistent<v8::Function> callback(v8::Isolate::GetCurrent(), args[args.Length()-1].As<Function>());
+            v8::Local<v8::Object> options = v8::Object::New(v8::Isolate::GetCurrent());
+            options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"), Number::New(v8::Isolate::GetCurrent(), rank));
+            H5T_order_t order = H5Tget_order(type_id);
+            options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "endian"), Number::New(v8::Isolate::GetCurrent(), order));
+            switch (rank) {
+              case 4:
+                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
+                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[3]));
+                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+                break;
+              case 3:
+                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
+                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+                break;
+              case 2:
+                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+                break;
+              case 1:
+                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+                break;
+            }
+            v8::Local<v8::Value> argv[1] = {options};
+            v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)
+                ->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), argc, argv);
+          } else{
+            buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"), Number::New(v8::Isolate::GetCurrent(), rank));
+            switch (rank) {
             case 4:
               buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
                           Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
@@ -1667,6 +1709,9 @@ namespace NodeHDF5 {
                           Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
               break;
           }
+          }
+          H5Tclose( type_id);
+          H5Dclose(did);
 
           // Attributes
           uint32_t                 index = 0;
