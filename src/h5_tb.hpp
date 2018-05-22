@@ -129,7 +129,8 @@ namespace NodeHDF5 {
           nrecords               = field->Length();
           field_offsets[i]       = type_size;
 
-          if (field->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))) { // typed array
+          if (field->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))) { // explicit type
+#ifdef LONGLONG53BITS
             hid_t type_id = toTypeMap[(H5T)field->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))->Int32Value()];
             if (type_id==H5T_NATIVE_LLONG || type_id==H5T_NATIVE_ULLONG) {
               field_sizes[i] = 8;
@@ -138,6 +139,9 @@ namespace NodeHDF5 {
             } else {
               throw std::invalid_argument("unsupported data type");
             }
+#else
+            throw std::invalid_argument("unsupported data type");
+#endif
 
           } else { // string array
             size_t max = 0;
@@ -218,7 +222,8 @@ namespace NodeHDF5 {
         } else if (table->Get(i)->IsArray()) {
           Local<v8::Array> field = Local<v8::Array>::Cast(table->Get(i));
 
-          if (field->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))) { // typed array
+          if (field->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))) { // explicit type
+#ifdef LONGLONG53BITS
             hid_t type_id = toTypeMap[(H5T)field->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))->Int32Value()];
             if (type_id==H5T_NATIVE_LLONG) {
               for (uint32_t j = 0; j < nrecords; j++) {
@@ -231,6 +236,9 @@ namespace NodeHDF5 {
                 std::memcpy(&data[j * type_size + field_offsets[i]], &value, 8);
               }
             }
+#else
+            throw std::invalid_argument("unsupported data type");
+#endif
 
           } else { // string array
             for (uint32_t j = 0; j < nrecords; j++) {

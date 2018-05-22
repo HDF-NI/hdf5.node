@@ -260,24 +260,40 @@ namespace NodeHDF5 {
       return options->Get(name)->Int32Value();
     }
 
-    static unsigned int get_chunk_size(Handle<Object> options) {
+    static std::unique_ptr<hsize_t[]> get_chunk_size(Handle<Object> options, int rank) {
+      std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);  
+      for(int index=0;index<rank;index++){
+        dims[index]=0;
+      }
       if (options.IsEmpty()) {
-        return 0;
+        return dims;
       }
 
       auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "chunkSize"));
 
       if (!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
-        return 0;
+        return dims;
+      }
+      if(options->Get(name)->IsArray()){
+          v8::Handle<v8::Array> array = v8::Local<v8::Array>::Cast(options->Get(name));
+        for (unsigned int arrayIndex = 0; arrayIndex < std::min((uint32_t)rank, array->Length()); arrayIndex++) {
+           dims.get()[arrayIndex]=array->Get(arrayIndex)->Uint32Value();
+        }
+          
+      }
+      else {
+        for(int index=0;index<rank;index++){
+          dims.get()[index]=options->Get(name)->Uint32Value();
+        }
       }
 
-      return options->Get(name)->Uint32Value();
+      return dims;
     }
 
     // TODO: permit other that square geometry
-    static bool configure_chunked_layout(const hid_t& dcpl, const unsigned int& size, const int& rank, const hsize_t* ds_dim) {
+    static bool configure_chunked_layout(const hid_t& dcpl,  std::unique_ptr<hsize_t[]>& chunk_dims, const int& rank, const hsize_t* ds_dim) {
       herr_t err;
-      if (!size) {
+      if (chunk_dims[0]==0) {
         err = H5Pset_chunk(dcpl, rank, ds_dim);
         if (err) {
           v8::Isolate::GetCurrent()->ThrowException(
@@ -288,11 +304,7 @@ namespace NodeHDF5 {
         return true;
       }
 
-      std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);
-      for (int i = 0; i < rank; ++i) {
-        dims.get()[i] = size;
-      }
-      err = H5Pset_chunk(dcpl, rank, dims.get());
+      err = H5Pset_chunk(dcpl, rank, chunk_dims.get());
       if (err) {
         v8::Isolate::GetCurrent()->ThrowException(
             v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
@@ -435,7 +447,7 @@ namespace NodeHDF5 {
           break;
       }
       unsigned int compression = get_compression(options);
-      unsigned int chunk_size  = get_chunk_size(options);
+      std::unique_ptr<hsize_t[]>&& chunk_dims  = get_chunk_size(options, rank);
       hid_t        dcpl        = H5Pcreate(H5P_DATASET_CREATE);
       if (compression > 0) {
         if (!configure_compression(dcpl, compression)) {
@@ -443,7 +455,7 @@ namespace NodeHDF5 {
         }
       }
 
-      if (!configure_chunked_layout(dcpl, chunk_size, rank, dims.get())) {
+      if (!configure_chunked_layout(dcpl, chunk_dims, rank, dims.get())) {
         return;
       }
 
@@ -513,7 +525,7 @@ namespace NodeHDF5 {
       if (rank == 1) {
         hsize_t      dims[1]     = {buffer->Length()};
         unsigned int compression = get_compression(options);
-        unsigned int chunk_size  = get_chunk_size(options);
+        std::unique_ptr<hsize_t[]>&& chunk_dims  = get_chunk_size(options, rank);
 
         hid_t dcpl = H5Pcreate(H5P_DATASET_CREATE);
 
@@ -523,7 +535,7 @@ namespace NodeHDF5 {
           }
         }
 
-        if (!configure_chunked_layout(dcpl, chunk_size, rank, dims)) {
+        if (!configure_chunked_layout(dcpl, chunk_dims, rank, dims)) {
           return;
         }
 
@@ -546,7 +558,7 @@ namespace NodeHDF5 {
         dims[1]= (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"))->Int32Value();
         }else get_columns(options, [&](int columns){dims[1]=columns;});
         unsigned int compression = get_compression(options);
-        unsigned int chunk_size  = get_chunk_size(options);
+        std::unique_ptr<hsize_t[]>&& chunk_dims = get_chunk_size(options, rank);
 
         hid_t dcpl = H5Pcreate(H5P_DATASET_CREATE);
 
@@ -556,7 +568,7 @@ namespace NodeHDF5 {
           }
         }
 
-        if (!configure_chunked_layout(dcpl, chunk_size, rank, dims)) {
+        if (!configure_chunked_layout(dcpl, chunk_dims, rank, dims)) {
           return;
         }
 
@@ -581,7 +593,7 @@ namespace NodeHDF5 {
           dims[2]=(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->Int32Value();
         }else get_sections(options, [&](int sections){dims[2]=sections;});
         unsigned int compression = get_compression(options);
-        unsigned int chunk_size  = get_chunk_size(options);
+        std::unique_ptr<hsize_t[]>&& chunk_dims  = get_chunk_size(options, rank);
 
         hid_t dcpl = H5Pcreate(H5P_DATASET_CREATE);
 
@@ -591,7 +603,7 @@ namespace NodeHDF5 {
           }
         }
 
-        if (!configure_chunked_layout(dcpl, chunk_size, rank, dims)) {
+        if (!configure_chunked_layout(dcpl, chunk_dims, rank, dims)) {
           return;
         }
 

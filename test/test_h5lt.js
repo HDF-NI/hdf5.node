@@ -657,7 +657,6 @@ describe("testing lite interface ", function() {
               const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Waldo', {start: [3,4], stride: [1,1]});
             }
             catch (e) {
-                console.log(e);
                 e.message.should.equal("Need to supply the subspace count dimensions. Start and stride are optional.");
             }
             group.close();
