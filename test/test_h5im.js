@@ -84,7 +84,7 @@ describe("testing images ",function() {
         });
 
         it("again make image  ", function(done) {
-            h5im.makeImage(group.id, 'repeat.jpg', imageAgain);
+            h5im.makeImage(group.id, 'repeat.jpg', imageAgain, {width: imageAgain.width, height: imageAgain.height, planes: imageAgain.planes});
             done();
         });
 

@@ -5,6 +5,7 @@
 #include <node_buffer.h>
 
 #include <memory>
+#include <functional>
 
 #include "file.h"
 #include "group.h"
@@ -32,16 +33,69 @@ namespace NodeHDF5 {
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::make_palette)->GetFunction());
     }
 
+    static void get_height(Handle<Object> options, std::function<void(hid_t)> cb) {
+      if (options.IsEmpty()) {
+        return;
+      }
+      
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"));
+
+      if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
+        cb((hsize_t)options->Get(name)->Uint32Value());
+      }
+    }
+    
+    static void get_width(Handle<Object> options, std::function<void(hsize_t)> cb) {
+      if (options.IsEmpty()) {
+        return;
+      }
+      
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"));
+
+      if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
+        cb((hsize_t)options->Get(name)->Uint32Value());
+      }
+    }
+    
+    static void get_planes(Handle<Object> options, std::function<void(hsize_t)> cb) {
+      if (options.IsEmpty()) {
+        return;
+      }
+      
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"));
+
+      if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
+        cb((hsize_t)options->Get(name)->Uint32Value());
+      }
+    }
+    
     static void make_image(const v8::FunctionCallbackInfo<Value>& args) {
 
       String::Utf8Value dset_name(args[1]->ToString());
       Local<v8::Object> buffer = args[2]->ToObject();
+      Local<Object>     options;
+      if (args.Length() >= 4 && args[3]->IsObject()) {
+        options = args[3]->ToObject();
+      }
 
       String::Utf8Value interlace(buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"))->ToString());
       herr_t            err;
-      hsize_t           dims[3] = {(hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))->Int32Value(),
-                         (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))->Int32Value(),
-                         (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))->Int32Value()};
+      hsize_t           dims[3];
+      if (buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))) {
+        Local<Value> heightValue = buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"));
+        dims[0]                   = heightValue->Int32Value();
+      }
+      else get_height(options, [&](int _height){dims[0]=_height;});      
+      if (buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))) {
+        Local<Value> widthValue = buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"));
+        dims[1]                   = widthValue->Int32Value();
+      }
+      else get_width(options, [&](int _width){dims[1]=_width;});      
+      if (buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))) {
+        Local<Value> planesValue = buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"));
+        dims[2]                   = planesValue->Int32Value();
+      }
+      else get_planes(options, [&](int _planes){dims[2]=_planes;});      
       Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       err           = H5LTmake_dataset(idWrap->Value(), *dset_name, 3, dims, H5T_NATIVE_UCHAR, (const char*)node::Buffer::Data(args[2]));
       if (err < 0) {
@@ -89,11 +143,25 @@ namespace NodeHDF5 {
       }
       v8::Local<v8::Object> buffer =
           node::Buffer::Copy(v8::Isolate::GetCurrent(), (char*)contentBuffer.get(), planes * width * height).ToLocalChecked();
-      buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"), Number::New(v8::Isolate::GetCurrent(), width));
-      buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"), Number::New(v8::Isolate::GetCurrent(), height));
-      buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"), Number::New(v8::Isolate::GetCurrent(), planes));
-      buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"), String::NewFromUtf8(v8::Isolate::GetCurrent(), interlace));
-      buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "npals"), Number::New(v8::Isolate::GetCurrent(), npals));
+        if ((args.Length() == 3 && args[2]->IsFunction()) || (args.Length() == 4 && args[3]->IsFunction())) {
+          const unsigned               argc = 1;
+          v8::Persistent<v8::Function> callback(v8::Isolate::GetCurrent(), args[args.Length()-1].As<Function>());
+          v8::Local<v8::Object> options = v8::Object::New(v8::Isolate::GetCurrent());
+          options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"), Number::New(v8::Isolate::GetCurrent(), width));
+          options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"), Number::New(v8::Isolate::GetCurrent(), height));
+          options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"), Number::New(v8::Isolate::GetCurrent(), planes));
+          options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"), String::NewFromUtf8(v8::Isolate::GetCurrent(), interlace));
+          options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "npals"), Number::New(v8::Isolate::GetCurrent(), npals));
+          v8::Local<v8::Value> argv[1] = {options};
+          v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)
+              ->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), argc, argv);
+        } else{
+          buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"), Number::New(v8::Isolate::GetCurrent(), width));
+          buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"), Number::New(v8::Isolate::GetCurrent(), height));
+          buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"), Number::New(v8::Isolate::GetCurrent(), planes));
+          buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"), String::NewFromUtf8(v8::Isolate::GetCurrent(), interlace));
+          buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "npals"), Number::New(v8::Isolate::GetCurrent(), npals));
+        }
 
       args.GetReturnValue().Set(buffer);
     }
