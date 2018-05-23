@@ -9,6 +9,7 @@ const h5tb          = hdf5Lib.h5tb;
 const Access        = globs.Access;
 const CreationOrder = globs.CreationOrder;
 const HLType        = globs.HLType;
+const H5Type        = globs.H5Type;
 
 describe("testing table interface ",function(){
 
@@ -16,12 +17,13 @@ describe("testing table interface ",function(){
         // open hdf file
         let file;
         let group;
-        before(function*() {
+        before(function(done) {
             file  = new hdf5.File('./h5tb.h5', Access.ACC_TRUNC);
             group = file.createGroup('pmc/refinement');
+            done();
         });
 
-        it("should be Table io ", function*() {
+        it("should be Table io ", function(done) {
             group.id.should.not.equal(-1);
             const tableModel=new Array(4);
             const fieldArray1=new Uint32Array(5);
@@ -57,9 +59,10 @@ describe("testing table interface ",function(){
             fieldArray4[4]="HOH";
             tableModel[3]=fieldArray4;
             h5tb.makeTable(group.id, 'Reflections', tableModel);
+            done();
         });
 
-        it("should append to Table ", function*() {
+        it("should append to Table ", function(done) {
             const tableModel=new Array(4);
             const fieldArray1=new Uint32Array(2);
             fieldArray1.name="Index";
@@ -88,9 +91,10 @@ describe("testing table interface ",function(){
             const fieldInfo=h5tb.getFieldInfo(group.id, 'Reflections');
             fieldInfo.length.should.equal(4);
             fieldInfo[3].should.equal("Residues");
+            done();
         });
 
-        it("should overwrite records in Table ", function*() {
+        it("should overwrite records in Table ", function(done) {
             const tableModel=new Array(4);
             const fieldArray1=new Uint32Array(2);
             fieldArray1.name="Index";
@@ -116,20 +120,23 @@ describe("testing table interface ",function(){
             const info=h5tb.getTableInfo(group.id, 'Reflections');
             info.nfields.should.equal(4);
             info.nrecords.should.equal(7);
+            done();
         });
 
-        it("should close pmc/refinement ", function*() {
+        it("should close pmc/refinement ", function(done) {
             group.close();
+            done();
         });
     });
 
     describe("should read table", function() {
         let file;
-        before(function*() {
+        before(function(done) {
           file = new hdf5.File('./h5tb.h5', Access.ACC_RDONLY);
+            done();
         });
 
-        it("should be Table input ", function*() {
+        it("should be Table input ", function(done) {
             const groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.getDatasetType("Reflections").should.equal(HLType.HL_TYPE_TABLE);
             let table=h5tb.readTable(groupTarget.id, "Reflections");
@@ -139,9 +146,10 @@ describe("testing table interface ",function(){
             table.length.should.equal(4);
             table[0].length.should.equal(2);
             groupTarget.close();
+            done();
         });
 
-        it("should delete records from Table ", function*() {
+        it("should delete records from Table ", function(done) {
             const groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.getDatasetType("Reflections").should.equal(HLType.HL_TYPE_TABLE);
             h5tb.deleteRecord(groupTarget.id, "Reflections", 3, 2);
@@ -149,9 +157,10 @@ describe("testing table interface ",function(){
             info.nfields.should.equal(4);
             info.nrecords.should.equal(5);
             groupTarget.close();
+            done();
         });
 
-        it("should insert records into Table ", function*() {
+        it("should insert records into Table ", function(done) {
             const groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.getDatasetType("Reflections").should.equal(HLType.HL_TYPE_TABLE);
             const tableModel=new Array(4);
@@ -180,9 +189,10 @@ describe("testing table interface ",function(){
             info.nfields.should.equal(4);
             info.nrecords.should.equal(7);
             groupTarget.close();
+            done();
         });
 
-        it("should overwrite fields in Table ", function*() {
+        it("should overwrite fields in Table ", function(done) {
             const groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.getDatasetType("Reflections").should.equal(HLType.HL_TYPE_TABLE);
             const tableModel=new Array(2);
@@ -211,9 +221,10 @@ describe("testing table interface ",function(){
             info.nfields.should.equal(4);
             info.nrecords.should.equal(7);
             groupTarget.close();
+            done();
         });
 
-        it("should overwrite fields in Table by index ", function*() {
+        it("should overwrite fields in Table by index ", function(done) {
             const groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.getDatasetType("Reflections").should.equal(HLType.HL_TYPE_TABLE);
             const tableModel=new Array(2);
@@ -240,9 +251,10 @@ describe("testing table interface ",function(){
             info.nfields.should.equal(4);
             info.nrecords.should.equal(7);
             groupTarget.close();
+            done();
         });
 
-        it("should read fields in Table", function*() {
+        it("should read fields in Table", function(done) {
             const groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.getDatasetType("Reflections").should.equal(HLType.HL_TYPE_TABLE);
             const table=h5tb.readFieldsName(groupTarget.id, "Reflections", 1, 5, ["Index", "Residues"]);
@@ -255,9 +267,10 @@ describe("testing table interface ",function(){
             info.nfields.should.equal(4);
             info.nrecords.should.equal(7);
             groupTarget.close();
+            done();
         });
 
-        it("should read fields in Table by index", function*() {
+        it("should read fields in Table by index", function(done) {
             const groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.getDatasetType("Reflections").should.equal(HLType.HL_TYPE_TABLE);
             const table=h5tb.readFieldsIndex(groupTarget.id, "Reflections", 0, 7, [0, 2]);
@@ -272,9 +285,10 @@ describe("testing table interface ",function(){
             info.nfields.should.equal(4);
             info.nrecords.should.equal(7);
             groupTarget.close();
+            done();
         });
 
-        it("should delete field in Table", function*() {
+        it("should delete field in Table", function(done) {
             const groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.getDatasetType("Reflections").should.equal(HLType.HL_TYPE_TABLE);
             h5tb.deleteField(groupTarget.id, "Reflections", "Index");
@@ -282,9 +296,10 @@ describe("testing table interface ",function(){
             info.nfields.should.equal(3);
             info.nrecords.should.equal(7);
             groupTarget.close();
+            done();
         });
 
-        it("should insert field in Table", function*() {
+        it("should insert field in Table", function(done) {
             const groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.getDatasetType("Reflections").should.equal(HLType.HL_TYPE_TABLE);
             const tableModel=new Array(1);
@@ -304,9 +319,10 @@ describe("testing table interface ",function(){
             info.nrecords.should.equal(7);
             groupTarget.flush();
             groupTarget.close();
+            done();
         });
 
-        it("should add records from Table", function*() {
+        it("should add records from Table", function(done) {
             const groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.getDatasetType("Reflections").should.equal(HLType.HL_TYPE_TABLE);
             const tableModel=new Array(4);
@@ -339,9 +355,10 @@ describe("testing table interface ",function(){
             info2.nfields.should.equal(4);
             info2.nrecords.should.equal(9);
             groupTarget.close();
+            done();
         });
 
-        it("should combine Tables", function*() {
+        it("should combine Tables", function(done) {
             const groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.getDatasetType("Reflections").should.equal(HLType.HL_TYPE_TABLE);
             const info=h5tb.getTableInfo(groupTarget.id, 'Reflections');
@@ -352,12 +369,72 @@ describe("testing table interface ",function(){
             info2.nfields.should.equal(4);
             info2.nrecords.should.equal(16);
             groupTarget.close();
+            done();
         });
 
-        after(function*() {
+        after(function(done) {
             file.close();
+            done();
         });
     });
 
+    describe("should align table", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5.File('./h5tbAlignment.h5', Access.ACC_TRUNC);
+            done();
+        });
+
+        it("should be Table aligned ", function(done) {
+            const table = new Array();
+
+            const tempModeCol = new Int8Array(1);
+            tempModeCol.name = 'temperatureMode';
+            tempModeCol[0] = -1;
+            table.push(tempModeCol);
+
+            const tempSollCol = new Float64Array(1);
+            tempSollCol.name = 'temperatureSoll';
+            tempSollCol[0] =-1;
+            table.push(tempSollCol);
+
+            h5tb.makeTable(file.id, 'infos', table);
+            done();
+        });
+
+        it("should be Table aligned ", function(done) {
+            const table = new Array();
+
+            const idCol = new Array(1);
+            idCol.name = 'id';
+            idCol.type = H5Type.H5T_NATIVE_LLONG;
+            idCol[0] = 12;
+            table.push(idCol);
+
+            const timestampCol = new Array(1);
+            timestampCol.name = 'timestamp';
+            timestampCol.type = H5Type.H5T_NATIVE_ULLONG;
+            timestampCol[0] = 5534023222126287257;
+            table.push(timestampCol);
+
+            const tempModeCol= new Int8Array(1);
+            tempModeCol.name = 'mode';
+            tempModeCol[0] = 0;
+            table.push(tempModeCol);
+
+            try{
+              h5tb.makeTable(file.id, 'infos', table);
+            }
+            catch (e) {
+                e.message.should.equal("unsupported data type");
+            }
+            done();
+        });
+
+        after(function(done) {
+            file.close();
+            done();
+        });
+    });
 });
 
