@@ -126,5 +126,5 @@ of images can now be read.
 [npm-image]: https://badge.fury.io/js/hdf5.svg
 [npm-url]: https://www.npmjs.com/package/hdf5
 [downloads-image]: https://img.shields.io/npm/dm/hdf5.svg
-[node-version-image]: https://img.shields.io/node/v/hdf5.svg
+[node-version-image]: https://img.shields.io/node/v/negotiator.svg
 [node-version-url]: https://nodejs.org/en/download/
