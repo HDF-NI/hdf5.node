@@ -11,6 +11,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-7
+            - libhdf5-dev
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
@@ -27,6 +28,7 @@ before_install:
   - export HDF5_HOME=`pwd`/hdf5-1.10.2/dist
   
 install:
+  - export HDF5_HOME=`pwd`/hdf5-1.10.2/dist
   - export CC=gcc-7 && export CXX=g++-7
   - $CXX --version
   - npm install --longlong_type=LONGLONG53BITS --hdf5_home_linux=${HDF5_HOME}
