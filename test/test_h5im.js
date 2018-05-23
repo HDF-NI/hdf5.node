@@ -88,6 +88,16 @@ describe("testing images ",function() {
             done();
         });
 
+        it("repeat image options.width should be 48 ", function(done) {
+            let imageRepeat=h5im.readImage(group.id, 'repeat.jpg', (options) =>{
+                options.width.should.equal(48);
+                options.height.should.equal(45);
+                options.planes.should.equal(3);
+                options.interlace.should.equal('INTERLACE_PIXEL');
+            });
+            done();
+        });
+
         after(function(done) {
             group.close();
             file.close();
