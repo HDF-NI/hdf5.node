@@ -28,9 +28,7 @@ describe("testing attribute interface ",function(){
             notes[1]="Prefry the refried beans";
             notes[2]="Remember Mother's Day";
             //group.notes=notes;
-            console.dir("flush");
             group.flush();
-            console.dir("flushed");
             group.close();
             done();
         });

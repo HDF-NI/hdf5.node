@@ -402,16 +402,16 @@ describe("testing table interface ",function(){
             done();
         });
 
-        it("should be Table aligned ", function(done) {
+        it("should write Table long long ", function(done) {
             const table = new Array();
 
-            const idCol = new Array(1);
+            const idCol = new Array();
             idCol.name = 'id';
             idCol.type = H5Type.H5T_NATIVE_LLONG;
             idCol[0] = 12;
             table.push(idCol);
 
-            const timestampCol = new Array(1);
+            const timestampCol = new Array();
             timestampCol.name = 'timestamp';
             timestampCol.type = H5Type.H5T_NATIVE_ULLONG;
             timestampCol[0] = 5534023222126287257;
@@ -423,9 +423,24 @@ describe("testing table interface ",function(){
             table.push(tempModeCol);
 
             try{
-              h5tb.makeTable(file.id, 'infos', table);
+              h5tb.makeTable(file.id, 'infos2', table);
+                try{
+                  let readTable=h5tb.readTable(file.id, "infos2");
+                  try{
+                    readTable.length.should.equal(3);
+                    //readTable[0].length.should.equal(1);
+                  }
+                  catch (e) {
+                      console.log(e.message);
+                  }
+                }
+                catch (e) {
+                  console.log(e.message);
+                  e.message.should.equal("unsupported data type");
+                }
             }
             catch (e) {
+                console.dir(e.message);
                 e.message.should.equal("unsupported data type");
             }
             done();
