@@ -40,11 +40,13 @@ var group = file.openGroup('bar');
 
 ### Notes on Recent Releases
 
-* Note: Release v0.3.4 For static native linkng, link_type command line switch is provided in 
+* Note: Release v0.3.4 Reserved propeties such as type, rank, rows etc. are now settable in options 
+for dataset functions.  Typescript definition files now available. For static native linkng, link_type 
+command line switch is provided in 
 binding.gyp(darwin,win untested).  Added custom 64 bit signed (Int64) and unsigned (Uint64) integer 
 attributes read/write since tey are't yet supported by javascript.  Added a file method 
 enableSingleWriteMumltiRead (if native version older than 1.10.x it is a noop). Synchronous iterate 
-and visit is now available on file and group children.
+and visit is now available on file and group children. Bug fixes on dimensioning have been made
 
 * Note: asynchronous i/o is coming but not in this release
 
@@ -108,7 +110,8 @@ client before unzipping and rezipping on the server side.
 
 Third party filters can be used.  Those do take separate compiled libraries
 yet are independent. They get picked up by native hdf5 from the
-HDF5_PLUGIN_PATH.
+HDF5_PLUGIN_PATH.               
+
 
 
 ## Image
@@ -116,6 +119,9 @@ HDF5_PLUGIN_PATH.
 The h5im namespace is being designed to meet the Image Spec 1.2 <http://www.hdfgroup.org/HDF5/doc/ADGuide/ImageSpec.html>. Hyperslabs/regions
 of images can now be read.
 
+## Contributors
+* Christian Nienhaus (@NINI1988) added typescript definitions and many pull requests and bug fixes for hdf5 native calls.
+* John Shumway (@shumway) refurbished the documentation when the project as split into an organization.
 
 [npm-image]: https://badge.fury.io/js/hdf5.svg
 [npm-url]: https://www.npmjs.com/package/hdf5
