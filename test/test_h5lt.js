@@ -971,4 +971,29 @@ var start = process.hrtime();
         });
     });
 
+    describe("handling errors ", function() {
+        //let file;
+        before(function(done) {
+          //file = new hdf5.File('/home/roger/Downloads/sample.h5', Access.ACC_RDONLY);
+          done();
+        });
+
+        it("file reaad/write when it doesn't exist", function(done) {
+        try {
+          const file = new hdf5.File('./record.h5', Access.ACC_RDWR);
+          const dims = file.getDatasetDimensions('infos');
+          file.close();
+          if (dims.length > 0) {
+          }
+        } catch (error) {
+          error.message.should.equal("File ./record.h5 doesn't exist.");
+        }
+          done();
+        });
+        after(function(done) {
+          //file.close();
+          done();
+        });
+    });
+
 });

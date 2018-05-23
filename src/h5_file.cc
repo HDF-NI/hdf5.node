@@ -6,6 +6,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <exception>
 
 #include "file.h"
 #include "group.h"
@@ -60,6 +61,14 @@ namespace NodeHDF5 {
         return;
       }
     } else {
+      bool exists = std::ifstream(path).good();
+      if (!exists) {
+        std::stringstream ss;
+        ss << "File " << path << " doesn't exist.";
+                throw  std::invalid_argument(ss.str());
+        error = true;
+        return;
+      }
       id = H5Fopen(path, flags, H5P_DEFAULT);
       if (id < 0) {
         std::stringstream ss;
@@ -146,6 +155,7 @@ namespace NodeHDF5 {
       return;
     }
 
+    try{
     // create hdf file object
     File* f;
     if (args.Length() < 2) {
@@ -183,6 +193,11 @@ namespace NodeHDF5 {
     idWrap->value            = f->id;
 
     args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), idInstance);
+    } catch (std::exception& ex) {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        args.GetReturnValue().SetUndefined();
+        return;
+    }
   }
 
   void File::EnableSingleWriteMumltiRead(const v8::FunctionCallbackInfo<Value>& args) {
