@@ -2,6 +2,19 @@ language: node_js
 node_js:
   "8"
 
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+
+
 before_install:
   - wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.2/src/hdf5-1.10.2.tar.gz -O /tmp/hdf5-1.10.2.tar.gz
   - tar -zxvf /tmp/hdf5-1.10.2.tar.gz
