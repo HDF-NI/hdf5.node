@@ -34,7 +34,8 @@ install:
   - npm install --longlong_type=LONGLONG53BITS --hdf5_home_linux=${HDF5_HOME}
 
 before-scripte:
+  - export PATH=`pwd`/node_modules/.bin:${PATH}
   - export LD_LIBRARY_PATH=`pwd`/hdf5-1.10.2/dist/lib:${LD_LIBRARY_PATH}
   
 script:
-  - `pwd`/node_modules/.bin/mocha --harmony --require should
+  - mocha --harmony --require should
