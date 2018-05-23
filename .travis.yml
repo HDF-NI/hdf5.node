@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+  "8"
+
+before_install:
+  wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.2/src/hdf5-1.10.2.tar.gz -O /tmp/hdf5-1.10.2.tar.gz
+  tar -zxvf /tmp/hdf5-1.10.2.tar.gz
+  cd `pwd`/hdf5-1.10.2
+  ./configure --prefix=`pwd`/dist --enable-shared=yes --enable-static=no --enable-parallel=no --enable-hl --enable-build-mode=production --without-szlib
+  make -j2
+  make install
+
+before-install:
+  export HDF5_HOME=`pwd`/hdf5-1.10.2/dist
+  
+install:
+  npm install --longlong_type=LONGLONG53BITS --hdf5_home_linux=${HDF5_HOME}
+
+before-scripte:
+  export LD_LIBRARY_PATH=`pwd`/hdf5-1.10.2/dist/lib:${LD_LIBRARY_PATH}
+script:
+  mocha --harmony --require should
