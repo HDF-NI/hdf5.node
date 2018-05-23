@@ -1,9 +1,13 @@
-os:
-  - linux
-  - osx
 language: node_js
 node_js:
   "8"
+
+os:
+  - linux
+  - osx
+compiler:
+  - gcc
+  - clang
 
 matrix:
   include:
@@ -20,11 +24,11 @@ matrix:
     - os: osx
       osx_image: xcode8
       env:
-        - MATRIX_EVAL="brew install gcc && CC=gcc-7 && CXX=g++-7"
+        # MATRIX_EVAL="brew install gcc && CC=gcc-7 && CXX=g++-7"
 
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then eval "${MATRIX_EVAL}" ; fi
+   # if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then eval "${MATRIX_EVAL}" ; fi
   - wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.2/src/hdf5-1.10.2.tar.gz -O /tmp/hdf5-1.10.2.tar.gz
   - tar -zxvf /tmp/hdf5-1.10.2.tar.gz
   - cd `pwd`/hdf5-1.10.2
