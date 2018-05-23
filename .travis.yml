@@ -26,6 +26,7 @@ before_install:
   - which g++
   - g++ --version
   - export HDF5_HOME=`pwd`/hdf5-1.10.2/dist
+  - cd ..
   
 install:
   - export HDF5_HOME=`pwd`/hdf5-1.10.2/dist
