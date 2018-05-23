@@ -282,7 +282,7 @@ describe("testing lite interface ", function() {
             done();
         });
 
-        it("should be make a dataset with cutom chunk size ", function(done) {
+        it("should be make a dataset with custom chunk size ", function(done) {
             const buffer=new Float64Array(5);
             buffer[0]=1.0;
             buffer[1]=2.0;
@@ -298,6 +298,31 @@ describe("testing lite interface ", function() {
             buffer.rows=5;
             buffer.should.match(readBuffer);
             const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Refractive Index');
+            readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
+            done();
+        });
+
+        it("should be make a dataset with arrayed chunk size ", function(done) {
+            const buffer=new Float64Array(10);
+            buffer[0]=1.0;
+            buffer[1]=2.0;
+            buffer[2]=3.0;
+            buffer[3]=4.0;
+            buffer[4]=5.0;
+            buffer[5]=1.0;
+            buffer[6]=2.0;
+            buffer[7]=3.0;
+            buffer[8]=4.0;
+            buffer[9]=5.0;
+            h5lt.makeDataset(group.id, 'Arrayed-chunked Index', buffer, {rank:2, rows: 5, columns:2, chunkSize: [3,2]});
+            const readBuffer=h5lt.readDataset(group.id, 'Arrayed-chunked Index', function(options){
+                
+            });
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(10);
+            readBuffer.buffer.byteLength.should.match(buffer.buffer.byteLength);
+            buffer.should.match(readBuffer);
+            const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Arrayed-chunked Index');
             readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
             done();
         });
