@@ -54,7 +54,7 @@ namespace NodeHDF5 {
 
     static Persistent<FunctionTemplate> Constructor;
     static void New(const v8::FunctionCallbackInfo<Value>& args);
-    static void EnableSingleWriteMumltiRead(const v8::FunctionCallbackInfo<Value>& args);
+    static void EnableSingleWriteMultiRead(const v8::FunctionCallbackInfo<Value>& args);
     static void CreateGroup(const v8::FunctionCallbackInfo<Value>& args);
     static void OpenGroup(const v8::FunctionCallbackInfo<Value>& args);
     static void Move(const v8::FunctionCallbackInfo<Value>& args);

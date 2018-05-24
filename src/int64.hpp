@@ -8,6 +8,7 @@
 #include <string>
 #include <cstring>
 #include <memory>
+#include <cstdlib>
 
 namespace NodeHDF5 {
 

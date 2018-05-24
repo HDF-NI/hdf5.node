@@ -99,7 +99,7 @@ namespace NodeHDF5 {
     t->InstanceTemplate()->SetInternalFieldCount(1);
     Constructor.Reset(v8::Isolate::GetCurrent(), t);
     // member method prototypes
-    NODE_SET_PROTOTYPE_METHOD(t, "enableSingleWriteMumltiRead", EnableSingleWriteMumltiRead);
+    NODE_SET_PROTOTYPE_METHOD(t, "enableSingleWriteMultiRead", EnableSingleWriteMultiRead);
     NODE_SET_PROTOTYPE_METHOD(t, "createGroup", CreateGroup);
     NODE_SET_PROTOTYPE_METHOD(t, "openGroup", OpenGroup);
     NODE_SET_PROTOTYPE_METHOD(t, "getNumAttrs", GetNumAttrs);
@@ -185,7 +185,7 @@ namespace NodeHDF5 {
     args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), idInstance);
   }
 
-  void File::EnableSingleWriteMumltiRead(const v8::FunctionCallbackInfo<Value>& args) {
+  void File::EnableSingleWriteMultiRead(const v8::FunctionCallbackInfo<Value>& args) {
     // fail out if arguments are not correct
     if (args.Length() != 0) {
 
