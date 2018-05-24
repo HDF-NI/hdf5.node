@@ -295,6 +295,35 @@ namespace NodeHDF5 {
             break;
           case H5T_INTEGER:
             switch (H5Tget_precision(type)) {
+#ifdef LONGLONG53BITS
+              case 64:
+                if (H5Tget_sign(type) == H5T_SGN_NONE) {
+                  Local<Array> buffer = Array::New(v8::Isolate::GetCurrent(), nrecords);
+                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
+                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"),
+                              Int32::New(v8::Isolate::GetCurrent(), toEnumMap[H5T_NATIVE_ULLONG]));
+                  for (uint32_t j = 0; j < nrecords; j++) {
+                    unsigned long long value;
+                    std::memcpy(&value, &data[j * type_size + field_offsets[i]], 8);
+                    buffer->Set(j, Number::New(v8::Isolate::GetCurrent(), value));
+                  }
+                  table->Set(i, buffer);
+                } else {
+                  Local<Array> buffer = Array::New(v8::Isolate::GetCurrent(), nrecords);
+                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
+                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"),
+                              Int32::New(v8::Isolate::GetCurrent(), toEnumMap[H5T_NATIVE_LLONG]));
+                  for (uint32_t j = 0; j < nrecords; j++) {
+                    long long value;
+                    std::memcpy(&value, &data[j * type_size + field_offsets[i]], 8);
+                    buffer->Set(j, Number::New(v8::Isolate::GetCurrent(), value));
+                  }
+                  table->Set(i, buffer);
+                }
+                break;
+#endif
               case 32:
                 if (H5Tget_sign(type) == H5T_SGN_NONE) {
                   Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), 4 * nrecords);
