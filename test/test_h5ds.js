@@ -131,7 +131,6 @@ describe("testing dimension scale interface ", function() {
             });
             attrText.should.equal('CLASS :  DIMENSION_SCALE\nNAME :  The X Scale\nREFERENCE_LIST :  ->/pmc/refinement/Data,0\n');
             group.close();
-            console.log("ds info done ");
             done();
         });
 

@@ -46,14 +46,12 @@ describe("testing c interface ", function() {
 
         it("move should be 1 ", function (done) {
             const stemGroup=file.openGroup('pmc/Trajectories');
-            console.dir("move 0 to 1 "+stemGroup.id);
             stemGroup.move("0", stemGroup.id, "1");
             stemGroup.close();
             done();
         });
 
         it("move should be pmcservices ", function (done) {
-            console.dir("move pmc to pmcservices "+file.id);
             file.move("pmc", file.id, "pmcservices");
             done();
         });
@@ -86,6 +84,44 @@ describe("testing c interface ", function() {
 
     });
 
+    describe("handling errors ", function() {
+        //let file;
+        before(function(done) {
+          //file = new hdf5Lib.hdf5.File('/home/roger/Downloads/sample.h5', Access.ACC_RDONLY);
+          done();
+        });
+
+        it("file reaad/write when it doesn't exist", function(done) {
+        try {
+          const file = new hdf5Lib.hdf5.File('./record.h5', globs.Access.ACC_RDWR);
+          const dims = file.getDatasetDimensions('infos');
+          file.close();
+          if (dims.length > 0) {
+          }
+        } catch (error) {
+          error.message.should.equal("File ./record.h5 doesn\'t exist.");
+        }
+          done();
+        });
+        
+        it.skip("should stop on broken h5", function(done) {
+            try{
+              console.log("stop on broken");
+              var file = new hdf5Lib.hdf5.File('/home/roger/Downloads/broken.h5', globs.Access.ACC_RDONLY);
+              file.close();
+            }catch(error){
+              console.error(error);
+              error.message.should.equal("Failed to open file, /home/roger/Downloads/broken.h5 and flags 0 with return: -1.");
+            }
+            console.log("stop on broken done");
+            done();
+        });
+        
+        after(function(done) {
+          //file.close();
+          done();
+        });
+    });
 
 });
 
