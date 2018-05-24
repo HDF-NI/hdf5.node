@@ -331,7 +331,9 @@ namespace NodeHDF5 {
                   buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
                               String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
                   for (uint32_t j = 0; j < nrecords; j++) {
-                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), ((unsigned int*)&data[j * type_size + field_offsets[i]])[0]));
+                    unsigned int value;
+                    std::memcpy(&value, &data[j * type_size + field_offsets[i]], 4);
+                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
                   }
 
                   table->Set(i, buffer);
@@ -341,7 +343,9 @@ namespace NodeHDF5 {
                   buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
                               String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
                   for (uint32_t j = 0; j < nrecords; j++) {
-                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), ((int*)&data[j * type_size + field_offsets[i]])[0]));
+                    int value;
+                    std::memcpy(&value, &data[j * type_size + field_offsets[i]], 4);
+                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
                   }
 
                   table->Set(i, buffer);
@@ -354,8 +358,9 @@ namespace NodeHDF5 {
                   buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
                               String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
                   for (uint32_t j = 0; j < nrecords; j++) {
-                    buffer->Set(j,
-                                v8::Number::New(v8::Isolate::GetCurrent(), ((unsigned short*)&data[j * type_size + field_offsets[i]])[0]));
+                    unsigned short value;
+                    std::memcpy(&value, &data[j * type_size + field_offsets[i]], 2);
+                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
                   }
 
                   table->Set(i, buffer);
@@ -365,7 +370,9 @@ namespace NodeHDF5 {
                   buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
                               String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
                   for (uint32_t j = 0; j < nrecords; j++) {
-                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), ((short*)&data[j * type_size + field_offsets[i]])[0]));
+                    short value;
+                    std::memcpy(&value, &data[j * type_size + field_offsets[i]], 2);
+                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
                   }
 
                   table->Set(i, buffer);
@@ -378,8 +385,9 @@ namespace NodeHDF5 {
                   buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
                               String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
                   for (uint32_t j = 0; j < nrecords; j++) {
-                    buffer->Set(j,
-                                v8::Number::New(v8::Isolate::GetCurrent(), ((unsigned char*)&data[j * type_size + field_offsets[i]])[0]));
+                    unsigned char value;
+                    std::memcpy(&value, &data[j * type_size + field_offsets[i]], 1);
+                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
                   }
 
                   table->Set(i, buffer);
@@ -389,7 +397,9 @@ namespace NodeHDF5 {
                   buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
                               String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
                   for (uint32_t j = 0; j < nrecords; j++) {
-                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), ((char*)&data[j * type_size + field_offsets[i]])[0]));
+                    char value;
+                    std::memcpy(&value, &data[j * type_size + field_offsets[i]], 1);
+                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
                   }
 
                   table->Set(i, buffer);
