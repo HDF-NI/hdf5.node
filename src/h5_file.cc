@@ -65,7 +65,8 @@ namespace NodeHDF5 {
       if (!exists) {
         std::stringstream ss;
         ss << "File " << path << " doesn't exist.";
-                throw  std::invalid_argument(ss.str());
+        v8::Isolate::GetCurrent()->ThrowException(
+            v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
         error = true;
         return;
       }
