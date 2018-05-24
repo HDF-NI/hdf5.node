@@ -27,9 +27,9 @@ describe("testing images ",function() {
             done();
         });
 
-        it("should be 1.10.0 ", function(done) {
+        it("should be 1.10.2 ", function(done) {
             var version=hdf5.getLibVersion();
-            version.should.equal('1.10.1');
+            version.should.equal('1.10.2');
             done();
         });
 
@@ -84,7 +84,17 @@ describe("testing images ",function() {
         });
 
         it("again make image  ", function(done) {
-            h5im.makeImage(group.id, 'repeat.jpg', imageAgain);
+            h5im.makeImage(group.id, 'repeat.jpg', imageAgain, {width: imageAgain.width, height: imageAgain.height, planes: imageAgain.planes});
+            done();
+        });
+
+        it("repeat image options.width should be 48 ", function(done) {
+            let imageRepeat=h5im.readImage(group.id, 'repeat.jpg', (options) =>{
+                options.width.should.equal(48);
+                options.height.should.equal(45);
+                options.planes.should.equal(3);
+                options.interlace.should.equal('INTERLACE_PIXEL');
+            });
             done();
         });
 

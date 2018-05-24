@@ -93,7 +93,7 @@
                 'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-<(link_type)", "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-<(link_type)", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-<(link_type)", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++"],
                     'OTHER_LDFLAGS': [],
                     'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
@@ -195,7 +195,7 @@
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-<(link_type)", "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-<(link_type)", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-<(link_type)", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++"],
                     'OTHER_LDFLAGS': [],
                     'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
@@ -290,7 +290,7 @@
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-<(link_type)", "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-D<(longlong_type)", "-fPIC", "-<(link_type)", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
+                    'OTHER_CPLUSPLUSFLAGS': ["-D<(longlong_type)", "-fPIC", "-<(link_type)", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++"],
                     'OTHER_LDFLAGS': [],
                     'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
@@ -388,7 +388,7 @@
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-<(link_type)", "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-<(link_type)", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-<(link_type)", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++"],
                     'OTHER_LDFLAGS': [],
                     'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
@@ -483,7 +483,7 @@
             ['OS=="mac"', {
                 'cflags': ['-fPIC', "-<(link_type)", "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-<(link_type)", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-<(link_type)", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++"],
                     'OTHER_LDFLAGS': [],
                     'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },
@@ -575,8 +575,9 @@
                 }
             }],
             ['OS=="mac"', {
+                'cflags': ['-fPIC', "-<(link_type)", "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'xcode_settings': {
-                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-<(link_type)", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++", "-Werror"],
+                    'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-<(link_type)", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++"],
                     'OTHER_LDFLAGS': [],
                     'MACOSX_DEPLOYMENT_TARGET': '10.10'
                 },

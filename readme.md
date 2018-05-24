@@ -121,7 +121,7 @@ of images can now be read.
 
 ## Contributors
 * Christian Nienhaus (@NINI1988) added typescript definitions and many pull requests and bug fixes for hdf5 native calls.
-* John Shumway (@shumway) refurbished the documentation when the project as split into an organization.
+* John Shumway (@shumway) refurbished the documentation when the project was split into an organization.
 
 [npm-image]: https://badge.fury.io/js/hdf5.svg
 [npm-url]: https://www.npmjs.com/package/hdf5
