@@ -27,7 +27,7 @@ namespace NodeHDF5 {
         std::stringstream ss;
         ss << "Failed to read file, with return: " << id << ".\n";
         error = true;
-        throw  std::invalid_argument(ss.str());
+        throw  Exception(ss.str());
         return;
       }
     }
@@ -39,7 +39,7 @@ namespace NodeHDF5 {
         std::stringstream ss;
         ss << "Failed to create file, with return: " << id << ".\n";
         error = true;
-        throw  std::invalid_argument(ss.str());
+        throw  Exception(ss.str());
         return;
       }
     }
@@ -50,7 +50,7 @@ namespace NodeHDF5 {
       std::stringstream ss;
       ss << "Failed to set link creation order, with return: " << err << ".\n";
       error = true;
-      throw  std::invalid_argument(ss.str());
+      throw  Exception(ss.str());
       
     }
   }
@@ -63,7 +63,7 @@ namespace NodeHDF5 {
         std::stringstream ss;
         ss << "Failed to create file, with return: " << id << ".\n";
         error = true;
-        throw  std::invalid_argument(ss.str());
+        throw  Exception(ss.str());
         return;
       }
     } else {
@@ -72,7 +72,7 @@ namespace NodeHDF5 {
         std::stringstream ss;
         ss << "File " << path << " doesn't exist.";
         error = true;
-        throw  std::invalid_argument(ss.str());
+        throw  Exception(ss.str());
         return;
       }
       id = H5Fopen(path, flags, H5P_DEFAULT);
@@ -80,7 +80,7 @@ namespace NodeHDF5 {
         std::stringstream ss;
         ss << "Failed to open file, " << path << " and flags " << flags << " with return: " << id << ".";
         error = true;
-        throw  std::invalid_argument(ss.str());
+        throw  Exception(ss.str());
         return;
       }
     }
@@ -91,7 +91,7 @@ namespace NodeHDF5 {
       std::stringstream ss;
       ss << "Failed to set link creation order, with return: " << err << ".\n";
       error =true;
-      throw  std::invalid_argument(ss.str());
+      throw  Exception(ss.str());
     }
   }
 
@@ -199,6 +199,10 @@ namespace NodeHDF5 {
     idWrap->value            = f->id;
 
     args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), idInstance);
+    } catch (Exception& ex) {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        args.GetReturnValue().SetUndefined();
+        return;
     } catch (std::exception& ex) {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
         args.GetReturnValue().SetUndefined();

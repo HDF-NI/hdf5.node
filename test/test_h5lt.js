@@ -988,7 +988,7 @@ var start = process.hrtime();
           if (dims.length > 0) {
           }
         } catch (error) {
-          error.message.should.equal("File ./record.h5 doesn't exist.");
+          error.message.should.equal("File ./record.h5 doesn\'t exist.");
         }
           done();
         });

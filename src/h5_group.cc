@@ -142,6 +142,11 @@ namespace NodeHDF5 {
         idWrap->value          = -1;
         args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
       }
+    } catch (std::exception& ex) {
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group open failed")));
+      args.GetReturnValue().SetUndefined();
+      return;
     } catch (...) {
       v8::Isolate::GetCurrent()->ThrowException(
           v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group open failed")));
