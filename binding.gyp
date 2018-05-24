@@ -4,6 +4,7 @@
         "hdf5_home_win%": "C:/Software/hdf5",
         "hdf5_home_mac%": "/usr/local",
         "link_type%": "shared",
+        "debug_mode%": "",
         "longlong_type%": "LONGLONG64BITS"
     },
     'targets': [

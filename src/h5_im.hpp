@@ -97,7 +97,7 @@ namespace NodeHDF5 {
       }
       else get_planes(options, [&](int _planes){dims[2]=_planes;});      
       Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
-      err           = H5LTmake_dataset(idWrap->Value(), *dset_name, 3, dims, H5T_NATIVE_UCHAR, (const char*)node::Buffer::Data(args[2]));
+     err           = H5LTmake_dataset(idWrap->Value(), *dset_name, 3, dims, H5T_NATIVE_UCHAR, (const char*)node::Buffer::Data(args[2]));
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
             v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make image dataset")));

@@ -539,7 +539,11 @@ namespace NodeHDF5 {
         }
 
         herr_t err = H5LT_make_dataset_numerical(
+#if NODE_VERSION_AT_LEAST(8,0,0)
             group_id, dset_name, rank, dims, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, node::Buffer::Data(buffer->ToObject()));
+#else
+            group_id, dset_name, rank, dims, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data());
+#endif
         if (err < 0) {
           H5Pclose(dcpl);
           v8::Isolate::GetCurrent()->ThrowException(
@@ -572,7 +576,11 @@ namespace NodeHDF5 {
         }
 
         herr_t err = H5LT_make_dataset_numerical(
+#if NODE_VERSION_AT_LEAST(8,0,0)
             group_id, dset_name, rank, dims, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, node::Buffer::Data(buffer->ToObject()));
+#else
+            group_id, dset_name, rank, dims, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data());
+#endif
         if (err < 0) {
           H5Pclose(dcpl);
           v8::Isolate::GetCurrent()->ThrowException(
@@ -607,7 +615,11 @@ namespace NodeHDF5 {
         }
 
         herr_t err = H5LT_make_dataset_numerical(
+#if NODE_VERSION_AT_LEAST(8,0,0)
             group_id, dset_name, rank, dims, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, node::Buffer::Data(buffer->ToObject()));
+#else
+            group_id, dset_name, rank, dims, dims, type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, buffer->Buffer()->Externalize().Data());
+#endif
         if (err < 0) {
           H5Pclose(dcpl);
           v8::Isolate::GetCurrent()->ThrowException(
@@ -752,7 +764,12 @@ namespace NodeHDF5 {
         options = args[3]->ToObject();
         get_type(options, [&](hid_t _type_id){hasOptionType=true;});
       }
-      if (hasOptionType || (node::Buffer::HasInstance(buffer) && buffer->ToObject()->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type")))) {
+      bool bufferAsUnit8Array=true;
+#if NODE_VERSION_AT_LEAST(8,0,0)
+#else
+      bufferAsUnit8Array=buffer->ToObject()->IsUint8Array();
+#endif
+      if (hasOptionType || (bufferAsUnit8Array && node::Buffer::HasInstance(buffer) && buffer->ToObject()->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type")))) {
         make_dataset_from_buffer(group_id, dset_name, buffer->ToObject(), options);
       } else if (buffer->IsString()) {
         make_dataset_from_string(group_id, dset_name, buffer->ToString(), options);
@@ -818,7 +835,12 @@ namespace NodeHDF5 {
       if (args.Length() == 4) {
           subsetOn=get_dimensions(args, 3, start, stride, count, rank);
       }
-      if (node::Buffer::HasInstance(args[2])) {
+      bool bufferAsUnit8Array=true;
+#if NODE_VERSION_AT_LEAST(8,0,0)
+#else
+      bufferAsUnit8Array=args[2]->ToObject()->IsUint8Array();
+#endif
+      if (bufferAsUnit8Array && node::Buffer::HasInstance(args[2])) {
         Local<Value>      encodingValue = args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding"));
         String::Utf8Value encoding(encodingValue->ToString());
         if (args[2]->ToObject()->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding")) && std::strcmp("binary", (*encoding))) {
@@ -968,7 +990,11 @@ namespace NodeHDF5 {
           return;
         }
       }
+#if NODE_VERSION_AT_LEAST(8,0,0)
       err = H5Dwrite(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, node::Buffer::Data(buffer->ToObject()));
+#else
+      err = H5Dwrite(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, buffer->Buffer()->Externalize().Data());
+#endif
       if (err < 0) {
         if (subsetOn) {
           H5Sclose(memspace_id);
@@ -1391,7 +1417,11 @@ namespace NodeHDF5 {
             return;
           }
 
+#if NODE_VERSION_AT_LEAST(8,0,0)
           err = H5LTread_dataset(idWrap->Value(), *dset_name, type_id, node::Buffer::Data(buffer->ToObject()));
+#else
+          err = H5LTread_dataset(idWrap->Value(), *dset_name, type_id, buffer->Buffer()->Externalize().Data());
+#endif
           if (err < 0) {
             v8::Isolate::GetCurrent()->ThrowException(
                 v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset")));
