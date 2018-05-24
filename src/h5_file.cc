@@ -367,7 +367,10 @@ namespace NodeHDF5 {
     File*             file = ObjectWrap::Unwrap<File>(args.This());
     String::Utf8Value group_name(args[0]->ToString());
     String::Utf8Value dest_name(args[2]->ToString());
-    herr_t            err = H5Lmove(file->id, *group_name, args[1]->Uint32Value(), *dest_name, H5P_DEFAULT, H5P_DEFAULT);
+    Int64*            idWrap   = ObjectWrap::Unwrap<Int64>(args[1]->ToObject());
+    hid_t             group_id = idWrap->Value();
+
+    herr_t            err = H5Lmove(file->id, *group_name, group_id, *dest_name, H5P_DEFAULT, H5P_DEFAULT);
     if (err < 0) {
       std::string str(*dest_name);
       std::string errStr = "Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";

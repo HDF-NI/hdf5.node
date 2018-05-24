@@ -61,8 +61,7 @@ namespace NodeHDF5 {
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::combine_tables)->GetFunction());
     }
 
-    static std::
-        tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>
+    static std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>
         prepareData(Local<v8::Array>& table) {
       hsize_t                   nrecords  = 0;
       size_t                    type_size = 0;
@@ -479,6 +478,10 @@ namespace NodeHDF5 {
           args.GetReturnValue().SetUndefined();
           return;
         }
+      } catch (Exception& ex) {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        args.GetReturnValue().SetUndefined();
+        return;
       } catch (std::exception& ex) {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
         args.GetReturnValue().SetUndefined();
@@ -559,6 +562,10 @@ namespace NodeHDF5 {
                      std::move(field_offsets),
                      std::move(data),
                      table);
+      } catch (Exception& ex) {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        args.GetReturnValue().SetUndefined();
+        return;
       } catch (std::exception& ex) {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
         args.GetReturnValue().SetUndefined();
@@ -600,6 +607,10 @@ namespace NodeHDF5 {
           args.GetReturnValue().SetUndefined();
           return;
         }
+      } catch (Exception& ex) {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        args.GetReturnValue().SetUndefined();
+        return;
       } catch (std::exception& ex) {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
         args.GetReturnValue().SetUndefined();
@@ -639,6 +650,10 @@ namespace NodeHDF5 {
           args.GetReturnValue().SetUndefined();
           return;
         }
+      } catch (Exception& ex) {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        args.GetReturnValue().SetUndefined();
+        return;
       } catch (std::exception& ex) {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
         args.GetReturnValue().SetUndefined();
@@ -707,6 +722,10 @@ namespace NodeHDF5 {
                      std::move(field_offsets),
                      std::move(data),
                      table);
+      } catch (Exception& ex) {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        args.GetReturnValue().SetUndefined();
+        return;
       } catch (std::exception& ex) {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
         args.GetReturnValue().SetUndefined();
@@ -772,6 +791,10 @@ namespace NodeHDF5 {
           args.GetReturnValue().SetUndefined();
           return;
         }
+      } catch (Exception& ex) {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        args.GetReturnValue().SetUndefined();
+        return;
       } catch (std::exception& ex) {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
         args.GetReturnValue().SetUndefined();
@@ -851,6 +874,10 @@ namespace NodeHDF5 {
           args.GetReturnValue().SetUndefined();
           return;
         }
+      } catch (Exception& ex) {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        args.GetReturnValue().SetUndefined();
+        return;
       } catch (std::exception& ex) {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
         args.GetReturnValue().SetUndefined();
@@ -927,6 +954,10 @@ namespace NodeHDF5 {
           args.GetReturnValue().SetUndefined();
           return;
         }
+      } catch (Exception& ex) {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        args.GetReturnValue().SetUndefined();
+        return;
       } catch (std::exception& ex) {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
         args.GetReturnValue().SetUndefined();
@@ -1046,6 +1077,10 @@ namespace NodeHDF5 {
                      std::move(model_field_offsets),
                      std::move(data),
                      table);
+      } catch (Exception& ex) {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        args.GetReturnValue().SetUndefined();
+        return;
       } catch (std::exception& ex) {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
         args.GetReturnValue().SetUndefined();
@@ -1169,6 +1204,10 @@ namespace NodeHDF5 {
                      std::move(model_field_offsets),
                      std::move(data),
                      table);
+      } catch (Exception& ex) {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        args.GetReturnValue().SetUndefined();
+        return;
       } catch (std::exception& ex) {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
         args.GetReturnValue().SetUndefined();
@@ -1289,6 +1328,10 @@ namespace NodeHDF5 {
           args.GetReturnValue().SetUndefined();
           return;
         }
+      } catch (Exception& ex) {
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        args.GetReturnValue().SetUndefined();
+        return;
       } catch (std::exception& ex) {
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
         args.GetReturnValue().SetUndefined();
