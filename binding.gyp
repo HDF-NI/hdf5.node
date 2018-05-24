@@ -575,6 +575,7 @@
                 }
             }],
             ['OS=="mac"', {
+                'cflags': ['-fPIC', "-<(link_type)", "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'xcode_settings': {
                     'OTHER_CPLUSPLUSFLAGS': ["-fPIC", "-<(link_type)", "-O3", "-std=c++14", "-fexceptions", "-stdlib=libc++"],
                     'OTHER_LDFLAGS': [],
