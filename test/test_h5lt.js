@@ -952,6 +952,7 @@ var start = process.hrtime();
             }
             done();
         });
+        
         it("visit thru", function(done) {
             groupTarget=file.openGroup('scada', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.id.should.not.equal(-1);
@@ -965,6 +966,7 @@ var start = process.hrtime();
             groupTarget.close();
             done();
         });
+        
         after(function(done) {
           file.close();
           done();
@@ -990,6 +992,20 @@ var start = process.hrtime();
         }
           done();
         });
+        
+        it.skip("should stop on broken h5", function(done) {
+            try{
+              console.log("stop on broken");
+              var file = new hdf5.File('/home/roger/Downloads/broken.h5', Access.ACC_RDONLY);
+              file.close();
+            }catch(error){
+              console.error(error);
+              error.message.should.equal("Failed to open file, /home/roger/Downloads/broken.h5 and flags 0 with return: -1.");
+            }
+            console.log("stop on broken done");
+            done();
+        });
+        
         after(function(done) {
           //file.close();
           done();

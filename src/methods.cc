@@ -236,8 +236,20 @@ namespace NodeHDF5 {
     const hid_t location_id = idWrap->Value();
 
     const hid_t dataset   = H5Dopen(location_id, *dataset_name, H5P_DEFAULT);
+    if(dataset<0){
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "can't open dataset")));
+      args.GetReturnValue().SetUndefined();
+      return;
+    }
     const hid_t dataspace = H5Dget_space(dataset);
-
+    if(dataset<0){
+      H5Dclose(dataset);
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "can't get dataset space")));
+      args.GetReturnValue().SetUndefined();
+      return;
+    }
     const int rank = H5Sget_simple_extent_ndims(dataspace);
 
     std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);

@@ -45,7 +45,7 @@ for dataset functions.  Typescript definition files now available. For static na
 command line switch is provided in 
 binding.gyp(darwin,win untested).  Added custom 64 bit signed (Int64) and unsigned (Uint64) integer 
 attributes read/write since tey are't yet supported by javascript.  Added a file method 
-enableSingleWriteMumltiRead (if native version older than 1.10.x it is a noop). Synchronous iterate 
+enableSingleWriteMultiRead (if native version older than 1.10.x it is a noop). Synchronous iterate 
 and visit is now available on file and group children. Bug fixes on dimensioning have been made
 
 * Note: asynchronous i/o is coming but not in this release

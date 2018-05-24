@@ -23,6 +23,13 @@ namespace NodeHDF5 {
     bool exists = std::ifstream(path).good();
     if (exists) {
       id = H5Fopen(path, H5F_ACC_RDONLY, H5P_DEFAULT);
+      if (id < 0) {
+        std::stringstream ss;
+        ss << "Failed to read file, with return: " << id << ".\n";
+        error = true;
+        throw  std::invalid_argument(ss.str());
+        return;
+      }
     }
 
     if (!exists && id < 0) {
@@ -31,9 +38,8 @@ namespace NodeHDF5 {
       if (id < 0) {
         std::stringstream ss;
         ss << "Failed to create file, with return: " << id << ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
         error = true;
+        throw  std::invalid_argument(ss.str());
         return;
       }
     }
@@ -43,8 +49,9 @@ namespace NodeHDF5 {
     if (err < 0) {
       std::stringstream ss;
       ss << "Failed to set link creation order, with return: " << err << ".\n";
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
       error = true;
+      throw  std::invalid_argument(ss.str());
+      
     }
   }
 
@@ -55,9 +62,8 @@ namespace NodeHDF5 {
       if (id < 0) {
         std::stringstream ss;
         ss << "Failed to create file, with return: " << id << ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
         error = true;
+        throw  std::invalid_argument(ss.str());
         return;
       }
     } else {
@@ -65,17 +71,16 @@ namespace NodeHDF5 {
       if (!exists) {
         std::stringstream ss;
         ss << "File " << path << " doesn't exist.";
-                throw  std::invalid_argument(ss.str());
         error = true;
+        throw  std::invalid_argument(ss.str());
         return;
       }
       id = H5Fopen(path, flags, H5P_DEFAULT);
       if (id < 0) {
         std::stringstream ss;
-        ss << "Failed to open file, " << path << " and flags " << flags << " with return: " << id << ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
+        ss << "Failed to open file, " << path << " and flags " << flags << " with return: " << id << ".";
         error = true;
+        throw  std::invalid_argument(ss.str());
         return;
       }
     }
@@ -85,7 +90,8 @@ namespace NodeHDF5 {
     if (err < 0) {
       std::stringstream ss;
       ss << "Failed to set link creation order, with return: " << err << ".\n";
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
+      error =true;
+      throw  std::invalid_argument(ss.str());
     }
   }
 

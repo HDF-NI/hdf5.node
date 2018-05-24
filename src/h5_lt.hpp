@@ -837,11 +837,11 @@ namespace NodeHDF5 {
           return;
         }
 
-        hid_t  type_id = toTypeMap[(H5T)args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"))->Int32Value()];
         Int64* idWrap  = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
         hid_t  did     = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
         hid_t  dataspace_id = H5S_ALL;
         hid_t  memspace_id  = H5S_ALL;
+        hid_t type_id = H5Dget_type(did );
         if (subsetOn) {
           memspace_id  = H5Screate_simple(rank, count.get(), NULL);
           dataspace_id = H5Dget_space(did);
