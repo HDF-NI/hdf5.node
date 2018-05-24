@@ -26,8 +26,9 @@ before_install:
   - tar -zxvf /tmp/hdf5-1.10.2.tar.gz
   - cd `pwd`/hdf5-1.10.2
   - ./configure --prefix=`pwd`/dist --enable-shared=yes --enable-static=no --enable-parallel=no --enable-hl --enable-build-mode=production --without-szlib
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then make -j2 2>&1 &> hdf5_screen.txt ; else locate libhdf5.so  ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then make install ; else locate libhdf5.so  ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then make -j2 2>&1 &> hdf5_screen.txt ; else echo ${$TRAVIS_OS_NAME}  ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then make install ; else echo ${$TRAVIS_OS_NAME}  ; fi
+  - locate libhdf5.so
   - which g++
   - g++ --version
   - cd ..
