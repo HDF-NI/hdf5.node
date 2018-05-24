@@ -129,10 +129,10 @@ describe("testing table interface ",function(){
         });
     });
 
-    describe("should read table", function() {
+    describe("should read & modify table", function() {
         let file;
         before(function(done) {
-          file = new hdf5.File('./h5tb.h5', Access.ACC_RDONLY);
+          file = new hdf5.File('./h5tb.h5', Access.ACC_RDWR);
             done();
         });
 
