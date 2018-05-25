@@ -1,6 +1,6 @@
 'use strict';
 
-require('co-mocha')(require('mocha'));
+(require('mocha'));
 require("should");
 
 const fs            = require('fs');

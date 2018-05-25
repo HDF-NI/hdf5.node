@@ -11,7 +11,6 @@
     "node": ">=6.0.0"
   },
   "devDependencies": {
-    "co-mocha": "^1.2.2",
     "mocha": "5.1.1",
     "should": "*",
     "xml2js": "*"
