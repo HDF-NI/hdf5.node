@@ -1,7 +1,7 @@
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][npm-url]
 [![Node.js Version][node-version-image]][node-version-url]
-
+[![Build Status][travis-ci-build-image]][travis-ci-build-url]
 
 HDF5 is a node module for reading and writing the 
 [HDF5](https://www.hdfgroup.org/HDF5/) file format.
@@ -130,3 +130,5 @@ of images can now be read.
 [downloads-image]: https://img.shields.io/npm/dm/hdf5.svg
 [node-version-image]: https://img.shields.io/node/v/hdf5.svg
 [node-version-url]: https://nodejs.org/en/download/
+[travis-ci-build-image]: https://travis-ci.org/HDF-NI/hdf5.node.svg?branch=master
+[travis-ci-build-url]: https://travis-ci.org/HDF-NI/hdf5.node

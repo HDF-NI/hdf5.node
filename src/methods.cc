@@ -100,7 +100,8 @@ namespace NodeHDF5 {
     args.GetReturnValue().Set((uint32_t)ginfo.nlinks);
 
     for (index = 0; index < (uint32_t)ginfo.nlinks; index++) {
-      array->Set(index, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), group->getObjnameByIdx(index).c_str()));
+      std::unique_ptr<char[]>&& name_C=group->getObjnameByIdx(index);
+      array->Set(index, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), (const char*)name_C.get()));
     }
     args.GetReturnValue().Set(array);
     return;
@@ -572,7 +573,7 @@ namespace NodeHDF5 {
     return H5O_TYPE_UNKNOWN;
   }
 
-  std::string Methods::getObjnameByIdx(hsize_t idx) {
+  std::unique_ptr<char[]> Methods::getObjnameByIdx(hsize_t idx) {
     // call H5Lget_name_by_idx with name as NULL to get its length
     ssize_t name_len = H5Lget_name_by_idx(id, ".", H5_INDEX_NAME, H5_ITER_INC, idx, NULL, 0, H5P_DEFAULT);
 
@@ -580,11 +581,8 @@ namespace NodeHDF5 {
     std::unique_ptr<char[]> name_C(new char[name_len + 1]);
     std::memset(name_C.get(), 0, name_len + 1); // clear buffer
 
-    name_len = H5Lget_name_by_idx(id, ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C.get(), name_len, H5P_DEFAULT);
-
-    // clean up and return the string
-    std::string name = std::string(name_C.get());
-    return name;
+    name_len = H5Lget_name_by_idx(id, ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C.get(), name_len+1, H5P_DEFAULT);
+    return name_C;
   }
   
     void Methods::iterate(const v8::FunctionCallbackInfo<Value>& args) {

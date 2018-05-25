@@ -236,6 +236,6 @@ namespace NodeHDF5 {
     int        getNumAttrs();
     hsize_t    getNumObjs();
     H5O_type_t childObjType(const char* objname);
-    std::string getObjnameByIdx(hsize_t idx);
+    std::unique_ptr<char[]> getObjnameByIdx(hsize_t idx);
   };
 }

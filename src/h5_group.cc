@@ -142,6 +142,11 @@ namespace NodeHDF5 {
         idWrap->value          = -1;
         args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
       }
+    } catch (std::exception& ex) {
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group open failed")));
+      args.GetReturnValue().SetUndefined();
+      return;
     } catch (...) {
       v8::Isolate::GetCurrent()->ThrowException(
           v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group open failed")));
@@ -396,8 +401,10 @@ namespace NodeHDF5 {
     Group*            group = ObjectWrap::Unwrap<Group>(args.This());
     String::Utf8Value group_name(args[0]->ToString());
     String::Utf8Value dest_name(args[2]->ToString());
+    Int64*            idWrap   = ObjectWrap::Unwrap<Int64>(args[1]->ToObject());
+    hid_t             file_id = idWrap->Value();
 
-    herr_t err = H5Lmove(group->id, *group_name, args[1]->Uint32Value(), *dest_name, H5P_DEFAULT, H5P_DEFAULT);
+    herr_t err = H5Lmove(group->id, *group_name, file_id, *dest_name, H5P_DEFAULT, H5P_DEFAULT);
     if (err < 0) {
       std::string str(*dest_name);
       std::string errStr = "Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";

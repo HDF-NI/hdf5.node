@@ -21,7 +21,11 @@ namespace NodeHDF5 {
       hid_t attr_type = H5Tcopy(type_id);
       hid_t attr_id   = H5Acreate2(group_id, attribute_name, attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
 
+#if NODE_VERSION_AT_LEAST(8,0,0)
       H5Awrite(attr_id, attr_type, node::Buffer::Data(buffer->ToObject()));
+#else
+      H5Awrite(attr_id, attr_type, buffer->Buffer()->Externalize().Data());
+#endif
       H5Aclose(attr_id);
       H5Tclose(attr_type);
       H5Sclose(attr_space);
@@ -258,7 +262,11 @@ namespace NodeHDF5 {
                 return;
               }
               if(indexedArray){
+#if NODE_VERSION_AT_LEAST(8,0,0)
                 H5Aread(attr_id, attr_type, node::Buffer::Data(buffer->ToObject()));
+#else
+                H5Aread(attr_id, attr_type, buffer->Buffer()->Externalize().Data());
+#endif
                 args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), buffer);
               }
               break;
