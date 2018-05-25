@@ -17,11 +17,12 @@ describe("testing table interface ", function() {
     describe("create an h5, group and some tables ",function() {
         // open hdf file
         let file;
-        before(function*() {
+        before(function(done) {
           file = new hdf5.File('./h5pt.h5', Access.ACC_TRUNC);
+          done();
         });
 
-        it("should be Table io ", function*() {
+        it("should be Table io ", function(done) {
             const group=file.createGroup('pmc/refinement');
             group.id.should.not.equal(-1);
             const table  = new h5pt.PacketTable(new hdf5.Int64(0), 5);
@@ -47,20 +48,23 @@ describe("testing table interface ", function() {
             table.append();
             table.close();
             group.close();
+            done();
         });
 
-        it("should close pmc/refinement", function*() {
+        it("should close pmc/refinement", function(done) {
             file.close();
+            done();
         });
     });
 
     describe("should read table", function() {
         let file;
-        before(function*() {
+        before(function(done) {
           file = new hdf5.File('./h5pt.h5', Access.ACC_RDONLY);
+          done();
         });
 
-        it("should be Table input ", function*(){
+        it("should be Table input ", function(done){
             const groupTarget=file.openGroup('pmc/refinement', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.getDatasetType("Events").should.equal(HLType.HL_TYPE_PACKET_TABLE);
             const table = h5pt.readTable(groupTarget.id, "Events");
@@ -81,10 +85,12 @@ describe("testing table interface ", function() {
             }
             table.close();
             groupTarget.close();
+            done();
         });
 
-        after(function*(){
+        after(function(done){
             file.close();
+            done();
         });
     });
 

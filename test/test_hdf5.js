@@ -9,7 +9,7 @@ const globs   = require('../lib/globals');
 
 describe("testing c interface ", function() {
 
-    describe("create an h5 and group ", function*() {
+    describe("create an h5 and group ", function() {
         let file;
         before(function(done) {
           file = new hdf5Lib.hdf5.File('./TRAAAAW128F429D538.h5', globs.Access.ACC_TRUNC);

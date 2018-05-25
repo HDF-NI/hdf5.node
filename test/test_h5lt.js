@@ -980,7 +980,7 @@ var start = process.hrtime();
           done();
         });
 
-        it("file reaad/write when it doesn't exist", function(done) {
+        it("file read/write when it doesn't exist", function(done) {
         try {
           const file = new hdf5.File('./record.h5', Access.ACC_RDWR);
           const dims = file.getDatasetDimensions('infos');
