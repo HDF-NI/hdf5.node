@@ -277,7 +277,9 @@ namespace NodeHDF5 {
                           String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
 
               for (uint32_t j = 0; j < nrecords; j++) {
-                buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), ((double*)&data[j * type_size + field_offsets[i]])[0]));
+                double value;
+                std::memcpy(&value, &data[j * type_size + field_offsets[i]], 8);
+                buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
               }
 
               table->Set(i, buffer);
@@ -288,7 +290,9 @@ namespace NodeHDF5 {
                           String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
 
               for (uint32_t j = 0; j < nrecords; j++) {
-                buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), ((double*)&data[j * type_size + field_offsets[i]])[0]));
+                float value;
+                std::memcpy(&value, &data[j * type_size + field_offsets[i]], 4);
+                buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
               }
 
               table->Set(i, buffer);
