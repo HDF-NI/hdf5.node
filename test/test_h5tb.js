@@ -451,5 +451,58 @@ describe("testing table interface ",function(){
             done();
         });
     });
+
+    describe("write and read all datatypes", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5.File('./h5tbDatatypes.h5', Access.ACC_TRUNC);
+            done();
+        });
+
+        it("should write and read table", function(done) {
+            // Write Table
+
+            const table = new Array();
+
+            const count = 2
+
+            const types = [new Int8Array(count),new Int16Array(count),new Int32Array(count),new Float32Array(count), new Float64Array(count)];
+
+            for (let i = 0; i < types.length; i++) {                   
+                const col = types[i];
+                col.name = 'col'+i;
+
+                for (let c = 0; c < count; c++) {
+                    col[c] = ((i+10)*(c+2));              
+                }
+                
+                table.push(col);
+            }
+
+            h5tb.makeTable(file.id, 'infos', table);
+
+            // Read Table
+            const readTable=h5tb.readTable(file.id, "infos");
+            readTable.length.should.equal(types.length);
+
+            for (let i = 0; i < readTable.length; i++) {                   
+                const col = readTable[i];
+                col.name.should.equal('col'+i);
+
+                for (let c = 0; c < count; c++) {
+                    col[c].should.equal(((i+10)*(c+2)));              
+                }
+                
+            }
+
+            done();
+        });
+
+        after(function(done) {
+            file.close();
+            done();
+        });
+    });
+
 });
 
