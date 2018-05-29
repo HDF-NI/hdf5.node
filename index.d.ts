@@ -12,9 +12,9 @@ type TableArray = TableTypedArray | TableStringArray | TableNumberArray;
 
 type TableTypedArray = TypedArray & { name?: string };
 
-type TableStringArray = { name?: string, [key: number]: string };
+type TableStringArray = string[] & { name?: string };
 
-type TableNumberArray = { name?: string, [key: number]: number, type?: H5Type };
+type TableNumberArray = number[] & { name?: string, type?: H5Type };
 
 export declare namespace hdf5 {
 
