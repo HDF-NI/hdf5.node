@@ -511,7 +511,6 @@ namespace NodeHDF5 {
       // return empty
       std::stringstream ss;
       ss << "Failed to read group. Group doesn't exist ";
-      error = true;
       throw  Exception(ss.str());
       return tmp;
     }
