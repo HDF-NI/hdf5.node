@@ -355,11 +355,6 @@ namespace NodeHDF5 {
       v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
       args.GetReturnValue().SetUndefined();
       return;
-    } catch (Exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "group not found")));
-      args.GetReturnValue().SetUndefined();
-      return;
     }
     
   }
