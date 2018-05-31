@@ -12,42 +12,19 @@ type TableArray = TableTypedArray | TableStringArray | TableNumberArray;
 
 type TableTypedArray = TypedArray & { name?: string };
 
-type TableStringArray = { name?: string, [key: number]: string };
+type TableStringArray = string[] & { name?: string };
 
-type TableNumberArray = { name?: string, [key: number]: number, type?: H5Type };
-
-type Hdf5Id = number;
-
-export declare class Hdf5Buffer extends Buffer {
-    rank?: number;
-    type?: H5Type;
-
-    /**
-     * dimension 1
-     */
-    rows?: number;
-
-    /**
-     * dimension 2
-     */
-    columns?: number;
-
-    /**
-     * dimension 3
-     */
-    sections?: number;
-
-    /**
-     * dimension 4
-     */
-    files?: number;
-}
+type TableNumberArray = number[] & { name?: string, type?: H5Type };
 
 export declare namespace hdf5 {
 
+    class Id {
+        public toString():string;
+    }
+
     class Methods {
 
-        public id: Hdf5Id;
+        public id: hdf5.Id;
 
         /**
          * 
@@ -67,7 +44,7 @@ export declare namespace hdf5 {
          * @param id the group or file id location. Every group and the file return with an id attribute. In this case it is the destination’s future location. If it is the file’s id this essentially renames the source
          * @param destination the name of the destination group.
          */
-        public move(source: string, id: Hdf5Id, destination: string): any;
+        public move(source: string, id: hdf5.Id, destination: string): any;
 
         /**
          * @returns # of attributes
@@ -205,7 +182,7 @@ export declare namespace hdf5 {
          * @param id the group or file id location. Every group and the file return with an id attribute. In this case it is the destination’s future location
          * @param destination the name of the destination group
          */
-        public copy(source: string, id: Hdf5Id, destination: string): void;
+        public copy(source: string, id: hdf5.Id, destination: string): void;
 
         /**
          * 
@@ -213,7 +190,7 @@ export declare namespace hdf5 {
          * @param id the group or file id location.Every group and the file return with an id attribute.In this case it is the destination’s future location
          * @param destination the name of the destination group
          */
-        public link(source: string, id: Hdf5Id, destination: string): void;
+        public link(source: string, id: hdf5.Id, destination: string): void;
 
     }
 
@@ -228,15 +205,44 @@ export declare namespace hdf5 {
 
 export declare namespace h5lt {
 
-    interface MakeDatasetOptions {
+    type ReadDatasetOptionsCallback = (options: h5lt.ReadDatasetOptions) => void;
 
+    interface ReadDatasetOptions {
+        rank: number;
+        type: H5Type;
+
+        /**
+         * dimension 1
+         */
+        rows: number;
+
+        /**
+         * dimension 2
+         */
+        columns?: number;
+
+        /**
+         * dimension 3
+         */
+        sections?: number;
+
+        /**
+         * dimension 4
+         */
+        files?: number;
+    }
+
+    interface MakeDatasetOptions {
         /**
          * 0 and 9 inclusive. 0 is the lowest compression, but is the fastest. 9 gives the best compression, but is the slowest
          */
         compression?: number;
         fixed_width?: number;
-        chunkSize?: number;
+        chunkSize?: number | number[];
 
+    }
+
+    interface MakeBufferDatasetOptions extends ReadDatasetOptions, MakeDatasetOptions {
         maxRows?: number | H5SType;
         maxColumns?: number | H5SType;
         maxSections?: number | H5SType;
@@ -259,7 +265,7 @@ export declare namespace h5lt {
      * @param name a string naming the dataset
      * @param buffer Typed array, string or a node::Buffer. The buffer can have attributes describing its shape. When using a node::Buffer the data is expected to be homogeneous and the type attribute set to choice in H5Type
      */
-    function makeDataset(id: Hdf5Id, name: string, buffer: TypedArray | string | Hdf5Buffer): void;
+    function makeDataset(id: hdf5.Id, name: string, buffer: TypedArray | string | Buffer): void;
     /**
      * 
      * @param id the group or file id location. Every group and the file return with an id attribute
@@ -267,7 +273,15 @@ export declare namespace h5lt {
      * @param buffer Typed array, string or a node::Buffer. The buffer can have attributes describing its shape. When using a node::Buffer the data is expected to be homogeneous and the type attribute set to choice in H5Type
      * @param options currently has the option to set compression { compression: 6}. can be 0 through 9. For an Array of fixed width strings {fixed_width: maxLength} option sets the width. The Array can hold variable length strings and this call will make a fixed buffer and if any are actually greater than maxLength an exception is thrown.
      */
-    function makeDataset(id: Hdf5Id, name: string, buffer: TypedArray | string | Hdf5Buffer, options: MakeDatasetOptions): void;
+    function makeDataset(id: hdf5.Id, name: string, buffer: TypedArray | string, options: MakeDatasetOptions): void;
+    /**
+     * 
+     * @param id the group or file id location. Every group and the file return with an id attribute
+     * @param name a string naming the dataset
+     * @param buffer Typed array, string or a node::Buffer. The buffer can have attributes describing its shape. When using a node::Buffer the data is expected to be homogeneous and the type attribute set to choice in H5Type
+     * @param options currently has the option to set compression { compression: 6}. can be 0 through 9. For an Array of fixed width strings {fixed_width: maxLength} option sets the width. The Array can hold variable length strings and this call will make a fixed buffer and if any are actually greater than maxLength an exception is thrown.
+     */
+    function makeDataset(id: hdf5.Id, name: string, buffer: Buffer, options: MakeBufferDatasetOptions): void;
 
     /**
      * 
@@ -275,7 +289,7 @@ export declare namespace h5lt {
      * @param name a string naming the dataset
      * @param buffer Typed array, string or a node::Buffer. The buffer can have attributes describing its shape. When using a node::Buffer the data is expected to be homogeneous and the type attribute set to choice in H5Type
      */
-    function writeDataset(id: Hdf5Id, name: string, buffer: TypedArray | string | Hdf5Buffer): void;
+    function writeDataset(id: hdf5.Id, name: string, buffer: TypedArray | string | Buffer): void;
     /**
      * 
      * @param id the group or file id location. Every group and the file return with an id attribute
@@ -283,7 +297,7 @@ export declare namespace h5lt {
      * @param buffer Typed array, string or a node::Buffer. The buffer can have attributes describing its shape. When using a node::Buffer the data is expected to be homogeneous and the type attribute set to choice in H5Type
      * @param options optional: start, stride and count
      */
-    function writeDataset(id: Hdf5Id, name: string, buffer: string | Hdf5Buffer, options: DatasetOptions): void;
+    function writeDataset(id: hdf5.Id, name: string, buffer: TypedArray | string | Buffer, options: DatasetOptions): void;
 
     /**
      * 
@@ -291,7 +305,7 @@ export declare namespace h5lt {
      * @param name a string naming the dataset
      * @returns A typed array or string
      */
-    function readDataset(id: Hdf5Id, name: string): TypedArray | string;
+    function readDataset(id: hdf5.Id, name: string): TypedArray | string;
     /**
      * 
      * @param id the group or file id location. Every group and the file return with an id attribute
@@ -299,7 +313,7 @@ export declare namespace h5lt {
      * @param options start, stride and count
      * @returns A typed array or string
      */
-    function readDataset(id: Hdf5Id, name: string, options: DatasetOptions): TypedArray | string;
+    function readDataset(id: hdf5.Id, name: string, options: DatasetOptions): TypedArray | string;
 
     /**
      * 
@@ -307,7 +321,7 @@ export declare namespace h5lt {
      * @param name a string naming the dataset.
      * @return A node::Buffer with the data and attributes for its shape and type
      */
-    function readDatasetAsBuffer(id: Hdf5Id, name: string): Hdf5Buffer;
+    function readDatasetAsBuffer(id: hdf5.Id, name: string): Buffer;
     /**
      * 
      * @param id the group or file id location. Every group and the file return with an id attribute
@@ -315,7 +329,16 @@ export declare namespace h5lt {
      * @param options start, stride and count
      * @return A node::Buffer with the data and attributes for its shape and type
      */
-    function readDatasetAsBuffer(id: Hdf5Id, name: string, options: DatasetOptions): Hdf5Buffer;
+    function readDatasetAsBuffer(id: hdf5.Id, name: string, options: DatasetOptions): Buffer;
+    /**
+     * 
+     * @param id the group or file id location. Every group and the file return with an id attribute
+     * @param name a string naming the dataset.
+     * @param options start, stride and count
+     * @param callback a synchronous callback with the options properties of how a dataset is structured
+     * @return A node::Buffer with the data and attributes for its shape and type
+     */
+    function readDatasetAsBuffer(id: hdf5.Id, name: string, options: DatasetOptions, callback: ReadDatasetOptionsCallback): Buffer;
 
     // TODO
     function readDatasetDatatype(): any;
@@ -346,12 +369,14 @@ export interface h5im {
     readImageRegion: any;
 }
 
-// TODO
-export interface h5pt {
-    Int64: any;
-    PacketTable: any;
-    makeTable: any;
-    readTable: any;
+export declare namespace h5pt {
+
+    // TODO
+    function Int64(): any;
+    function PacketTable(): any;
+    function makeTable(): any;
+    function readTable(): any;
+
 }
 
 export declare namespace h5tb {
@@ -362,14 +387,14 @@ export declare namespace h5tb {
      * @param name The table name
      * @param model a model composed of an Array of typed arrays and Array of strings each representing a column in the table. Each column has a name attribute to name it.
      */
-    function makeTable(id: Hdf5Id, name: string, model: TableArray[]): void;
+    function makeTable(id: hdf5.Id, name: string, model: TableArray[]): void;
 
     /**
      * @param id the group or file id location. Every group and the file return with an id attribute
      * @param name The table name
      * @param model a model composed of an Array of typed arrays and Array of strings each representing a column in the table. Each column has a name attribute to name it.
      */
-    function appendRecords(id: Hdf5Id, name: string, model: TableArray[]): void;
+    function appendRecords(id: hdf5.Id, name: string, model: TableArray[]): void;
 
     /**
      * @param id the group or file id location. Every group and the file return with an id attribute
@@ -377,7 +402,15 @@ export declare namespace h5tb {
      * @param start &rarr starting record index
      * @param model a model composed of an Array of typed arrays and Array of strings each representing a column in the table. Each column has a name attribute to name it. . This is a sub model where the length of columns and start are less than the whole table
     */
-    function writeRecords(id: Hdf5Id, name: string, start: number, model: TableArray[]): void;
+    function writeRecords(id: hdf5.Id, name: string, start: number, model: TableArray[]): void;
+
+    /**
+     * 
+     * @param id the group or file id location. Every group and the file return with an id attribute
+     * @param name The table name
+     * @returns a model composed of an Array of typed arrays and Array of strings each representing a column in the table. Each column has a name attribute to name it.
+     */
+    function readTable(id: hdf5.Id, name: string): TableArray[];
 
     // TODO
     function addRecordsFrom(): any;
@@ -391,7 +424,6 @@ export declare namespace h5tb {
     function readFieldsIndex(): any;
     function readFieldsName(): any;
     function readRecords(): any;
-    function readTable(): any;
     function writeFieldsIndex(): any;
     function writeFieldsName(): any;
 }
