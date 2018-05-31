@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <exception>
 
 #include "file.h"
 #include "group.h"
@@ -508,6 +509,10 @@ namespace NodeHDF5 {
       return instance.ToLocalChecked();
     } else {
       // return empty
+      std::stringstream ss;
+      ss << "Failed to read group. Group doesn't exist ";
+      error = true;
+      throw  Exception(ss.str());
       return tmp;
     }
   }
