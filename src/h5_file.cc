@@ -345,12 +345,23 @@ namespace NodeHDF5 {
       args.GetReturnValue().SetUndefined();
       return;
     }
-
-    String::Utf8Value group_name(args[0]->ToString());
-
-    Local<Object> instance = Group::Instantiate(*group_name, args.This(), args[1]->Uint32Value());
-    args.GetReturnValue().Set(instance);
-    return;
+    
+    try {
+      String::Utf8Value group_name(args[0]->ToString());
+      Local<Object> instance = Group::Instantiate(*group_name, args.This(), args[1]->Uint32Value());
+      args.GetReturnValue().Set(instance);
+      return;
+    } catch (std::exception& ex) {
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      args.GetReturnValue().SetUndefined();
+      return;
+    } catch (Exception& ex) {
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "group not found")));
+      args.GetReturnValue().SetUndefined();
+      return;
+    }
+    
   }
 
   void File::Move(const v8::FunctionCallbackInfo<Value>& args) {
