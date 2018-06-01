@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <exception>
 
 #include "file.h"
 #include "group.h"
@@ -500,7 +501,18 @@ namespace NodeHDF5 {
     // group name and parent reference
     Local<Value> argv[3] = {Local<Value>::New(isolate, String::NewFromUtf8(isolate, name)), parent, Uint32::New(isolate, creationOrder)};
 
-    // return new group instance
-    return v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), 3, argv).ToLocalChecked();
+    Local<Object> tmp;
+    Local<Value> value;
+    auto instance = v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), 3, argv);
+    if (instance.ToLocal(&value)) {
+      // return new group instance
+      return instance.ToLocalChecked();
+    } else {
+      // return empty
+      std::stringstream ss;
+      ss << "Failed to read group. Group doesn't exist ";
+      throw  Exception(ss.str());
+      return tmp;
+    }
   }
 };
