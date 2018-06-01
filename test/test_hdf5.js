@@ -77,6 +77,28 @@ describe("testing c interface ", function() {
             done();
         });
 
+        it("catch on nonexistent group open try", function(done) {
+          try{
+            //const group=file.openGroup('pmcservices');
+              const groupPmc=file.openGroup('pmc');
+              groupPmc.id.should.equal(-1);
+              groupPmc.close();
+          }
+            catch(error) {
+            error.message.should.equal("Failed to read group. Group pmc doesn\'t exist.");
+          }
+          try{
+            const group=file.openGroup('pmcservices');
+              const groupPmc=group.openGroup('polywog');
+              groupPmc.id.should.equal(-1);
+              groupPmc.close();
+          }
+            catch(error) {
+            error.message.should.equal("Failed to read group. Group polywog doesn\'t exist.");
+          }
+            done();
+        });
+        
         after(function(done) {
           file.close();
           done();
@@ -104,14 +126,14 @@ describe("testing c interface ", function() {
           done();
         });
         
-        it.skip("should stop on broken h5", function(done) {
+        it("should stop on broken h5", function(done) {
             try{
               console.log("stop on broken");
-              var file = new hdf5Lib.hdf5.File('/home/roger/Downloads/broken.h5', globs.Access.ACC_RDONLY);
+              var file = new hdf5Lib.hdf5.File('./test/examples/broken.h5', globs.Access.ACC_RDONLY);
               file.close();
             }catch(error){
               console.error(error);
-              error.message.should.equal("Failed to open file, /home/roger/Downloads/broken.h5 and flags 0 with return: -1.");
+              error.message.should.equal("Failed to open file, ./test/examples/broken.h5 and flags 0 with return: -1.");
             }
             console.log("stop on broken done");
             done();

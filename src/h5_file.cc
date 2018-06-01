@@ -351,6 +351,10 @@ namespace NodeHDF5 {
       Local<Object> instance = Group::Instantiate(*group_name, args.This(), args[1]->Uint32Value());
       args.GetReturnValue().Set(instance);
       return;
+    } catch (Exception& ex) {
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      args.GetReturnValue().SetUndefined();
+      return;
     } catch (std::exception& ex) {
       v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
       args.GetReturnValue().SetUndefined();

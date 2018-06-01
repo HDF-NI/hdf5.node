@@ -356,11 +356,20 @@ namespace NodeHDF5 {
       return;
     }
 
-    String::Utf8Value group_name(args[0]->ToString());
-
-    Local<Object> instance = Group::Instantiate(*group_name, args.This(), args[1]->Uint32Value());
-
-    args.GetReturnValue().Set(instance);
+    try {
+      String::Utf8Value group_name(args[0]->ToString());
+      Local<Object> instance = Group::Instantiate(*group_name, args.This(), args[1]->Uint32Value());
+      args.GetReturnValue().Set(instance);
+      return;
+    } catch (Exception& ex) {
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      args.GetReturnValue().SetUndefined();
+      return;
+    } catch (std::exception& ex) {
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      args.GetReturnValue().SetUndefined();
+      return;
+    }
   }
 
   void Group::Copy(const v8::FunctionCallbackInfo<Value>& args) {
@@ -504,13 +513,16 @@ namespace NodeHDF5 {
     Local<Object> tmp;
     Local<Value> value;
     auto instance = v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), 3, argv);
-    if (instance.ToLocal(&value)) {
+    bool toCheck = instance.ToLocal(&value);
+    // unwrap group
+    Group* group = ObjectWrap::Unwrap<Group>(value->ToObject());
+    if (toCheck && group->id>=0) {
       // return new group instance
       return instance.ToLocalChecked();
     } else {
       // return empty
       std::stringstream ss;
-      ss << "Failed to read group. Group doesn't exist ";
+      ss << "Failed to read group. Group "<<(name)<< " doesn't exist.";
       throw  Exception(ss.str());
       return tmp;
     }
