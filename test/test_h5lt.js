@@ -933,19 +933,27 @@ var start = process.hrtime();
         });
     });
     
-    describe.skip("iterations on h5 ", function() {
+    describe("iterations on h5 ", function() {
         let file;
         before(function(done) {
-          file = new hdf5.File('/home/roger/Downloads/sample.h5', Access.ACC_RDONLY);
+          file = new hdf5.File('./pmc.h5', Access.ACC_RDONLY);
           done();
         });
         let groupTarget;
         it("iterate thru", function(done) {
-            groupTarget=file.openGroup('scada', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
+            groupTarget=file.openGroup('pmcservices', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.id.should.not.equal(-1);
+            var paths=[];
+            paths.push('sodium-icosanoate');
+            paths.push('Triple');
+            paths.push('Double');
+            paths.push('Quotes');
+            paths.push('namForest');
             try {
+                var count=0;
                 groupTarget.iterate(1, function(r, name) {
-                    console.dir("name: "+name);
+                    paths[count].should.equal(name);
+                    count++;
                 });
             } catch (e) {
 
@@ -954,14 +962,18 @@ var start = process.hrtime();
         });
         
         it("visit thru", function(done) {
-            groupTarget=file.openGroup('scada', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
+            groupTarget=file.openGroup('pmcservices/sodium-icosanoate/Documents', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.id.should.not.equal(-1);
             try {
+                var count=0;
                 file.visit(1, function(r, xpath) {
-                    console.dir("visiting name: "+xpath);
+                    //console.dir("visiting name: "+xpath);
+                    count++;
                 });
+                console.log("cout "+count);
+                count.should.equal(204);
             } catch (e) {
-
+                console.log(e.message);
             }
             groupTarget.close();
             done();

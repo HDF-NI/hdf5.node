@@ -637,7 +637,7 @@ namespace NodeHDF5 {
                                         v8::Local<v8::Value> argv[2] = {v8::Int32::New(v8::Isolate::GetCurrent(), toEnumMap[info->type]),
                                                                         v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name)};
                                         ((v8::Local<v8::Function>*)op_data)[0]->Call(
-                                            v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), 3, argv);
+                                            v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), 2, argv);
                                         return (herr_t)0;
                                       },
                                       &func);

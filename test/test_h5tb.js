@@ -431,16 +431,16 @@ describe("testing table interface ",function(){
                     //readTable[0].length.should.equal(1);
                   }
                   catch (e) {
-                      console.log(e.message);
+                      console.log("\t\t"+e.message);
                   }
                 }
                 catch (e) {
-                  console.log(e.message);
+                  console.log("\t\t"+e.message);
                   e.message.should.equal("unsupported data type");
                 }
             }
             catch (e) {
-                console.dir(e.message);
+                console.log("\t"+e.message);
                 e.message.should.equal("unsupported data type");
             }
             done();
