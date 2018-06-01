@@ -724,7 +724,7 @@ describe("testing lite interface ", function() {
         });
     });
 
-    describe.skip("huge varlen char arrays", function() {
+    describe("huge varlen char arrays", function() {
         let file;
         before(function(done) {
           file = new hdf5.File('./pmc.h5', Access.ACC_RDWR);
@@ -741,8 +741,8 @@ describe("testing lite interface ", function() {
             quotes[5]="Loyalty to country ALWAYS. Loyalty to government, when it deserves it.";
             quotes[6]="What would men be without women? Scarce, sir...mighty scarce.";
 
-            const hugeQuotes=new Array(2500000*5);
-            for(var i =0;i<2500000*5;i++){
+            const hugeQuotes=new Array(250000);
+            for(var i =0;i<250000;i++){
                 hugeQuotes[i]=quotes[i % 7];
             }
             h5lt.makeDataset(group.id, "Mark Twain", hugeQuotes);
@@ -751,8 +751,7 @@ describe("testing lite interface ", function() {
             file = new hdf5.File('./pmc.h5', Access.ACC_RDWR);
             group=file.openGroup('pmcservices/Huge Quotes');
             const array=h5lt.readDataset(group.id, 'Mark Twain', {start: [1000], stride: [1], count: [21]});
-            console.dir(array.length);
-            console.dir(array[0]);
+            console.dir(array[0]+" -- Mark Twain");
             array.length.should.equal(21);
             group.close();
             done();
@@ -940,7 +939,7 @@ var start = process.hrtime();
           done();
         });
         let groupTarget;
-        it("iterate thru", function(done) {
+        it.skip("iterate thru", function(done) {
             groupTarget=file.openGroup('pmcservices', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.id.should.not.equal(-1);
             var paths=[];
@@ -961,7 +960,7 @@ var start = process.hrtime();
             done();
         });
         
-        it("visit thru", function(done) {
+        it.skip("visit thru", function(done) {
             groupTarget=file.openGroup('pmcservices/sodium-icosanoate/Documents', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
             groupTarget.id.should.not.equal(-1);
             try {
