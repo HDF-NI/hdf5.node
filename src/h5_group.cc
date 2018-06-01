@@ -115,27 +115,39 @@ namespace NodeHDF5 {
           }
         }
 
-        // create group H5Gopen
-        Group* group   = new Group(H5Gopen(previous_hid, trail[trail.size() - 1].c_str(), H5P_DEFAULT));
-        group->gcpl_id = H5Pcreate(H5P_GROUP_CREATE);
-        herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->IntegerValue());
-        if (err < 0) {
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
-          args.GetReturnValue().SetUndefined();
-          return;
-        }
-        //        group->m_group.
-        group->name.assign(trail[trail.size() - 1]);
-        for (std::vector<hid_t>::iterator it = hidPath.begin(); it != hidPath.end(); ++it)
-          group->hidPath.push_back(*it);
-        group->Wrap(args.This());
+        if (H5Lexists(previous_hid, trail[trail.size() - 1].c_str(), H5P_DEFAULT)) {
+          // create group H5Gopen
+          Group* group   = new Group(H5Gopen(previous_hid, trail[trail.size() - 1].c_str(), H5P_DEFAULT));
+          group->gcpl_id = H5Pcreate(H5P_GROUP_CREATE);
+          herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->IntegerValue());
+          if (err < 0) {
+            v8::Isolate::GetCurrent()->ThrowException(
+                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+            args.GetReturnValue().SetUndefined();
+            return;
+          }
+         //        group->m_group.
+          group->name.assign(trail[trail.size() - 1]);
+          for (std::vector<hid_t>::iterator it = hidPath.begin(); it != hidPath.end(); ++it)
+            group->hidPath.push_back(*it);
+          group->Wrap(args.This());
 
-        // attach various properties
-        Local<Object> instance = Int64::Instantiate(args.This(), group->id);
-        Int64*        idWrap   = ObjectWrap::Unwrap<Int64>(instance);
-        idWrap->value          = group->id;
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
+          // attach various properties
+          Local<Object> instance = Int64::Instantiate(args.This(), group->id);
+          Int64*        idWrap   = ObjectWrap::Unwrap<Int64>(instance);
+          idWrap->value          = group->id;
+          args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
+        }
+        else{
+          Group* group   = new Group(-1);
+          group->name.assign(trail[trail.size() - 1]);
+          group->Wrap(args.This());
+          // attach various properties
+          Local<Object> instance = Int64::Instantiate(args.This(), group->id);
+          Int64*        idWrap   = ObjectWrap::Unwrap<Int64>(instance);
+          idWrap->value          = group->id;
+          args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
+        }
 
       } else {
         Local<Object> instance = Int64::Instantiate(args.This(), -1);
