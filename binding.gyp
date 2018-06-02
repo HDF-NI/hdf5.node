@@ -538,7 +538,6 @@
                     '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
-                    'C:/Software/node-v0.12.7/src',
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
@@ -590,8 +589,8 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '<(hdf5_home_mac)/lib/libhdf5.dylib',
-                        '<(hdf5_home_mac)/lib/libhdf5_hl.dylib'
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ],
                     'ldflags': [
                         '-L<(hdf5_home_mac)/lib'
