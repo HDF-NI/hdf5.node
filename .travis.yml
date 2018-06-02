@@ -42,10 +42,12 @@ install:
 before-scripte:
   - export PATH=`pwd`/node_modules/.bin:${PATH}
   - export LD_LIBRARY_PATH=`pwd`/hdf5-1.10.2/dist/lib:${LD_LIBRARY_PATH}
+  - export DYLD_LIBRARY_PATH=`pwd`/hdf5-1.10.2/dist/lib:${DYLD_LIBRARY_PATH}
   
 script:
   - export PATH=`pwd`/node_modules/.bin:${PATH}
   - export LD_LIBRARY_PATH=`pwd`/hdf5-1.10.2/dist/lib:${LD_LIBRARY_PATH}
+  - export DYLD_LIBRARY_PATH=`pwd`/hdf5-1.10.2/dist/lib:${DYLD_LIBRARY_PATH}
   - echo ${PATH}
   - ls `pwd`/node_modules/.bin
   - mocha --harmony --require should
