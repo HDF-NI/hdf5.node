@@ -110,17 +110,16 @@
                     'src/h5_file.cc',
                     'src/h5_group.cc',
                 ],
-                'libraries': [
-                    '<(hdf5_home_mac)/lib/libhdf5.dylib',
-                    '<(hdf5_home_mac)/lib/libhdf5_hl.dylib'
-                ],
                 'link_settings': {
                     'libraries': [
-                        '<(hdf5_home_mac)/lib/libhdf5.dylib',
-                        '<(hdf5_home_mac)/lib/libhdf5_hl.dylib'
+                        '-L<(hdf5_home_mac)/lib',
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ],
                     'ldflags': [
-                        '-L<(hdf5_home_mac)/lib'
+                        '-L<(hdf5_home_mac)/lib',
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ]
                 }
             }]
@@ -208,11 +207,14 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '<(hdf5_home_mac)/lib/libhdf5.dylib',
-                        '<(hdf5_home_mac)/lib/libhdf5_hl.dylib'
+                        '-L<(hdf5_home_mac)/lib',
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ],
                     'ldflags': [
-                        '-L<(hdf5_home_mac)/lib'
+                        '-L<(hdf5_home_mac)/lib',
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ]
                 }
             }]
@@ -303,11 +305,14 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '<(hdf5_home_mac)/lib/libhdf5.dylib',
-                        '<(hdf5_home_mac)/lib/libhdf5_hl.dylib'
+                        '-L<(hdf5_home_mac)/lib',
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ],
                     'ldflags': [
-                        '-L<(hdf5_home_mac)/lib'
+                        '-L<(hdf5_home_mac)/lib',
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ]
                 }
             }]
@@ -402,11 +407,14 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '<(hdf5_home_mac)/lib/libhdf5.dylib',
-                        '<(hdf5_home_mac)/lib/libhdf5_hl.dylib'
+                        '-L<(hdf5_home_mac)/lib',
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ],
                     'ldflags': [
-                        '-L<(hdf5_home_mac)/lib'
+                        '-L<(hdf5_home_mac)/lib',
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ]
                 }
             }]
@@ -496,11 +504,14 @@
                 ],
                 'link_settings': {
                     'libraries': [
-                        '<(hdf5_home_mac)/lib/libhdf5.dylib',
-                        '<(hdf5_home_mac)/lib/libhdf5_hl.dylib'
+                        '-L<(hdf5_home_mac)/lib',
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ],
                     'ldflags': [
-                        '-L<(hdf5_home_mac)/lib'
+                        '-L<(hdf5_home_mac)/lib',
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ]
                 }
             }]
