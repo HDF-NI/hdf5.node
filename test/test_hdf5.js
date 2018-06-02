@@ -106,6 +106,14 @@ describe("testing c interface ", function() {
 
     });
 
+    describe("hdf5 check ", function() {
+        it("should ban hdf5", function (done) {
+              hdf5Lib.hdf5.isHDF5('./TRAAAAW128F429D538.h5').should.equal(true);
+            done();
+        });
+
+    });
+
     describe("handling errors ", function() {
         //let file;
         before(function(done) {
@@ -129,13 +137,13 @@ describe("testing c interface ", function() {
         it("should stop on broken h5", function(done) {
             try{
               console.log("stop on broken");
+              hdf5Lib.hdf5.isHDF5('./test/examples/broken.h5').should.equal(true);
               var file = new hdf5Lib.hdf5.File('./test/examples/broken.h5', globs.Access.ACC_RDONLY);
               file.close();
             }catch(error){
-              console.error(error);
+              //console.error(error);
               error.message.should.equal("Failed to open file, ./test/examples/broken.h5 and flags 0 with return: -1.");
             }
-            console.log("stop on broken done");
             done();
         });
         

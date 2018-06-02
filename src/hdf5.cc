@@ -15,6 +15,7 @@ static void init(Handle<Object> target) {
   HandleScope scope(v8::Isolate::GetCurrent());
 
   NODE_SET_METHOD(target, "getLibVersion", getLibVersion);
+  NODE_SET_METHOD(target, "isHDF5", isHDF5);
 
   // initialize wrapped objects
   File::Initialize(target);
@@ -54,4 +55,32 @@ namespace NodeHDF5 {
       return;
     }
   }
+  
+  void isHDF5(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    // fail out if arguments are not correct
+    if (args.Length() != 1 || !args[0]->IsString() ) {
+
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected string")));
+      args.GetReturnValue().SetUndefined();
+      return;
+    }
+      String::Utf8Value path(args[0]->ToString());
+
+    htri_t ret_value = H5Fis_hdf5( *path );
+   if( ret_value > 0 ){
+     args.GetReturnValue().Set(v8::Boolean::New(
+        v8::Isolate::GetCurrent(), true));
+   }else if( ret_value == 0 ){
+     args.GetReturnValue().Set(v8::Boolean::New(
+        v8::Isolate::GetCurrent(), false));
+       
+   } else // Raise exception when H5Fis_hdf5 returns a negative value
+   {
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to check")));
+      args.GetReturnValue().SetUndefined();
+   }
+  }
+  
 }
