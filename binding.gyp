@@ -589,6 +589,7 @@
                 ],
                 'link_settings': {
                     'libraries': [
+                        '-L<(hdf5_home_mac)/lib',
                         '-lhdf5',
                         '-lhdf5_hl'
                     ],
