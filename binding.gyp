@@ -593,7 +593,9 @@
                         '-lhdf5_hl'
                     ],
                     'ldflags': [
-                        '-L<(hdf5_home_mac)/lib'
+                        '-L<(hdf5_home_mac)/lib',
+                        '-lhdf5',
+                        '-lhdf5_hl'
                     ]
                 }
             }]
