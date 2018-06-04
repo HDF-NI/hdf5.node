@@ -7,7 +7,7 @@ node_js:
   
 env:
   - GCC_VERSION="export CC=gcc-7 && export CXX=g++-7"
-  - GCC_VERSION="export CC=gcc-6 && export CXX=g++-6"
+  #  - GCC_VERSION="export CC=gcc-6 && export CXX=g++-6"
   
 os: 
   - linux
@@ -36,7 +36,7 @@ before_install:
   - export HDF5_HOME=`pwd`/hdf5-1.10.2/dist
   
 install:
-  - export HDF5_HOME_MAX=`pwd`/hdf5-1.10.2/dist
+  - export HDF5_HOME_MAC=`pwd`/hdf5-1.10.2/dist
   - export HDF5_HOME_LINUX=/usr/lib/x86_64-linux-gnu/hdf5/serial
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then echo ${HDF5_HOME} ; else eval "${GCC_VERSION}" ; fi
   # ${CXX} --version
