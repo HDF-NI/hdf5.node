@@ -40,7 +40,7 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then export HDF5_HOME_MAX=`pwd`/hdf5-1.10.2/dist ; else export HDF5_HOME_LINUX=/usr/lib/x86_64-linux-gnu/hdf5/serial ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then echo ${HDF5_HOME} ; else eval "${GCC_VERSION}" ; fi
   # ${CXX} --version
-  - then npm install --longlong_type=LONGLONG53BITS --hdf5_home_mac=${HDF5_HOME_MAC} --hdf5_home_linux=${HDF5_HOME_LINUX}
+  - npm install --longlong_type=LONGLONG53BITS --hdf5_home_mac=${HDF5_HOME_MAC} --hdf5_home_linux=${HDF5_HOME_LINUX}
 
 before-scripte:
   - export PATH=`pwd`/node_modules/.bin:${PATH}
