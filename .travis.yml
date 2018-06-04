@@ -1,9 +1,10 @@
 language: node_js
 node_js:
-  - "7"
+  - "node"
+  - "10"
+  - "9"
+  - "8"
   - "6"
-  - "5"
-  - "4"
   
 env:
   - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
