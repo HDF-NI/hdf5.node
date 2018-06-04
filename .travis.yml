@@ -1,27 +1,29 @@
 language: node_js
 node_js:
+  - "node"
+  - "9"
   - "8"
-
-matrix:
-  include:
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7
-            - libhdf5-dev
-      env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-    - os: osx
-      osx_image: xcode8
-      env:
-        # MATRIX_EVAL="brew install gcc && CC=gcc-7 && CXX=g++-7"
-
+  - "6"
+  
+env:
+  - GCC_VERSION="export CC=gcc-7 && export CXX=g++-7"
+  #  - GCC_VERSION="export CC=gcc-6 && export CXX=g++-6"
+  
+os: 
+  - linux
+  - osx
+  
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-7
+      - libhdf5-dev
+      
+osx_image: xcode8
 
 before_install:
-   # if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then eval "${MATRIX_EVAL}" ; fi
   - wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.2/src/hdf5-1.10.2.tar.gz -O /tmp/hdf5-1.10.2.tar.gz
   - tar -zxvf /tmp/hdf5-1.10.2.tar.gz
   - cd `pwd`/hdf5-1.10.2
@@ -34,10 +36,11 @@ before_install:
   - export HDF5_HOME=`pwd`/hdf5-1.10.2/dist
   
 install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then export HDF5_HOME=`pwd`/hdf5-1.10.2/dist ; else export HDF5_HOME=/usr/lib/x86_64-linux-gnu/hdf5/serial ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then echo ${HDF5_HOME} ; else export CC=gcc-7 && export CXX=g++-7 ; fi
+  - export HDF5_HOME_MAC=`pwd`/hdf5-1.10.2/dist
+  - export HDF5_HOME_LINUX=/usr/lib/x86_64-linux-gnu/hdf5/serial
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then echo ${HDF5_HOME} ; else eval "${GCC_VERSION}" ; fi
   # ${CXX} --version
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then npm install --longlong_type=LONGLONG53BITS --hdf5_home_mac=${HDF5_HOME} ; else npm install --longlong_type=LONGLONG53BITS --hdf5_home_linux=${HDF5_HOME} ; fi
+  - npm install --longlong_type=LONGLONG53BITS --hdf5_home_mac=${HDF5_HOME_MAC} --hdf5_home_linux=${HDF5_HOME_LINUX}
 
 before-scripte:
   - export PATH=`pwd`/node_modules/.bin:${PATH}
