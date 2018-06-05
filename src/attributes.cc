@@ -151,7 +151,7 @@ namespace NodeHDF5 {
           switch (class_id) {
             case H5T_ARRAY: {
               hid_t basetype_id = H5Tget_super(attr_type);
-              if (H5Tis_variable_str(basetype_id)) {
+              if (H5Tis_variable_str(basetype_id)>0) {
                 int                        arrayRank = H5Tget_array_ndims(attr_type);
                 std::unique_ptr<hsize_t[]> arrayDims(new hsize_t[arrayRank]);
                 H5Tget_array_dims(attr_type, arrayDims.get());
