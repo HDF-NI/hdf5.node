@@ -19,7 +19,7 @@ namespace NodeHDF5 {
     hid_t attr_space     = H5Screate_simple(1, currentDims.get(), NULL);
     if (attr_space >= 0) {
       hid_t attr_type = H5Tcopy(type_id);
-      hid_t attr_id   = H5Acreate2(group_id, attribute_name, attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+      hid_t attr_id   = H5Acreate(group_id, attribute_name, attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
 
 #if NODE_VERSION_AT_LEAST(8,0,0)
       H5Awrite(attr_id, attr_type, node::Buffer::Data(buffer->ToObject()));
@@ -33,7 +33,7 @@ namespace NodeHDF5 {
   }
 
   void Attributes::make_attribute_from_array(const hid_t& group_id, const char* attribute_name, v8::Handle<v8::Array> array) {
-    int                        rank = 1;
+   int                        rank = 1;
     std::unique_ptr<hsize_t[]> countSpace(new hsize_t[rank]);
     countSpace.get()[0] = array->Length();
     std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
@@ -43,7 +43,7 @@ namespace NodeHDF5 {
       hid_t type_id     =  H5Tcopy(H5T_NATIVE_INT64);
 //      H5Tset_size(type_id, array->Length());
 //      hid_t                     arraytype_id = H5Tarray_create(type_id, rank, count.get());
-      hid_t                     attr_id      = H5Acreate2(group_id, attribute_name, type_id, memspace_id, H5P_DEFAULT, H5P_DEFAULT);
+      hid_t                     attr_id      = H5Acreate(group_id, attribute_name, type_id, memspace_id, H5P_DEFAULT, H5P_DEFAULT);
       std::unique_ptr<long long []> vl(new long long[array->Length()]);
       for (unsigned int arrayIndex = 0; arrayIndex < array->Length(); arrayIndex++) {
         Int64* valueWrap = ObjectWrap::Unwrap<Int64>(array->Get(arrayIndex)->ToObject());
@@ -67,7 +67,7 @@ namespace NodeHDF5 {
       hid_t type_id     =  H5Tcopy(H5T_NATIVE_UINT64);
 //      H5Tset_size(type_id, array->Length());
 //      hid_t                     arraytype_id = H5Tarray_create(type_id, rank, count.get());
-      hid_t                     attr_id      = H5Acreate2(group_id, attribute_name, type_id, memspace_id, H5P_DEFAULT, H5P_DEFAULT);
+      hid_t                     attr_id      = H5Acreate(group_id, attribute_name, type_id, memspace_id, H5P_DEFAULT, H5P_DEFAULT);
       std::unique_ptr<unsigned long long []> vl(new unsigned long long[array->Length()]);
       for (unsigned int arrayIndex = 0; arrayIndex < array->Length(); arrayIndex++) {
         Uint64* valueWrap = ObjectWrap::Unwrap<Uint64>(array->Get(arrayIndex)->ToObject());
@@ -91,13 +91,14 @@ namespace NodeHDF5 {
     hid_t type_id     = H5Tcopy(H5T_C_S1);
     H5Tset_size(type_id, H5T_VARIABLE);
     hid_t                     arraytype_id = H5Tarray_create(type_id, rank, count.get());
-    hid_t                     attr_id      = H5Acreate2(group_id, attribute_name, arraytype_id, memspace_id, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t                     attr_id      = H5Acreate(group_id, attribute_name, arraytype_id, memspace_id, H5P_DEFAULT, H5P_DEFAULT);
     std::unique_ptr<char* []> vl(new char*[array->Length()]);
     for (unsigned int arrayIndex = 0; arrayIndex < array->Length(); arrayIndex++) {
       v8::String::Utf8Value buffer(array->Get(arrayIndex)->ToString());
       std::string           s(*buffer);
-      vl.get()[arrayIndex] = new char[s.length() + 1];
-      std::strncpy(vl.get()[arrayIndex], s.c_str(), s.length() + 1);
+      vl.get()[arrayIndex] = new char[s.length()];
+      std::memset(vl.get()[arrayIndex], 0, s.length());
+      std::strncpy(vl.get()[arrayIndex], s.c_str(), s.length());
     }
 
     herr_t err = H5Awrite(attr_id, arraytype_id, vl.get());
@@ -449,7 +450,7 @@ namespace NodeHDF5 {
           }
           hid_t attr_type  = H5Tcopy(H5T_NATIVE_UINT);
           hid_t attr_space = H5Screate(H5S_SCALAR);
-          hid_t attr_id = H5Acreate2(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+          hid_t attr_id = H5Acreate(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
           if (attr_id < 0) {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
@@ -470,7 +471,7 @@ namespace NodeHDF5 {
           }
           hid_t attr_type  = H5Tcopy(H5T_NATIVE_INT);
           hid_t attr_space = H5Screate(H5S_SCALAR);
-          hid_t attr_id = H5Acreate2(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+          hid_t attr_id = H5Acreate(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
           if (attr_id < 0) {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
@@ -492,7 +493,7 @@ namespace NodeHDF5 {
           }
           hid_t attr_type  = H5Tcopy(H5T_NATIVE_DOUBLE);
           hid_t attr_space = H5Screate(H5S_SCALAR);
-          hid_t attr_id = H5Acreate2(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+          hid_t attr_id = H5Acreate(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
           if (attr_id < 0) {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
@@ -514,7 +515,7 @@ namespace NodeHDF5 {
           hid_t attr_type = H5Tcopy(H5T_C_S1);
           H5Tset_size(attr_type, H5T_VARIABLE);
           hid_t attr_space = H5Screate(H5S_SCALAR);
-          hid_t attr_id = H5Acreate2(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+          hid_t attr_id = H5Acreate(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
           if (attr_id < 0) {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
@@ -542,7 +543,7 @@ namespace NodeHDF5 {
             H5Tset_size(attr_type, s);
           }
           hid_t attr_space = H5Screate(H5S_SCALAR);
-          hid_t attr_id = H5Acreate2(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+          hid_t attr_id = H5Acreate(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
           if (attr_id < 0) {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
@@ -570,7 +571,7 @@ namespace NodeHDF5 {
           }
           hid_t attr_type  = H5Tcopy(H5T_NATIVE_INT64);
           hid_t attr_space = H5Screate(H5S_SCALAR);
-          hid_t attr_id = H5Acreate2(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+          hid_t attr_id = H5Acreate(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
           if (attr_id < 0) {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
@@ -592,7 +593,7 @@ namespace NodeHDF5 {
           }
           hid_t attr_type  = H5Tcopy(H5T_NATIVE_UINT64);
           hid_t attr_space = H5Screate(H5S_SCALAR);
-          hid_t attr_id = H5Acreate2(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+          hid_t attr_id = H5Acreate(group->id, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
           if (attr_id < 0) {
             H5Sclose(attr_space);
             H5Tclose(attr_type);

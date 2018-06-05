@@ -6,7 +6,7 @@ require('should');
 const hdf5Lib = require('..');
 const globs   = require('../lib/globals');
 
-describe("testing attribute interface ",function(){
+describe("testing attribute interface",function(){
 
     describe("create an h5, group and some attributes ", function() {
         // open hdf file
@@ -53,7 +53,7 @@ describe("testing attribute interface ",function(){
             group.name.type.should.equal("variable-length");
             group.size.constructor.name.should.match('Float64Array');
             //group.notes.constructor.name.should.match('Array');
-            // console.dir(group.notes);
+             //console.dir(group.notes);
             group.close();
             done();
         });
@@ -115,6 +115,46 @@ describe("testing attribute interface ",function(){
             const group   = file.openGroup('scada');
             group.refresh();
             var attrs = group.getDatasetAttributes("active_power");
+            var attrText = '';
+            Object.getOwnPropertyNames(attrs).forEach(function(val, idx, array) {
+//              if (val !=  'id') {
+                if (attrs[val].constructor.name === Array) {
+                  attrText += val + ' :  ';
+                  for (var mIndex = 0; mIndex < attrs[val].Length(); mIndex++) {
+                    attrText += attrs[val][mIndex];
+                    if (mIndex < attrs[val].Length() - 1) {
+                      attrText += ',';
+                    }
+                  }
+                }
+                else{
+                  attrText += val + ' :  ' + attrs[val] + '\n';
+                  console.dir("directly a string ");
+                }
+//              }
+            });
+            console.dir(attrText);
+            group.close();
+            done();
+        });
+
+        after(function(done){
+            file.close();
+            done();
+        });
+    });
+
+    describe.skip("read two attributes", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5Lib.hdf5.File('/home/roger/Downloads/HAA-NL-OPA-picnictd-BE-341.hdf5', globs.Access.ACC_RDONLY);
+          done();
+        });
+
+        it("should be variable string info", function(done) {
+            const group   = file.openGroup('LEG_L_KBA_FLUX');
+            group.refresh();
+            var attrs = group.getDatasetAttributes("y");
             var attrText = '';
             Object.getOwnPropertyNames(attrs).forEach(function(val, idx, array) {
 //              if (val !=  'id') {
