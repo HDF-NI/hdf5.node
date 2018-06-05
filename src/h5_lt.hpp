@@ -1211,7 +1211,7 @@ namespace NodeHDF5 {
           std::unique_ptr<hsize_t[]> arrayDims(new hsize_t[arrayRank]);
           H5Tget_array_dims(type_id, arrayDims.get());
           std::unique_ptr<char* []> vl(new char*[arrayDims.get()[0]]);
-          if (!H5Tis_variable_str(basetype_id)) {
+          if (!(H5Tis_variable_str(basetype_id)>0)) {
             size_t typeSize = H5Tget_size(basetype_id);
             for (unsigned int arrayIndex = 0; arrayIndex < arrayDims.get()[0]; arrayIndex++) {
               vl.get()[arrayIndex] = new char[typeSize + 1];
@@ -1252,7 +1252,7 @@ namespace NodeHDF5 {
           hid_t did     = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
           hid_t t       = H5Dget_type(did);
           hid_t type_id = H5Tget_native_type(t, H5T_DIR_ASCEND);
-          if (H5Tis_variable_str(type_id)) {
+          if (H5Tis_variable_str(type_id)>0) {
             hid_t                     dataspace_id = H5S_ALL;
             hid_t                     memspace_id  = H5S_ALL;
             hid_t                     basetype_id  = H5Tget_super(type_id);

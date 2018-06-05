@@ -198,7 +198,7 @@ namespace NodeHDF5 {
             bool variableType = true;
             for (int memberIndex = 0; memberIndex < nmembers; memberIndex++) {
               hid_t memberType = H5Tget_member_type(type, memberIndex);
-              if (!H5Tis_variable_str(memberType)) {
+              if (!(H5Tis_variable_str(memberType)>0)) {
                 variableType = false;
               }
 
@@ -453,7 +453,7 @@ namespace NodeHDF5 {
             H5Tclose(super_type);
         } break;
         case H5T_STRING: {
-          if (H5Tis_variable_str(attr_type) >= 0) {
+          if (H5Tis_variable_str(attr_type) > 0) {
 
             if (num_elements > 1) {
               std::unique_ptr<char*> buf(new char*[num_elements]);

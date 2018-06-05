@@ -216,7 +216,7 @@ namespace NodeHDF5 {
           nmembers = H5Tget_nmembers(type);
           for (int memberIndex = 0; memberIndex < nmembers; memberIndex++) {
             hid_t memberType = H5Tget_member_type(type, memberIndex);
-            if (H5Tis_variable_str(memberType)) {
+            if (H5Tis_variable_str(memberType)>0) {
               record->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), H5Tget_member_name(type, memberIndex)),
                           String::NewFromUtf8(v8::Isolate::GetCurrent(), "huh"));
             } else {
