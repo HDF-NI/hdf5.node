@@ -90,25 +90,25 @@ namespace NodeHDF5 {
     else{
     hid_t type_id     = H5Tcopy(H5T_C_S1);
     H5Tset_size(type_id, H5T_VARIABLE);
-    hid_t                     arraytype_id = H5Tarray_create(type_id, rank, count.get());
-    hid_t                     attr_id      = H5Acreate(group_id, attribute_name, arraytype_id, memspace_id, H5P_DEFAULT, H5P_DEFAULT);
+//    hid_t                     arraytype_id = H5Tarray_create(type_id, rank, count.get());
+    hid_t                     attr_id      = H5Acreate(group_id, attribute_name, type_id, memspace_id, H5P_DEFAULT, H5P_DEFAULT);
     std::unique_ptr<char* []> vl(new char*[array->Length()]);
     for (unsigned int arrayIndex = 0; arrayIndex < array->Length(); arrayIndex++) {
       v8::String::Utf8Value buffer(array->Get(arrayIndex)->ToString());
       std::string           s(*buffer);
-      vl.get()[arrayIndex] = new char[s.length()];
-      std::memset(vl.get()[arrayIndex], 0, s.length());
+      vl.get()[arrayIndex] = new char[s.length()+1];
+      std::memset(vl.get()[arrayIndex], 0, s.length()+1);
       std::strncpy(vl.get()[arrayIndex], s.c_str(), s.length());
     }
 
-    herr_t err = H5Awrite(attr_id, arraytype_id, vl.get());
+    herr_t err = H5Awrite(attr_id, type_id, vl.get());
 
     if (err < 0) {
       v8::Isolate::GetCurrent()->ThrowException(
           v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make var len array attribute")));
     }
 
-    H5Tclose(arraytype_id);
+//    H5Tclose(arraytype_id);
     H5Tclose(type_id);
     H5Aclose(attr_id);
     }
@@ -144,6 +144,7 @@ namespace NodeHDF5 {
       hid_t attr_id   = H5Aopen(group->id, holder[index].c_str(), H5P_DEFAULT);
       hid_t attr_type = H5Aget_type(attr_id);
       hid_t space     = H5Aget_space(attr_id);
+      hssize_t num_elements = H5Sget_simple_extent_npoints(space);
       switch (H5Sget_simple_extent_type(space)) {
         case H5S_SIMPLE: {
           hssize_t    numberOfElements = H5Sget_simple_extent_npoints(space);
@@ -175,7 +176,62 @@ namespace NodeHDF5 {
                 args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), array);
               }
             } break;
-            case H5T_STRING: break;
+            case H5T_STRING:
+                if (H5Tis_variable_str(attr_type) > 0) {
+
+                  if (num_elements > 1) {
+                    std::unique_ptr<char*[]> buf(new char*[num_elements]);
+                    /*herr_t err=*/H5Aread(attr_id, attr_type, buf.get());
+                    v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), num_elements);
+                    for (unsigned int elementIndex = 0; elementIndex < num_elements; elementIndex++) {
+                      std::string attrValue = "";
+                      if (buf.get()[elementIndex] != NULL)
+                        attrValue = std::string(buf.get()[elementIndex]);
+                      array->Set(elementIndex,
+                                 v8::String::NewFromUtf8(
+                                     v8::Isolate::GetCurrent(), (char*)(attrValue.c_str()), v8::String::kNormalString, attrValue.length()));
+                    }
+                    args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), array);
+
+                  } else {
+                  std::unique_ptr<char*[]>data(new char*[1]);
+                  //std::memset(data.get(), 0, H5Aget_storage_size(attr_id) + 1); // clear buffer
+                    H5Aread(attr_id, attr_type, data.get());
+                    std::string attrValue = "";
+                    if (data.get()[0] != NULL)
+                        attrValue = std::string(data.get()[0]);
+                    args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
+                               v8::String::NewFromUtf8(
+                                   v8::Isolate::GetCurrent(), (char*)(attrValue.c_str()), v8::String::kNormalString, attrValue.length()));
+                  }
+                } else {
+
+                    hsize_t     storeSize = H5Aget_storage_size(attr_id);
+                  std::unique_ptr<char[]> data(new char[storeSize]);
+                  std::memset(data.get(), 0, storeSize); // clear buffer
+
+                  H5Aread(attr_id, attr_type, (void*)data.get());
+                  if(num_elements>0){
+                      hsize_t     offset=storeSize/num_elements;
+                    v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), num_elements);
+                    for (unsigned int elementIndex = 0; elementIndex < num_elements; elementIndex++) {
+                        hsize_t     trimOffset=offset;
+                      if (data.get()[elementIndex*offset+trimOffset-1] ==0){
+                          trimOffset=std::strlen((char*)(data.get()+elementIndex*offset));
+                      }
+                      array->Set(elementIndex,
+                                 v8::String::NewFromUtf8(
+                                     v8::Isolate::GetCurrent(), (char*)(data.get()+elementIndex*offset), v8::String::kNormalString, trimOffset));
+                    }
+                    args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), array);
+                  }
+                  else{
+                    args.This()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
+                             v8::String::NewFromUtf8(
+                                 v8::Isolate::GetCurrent(), (char*)data.get(), v8::String::kNormalString, storeSize));
+                  }
+                }
+                break;
             default:
               size_t                     size = H5Tget_size(attr_type);
               v8::Local<v8::ArrayBuffer> arrayBuffer;

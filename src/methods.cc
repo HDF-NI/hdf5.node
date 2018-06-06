@@ -456,13 +456,13 @@ namespace NodeHDF5 {
           if (H5Tis_variable_str(attr_type) > 0) {
 
             if (num_elements > 1) {
-              std::unique_ptr<char*> buf(new char*[num_elements]);
+              std::unique_ptr<char*[]> buf(new char*[num_elements]);
               /*herr_t err=*/H5Aread(attr_id, attr_type, buf.get());
               v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), num_elements);
               for (unsigned int elementIndex = 0; elementIndex < num_elements; elementIndex++) {
                 std::string attrValue = "";
                 if (buf.get()[elementIndex] != NULL)
-                  attrValue = buf.get()[elementIndex];
+                  attrValue = std::string(buf.get()[elementIndex]);
                 array->Set(elementIndex,
                            v8::String::NewFromUtf8(
                                v8::Isolate::GetCurrent(), (char*)(attrValue.c_str()), v8::String::kNormalString, attrValue.length()));
@@ -470,21 +470,42 @@ namespace NodeHDF5 {
               attrs->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()), array);
 
             } else {
-            std::unique_ptr<char[]>data(new char[H5Aget_storage_size(attr_id) + 1]);
-            std::memset(data.get(), 0, H5Aget_storage_size(attr_id) + 1); // clear buffer
+            std::unique_ptr<char*[]>data(new char*[1]);
+            //std::memset(data.get(), 0, H5Aget_storage_size(attr_id) + 1); // clear buffer
               H5Aread(attr_id, attr_type, data.get());
               std::string attrValue = "";
-              ssize_t value_len = (H5Aget_storage_size(attr_id)>0) ? H5Aget_storage_size(attr_id)-1: H5Aget_storage_size(attr_id);
+              if (data.get()[0] != NULL)
+                  attrValue = std::string(data.get()[0]);
               attrs->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()),
                          v8::String::NewFromUtf8(
-                             v8::Isolate::GetCurrent(), (char*)data.get(), v8::String::kNormalString, value_len));
+                             v8::Isolate::GetCurrent(), (char*)(attrValue.c_str()), v8::String::kNormalString, attrValue.length()));
             }
           } else {
-            std::string strValue(H5Aget_storage_size(attr_id) + 1, '\0');
-            H5Aread(attr_id, attr_type, (void*)strValue.c_str());
-            attrs->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()),
+
+              hsize_t     storeSize = H5Aget_storage_size(attr_id);
+            std::unique_ptr<char[]> data(new char[storeSize]);
+            std::memset(data.get(), 0, storeSize); // clear buffer
+              
+            H5Aread(attr_id, attr_type, (void*)data.get());
+            if(num_elements>0){
+                hsize_t     offset=storeSize/num_elements;
+              v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), num_elements);
+              for (unsigned int elementIndex = 0; elementIndex < num_elements; elementIndex++) {
+                  hsize_t     trimOffset=offset;
+                if (data.get()[elementIndex*offset+trimOffset-1] ==0){
+                    trimOffset=std::strlen((char*)(data.get()+elementIndex*offset));
+                }
+                array->Set(elementIndex,
+                           v8::String::NewFromUtf8(
+                               v8::Isolate::GetCurrent(), (char*)(data.get()+elementIndex*offset), v8::String::kNormalString, trimOffset));
+              }
+              attrs->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()), array);
+            }
+            else{
+              attrs->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()),
                        v8::String::NewFromUtf8(
-                           v8::Isolate::GetCurrent(), strValue.c_str(), v8::String::kNormalString, std::strlen(strValue.c_str())));
+                           v8::Isolate::GetCurrent(), (char*)data.get(), v8::String::kNormalString, storeSize));
+            }
           }
         } break;
         case H5T_NO_CLASS:
