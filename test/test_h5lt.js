@@ -916,6 +916,7 @@ var start = process.hrtime();
             'Float64Array'.should.match(readBuffer.constructor.name);
             const length=186;
             length.should.match(readBuffer.length);
+            console.dir(readBuffer.Dipole);
             const value=2.9;
             value.should.match(readBuffer.Dipole);
             groupGeometries.close();

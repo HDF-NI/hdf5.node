@@ -2,6 +2,7 @@
 #include <v8.h>
 #include <uv.h>
 #include <node.h>
+#include <node_object_wrap.h>
 #include <node_buffer.h>
 
 #include <algorithm>
@@ -15,6 +16,8 @@
 #include "group.h"
 #include "int64.hpp"
 #include "H5LTpublic.h"
+
+#include "attributes.hpp"
 
 static herr_t H5LT_make_dataset_numerical(hid_t          loc_id,
                                           const char*    dset_name,
@@ -1492,58 +1495,11 @@ namespace NodeHDF5 {
               break;
           }
           }
+          hid_t did                  = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
 
-          // Attributes
-          uint32_t                 index = 0;
-          hsize_t                  idx   = 0;
-          std::vector<std::string> holder;
-          //        group->m_group.iterateAttrs([&](H5::H5Location &loc, H5std_string attr_name, void *operator_data){
-          //            ((std::vector<std::string>*)operator_data)->push_back(attr_name);
-          //        }, &index, &holder);
-          H5Aiterate_by_name(idWrap->Value(),
-                             *dset_name,
-                             H5_INDEX_CRT_ORDER,
-                             H5_ITER_INC,
-                             &idx,
-                             [](hid_t location_id, const char* attr_name, const H5A_info_t* ainfo, void* operator_data) {
-                               if (ainfo->data_size > 0)
-                                 ((std::vector<std::string>*)operator_data)->push_back(std::string(attr_name));
-                               return (herr_t)((std::vector<std::string>*)operator_data)->size();
-                             },
-                             (void*)&holder,
-                             H5P_DEFAULT);
-          for (index = 0; index < (uint32_t)holder.size(); index++) {
-            hsize_t     values_dim[1] = {1};
-            size_t      bufSize       = 0;
-            H5T_class_t class_id;
-            err = H5LTget_attribute_info(idWrap->Value(), *dset_name, holder[index].c_str(), values_dim, &class_id, &bufSize);
-            if (err >= 0) {
-              switch (class_id) {
-                case H5T_INTEGER:
-                  long long intValue;
-                  H5LTget_attribute_int(idWrap->Value(), *dset_name, holder[index].c_str(), (int*)&intValue);
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                              Int32::New(v8::Isolate::GetCurrent(), intValue));
-                  break;
-                case H5T_FLOAT:
-                  double value;
-                  H5LTget_attribute_double(idWrap->Value(), *dset_name, holder[index].c_str(), &value);
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                              Number::New(v8::Isolate::GetCurrent(), value));
-                  break;
-                case H5T_STRING: {
-                  std::string strValue(bufSize + 1, '\0');
-                  H5LTget_attribute_string(idWrap->Value(), *dset_name, holder[index].c_str(), (char*)strValue.c_str());
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str()));
-                } break;
-                case H5T_NO_CLASS:
-                default: break;
-              }
-            }
-          }
-
-          //
+          v8::Local<v8::Object> focus=buffer->ToObject();
+          refreshAttributes(focus, did);
+          H5Dclose(did);
           args.GetReturnValue().Set(buffer);
           break;
       }
@@ -1752,10 +1708,12 @@ namespace NodeHDF5 {
           }
           }
           H5Tclose( type_id);
+          v8::Local<v8::Object> focus=buffer->ToObject();
+          refreshAttributes(focus, did);
           H5Dclose(did);
 
           // Attributes
-          uint32_t                 index = 0;
+/*          uint32_t                 index = 0;
           hsize_t                  idx   = 0;
           std::vector<std::string> holder;
           H5Aiterate_by_name(idWrap->Value(),
@@ -1800,7 +1758,7 @@ namespace NodeHDF5 {
               }
             }
           }
-
+*/
           args.GetReturnValue().Set(buffer);
         } break;
         default:

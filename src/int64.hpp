@@ -31,6 +31,7 @@ namespace NodeHDF5 {
     };
 
     static void toString(const v8::FunctionCallbackInfo<v8::Value>& args);
+    void setValue(long long value){this->value=value;};
 
   protected:
     Int64()

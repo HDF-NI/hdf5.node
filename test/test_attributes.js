@@ -5,6 +5,7 @@ require('should');
 
 const hdf5Lib = require('..');
 const globs   = require('../lib/globals');
+const h5lt          = hdf5Lib.h5lt;
 
 describe("testing attribute interface",function(){
 
@@ -174,6 +175,26 @@ describe("testing attribute interface",function(){
 //              }
             });
             console.dir(attrText);
+            var buffer=h5lt.readDataset(group.id, 'y');
+            attrText = "";
+            Object.getOwnPropertyNames(buffer).forEach(function(val, idx, array) {
+//              if (val !=  'id') {
+                if (buffer[val].constructor.name === Array) {
+                  attrText += val + ' :  ';
+                  for (var mIndex = 0; mIndex < buffer[val].Length(); mIndex++) {
+                    attrText += buffer[val][mIndex];
+                    if (mIndex < buffer[val].Length() - 1) {
+                      attrText += ',';
+                    }
+                  }
+                }
+                else{
+                  attrText += val + ' :  ' + buffer[val] + '\n';
+                }
+//              }
+            });
+            console.dir(attrText);
+            
             group.close();
             done();
         });

@@ -129,6 +129,8 @@
             'target_name': 'h5lt',
             'conditions': [
             ['OS=="linux"', {
+                'cflags!': [ '-fno-exceptions' ],
+                'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-<(link_type)", "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'include_dirs': [
                     '<(hdf5_home_linux)/include',
@@ -322,6 +324,8 @@
             'target_name': 'h5pt',
             'conditions': [
             ['OS=="linux"', {
+                'cflags!': [ '-fno-exceptions' ],
+                'cflags_cc!': [ '-fno-exceptions' ],
                 'cflags': ['-fPIC', "-<(link_type)", "-O4", "-std=c++14", "-fexceptions", "-Werror"],
                 'include_dirs': [
                     '<(hdf5_home_linux)/include',
