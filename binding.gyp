@@ -161,6 +161,8 @@
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
+                    'src/int64.cc',
+                    'src/uint64.cc',
                     'src/h5lt.cc'
                 ],
                 'msbuild_toolset': 'v120',
