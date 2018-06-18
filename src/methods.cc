@@ -342,8 +342,20 @@ namespace NodeHDF5 {
 
       switch (H5Tget_class(attr_type)) {
         case H5T_BITFIELD:
-        case H5T_OPAQUE:
-        case H5T_REFERENCE:
+        case H5T_OPAQUE: break;
+        case H5T_REFERENCE: {
+          std::unique_ptr<long long[]> buf(new long long[num_elements]);
+          H5Aread(attr_id, attr_type, buf.get());
+          if (num_elements > 1) {
+            v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), num_elements);
+            for (unsigned int elementIndex = 0; elementIndex < num_elements; elementIndex++) {
+              array->Set(elementIndex, v8::Int32::New(v8::Isolate::GetCurrent(), buf.get()[elementIndex]));
+            }
+            attrs->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()), array);
+          } else
+            attrs->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()),
+                       v8::Int32::New(v8::Isolate::GetCurrent(), buf.get()[0]));
+        } break;
         case H5T_ARRAY:
         case H5T_ENUM: break;
         case H5T_COMPOUND: {
@@ -672,4 +684,35 @@ namespace NodeHDF5 {
       args.GetReturnValue().SetUndefined();
     }
 
+    haddr_t Methods::childId(const char* objname) {
+      H5O_info_t objinfo;
+
+      // Use C API to get information of the object
+      herr_t ret_value = H5Oget_info_by_name(id, objname, &objinfo, H5P_DEFAULT);
+
+      if (ret_value < 0) {
+        // Return a valid type or throw an exception for unknown type
+        return -1;
+      }
+      return objinfo.addr;
+    }
+
+    void Methods::getDatasetId(const v8::FunctionCallbackInfo<Value>& args) {
+      // fail out if arguments are not correct
+      if (args.Length() != 1 || !args[0]->IsString()) {
+
+        v8::Isolate::GetCurrent()->ThrowException(
+            v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected dataset name")));
+        args.GetReturnValue().SetUndefined();
+        return;
+      }
+
+      // unwrap group
+      Methods* group = ObjectWrap::Unwrap<Methods>(args.This());
+      // store specified child name
+      v8::String::Utf8Value child_name(args[0]->ToString());
+      args.GetReturnValue().Set((uint32_t)group->childId(*child_name));
+
+      return;
+    }
 }
