@@ -349,12 +349,12 @@ namespace NodeHDF5 {
           if (num_elements > 1) {
             v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), num_elements);
             for (unsigned int elementIndex = 0; elementIndex < num_elements; elementIndex++) {
-              array->Set(elementIndex, v8::Int32::New(v8::Isolate::GetCurrent(), buf.get()[elementIndex]));
+              array->Set(elementIndex, v8::Number::New(v8::Isolate::GetCurrent(), buf.get()[elementIndex]));
             }
             attrs->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()), array);
           } else
             attrs->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()),
-                       v8::Int32::New(v8::Isolate::GetCurrent(), buf.get()[0]));
+                       v8::Number::New(v8::Isolate::GetCurrent(), buf.get()[0]));
         } break;
         case H5T_ARRAY:
         case H5T_ENUM: break;
