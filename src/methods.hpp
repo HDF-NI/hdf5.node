@@ -231,11 +231,13 @@ namespace NodeHDF5 {
     static void getFilters(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void iterate(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void visit(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void getDatasetId(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   protected:
     int        getNumAttrs();
     hsize_t    getNumObjs();
     H5O_type_t childObjType(const char* objname);
+    haddr_t    childId(const char* objname);
     std::unique_ptr<char[]> getObjnameByIdx(hsize_t idx);
   };
 }
