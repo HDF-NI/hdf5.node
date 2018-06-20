@@ -78,8 +78,11 @@ namespace NodeHDF5 {
       Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t  locId  = args[0]->IsUndefined() ? -1 : idWrap->Value();
       
+#if  H5_VERSION_GE(1,10,0)
       H5Rdereference(locId, H5P_DEFAULT, (H5R_type_t)args[1]->Int32Value(), (void *)obj->objectId);
-
+#else
+      H5Rdereference(locId, (H5R_type_t)args[1]->Int32Value(), (void *)obj->objectId);
+#endif
       args.GetReturnValue().SetUndefined();
     }
     
