@@ -132,6 +132,14 @@ export declare enum H5Type {
     H5T_NATIVE_UINT8,
 }
 
+export declare enum H5RType {
+  H5R_BADTYPE         = -1,     /*invalid Reference Type                     */
+  H5R_OBJECT          = 0,      /*Object reference                           */
+  H5R_DATASET_REGION  = 1,      /*Dataset Region Reference                   */
+  H5R_MAXTYPE         = 2       /*highest type (Invalid as true type)	     */
+}
+
+
 export declare enum Interlace {
     INTERLACE_PIXEL,
     INTERLACE_PLANE

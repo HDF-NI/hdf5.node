@@ -2,9 +2,11 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
+#include "reference.hpp"
 #include "attributes.hpp"
 #include "methods.hpp"
 #include "filters.hpp"
+
 #include "H5LTpublic.h"
 #include "H5PTpublic.h"
 #include "H5Lpublic.h"
@@ -343,7 +345,15 @@ namespace NodeHDF5 {
       switch (H5Tget_class(attr_type)) {
         case H5T_BITFIELD:
         case H5T_OPAQUE:
-        case H5T_REFERENCE:
+            break;
+        case H5T_REFERENCE:{
+          std::unique_ptr<char[]> buf(new char[H5Aget_storage_size(attr_id)]);
+          H5Aread(attr_id, attr_type, buf.get());
+          hid_t objectId=((hid_t*)buf.get())[0];
+          v8::Local<v8::Object>&& ref = Reference::Instantiate(objectId, 1);
+          attrs->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), attrName.c_str()), ref);
+        }
+            break;
         case H5T_ARRAY:
         case H5T_ENUM: break;
         case H5T_COMPOUND: {

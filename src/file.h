@@ -12,6 +12,7 @@
 #include "hdf5_hl.h"
 
 #include "exceptions.hpp"
+#include "reference.hpp"
 #include "attributes.hpp"
 #include "methods.hpp"
 

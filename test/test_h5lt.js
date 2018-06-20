@@ -784,6 +784,43 @@ describe("testing lite interface ", function() {
         });
     });
 
+
+    describe("write/read enum", function() {
+        let file;
+        before(function(done) {
+          //file = new hdf5.File('/home/roger/testing-grounds/hdf5-examples/1_10/C/h5ex_t_enum.h5', Access.ACC_RDWR);
+          file = new hdf5.File('./enum.h5', Access.ACC_TRUNC);
+          done();
+        });
+        it("write enum", function(done) {
+            var phases = {
+                SOLID: 0,
+                LIQUID: 1,
+                GAS: 2,
+                PLASMA: 3
+            };
+            const buffer=new Uint16Array(35);
+            buffer[0]=phases.SOLID,  buffer[2]=phases.SOLID,  buffer[3]=phases.SOLID,  buffer[4]=phases.SOLID,  buffer[5]=phases.SOLID,  buffer[6]=phases.SOLID,  buffer[7]=phases.SOLID;
+            buffer[8]=phases.SOLID,  buffer[9]=phases.LIQUID, buffer[10]=phases.GAS,    buffer[11]=phases.PLASMA, buffer[12]=phases.SOLID,  buffer[13]=phases.LIQUID, buffer[14]=phases.GAS;
+            buffer[15]=phases.SOLID,  buffer[16]=phases.GAS,    buffer[17]=phases.SOLID,  buffer[18]=phases.GAS,    buffer[19]=phases.SOLID,  buffer[20]=phases.GAS,    buffer[21]=phases.SOLID;
+            buffer[22]=phases.SOLID,  buffer[23]=phases.PLASMA, buffer[24]=phases.GAS,    buffer[2]=phases.LIQUID, buffer[26]=phases.SOLID,  buffer[27]=phases.PLASMA, buffer[28]=phases.GAS;
+            h5lt.makeDataset(file.id, 'states', buffer, {rank: 2, rows: 5, columns: 7, enumeration: phases});
+
+            done();
+        });
+        it("read enum", function(done) {
+            const enumeration=h5lt.readDataset(file.id, 'states', (options) =>{
+                console.dir(options.enumeration);
+            });
+            enumeration.length.should.equal(35);
+            done();
+        });
+        after(function(done) {
+          file.close();
+          done();
+        });
+    });
+
     describe.skip("reading inchies", function() {
         let file;
         before(function(done) {

@@ -17,6 +17,7 @@ namespace NodeHDF5 {
     friend class Group;
     friend class Filters;
     friend class Attributes;
+    friend class Reference;
     friend class PacketTable;
 
   protected:

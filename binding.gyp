@@ -27,6 +27,7 @@
                     'src/methods.cc',
                     'src/h5_file.cc',
                     'src/h5_group.cc',
+                    'src/reference.cc'
                 ],
                 'link_settings': {
                     'libraries': [
@@ -57,6 +58,7 @@
                     'src/methods.cc',
                     'src/h5_file.cc',
                     'src/h5_group.cc',
+                    'src/reference.cc'
                 ],
                 'msbuild_toolset': 'v120',
                 "configurations": {
@@ -109,6 +111,7 @@
                     'src/methods.cc',
                     'src/h5_file.cc',
                     'src/h5_group.cc',
+                    'src/reference.cc'
                 ],
                 'link_settings': {
                     'libraries': [
@@ -137,7 +140,9 @@
                     "/usr/include/hdf5/serial"
                 ],
                 'sources': [
-                    'src/h5lt.cc'
+                    'src/int64.cc',
+                    'src/h5lt.cc',
+                    'src/reference.cc'
                 ],
                 'link_settings': {
                     'libraries': [
@@ -161,7 +166,9 @@
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
-                    'src/h5lt.cc'
+                    'src/int64.cc',
+                    'src/h5lt.cc',
+                    'src/reference.cc'
                 ],
                 'msbuild_toolset': 'v120',
                 "configurations": {
@@ -205,7 +212,9 @@
                     '<(hdf5_home_mac)/include'
                 ],
                 'sources': [
-                    'src/h5lt.cc'
+                    'src/int64.cc',
+                    'src/h5lt.cc',
+                    'src/reference.cc'
                 ],
                 'link_settings': {
                     'libraries': [

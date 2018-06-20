@@ -9,6 +9,7 @@
 #include <cstring>
 #include <vector>
 #include <memory>
+
 #include "H5Tpublic.h"
 #include "int64.hpp"
 #include "uint64.hpp"
@@ -39,6 +40,14 @@ namespace NodeHDF5 {
           hssize_t    numberOfElements = H5Sget_simple_extent_npoints(space);
           H5T_class_t class_id         = H5Tget_class(attr_type);
           switch (class_id) {
+        case H5T_REFERENCE:{
+            std::unique_ptr<char[]> buf(new char[H5Aget_storage_size(attr_id)]);
+            H5Aread(attr_id, attr_type, buf.get());
+            hid_t objectId=((hid_t*)buf.get())[0];
+            v8::Local<v8::Object>&& ref = Reference::Instantiate(objectId, 1);
+            focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), ref);
+          }
+            break;
             case H5T_ARRAY: {
               hid_t basetype_id = H5Tget_super(attr_type);
               if (H5Tis_variable_str(basetype_id)>0) {

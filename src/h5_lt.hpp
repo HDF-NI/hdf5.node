@@ -1389,7 +1389,7 @@ namespace NodeHDF5 {
             }
             H5Tclose(t);
             H5Dclose(h);
-          } else if (class_id == H5T_INTEGER && bufSize == 2) {
+          } else if ((class_id == H5T_INTEGER || class_id == H5T_ENUM) && bufSize == 2) {
             hid_t h = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
             hid_t t = H5Dget_type(h);
             if (H5Tget_sign(H5Dget_type(h)) == H5T_SGN_2) {
@@ -1457,6 +1457,27 @@ namespace NodeHDF5 {
               case 1:
                 options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
                 break;
+            }
+            if(class_id == H5T_ENUM){
+                v8::Local<v8::Object> enumeration = v8::Object::New(v8::Isolate::GetCurrent());
+
+                hid_t h = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
+                hid_t t = H5Dget_type(h);
+                int n=H5Tget_nmembers( t );
+                for(unsigned int i=0;i<(unsigned int)n;i++){
+                    char * mname=H5Tget_member_name( t, i );
+                    int idx=H5Tget_member_index(t, (const char *) mname );
+                    unsigned int value;
+                    H5Tget_member_value( t, idx, (void *)&value );
+                    //std::cout<<i<<" "<<value<<std::endl;
+                    hsize_t dvalue=value;
+                    enumeration->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), mname), Number::New(v8::Isolate::GetCurrent(), dvalue));                    
+                    H5free_memory((void *)mname);
+                }
+                H5Tclose(t);
+                H5Dclose(h);
+                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "enumeration"), enumeration);
+                
             }
             v8::Local<v8::Value> argv[1] = {options};
             v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)
@@ -1709,56 +1730,11 @@ namespace NodeHDF5 {
           }
           H5Tclose( type_id);
           v8::Local<v8::Object> focus=buffer->ToObject();
+          // Attributes
           refreshAttributes(focus, did);
           H5Dclose(did);
 
-          // Attributes
-/*          uint32_t                 index = 0;
-          hsize_t                  idx   = 0;
-          std::vector<std::string> holder;
-          H5Aiterate_by_name(idWrap->Value(),
-                             *dset_name,
-                             H5_INDEX_CRT_ORDER,
-                             H5_ITER_INC,
-                             &idx,
-                             [](hid_t location_id, const char* attr_name, const H5A_info_t* ainfo, void* operator_data) {
-                               if (ainfo->data_size > 0)
-                                 ((std::vector<std::string>*)operator_data)->push_back(std::string(attr_name));
-                               return (herr_t)((std::vector<std::string>*)operator_data)->size();
-                             },
-                             (void*)&holder,
-                             H5P_DEFAULT);
-          for (index = 0; index < (uint32_t)holder.size(); index++) {
-            hsize_t     values_dim[1] = {1};
-            size_t      bufSize       = 0;
-            H5T_class_t class_id;
-            err = H5LTget_attribute_info(idWrap->Value(), *dset_name, holder[index].c_str(), values_dim, &class_id, &bufSize);
-            if (err >= 0) {
-              switch (class_id) {
-                case H5T_INTEGER:
-                  long long intValue;
-                  H5LTget_attribute_int(idWrap->Value(), *dset_name, holder[index].c_str(), (int*)&intValue);
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                              Int32::New(v8::Isolate::GetCurrent(), intValue));
-                  break;
-                case H5T_FLOAT:
-                  double value;
-                  H5LTget_attribute_double(idWrap->Value(), *dset_name, holder[index].c_str(), &value);
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                              Number::New(v8::Isolate::GetCurrent(), value));
-                  break;
-                case H5T_STRING: {
-                  std::string strValue(bufSize + 1, '\0');
-                  H5LTget_attribute_string(idWrap->Value(), *dset_name, holder[index].c_str(), (char*)strValue.c_str());
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str()));
-                } break;
-                case H5T_NO_CLASS:
-                default: break;
-              }
-            }
-          }
-*/
+
           args.GetReturnValue().Set(buffer);
         } break;
         default:

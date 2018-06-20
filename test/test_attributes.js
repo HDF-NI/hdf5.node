@@ -5,6 +5,8 @@ require('should');
 
 const hdf5Lib = require('..');
 const globs   = require('../lib/globals');
+const H5RType        = globs.H5RType;
+const hdf5          = hdf5Lib.hdf5;
 const h5lt          = hdf5Lib.h5lt;
 
 describe("testing attribute interface",function(){
@@ -196,6 +198,46 @@ describe("testing attribute interface",function(){
             console.dir(attrText);
             
             group.close();
+            done();
+        });
+
+        after(function(done){
+            file.close();
+            done();
+        });
+    });
+
+    describe.skip("read reference attributes", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5Lib.hdf5.File('/home/roger/Downloads/test.h5', globs.Access.ACC_RDONLY);
+          done();
+        });
+
+        it("should be reference to clock signal", function(done) {
+          try{
+            const group   = file.openGroup('Group_1');
+            const readBuffer=h5lt.readDataset(group.id, 'Dataset_1', function(options){
+                options.rank.should.equal(2);
+                options.rows.should.equal(10);
+                options.columns.should.equal(1);
+            });
+            readBuffer.constructor.name.should.match('Float64Array');
+            readBuffer.length.should.match(10);
+            var refName=readBuffer.bases.getName(file.id, H5RType.H5R_OBJECT);
+            console.log(refName);
+            const refBuffer=h5lt.readDataset(file.id, refName, function(options){
+                options.rank.should.equal(2);
+                options.rows.should.equal(10);
+                options.columns.should.equal(1);
+            });
+            
+            group.close();
+          }
+          catch (e) {
+            console.log("\t\t"+e.message);
+            e.message.should.equal("unsupported data type");
+          }
             done();
         });
 

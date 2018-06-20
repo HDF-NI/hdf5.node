@@ -2,6 +2,7 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
+#include "reference.hpp"
 #include "attributes.hpp"
 
 namespace NodeHDF5 {

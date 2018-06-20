@@ -2,6 +2,7 @@
 #include "file.h"
 #include "group.h"
 #include "filters.hpp"
+#include "reference.hpp"
 #include "hdf5node.hpp"
 
 using namespace v8;
@@ -20,6 +21,7 @@ static void init(Handle<Object> target) {
   // initialize wrapped objects
   File::Initialize(target);
   Filters::Init(target);
+  Reference::Init(target);
   Int64::Initialize(target);
   Uint64::Initialize(target);
 
