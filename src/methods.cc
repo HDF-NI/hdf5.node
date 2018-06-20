@@ -246,7 +246,7 @@ namespace NodeHDF5 {
       return;
     }
     const hid_t dataspace = H5Dget_space(dataset);
-    if(dataset<0){
+    if(dataspace<0){
       H5Dclose(dataset);
       v8::Isolate::GetCurrent()->ThrowException(
           v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "can't get dataset space")));
@@ -495,7 +495,7 @@ namespace NodeHDF5 {
               hsize_t     storeSize = H5Aget_storage_size(attr_id);
             std::unique_ptr<char[]> data(new char[storeSize]);
             std::memset(data.get(), 0, storeSize); // clear buffer
-              
+
             H5Aread(attr_id, attr_type, (void*)data.get());
             if(num_elements>0){
                 hsize_t     offset=storeSize/num_elements;
@@ -615,7 +615,7 @@ namespace NodeHDF5 {
     name_len = H5Lget_name_by_idx(id, ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C.get(), name_len+1, H5P_DEFAULT);
     return name_C;
   }
-  
+
     void Methods::iterate(const v8::FunctionCallbackInfo<Value>& args) {
 
       Methods*                group = ObjectWrap::Unwrap<Methods>(args.This());

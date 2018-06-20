@@ -167,8 +167,8 @@
                 ],
                 'sources': [
                     'src/int64.cc',
-                    'src/h5lt.cc',
-                    'src/reference.cc'
+                    'src/reference.cc',
+                    'src/h5lt.cc'
                 ],
                 'msbuild_toolset': 'v120',
                 "configurations": {
