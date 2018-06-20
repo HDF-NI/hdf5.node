@@ -1472,7 +1472,9 @@ namespace NodeHDF5 {
                     //std::cout<<i<<" "<<value<<std::endl;
                     hsize_t dvalue=value;
                     enumeration->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), mname), Number::New(v8::Isolate::GetCurrent(), dvalue));                    
+#if  H5_VERSION_GE(1,8,13)
                     H5free_memory((void *)mname);
+#endif
                 }
                 H5Tclose(t);
                 H5Dclose(h);
