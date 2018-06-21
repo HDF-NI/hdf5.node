@@ -1499,7 +1499,9 @@ namespace NodeHDF5 {
                     H5Tget_member_value( t, idx, (void *)&value );
                     hsize_t dvalue=value;
                     enumeration->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), mname), Number::New(v8::Isolate::GetCurrent(), dvalue));                    
+#if  H5_VERSION_GE(1,8,13)
                     H5free_memory((void *)mname);
+#endif
                 }
                 H5Tclose(t);
                 H5Dclose(h);

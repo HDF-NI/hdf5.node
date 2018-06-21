@@ -141,6 +141,7 @@
                 ],
                 'sources': [
                     'src/int64.cc',
+                    'src/uint64.cc',
                     'src/h5lt.cc',
                     'src/reference.cc'
                 ],
@@ -167,6 +168,7 @@
                 ],
                 'sources': [
                     'src/int64.cc',
+                    'src/uint64.cc',
                     'src/reference.cc',
                     'src/h5lt.cc'
                 ],
@@ -213,6 +215,7 @@
                 ],
                 'sources': [
                     'src/int64.cc',
+                    'src/uint64.cc',
                     'src/h5lt.cc',
                     'src/reference.cc'
                 ],
