@@ -450,7 +450,6 @@ namespace NodeHDF5 {
     Group*            group = ObjectWrap::Unwrap<Group>(args.This());
     String::Utf8Value group_name(args[0]->ToString());
     String::Utf8Value dest_name(args[2]->ToString());
-    // std::cout<<*group_name<<" "<<*dest_name<<std::endl;
     herr_t err = H5Lcopy(group->id, *group_name, args[1]->IntegerValue(), *dest_name, H5P_DEFAULT, H5P_DEFAULT);
     if (err < 0) {
       std::string str(*dest_name);

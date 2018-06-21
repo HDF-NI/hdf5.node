@@ -646,7 +646,35 @@ namespace NodeHDF5 {
             strncmp("rows", (*String::Utf8Value(name->ToString())), 4) != 0 &&
             strncmp("columns", (*String::Utf8Value(name->ToString())), 7) != 0 &&
             strncmp("buffer", (*String::Utf8Value(name->ToString())), 6) != 0) {
-          if (buffer->Get(name)->IsObject() || buffer->Get(name)->IsExternal()) {
+          if (buffer->Get(name)->IsObject()){
+            std::string constructorName = "Reference";
+            if (constructorName.compare(*String::Utf8Value(buffer->Get(name)->ToObject()->GetConstructorName())) == 0) {
+                v8::Local<v8::Object> obj=buffer->Get(name)->ToObject();
+            // unwrap ref
+            Reference* ref =  ObjectWrap::Unwrap<Reference>(obj);
+            hid_t attr_type  = H5Tcopy(H5T_STD_REF_OBJ);
+            std::unique_ptr<hsize_t[]> currentDims(new hsize_t[1]);
+            currentDims.get()[0] = 1;
+            hid_t attr_space     = H5Screate_simple(1, currentDims.get(), NULL);
+//            hid_t attr_space = H5Screate(H5S_SCALAR);
+            hid_t  did = H5Dopen(group_id, dset_name, H5P_DEFAULT);
+            hid_t attr_id = H5Acreate(did, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+            if (attr_id < 0) {
+              H5Dclose(did);
+              H5Sclose(attr_space);
+              H5Tclose(attr_type);
+              continue;
+            }
+            hid_t value=ref->getObjectId();
+            H5Awrite(attr_id, attr_type, &value);
+            H5Dclose(did);
+            H5Sclose(attr_space);
+            H5Tclose(attr_type);
+            H5Aclose(attr_id);
+                
+            }
+          }
+          else if( buffer->Get(name)->IsExternal()) {
 
           } else if (buffer->Get(name)->IsUint32()) {
             uint32_t value = buffer->Get(name)->Uint32Value();
@@ -1469,7 +1497,6 @@ namespace NodeHDF5 {
                     int idx=H5Tget_member_index(t, (const char *) mname );
                     unsigned int value;
                     H5Tget_member_value( t, idx, (void *)&value );
-                    //std::cout<<i<<" "<<value<<std::endl;
                     hsize_t dvalue=value;
                     enumeration->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), mname), Number::New(v8::Isolate::GetCurrent(), dvalue));                    
                     H5free_memory((void *)mname);

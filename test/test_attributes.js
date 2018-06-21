@@ -207,15 +207,50 @@ describe("testing attribute interface",function(){
         });
     });
 
-    describe.skip("read reference attributes", function() {
+    describe("reference attributes", function() {
         let file;
         before(function(done) {
-          file = new hdf5Lib.hdf5.File('/home/roger/Downloads/test.h5', globs.Access.ACC_RDONLY);
+          file = new hdf5Lib.hdf5.File('./reference.h5', globs.Access.ACC_TRUNC);
           done();
+        });
+
+        it("should create reference to clock signal", function(done) {
+            const group   = file.createGroup('Group_1');
+            var signals=new Float64Array(10);
+            signals[0]=16.727220199999998;
+            signals[1]=16.7322189;
+            signals[2]=16.737217599999997;
+            signals[3]=16.7422163;
+            signals[4]=16.747215;
+            signals[5]=16.7522137;
+            signals[6]=16.7572124;
+            signals[7]=16.7622111;
+            signals[8]=16.7672098;
+            signals[9]=16.772208499999998;
+            h5lt.makeDataset(group.id, 'Dataset_Time', signals, {rank: 2, rows: 10, columns: 1});
+            var datum=new Float64Array(10);
+            datum[0]=1.5001427271366174;
+            datum[1]=1.5001369752883966;
+            datum[2]=1.5001381375789697;
+            datum[3]=1.5001336672306116;
+            datum[4]=1.5001220741272028;
+            datum[5]=1.500117395162588;
+            datum[6]=1.5001219847202356;
+            datum[7]=1.5001274087429102;
+            datum[8]=1.500133935451513;
+            datum[9]=1.5001405515670831;
+            datum.bases=new h5lt.Reference(file.id, 'Group_1/Dataset_Time', H5RType.H5R_OBJECT);
+            h5lt.makeDataset(group.id, "Dataset_1", datum, {rank: 2, rows: 10, columns: 1});
+            group.flush();
+            group.close();
+            file.flush();
+            file.close();
+            done();
         });
 
         it("should be reference to clock signal", function(done) {
           try{
+              file = new hdf5Lib.hdf5.File('./reference.h5', globs.Access.ACC_RDONLY);
             const group   = file.openGroup('Group_1');
             const readBuffer=h5lt.readDataset(group.id, 'Dataset_1', function(options){
                 options.rank.should.equal(2);

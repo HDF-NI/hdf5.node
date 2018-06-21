@@ -272,7 +272,6 @@ namespace NodeHDF5 {
           H5Ewalk2(H5Eget_current_stack(),
                    H5E_WALK_UPWARD,
                    [](unsigned int n, const H5E_error2_t* err_desc, void* client_data) -> herr_t {
-                     //                //std::cout<<"n="<<n<<" "<<err_desc[0].desc<<std::endl;
                      if (((std::string*)client_data)->empty())
                        ((std::string*)client_data)->assign(err_desc[0].desc, strlen(err_desc[0].desc));
                      return 0;

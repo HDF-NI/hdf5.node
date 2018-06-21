@@ -48,6 +48,7 @@ namespace NodeHDF5 {
       return v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), argc, argv).ToLocalChecked();
     }
 
+    hid_t getObjectId(){return objectId;};
   private:
     explicit Reference(hid_t objectId, unsigned int nmembers)
         : objectId(objectId)
@@ -61,12 +62,29 @@ namespace NodeHDF5 {
     static void New(const v8::FunctionCallbackInfo<v8::Value>& args) {
       v8::Isolate*    isolate = v8::Isolate::GetCurrent();
       v8::HandleScope scope(isolate);
-
-      // Invoked as constructor: `new MyObject(...)`
-      hid_t        value    = args[0]->IsUndefined() ? -1 : ObjectWrap::Unwrap<Int64>(args[0]->ToObject())->Value();
-      int          nmembers = args[1]->IsUndefined() ? -1 : args[1]->Int32Value();
-      Reference* obj      = new Reference(value, nmembers);
-      obj->Wrap(args.This());
+      if(args.Length() == 3 && args[1]->IsString()){
+        Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+        hid_t  locId  = args[0]->IsUndefined() ? -1 : idWrap->Value();
+        v8::String::Utf8Value name(args[1]->ToString());
+        size_t size=sizeof(hid_t);
+        std::unique_ptr<char[]> ref(new char[size]);
+        std::memset(ref.get(), 0, size);
+        herr_t err=H5Rcreate( (void *)ref.get(), locId, *name,(H5R_type_t)args[2]->Int32Value(), -1 );
+        if(err<0){
+            return;
+        }
+        hid_t objectId=((hid_t*)ref.get())[0];
+        int          nmembers = 1;
+        Reference* obj      = new Reference(objectId, nmembers);
+        obj->Wrap(args.This());
+      }
+      else{
+        // Invoked as constructor: `new MyObject(...)`
+        hid_t        value    = args[0]->IsUndefined() ? -1 : ObjectWrap::Unwrap<Int64>(args[0]->ToObject())->Value();
+        int          nmembers = args[1]->IsUndefined() ? -1 : args[1]->Int32Value();
+        Reference* obj      = new Reference(value, nmembers);
+        obj->Wrap(args.This());
+      }
       args.GetReturnValue().Set(args.This());
     }
 
@@ -103,8 +121,7 @@ namespace NodeHDF5 {
       ssize_t size=0;
       size=H5Rget_name(locId, (H5R_type_t)args[1]->Int32Value(), (void *)&obj->objectId, NULL, size)+1;
       std::unique_ptr<char[]> name(new char[size+1]);
-      std::memset(name.get(), 0, size+1);
-      size=H5Rget_name(locId, (H5R_type_t)args[1]->Int32Value(), (void *)&obj->objectId, name.get(), size);
+       size=H5Rget_name(locId, (H5R_type_t)args[1]->Int32Value(), (void *)&obj->objectId, name.get(), size);
       args.GetReturnValue().Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), (const char*)name.get(), v8::String::kNormalString, size));
     }
 
