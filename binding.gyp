@@ -1,7 +1,7 @@
 {
     "variables": {
         "hdf5_home_linux%": "/usr/local",
-        "hdf5_home_win%": "C:/Software/hdf5",
+        "hdf5_home_win%": "C:/Program Files/HDF_Group/HDF5/1.10.2",
         "hdf5_home_mac%": "/usr/local",
         "link_type%": "shared",
         "debug_mode%": "",
@@ -58,7 +58,7 @@
                     'src/h5_file.cc',
                     'src/h5_group.cc',
                 ],
-                'msbuild_toolset': 'v120',
+                'msbuild_toolset': 'v140',
                 "configurations": {
                             "Release": {
                     'msvs_settings':
@@ -165,7 +165,7 @@
                     'src/uint64.cc',
                     'src/h5lt.cc'
                 ],
-                'msbuild_toolset': 'v120',
+                'msbuild_toolset': 'v140',
                 "configurations": {
                             "Release": {
                     'msvs_settings':
@@ -263,7 +263,7 @@
                 'sources': [
                     'src/h5tb.cc'
                 ],
-                'msbuild_toolset': 'v120',
+                'msbuild_toolset': 'v140',
                 "configurations": {
                             "Release": {
                     'msvs_settings':
@@ -366,7 +366,7 @@
                     'src/h5pt.cc',
                     'src/h5_pt.cc'
                 ],
-                'msbuild_toolset': 'v120',
+                'msbuild_toolset': 'v140',
                 "configurations": {
                             "Release": {
                     'msvs_settings':
@@ -464,7 +464,7 @@
                 'sources': [
                     'src/h5im.cc'
                 ],
-                'msbuild_toolset': 'v120',
+                'msbuild_toolset': 'v140',
                 "configurations": {
                             "Release": {
                     'msvs_settings':
@@ -560,7 +560,7 @@
                 'sources': [
                     'src/h5ds.cc'
                 ],
-                'msbuild_toolset': 'v120',
+                'msbuild_toolset': 'v140',
                 "configurations": {
                             "Release": {
                     'msvs_settings':
