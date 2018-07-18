@@ -89,6 +89,19 @@ namespace NodeHDF5 {
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::readDatasetAsBuffer)->GetFunction());
     }
 
+    inline static bool is_bind_atributes(const v8::FunctionCallbackInfo<Value>& args, unsigned int argIndex){
+        bool bindAttributes=false;
+        Local<Array> names = args[argIndex]->ToObject()->GetOwnPropertyNames();
+        for (uint32_t index = 0; index < names->Length(); index++) {
+          String::Utf8Value _name(names->Get(index));
+          std::string       name(*_name);
+          if (name.compare("bind_attributes") == 0) {
+            bindAttributes = args[argIndex]->ToObject()->Get(names->Get(index))->ToBoolean()->BooleanValue();
+          }
+        }
+        return bindAttributes;
+    }
+
     inline static bool get_dimensions(const v8::FunctionCallbackInfo<Value>& args, unsigned int argIndex, std::unique_ptr<hsize_t[]>& start, std::unique_ptr<hsize_t[]>& stride, std::unique_ptr<hsize_t[]>& count, int rank){
         bool subsetOn=false;
         bool gotStart=false;
@@ -859,11 +872,13 @@ namespace NodeHDF5 {
         return;
       }
 
+      bool bindAttributes = false;
       bool                       subsetOn = false;
       std::unique_ptr<hsize_t[]> start(new hsize_t[rank]);
       std::unique_ptr<hsize_t[]> stride(new hsize_t[rank]);
       std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
       if (args.Length() == 4) {
+          bindAttributes = is_bind_atributes(args,3);
           subsetOn=get_dimensions(args, 3, start, stride, count, rank);
       }
       bool bufferAsUnit8Array=true;
@@ -1200,11 +1215,13 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
+      bool bindAttributes = false;
       bool                       subsetOn = false;
       std::unique_ptr<hsize_t[]> start(new hsize_t[rank]);
       std::unique_ptr<hsize_t[]> stride(new hsize_t[rank]);
       std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
       if (args.Length() >= 3 && args[2]->IsObject()) {
+        bindAttributes = is_bind_atributes(args, 2);
         subsetOn=get_dimensions(args, 2, start, stride, count, rank);
       }
       std::unique_ptr<hsize_t[]> values_dim(new hsize_t[rank]);
@@ -1545,11 +1562,13 @@ namespace NodeHDF5 {
               break;
           }
           }
-          hid_t did                  = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
+          if(bindAttributes){
+            hid_t did                  = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
 
-          v8::Local<v8::Object> focus=buffer->ToObject();
-          refreshAttributes(focus, did);
-          H5Dclose(did);
+            v8::Local<v8::Object> focus=buffer->ToObject();
+            refreshAttributes(focus, did);
+            H5Dclose(did);
+          }
           args.GetReturnValue().Set(buffer);
           break;
       }
@@ -1597,11 +1616,13 @@ namespace NodeHDF5 {
         return;
       }
       hsize_t                    theSize  = bufSize;
+      bool bindAttributes = false;
       bool                       subsetOn = false;
       std::unique_ptr<hsize_t[]> start(new hsize_t[rank]);
       std::unique_ptr<hsize_t[]> stride(new hsize_t[rank]);
       std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
-      if (args.Length() == 3) {
+      if (args.Length() >= 3 && args[2]->IsObject()) {
+        bindAttributes = is_bind_atributes(args, 2);
         subsetOn=get_dimensions(args, 2, start, stride, count, rank);
       }
       switch (rank) {
@@ -1758,9 +1779,11 @@ namespace NodeHDF5 {
           }
           }
           H5Tclose( type_id);
-          v8::Local<v8::Object> focus=buffer->ToObject();
-          // Attributes
-          refreshAttributes(focus, did);
+          if(bindAttributes){
+            v8::Local<v8::Object> focus=buffer->ToObject();
+            // Attributes
+            refreshAttributes(focus, did);
+          }
           H5Dclose(did);
 
 

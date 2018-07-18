@@ -653,7 +653,6 @@ describe("testing lite interface ", function() {
                         }
                 }
             }
-
             h5lt.makeDataset(group.id, 'Waldo', buffer, {type: H5Type.H5T_NATIVE_DOUBLE, rank: 2, rows: 8, columns: 10});
             var dimensions=group.getDatasetDimensions('Waldo');
             dimensions.length.should.equal(2);
@@ -949,7 +948,7 @@ var start = process.hrtime();
         });
         it("Size of dataset '0' should be 186 ", function(done) {
             groupGeometries.getDatasetType('0').should.equal(HLType.HL_TYPE_LITE);
-            const readBuffer=h5lt.readDataset(groupGeometries.id, '0');
+            const readBuffer=h5lt.readDataset(groupGeometries.id, '0', {bind_attributes:true});
             'Float64Array'.should.match(readBuffer.constructor.name);
             const length=186;
             length.should.match(readBuffer.length);
