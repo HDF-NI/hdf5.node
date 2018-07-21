@@ -1057,6 +1057,9 @@ namespace NodeHDF5 {
         H5Sclose(memspace_id);
         H5Sclose(dataspace_id);
       }
+      if(bindAttributes){
+          
+      }
       H5Dclose(did);
 
       args.GetReturnValue().SetUndefined();
