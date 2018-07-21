@@ -19,7 +19,7 @@ h5lt.Reference.id, xpath, type);
 > *  type &rarr; a type from the H5RType enumeration.  Currently [H5RType]({{ site.baseurl }}/ref/globals.html#h5rtype).H5R_OBJECT.
 > *  return &larr; a constructed Reference function
 
-Reference.prototype.getName(id, type)
+Reference.prototype.**getName**(id, type)
 
 > *  id &rarr; file or group id.
 > *  type &rarr; a type from the H5RType enumeration.  Currently [H5RType]({{ site.baseurl }}/ref/globals.html#h5rtype).H5R_OBJECT.
