@@ -97,7 +97,8 @@ namespace NodeHDF5 {
       hid_t  locId  = args[0]->IsUndefined() ? -1 : idWrap->Value();
       
 #if  H5_VERSION_GE(1,10,0)
-      H5Rdereference(locId, H5P_DEFAULT, (H5R_type_t)args[1]->Int32Value(), (void *)obj->objectId);
+      //H5Rdereference(locId, H5P_DEFAULT, (H5R_type_t)args[1]->Int32Value(), (void *)obj->objectId);
+      H5Rdereference2(locId, H5P_DEFAULT, (H5R_type_t)args[1]->Int32Value(), (void *)obj->objectId);
 #else
       H5Rdereference(locId, (H5R_type_t)args[1]->Int32Value(), (void *)obj->objectId);
 #endif
