@@ -2,7 +2,7 @@
   "name": "hdf5",
   "version": "0.3.4",
   "description": "Native Abstractions for hdf5 file io",
-  "main": "./index.js",
+  "main": "./hdf5.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/HDF-NI/hdf5.node.git"
