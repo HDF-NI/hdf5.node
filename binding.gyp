@@ -47,7 +47,6 @@
                     '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
-                    'C:/Software/node-v0.12.7/src',
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
@@ -60,7 +59,6 @@
                     'src/h5_group.cc',
                     'src/reference.cc'
                 ],
-                'msbuild_toolset': 'v120',
                 "configurations": {
                             "Release": {
                     'msvs_settings':
@@ -163,7 +161,6 @@
                     '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
-                    'C:/Software/node-v0.12.7/src',
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
@@ -172,7 +169,6 @@
                     'src/reference.cc',
                     'src/h5lt.cc'
                 ],
-                'msbuild_toolset': 'v120',
                 "configurations": {
                             "Release": {
                     'msvs_settings':
@@ -267,13 +263,11 @@
                     '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
-                    'C:/Software/node-v0.12.7/src',
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
                     'src/h5tb.cc'
                 ],
-                'msbuild_toolset': 'v120',
                 "configurations": {
                             "Release": {
                     'msvs_settings':
@@ -367,7 +361,6 @@
                     '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
-                    'C:/Software/node-v0.12.7/src',
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
@@ -376,7 +369,6 @@
                     'src/h5pt.cc',
                     'src/h5_pt.cc'
                 ],
-                'msbuild_toolset': 'v120',
                 "configurations": {
                             "Release": {
                     'msvs_settings':
@@ -468,13 +460,11 @@
                     '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
-                    'C:/Software/node-v0.12.7/src',
                     'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
                     'src/h5im.cc'
                 ],
-                'msbuild_toolset': 'v120',
                 "configurations": {
                             "Release": {
                     'msvs_settings':
@@ -570,7 +560,6 @@
                 'sources': [
                     'src/h5ds.cc'
                 ],
-                'msbuild_toolset': 'v120',
                 "configurations": {
                             "Release": {
                     'msvs_settings':
