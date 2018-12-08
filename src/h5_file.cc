@@ -131,6 +131,7 @@ namespace NodeHDF5 {
     NODE_SET_PROTOTYPE_METHOD(t, "getDatasetDimensions", getDatasetDimensions);
     NODE_SET_PROTOTYPE_METHOD(t, "getDataType", getDataType);
     NODE_SET_PROTOTYPE_METHOD(t, "getDatasetAttributes", getDatasetAttributes);
+    NODE_SET_PROTOTYPE_METHOD(t, "getDatasetAttribute", getDatasetAttribute);
     NODE_SET_PROTOTYPE_METHOD(t, "getByteOrder", getByteOrder);
     NODE_SET_PROTOTYPE_METHOD(t, "getFilters", getFilters);
     NODE_SET_PROTOTYPE_METHOD(t, "iterate", iterate);

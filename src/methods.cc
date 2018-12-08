@@ -528,6 +528,224 @@ namespace NodeHDF5 {
     args.GetReturnValue().Set(attrs);
   }
 
+  void Methods::getDatasetAttribute(const v8::FunctionCallbackInfo<v8::Value>& args) {
+
+    // fail out if arguments are not correct
+    if (args.Length() != 2 || !args[0]->IsString()|| !args[1]->IsString()) {
+
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected dataset name")));
+      args.GetReturnValue().SetUndefined();
+      return;
+    }
+
+    v8::String::Utf8Value dset_name(args[0]->ToString());
+    v8::String::Utf8Value attr_name(args[1]->ToString());
+    // unwrap group
+    Methods*    group = ObjectWrap::Unwrap<Methods>(args.This());
+    std::string name(*dset_name);
+    H5O_info_t  object_info;
+    herr_t      err = H5Oget_info_by_name(group->id, *dset_name, &object_info, H5P_DEFAULT);
+    if (err < 0) {
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get attr info")));
+      args.GetReturnValue().SetUndefined();
+      return;
+    }
+        
+      hid_t attr_id = H5Aopen_by_name(group->id, *dset_name, *attr_name, H5P_DEFAULT, H5P_DEFAULT);
+      if (attr_id < 0) {
+        v8::Isolate::GetCurrent()->ThrowException(
+            v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to open attr")));
+        args.GetReturnValue().SetUndefined();
+        return;
+      }
+      H5A_info_t ainfo;
+      H5Aget_info(attr_id, &ainfo);
+      size_t      nameSize = H5Aget_name(attr_id, 0, NULL);
+      std::string attrName(nameSize + 1, '\0');
+      H5Aget_name(attr_id, nameSize + 1, (char*)attrName.c_str());
+      hid_t    attr_type    = H5Aget_type(attr_id);
+      hid_t    space_id     = H5Aget_space(attr_id);
+      hssize_t num_elements = H5Sget_simple_extent_npoints(space_id);
+
+      switch (H5Tget_class(attr_type)) {
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+            break;
+        case H5T_REFERENCE:{
+          std::unique_ptr<char[]> buf(new char[H5Aget_storage_size(attr_id)]);
+          H5Aread(attr_id, attr_type, buf.get());
+          hid_t objectId=((hid_t*)buf.get())[0];
+          v8::Local<v8::Object>&& ref = Reference::Instantiate(objectId, 1);
+          args.GetReturnValue().Set(ref);
+        }
+            break;
+        case H5T_ARRAY:
+        case H5T_ENUM: break;
+        case H5T_COMPOUND: {
+          v8::Local<v8::Array>    array = v8::Array::New(v8::Isolate::GetCurrent(), H5Tget_nmembers(attr_type));
+          std::unique_ptr<char[]> buf(new char[H5Aget_storage_size(attr_id)]);
+          H5Aread(attr_id, attr_type, buf.get());
+          for (int mIndex = 0; mIndex < H5Tget_nmembers(attr_type); mIndex++) {
+            hid_t mType = H5Tget_member_type(attr_type, mIndex);
+
+            switch (H5Tget_member_class(attr_type, mIndex)) {
+              case H5T_BITFIELD:
+              case H5T_OPAQUE: break;
+              case H5T_REFERENCE: {
+                H5O_type_t obj_type;
+                H5Rget_obj_type(attr_id, H5R_OBJECT, buf.get(), &obj_type);
+                ssize_t     size = H5Rget_name(attr_id, H5R_OBJECT, buf.get(), NULL, 0);
+                std::string refName(size, '\0');
+                size            = H5Rget_name(attr_id, H5R_OBJECT, buf.get(), (char*)refName.c_str(), size + 1);
+                std::string ref = "->" + refName;
+                array->Set(
+                    mIndex,
+                    v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), (char*)(ref.c_str()), v8::String::kNormalString, ref.length()));
+              } break;
+              case H5T_ARRAY:
+              case H5T_ENUM:
+              case H5T_COMPOUND: break;
+              case H5T_INTEGER:
+                array->Set(
+                    mIndex,
+                    v8::Int32::New(v8::Isolate::GetCurrent(), ((long long*)(buf.get() + H5Tget_member_offset(attr_type, mIndex)))[0]));
+                break;
+              case H5T_FLOAT:
+                array->Set(mIndex,
+                           v8::Int32::New(v8::Isolate::GetCurrent(), ((double*)(buf.get() + H5Tget_member_offset(attr_type, mIndex)))[0]));
+                break;
+              case H5T_VLEN: break;
+              case H5T_STRING: {
+                array->Set(
+                    mIndex,
+                    v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), (char*)(buf.get() + H5Tget_member_offset(attr_type, mIndex))));
+              } break;
+              case H5T_NO_CLASS:
+              default: break;
+            }
+
+            H5Tclose(mType);
+          }
+          args.GetReturnValue().Set(array);
+        } break;
+        case H5T_INTEGER: {
+          std::unique_ptr<long long[]> buf(new long long[num_elements]);
+          H5Aread(attr_id, attr_type, buf.get());
+          if (num_elements > 1) {
+            v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), num_elements);
+            for (unsigned int elementIndex = 0; elementIndex < num_elements; elementIndex++) {
+              array->Set(elementIndex, v8::Int32::New(v8::Isolate::GetCurrent(), buf.get()[elementIndex]));
+            }
+            args.GetReturnValue().Set(array);
+          } else
+            args.GetReturnValue().Set(v8::Int32::New(v8::Isolate::GetCurrent(), buf.get()[0]));
+        } break;
+        case H5T_FLOAT:
+          double value;
+          H5Aread(attr_id, attr_type, &value);
+          args.GetReturnValue().Set(v8::Number::New(v8::Isolate::GetCurrent(), value));
+          break;
+        case H5T_VLEN: {
+          hid_t super_type = H5Tget_super(attr_type);
+
+          if (H5Tget_class(super_type) == H5T_REFERENCE) {
+            H5O_type_t             obj_type;
+            std::unique_ptr<hvl_t[]> vl(new hvl_t[num_elements]);
+            H5Aread(attr_id, attr_type, (void*)vl.get());
+            if (num_elements > 0) {
+              v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), num_elements);
+              for (unsigned int elementIndex = 0; elementIndex < num_elements; elementIndex++) {
+                /*herr_t err=*/H5Rget_obj_type(attr_id, H5R_OBJECT, vl.get()[elementIndex].p, &obj_type);
+                ssize_t     size = H5Rget_name(attr_id, H5R_OBJECT, vl.get()[elementIndex].p, NULL, 0);
+                std::string refName(size, '\0');
+                size            = H5Rget_name(attr_id, H5R_OBJECT, vl.get()[elementIndex].p, (char*)refName.c_str(), size + 1);
+                std::string ref = "->" + refName;
+                array->Set(
+                    elementIndex,
+                    v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), (char*)(ref.c_str()), v8::String::kNormalString, ref.length()));
+              }
+              args.GetReturnValue().Set(array);
+            } else {
+              H5Rget_obj_type(attr_id, H5R_OBJECT, vl.get()[0].p, &obj_type);
+
+              ssize_t     size = H5Rget_name(attr_id, H5R_OBJECT, vl.get()[0].p, NULL, 0);
+              std::string refName(size, '\0');
+              size            = H5Rget_name(attr_id, H5R_OBJECT, vl.get()[0].p, (char*)refName.c_str(), size + 1);
+              std::string ref = "->" + refName;
+              args.GetReturnValue().Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), (char*)(ref.c_str()), v8::String::kNormalString, ref.length()));
+            }
+          } else {
+            std::unique_ptr<hvl_t[]> vl(new hvl_t[num_elements]);
+            H5Aread(attr_id, attr_type, (void*)vl.get());
+            args.GetReturnValue().Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), (char*)(vl.get()[0].p), v8::String::kNormalString, vl.get()[0].len));
+          }
+          if (super_type >= 0)
+            H5Tclose(super_type);
+        } break;
+        case H5T_STRING: {
+          if (H5Tis_variable_str(attr_type) > 0) {
+
+            if (num_elements > 1) {
+              std::unique_ptr<char*[]> buf(new char*[num_elements]);
+              /*herr_t err=*/H5Aread(attr_id, attr_type, buf.get());
+              v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), num_elements);
+              for (unsigned int elementIndex = 0; elementIndex < num_elements; elementIndex++) {
+                std::string attrValue = "";
+                if (buf.get()[elementIndex] != NULL)
+                  attrValue = std::string(buf.get()[elementIndex]);
+                array->Set(elementIndex,
+                           v8::String::NewFromUtf8(
+                               v8::Isolate::GetCurrent(), (char*)(attrValue.c_str()), v8::String::kNormalString, attrValue.length()));
+              }
+              args.GetReturnValue().Set(array);
+
+            } else {
+            std::unique_ptr<char*[]>data(new char*[1]);
+            //std::memset(data.get(), 0, H5Aget_storage_size(attr_id) + 1); // clear buffer
+              H5Aread(attr_id, attr_type, data.get());
+              std::string attrValue = "";
+              if (data.get()[0] != NULL)
+                  attrValue = std::string(data.get()[0]);
+              args.GetReturnValue().Set(v8::String::NewFromUtf8(
+                             v8::Isolate::GetCurrent(), (char*)(attrValue.c_str()), v8::String::kNormalString, attrValue.length()));
+            }
+          } else {
+
+              hsize_t     storeSize = H5Aget_storage_size(attr_id);
+            std::unique_ptr<char[]> data(new char[storeSize]);
+            std::memset(data.get(), 0, storeSize); // clear buffer
+
+            H5Aread(attr_id, attr_type, (void*)data.get());
+            if(num_elements>0){
+                hsize_t     offset=storeSize/num_elements;
+              v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), num_elements);
+              for (unsigned int elementIndex = 0; elementIndex < num_elements; elementIndex++) {
+                  hsize_t     trimOffset=offset;
+                if (data.get()[elementIndex*offset+trimOffset-1] ==0){
+                    trimOffset=std::strlen((char*)(data.get()+elementIndex*offset));
+                }
+                array->Set(elementIndex,
+                           v8::String::NewFromUtf8(
+                               v8::Isolate::GetCurrent(), (char*)(data.get()+elementIndex*offset), v8::String::kNormalString, trimOffset));
+              }
+              args.GetReturnValue().Set(array);
+            }
+            else{
+              args.GetReturnValue().Set(v8::String::NewFromUtf8(
+                           v8::Isolate::GetCurrent(), (char*)data.get(), v8::String::kNormalString, storeSize));
+            }
+          }
+        } break;
+        case H5T_NO_CLASS:
+        default: break;
+      }
+      H5Sclose(space_id);
+      H5Tclose(attr_type);
+      H5Aclose(attr_id);
+  }
+
   void Methods::getByteOrder(const v8::FunctionCallbackInfo<v8::Value>& args) {
     // fail out if arguments are not correct
     if (args.Length() != 1 || !args[0]->IsString()) {
