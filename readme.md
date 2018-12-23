@@ -48,7 +48,7 @@ var group = file.openGroup('bar');
 ### Notes on Recent Releases
 
 * Note: Release v0.3.5
-  * Strictly for building on Windows.  Tested with VS 2017
+  * Strictly for upgrading the build on Windows.  Tested with VS 2017
 
 * Note: Release v0.3.4 
   * Reference attributes on datasets and groups are now available properties.
