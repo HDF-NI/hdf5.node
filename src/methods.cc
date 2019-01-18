@@ -534,7 +534,7 @@ namespace NodeHDF5 {
     if (args.Length() != 2 || !args[0]->IsString()|| !args[1]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected dataset name")));
+          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected dataset and attribute name")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -642,11 +642,20 @@ namespace NodeHDF5 {
           } else
             args.GetReturnValue().Set(v8::Int32::New(v8::Isolate::GetCurrent(), buf.get()[0]));
         } break;
-        case H5T_FLOAT:
-          double value;
-          H5Aread(attr_id, attr_type, &value);
-          args.GetReturnValue().Set(v8::Number::New(v8::Isolate::GetCurrent(), value));
-          break;
+        case H5T_FLOAT: {
+          size_t size = H5Tget_size(attr_type);
+          if(size == 8){
+            double value;
+            H5Aread(attr_id, attr_type, &value);
+            args.GetReturnValue().Set(v8::Number::New(v8::Isolate::GetCurrent(), value));
+          }
+          else{
+            float value;
+            H5Aread(attr_id, attr_type, &value);
+            args.GetReturnValue().Set(v8::Number::New(v8::Isolate::GetCurrent(), value));
+            
+          }
+        } break;
         case H5T_VLEN: {
           hid_t super_type = H5Tget_super(attr_type);
 
