@@ -118,6 +118,8 @@ namespace NodeHDF5 {
     NODE_SET_PROTOTYPE_METHOD(t, "createGroup", CreateGroup);
     NODE_SET_PROTOTYPE_METHOD(t, "openGroup", OpenGroup);
     NODE_SET_PROTOTYPE_METHOD(t, "getNumAttrs", GetNumAttrs);
+    NODE_SET_PROTOTYPE_METHOD(t, "getAttributeNames", getAttributeNames);
+    NODE_SET_PROTOTYPE_METHOD(t, "readAttribute", readAttribute);
     NODE_SET_PROTOTYPE_METHOD(t, "refresh", Refresh);
     NODE_SET_PROTOTYPE_METHOD(t, "move", Move);
     NODE_SET_PROTOTYPE_METHOD(t, "delete", Delete);

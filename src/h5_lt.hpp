@@ -89,7 +89,7 @@ namespace NodeHDF5 {
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::readDatasetAsBuffer)->GetFunction());
     }
 
-    inline static bool is_bind_atributes(const v8::FunctionCallbackInfo<Value>& args, unsigned int argIndex){
+    inline static bool is_bind_attributes(const v8::FunctionCallbackInfo<Value>& args, unsigned int argIndex){
         bool bindAttributes=false;
         Local<Array> names = args[argIndex]->ToObject()->GetOwnPropertyNames();
         for (uint32_t index = 0; index < names->Length(); index++) {
@@ -722,6 +722,8 @@ namespace NodeHDF5 {
     }
 
     static void make_dataset_from_array(const hid_t& group_id, const char* dset_name, Handle<Array> array, Handle<Object> options) {
+      bool hasOptionType=false;
+      get_type(options, [&](hid_t _type_id){hasOptionType=true;});
       hid_t        dcpl       = H5Pcreate(H5P_DATASET_CREATE);
       int          rank       = 1;
       unsigned int fixedWidth = get_fixed_width(options);
@@ -756,10 +758,39 @@ namespace NodeHDF5 {
         H5Dclose(did);
         H5Sclose(memspace_id);
         H5Pclose(dcpl);
+      } else if(hasOptionType){
+        std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
+        count.get()[0] = array->Length();
+        std::unique_ptr<hvl_t[]> vl(new hvl_t[array->Length()]);
+        for (unsigned int arrayIndex = 0; arrayIndex < array->Length(); arrayIndex++) {
+          char* buffer = (char*)node::Buffer::Data(array->Get(arrayIndex));
+           hsize_t length=Local<v8::Int8Array>::Cast(array->Get(arrayIndex))->Length();
+          //s.assign(*buffer);
+          vl.get()[arrayIndex].p = new char[length];
+          vl.get()[arrayIndex].len = length;
+          std::memcpy(vl.get()[arrayIndex].p, buffer, length);
+        }
+        hid_t memspace_id = H5Screate_simple(rank, count.get(), NULL);
+        hid_t type_id;
+          get_type(options, [&](hid_t _type_id){type_id=H5Tvlen_create(_type_id);});
+        hid_t did = H5Dcreate(group_id, dset_name, type_id, memspace_id, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+
+        herr_t err = H5Dwrite(did, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, vl.get());
+        if (err < 0) {
+          v8::Isolate::GetCurrent()->ThrowException(
+              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make var len dataset")));
+          return;
+        }
+//H5Dvlen_reclaim(type_id, did, dcpl, vl.get());
+        //H5Tclose(type_id);
+        H5Dclose(did);
+        H5Sclose(memspace_id);
+        H5Pclose(dcpl);
+        
       } else {
         std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
         count.get()[0] = array->Length();
-        std::unique_ptr<char* []> vl(new char*[array->Length()]);
+        std::unique_ptr<char*[]> vl(new char*[array->Length()]);
         for (unsigned int arrayIndex = 0; arrayIndex < array->Length(); arrayIndex++) {
           String::Utf8Value buffer(array->Get(arrayIndex));
           //s.assign(*buffer);
@@ -813,7 +844,7 @@ namespace NodeHDF5 {
 #else
       bufferAsUnit8Array=buffer->ToObject()->IsUint8Array();
 #endif
-      if (hasOptionType || (bufferAsUnit8Array && node::Buffer::HasInstance(buffer) && buffer->ToObject()->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type")))) {
+      if ((hasOptionType && !buffer->IsArray()) || (bufferAsUnit8Array && node::Buffer::HasInstance(buffer) && buffer->ToObject()->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type")))) {
         make_dataset_from_buffer(group_id, dset_name, buffer->ToObject(), options);
       } else if (buffer->IsString()) {
         make_dataset_from_string(group_id, dset_name, buffer->ToString(), options);
@@ -878,7 +909,7 @@ namespace NodeHDF5 {
       std::unique_ptr<hsize_t[]> stride(new hsize_t[rank]);
       std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
       if (args.Length() == 4) {
-          bindAttributes = is_bind_atributes(args,3);
+          bindAttributes = is_bind_attributes(args,3);
           subsetOn=get_dimensions(args, 3, start, stride, count, rank);
       }
       bool bufferAsUnit8Array=true;
@@ -1224,7 +1255,7 @@ namespace NodeHDF5 {
       std::unique_ptr<hsize_t[]> stride(new hsize_t[rank]);
       std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
       if (args.Length() >= 3 && args[2]->IsObject()) {
-        bindAttributes = is_bind_atributes(args, 2);
+        bindAttributes = is_bind_attributes(args, 2);
         subsetOn=get_dimensions(args, 2, start, stride, count, rank);
       }
       std::unique_ptr<hsize_t[]> values_dim(new hsize_t[rank]);
@@ -1625,7 +1656,7 @@ namespace NodeHDF5 {
       std::unique_ptr<hsize_t[]> stride(new hsize_t[rank]);
       std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
       if (args.Length() >= 3 && args[2]->IsObject()) {
-        bindAttributes = is_bind_atributes(args, 2);
+        bindAttributes = is_bind_attributes(args, 2);
         subsetOn=get_dimensions(args, 2, start, stride, count, rank);
       }
       switch (rank) {

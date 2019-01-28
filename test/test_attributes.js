@@ -282,5 +282,56 @@ describe("testing attribute interface",function(){
         });
     });
 
+    describe.skip("read 32 bit floating attributes", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5Lib.hdf5.File('/home/roger/Downloads/OR_GLM-L2-LCFA_G16_s20182632044200_e20182632044400_c20182632044426.nc', globs.Access.ACC_RDONLY);
+          done();
+        });
+
+        it("file attributes", function(done) {
+
+            var attrs = file.getAttributeNames();
+            for(var attr in attrs){
+              var attrValue = file.readAttribute(attrs[attr]);
+              console.log(attrs[attr]+" "+attrValue);
+            }
+            done();
+        });
+
+        it("32 bit floating attr", function(done) {
+            var scale_factor = file.getDatasetAttribute("group_energy", "scale_factor");
+            console.dir(scale_factor);
+            
+            var attrs = file.getDatasetAttributes("group_energy");
+            var attrText = "";
+            Object.getOwnPropertyNames(attrs).forEach(function(val, idx, array) {
+//              if (val !=  'id') {
+                if (attrs[val].constructor.name === Array) {
+                  attrText += val + ' :  ';
+                  for (var mIndex = 0; mIndex < attrs[val].Length(); mIndex++) {
+                    attrText += attrs[val][mIndex];
+                    if (mIndex < attrs[val].Length() - 1) {
+                      attrText += ',';
+                    }
+                  }
+                }
+                else{
+                  attrText += val + ' :  ' + attrs[val] + "\n";
+                  //console.dir("directly a string ");
+                }
+//              }
+            });
+            console.log(attrText);
+            done();
+        });
+
+        after(function(done){
+            file.close();
+            done();
+        });
+    });
+
+
 });
 

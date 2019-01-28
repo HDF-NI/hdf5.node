@@ -217,8 +217,8 @@ namespace NodeHDF5 {
     // static void Initialize (Handle<Object> target);
 
     static void GetNumAttrs(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetAttributeNames(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void ReadAttribute(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void getAttributeNames(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void readAttribute(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetNumObjs(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetMemberNames(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetMemberNamesByCreationOrder(const v8::FunctionCallbackInfo<v8::Value>& args);

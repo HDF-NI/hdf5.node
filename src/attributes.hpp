@@ -17,21 +17,10 @@
 
 namespace NodeHDF5 {
     
-    inline void refreshAttributes(v8::Local<v8::Object>& focus, hid_t id){
-    hsize_t                  index = 0;
-    std::vector<std::string> holder;
-    H5Aiterate(id,
-               H5_INDEX_NAME,
-               H5_ITER_INC,
-               &index,
-               [](hid_t loc, const char* attr_name, const H5A_info_t* ainfo, void* operator_data) -> herr_t {
-                 ((std::vector<std::string>*)operator_data)->push_back(attr_name);
-                 return 0;
-               },
-               &holder);
-    for (index = 0; index < (uint32_t)holder.size(); index++) {
+inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, hid_t id, std::string name){
+    v8::Local<v8::Value> value;
       bool indexedArray=true;
-      hid_t attr_id   = H5Aopen(id, holder[index].c_str(), H5P_DEFAULT);
+      hid_t attr_id   = H5Aopen(id, name.c_str(), H5P_DEFAULT);
       hid_t attr_type = H5Aget_type(attr_id);
       hid_t space     = H5Aget_space(attr_id);
       hssize_t num_elements = H5Sget_simple_extent_npoints(space);
@@ -45,7 +34,7 @@ namespace NodeHDF5 {
             H5Aread(attr_id, attr_type, buf.get());
             hid_t objectId=((hid_t*)buf.get())[0];
             v8::Local<v8::Object>&& ref = Reference::Instantiate(objectId, 1);
-            focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), ref);
+            value = ref;
           }
             break;
             case H5T_ARRAY: {
@@ -68,7 +57,7 @@ namespace NodeHDF5 {
                       v8::String::NewFromUtf8(
                           v8::Isolate::GetCurrent(), vl.get()[arrayIndex], v8::String::kNormalString, std::strlen(vl.get()[arrayIndex])));
                 }
-                focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), array);
+                value = array;
               }
             } break;
             case H5T_STRING:
@@ -86,7 +75,7 @@ namespace NodeHDF5 {
                                  v8::String::NewFromUtf8(
                                      v8::Isolate::GetCurrent(), (char*)(attrValue.c_str()), v8::String::kNormalString, attrValue.length()));
                     }
-                    focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), array);
+                    value = array;
 
                   } else {
                   std::unique_ptr<char*[]>data(new char*[1]);
@@ -95,9 +84,8 @@ namespace NodeHDF5 {
                     std::string attrValue = "";
                     if (data.get()[0] != NULL)
                         attrValue = std::string(data.get()[0]);
-                    focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                               v8::String::NewFromUtf8(
-                                   v8::Isolate::GetCurrent(), (char*)(attrValue.c_str()), v8::String::kNormalString, attrValue.length()));
+                    value =  v8::String::NewFromUtf8(
+                                   v8::Isolate::GetCurrent(), (char*)(attrValue.c_str()), v8::String::kNormalString, attrValue.length());
                   }
                 } else {
 
@@ -118,12 +106,11 @@ namespace NodeHDF5 {
                                  v8::String::NewFromUtf8(
                                      v8::Isolate::GetCurrent(), (char*)(data.get()+elementIndex*offset), v8::String::kNormalString, trimOffset));
                     }
-                    focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), array);
+                    value = array;
                   }
                   else{
-                    focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                             v8::String::NewFromUtf8(
-                                 v8::Isolate::GetCurrent(), (char*)data.get(), v8::String::kNormalString, storeSize));
+                    value = v8::String::NewFromUtf8(
+                                 v8::Isolate::GetCurrent(), (char*)data.get(), v8::String::kNormalString, storeSize);
                   }
                 }
                 break;
@@ -140,14 +127,12 @@ namespace NodeHDF5 {
               } else if (class_id == H5T_FLOAT && size == 8) {
                   double dValue;
                   H5Aread(attr_id, attr_type, &dValue);
-                focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                               v8::Number::New(v8::Isolate::GetCurrent(), dValue));
+                value = v8::Number::New(v8::Isolate::GetCurrent(), dValue);
                 indexedArray=false;
               } else if (class_id == H5T_FLOAT && size == 4) {
                   float dValue;
                   H5Aread(attr_id, attr_type, &dValue);
-                focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                               v8::Number::New(v8::Isolate::GetCurrent(), dValue));
+                value = v8::Number::New(v8::Isolate::GetCurrent(), dValue);
                 indexedArray=false;
               } else if (class_id == H5T_INTEGER && size == 8 && numberOfElements>1) {
                 v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), numberOfElements);
@@ -170,8 +155,7 @@ namespace NodeHDF5 {
                     array->Set(i, uint64Instance);
                   }
                 }
-                focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                               array);
+                value = array;
                 indexedArray=false;
               } else if (class_id == H5T_INTEGER && size == 8) {
                 if (H5Tget_sign(attr_type) == H5T_SGN_2) {
@@ -180,16 +164,14 @@ namespace NodeHDF5 {
                   v8::Local<v8::Object> int64Instance = Int64::Instantiate(focus, intValue[0]);
                   Int64*        idWrap   = node::ObjectWrap::Unwrap<Int64>(int64Instance);
                   idWrap->setValue(intValue[0]);
-                  focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                               int64Instance);
+                  value = int64Instance;
                 } else {
                   std::unique_ptr<uint64_t[]> uintValue(new uint64_t[numberOfElements]);
                   H5Aread(attr_id, attr_type, uintValue.get());
                   v8::Local<v8::Object> uint64Instance = Uint64::Instantiate(focus, uintValue[0]);
                   Uint64*        idWrap   = node::ObjectWrap::Unwrap<Uint64>(uint64Instance);
                   idWrap->setValue(uintValue[0]);
-                  focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                               uint64Instance);
+                  value = uint64Instance;
                 }
                 indexedArray=false;
               } else if (class_id == H5T_INTEGER && size == 4 && numberOfElements>1) {
@@ -219,20 +201,17 @@ namespace NodeHDF5 {
               } else if (class_id == H5T_INTEGER && size == 4) {
                   int dValue;
                   H5Aread(attr_id, attr_type, &dValue);
-                focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                               v8::Number::New(v8::Isolate::GetCurrent(), dValue));
+                value = v8::Number::New(v8::Isolate::GetCurrent(), dValue);
                 indexedArray=false;
               } else if (class_id == H5T_INTEGER && size == 2) {
                   short dValue;
                   H5Aread(attr_id, attr_type, &dValue);
-                focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                               v8::Number::New(v8::Isolate::GetCurrent(), dValue));
+                value = v8::Number::New(v8::Isolate::GetCurrent(), dValue);
                 indexedArray=false;
               } else if (class_id == H5T_INTEGER && size == 1) {
                   char dValue;
                   H5Aread(attr_id, attr_type, &dValue);
-                focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                               v8::Number::New(v8::Isolate::GetCurrent(), dValue));
+                value = v8::Number::New(v8::Isolate::GetCurrent(), dValue);
                 indexedArray=false;
               } else {
                 H5Sclose(space);
@@ -246,7 +225,7 @@ namespace NodeHDF5 {
 #else
                 H5Aread(attr_id, attr_type, buffer->Buffer()->Externalize().Data());
 #endif
-                focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), buffer);
+                value = buffer;
               }
               break;
           }
@@ -257,23 +236,20 @@ namespace NodeHDF5 {
             case H5T_INTEGER:
               long long intValue;
               H5Aread(attr_id, attr_type, &intValue);
-              focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                               v8::Int32::New(v8::Isolate::GetCurrent(), intValue));
+              value = v8::Int32::New(v8::Isolate::GetCurrent(), intValue);
               break;
             case H5T_FLOAT: {
               size_t size = H5Tget_size(attr_type);
               switch (size) {
                 case 8: {
-                  double value;
-                  H5Aread(attr_id, attr_type, &value);
-                  focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                                   v8::Number::New(v8::Isolate::GetCurrent(), value));
+                  double nativeValue;
+                  H5Aread(attr_id, attr_type, &nativeValue);
+                  value = v8::Number::New(v8::Isolate::GetCurrent(), nativeValue);
                 } break;
                 default: {
-                  float value;
-                  H5Aread(attr_id, attr_type, &value);
-                  focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                                   v8::Number::New(v8::Isolate::GetCurrent(), value));
+                  float nativeValue;
+                  H5Aread(attr_id, attr_type, &nativeValue);
+                  value = v8::Number::New(v8::Isolate::GetCurrent(), nativeValue);
                 } break;
               }
             } break;
@@ -286,8 +262,7 @@ namespace NodeHDF5 {
                 hsize_t     storeSize = H5Aget_storage_size(attr_id);
                 std::string strValue(storeSize, '\0');
                 H5Aread(attr_id, attr_type, (void*)strValue.c_str());
-                focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()),
-                                 v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str()));
+                value = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str());
               } else if (isVlen != -1) {
 
                 H5A_info_t ainfo;
@@ -312,7 +287,7 @@ namespace NodeHDF5 {
                 v8::Local<v8::Value>  varLenStrObject = v8::StringObject::New(varLenStr);
                 varLenStrObject->ToObject()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"),
                                                  v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "variable-length"));
-                focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), varLenStrObject);
+                value = varLenStrObject;
 
                 /*
                  * Clean up the mess I made
@@ -321,7 +296,7 @@ namespace NodeHDF5 {
               }
             } break;
             case H5T_NO_CLASS:
-            default: return;
+            default: break;
           }
           break;
         case H5T_NO_CLASS:
@@ -330,10 +305,28 @@ namespace NodeHDF5 {
       H5Sclose(space);
       H5Tclose(attr_type);
       H5Aclose(attr_id);
+      return value;
+};
+
+    inline void refreshAttributes(v8::Local<v8::Object>& focus, hid_t id){
+    hsize_t                  index = 0;
+    std::vector<std::string> holder;
+    H5Aiterate(id,
+               H5_INDEX_NAME,
+               H5_ITER_INC,
+               &index,
+               [](hid_t loc, const char* attr_name, const H5A_info_t* ainfo, void* operator_data) -> herr_t {
+                 ((std::vector<std::string>*)operator_data)->push_back(attr_name);
+                 return 0;
+               },
+               &holder);
+    for (index = 0; index < (uint32_t)holder.size(); index++) {
+        v8::Local<v8::Value>&& value = readAttributeByName(focus, id, holder[index]);
+        focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), value);
     }
         
     };
-    
+
   class Attributes : public node::ObjectWrap {
   protected:
     std::string name;
@@ -359,4 +352,5 @@ namespace NodeHDF5 {
     virtual int getNumAttrs() = 0;
     
   };
+  
 }

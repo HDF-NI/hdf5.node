@@ -20,7 +20,7 @@ namespace NodeHDF5 {
     args.GetReturnValue().Set(group->getNumAttrs());
   }
 
-  void Methods::GetAttributeNames(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  void Methods::getAttributeNames(const v8::FunctionCallbackInfo<v8::Value>& args) {
     // unwrap group
     Methods* group = ObjectWrap::Unwrap<Methods>(args.This());
 
@@ -43,7 +43,7 @@ namespace NodeHDF5 {
     args.GetReturnValue().Set(array);
   }
 
-  void Methods::ReadAttribute(const v8::FunctionCallbackInfo<Value>& args) {
+  void Methods::readAttribute(const v8::FunctionCallbackInfo<Value>& args) {
     // fail out if arguments are not correct
     if (args.Length() != 1 || !args[0]->IsString()) {
 
@@ -58,7 +58,9 @@ namespace NodeHDF5 {
 
     // unwrap group
     Methods* group       = ObjectWrap::Unwrap<Methods>(args.This());
-    hid_t    attr_id     = H5Aopen(group->id, (*attribute_name), H5P_DEFAULT);
+    v8::Local<v8::Value>&& value = readAttributeByName(args.This(), group->id, (*attribute_name));
+    args.GetReturnValue().Set(value);
+    /*hid_t    attr_id     = H5Aopen(group->id, (*attribute_name), H5P_DEFAULT);
     hid_t    datatype_id = H5Aget_type(attr_id);
     switch (H5Tget_class(datatype_id)) {
       case 1:
@@ -76,7 +78,7 @@ namespace NodeHDF5 {
         break;
     }
     H5Tclose(datatype_id);
-    H5Aclose(attr_id);
+    H5Aclose(attr_id);*/
     return;
   }
 
