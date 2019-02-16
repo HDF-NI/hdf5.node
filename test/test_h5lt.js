@@ -32,7 +32,7 @@ describe("testing lite interface ", function() {
             group.id.should.not.equal(-1);
             done();
         });
-        it("should be variable array of Uint8Array's ", function(done) {
+        it("should be variable array of Uint8Array's", function(done) {
             const buffer=new Array(3);
             for(var i=0;i<3;i++){
                 buffer[i]=new Uint8Array(i+1);
@@ -40,14 +40,17 @@ describe("testing lite interface ", function() {
                     buffer[i][j]=j;
             }
             h5lt.makeDataset(group.id, 'real labels', buffer, {type: H5Type.H5T_STD_U8LE});
-            /*const readBuffer=h5lt.readDataset(group.id, 'real labels', function(options){
+            const readBuffer=h5lt.readDataset(group.id, 'real labels', function(options){
                 options.rank.should.equal(1);
                 options.rows.should.equal(3);
             });
             readBuffer.constructor.name.should.match('Array');
             readBuffer.length.should.match(3);
-            readBuffer.buffer.byteLength.should.match(buffer.buffer.byteLength);
-            buffer.should.match(readBuffer);*/
+            //readBuffer.buffer.byteLength.should.match(buffer.buffer.byteLength);
+            buffer.should.match(readBuffer);
+            for(var i in readBuffer){
+                console.log(readBuffer[i]);
+            }
             //const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Refractive Index');
             //readAsBuffer.readDoubleLE(4*8).should.equal(5.0);
             done();

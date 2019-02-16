@@ -11,7 +11,7 @@ const h5lt          = hdf5Lib.h5lt;
 
 describe("testing attribute interface",function(){
 
-    describe("create an h5, group and some attributes ", function() {
+    describe("create an h5, group and some attributes", function() {
         // open hdf file
         let file;
         before(function(done) {
@@ -57,6 +57,18 @@ describe("testing attribute interface",function(){
             group.size.constructor.name.should.match('Float64Array');
              console.dir(group.notes);
             group.notes.constructor.name.should.match('Array');
+            group.close();
+            done();
+        });
+
+        it("should be separate attributes ", function(done) {
+            var group, attrs;
+            [group, attrs]= file.openGroup('pmc/refinement', {separate_attributes: true});
+            attrs.name.should.equal("3FVA");
+            attrs.name.type.should.equal("variable-length");
+            attrs.size.constructor.name.should.match('Float64Array');
+             console.dir(attrs.notes);
+            attrs.notes.constructor.name.should.match('Array');
             group.close();
             done();
         });
@@ -154,7 +166,7 @@ describe("testing attribute interface",function(){
           done();
         });
 
-        it("should be variable string info", function(done) {
+        it("should be variable string in Array", function(done) {
             const group   = file.openGroup('LEG_L_KBA_FLUX');
             group.refresh();
             var attrs = group.getDatasetAttributes("y");

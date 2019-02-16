@@ -1427,6 +1427,50 @@ namespace NodeHDF5 {
           H5Tclose(type_id);
           H5Dclose(did);
         } break;
+        case H5T_VLEN:{
+            hid_t                   dataspace_id = H5S_ALL;
+            hid_t                   memspace_id  = H5S_ALL;
+           hid_t did                  = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
+           hid_t type_id                    = H5Dget_type(did);
+            hsize_t arrayStart=0;
+            hsize_t arrayMaximum=values_dim.get()[0];
+            //hsize_t realLength=0;
+            if(subsetOn){
+              arrayStart=start.get()[0];
+              arrayMaximum=std::min(values_dim.get()[0], arrayStart+count.get()[0]);
+            }
+            std::unique_ptr<hvl_t[]> vl(new hvl_t[arrayMaximum]);
+          herr_t err=H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, (void*)vl.get());
+          if (err < 0) {
+            v8::Isolate::GetCurrent()->ThrowException(
+                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to vlen read dataset")));
+            args.GetReturnValue().SetUndefined();
+          }
+          else{
+          hid_t super_type = H5Tget_super(type_id);
+          hsize_t typeSize = H5Tget_size(super_type);
+          Local<Array> array = Array::New(v8::Isolate::GetCurrent(), std::min(values_dim.get()[0], count.get()[0]));
+          for (unsigned int arrayIndex = arrayStart; arrayIndex < arrayMaximum; arrayIndex++) {
+            if(H5Tis_variable_str(super_type)){
+              std::string s((char*)vl.get()[arrayIndex].p);
+              array->Set(arrayIndex-arrayStart,
+                          String::NewFromUtf8(
+                              v8::Isolate::GetCurrent(), (char*)vl.get()[arrayIndex].p, String::kNormalString, vl.get()[arrayIndex].len));
+            }
+            else if(typeSize==1){
+          Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), vl.get()[arrayIndex].p, typeSize * vl.get()[arrayIndex].len);
+              array->Set(arrayIndex-arrayStart,
+                          v8::Uint8Array::New(arrayBuffer, 0, vl.get()[arrayIndex].len));
+              
+            }
+          }
+          args.GetReturnValue().Set(array);
+          }
+            
+            H5Tclose(type_id);
+            H5Dclose(did);
+          
+        } break;
         default:
 
           hid_t              type_id;
@@ -1446,7 +1490,7 @@ namespace NodeHDF5 {
             H5LTread_dataset(idWrap->Value(), *dset_name, type_id, (char*)node::Buffer::Data(int64Buffer));
 
             hid_t native_type_id = H5Tget_native_type(type_id, H5T_DIR_ASCEND);
-            if (H5Tequal(H5T_NATIVE_LLONG, native_type_id)) { // FIXME: we should use read_dataset_datatype
+            if (H5Tequal(H5T_NATIVE_LLONG, native_type_id)) {
               int64Buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"),
                                Int32::New(v8::Isolate::GetCurrent(), toEnumMap[H5T_NATIVE_LLONG]));
             }
@@ -1494,7 +1538,7 @@ namespace NodeHDF5 {
             H5Dclose(h);
           } else {
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
+                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type in reading")));
             args.GetReturnValue().SetUndefined();
             return;
           }

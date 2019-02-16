@@ -19,6 +19,20 @@ namespace NodeHDF5 {
 
   using namespace v8;
 
+    static bool get_separate_attrs(v8::Handle<v8::Object> options) {
+      if (options.IsEmpty()) {
+        return false;
+      }
+
+      auto name(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "separate_attributes"));
+
+      if (!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
+        return false;
+      }
+
+      return options->Get(name)->BooleanValue();
+    };
+
   Persistent<Function> Filters::Constructor;
 
   Group::Group(hid_t id)
@@ -372,9 +386,25 @@ namespace NodeHDF5 {
     }
 
     try {
+      Local<Object>     options;
+      bool separateAttrs=false;
+      if (args.Length() >= 2 && args[1]->IsObject()) {
+        options = args[1]->ToObject();
+        separateAttrs = get_separate_attrs(options);
+      }
       String::Utf8Value group_name(args[0]->ToString());
       Local<Object> instance = Group::Instantiate(*group_name, args.This(), args[1]->Uint32Value());
-      args.GetReturnValue().Set(instance);
+      if(separateAttrs){
+         v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), 2);
+          v8::Local<v8::Object> attrs = v8::Object::New(v8::Isolate::GetCurrent());
+        Group* group = ObjectWrap::Unwrap<Group>(instance);
+        refreshAttributes(attrs, group->id);
+        array->Set(0, instance);
+        array->Set(1, attrs);
+        args.GetReturnValue().Set(array);
+      }
+      else
+        args.GetReturnValue().Set(instance);
       return;
     } catch (Exception& ex) {
       v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
