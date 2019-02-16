@@ -60,3 +60,11 @@ Object.getOwnPropertyNames(attrs).forEach(function(val, idx, array) {
   }
 });
 ```
+
+If attribute names conflict with this API you can read the attributes separately using destructuring assignment:
+
+```javascript
+    var group, attrs;
+    [group, attrs]= file.openGroup('pmc/refinement', {separate_attributes: true});
+
+```
