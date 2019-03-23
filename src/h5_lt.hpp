@@ -1281,6 +1281,13 @@ namespace NodeHDF5 {
           return;
           break;
       }
+      if(subsetOn){
+            theSize = 1;
+            for (int rankIndex = 0; rankIndex < rank; rankIndex++) {
+              theSize *= count.get()[rankIndex];
+            }
+      }
+      
       switch (class_id) {
         case H5T_ARRAY: {
           hid_t                      did          = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
@@ -1473,7 +1480,8 @@ namespace NodeHDF5 {
         } break;
         default:
 
-          hid_t              type_id;
+          hid_t did = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);;
+          hid_t type_id;
           Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), bufSize * theSize);
           Local<TypedArray>  buffer;
           if (class_id == H5T_FLOAT && bufSize == 8) {
@@ -1484,7 +1492,6 @@ namespace NodeHDF5 {
             buffer  = Float32Array::New(arrayBuffer, 0, theSize);
           } else if (class_id == H5T_INTEGER && bufSize == 8) {
 
-           hid_t did                  = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
             type_id                    = H5Dget_type(did);
             Handle<Object> int64Buffer = node::Buffer::New(v8::Isolate::GetCurrent(), bufSize * theSize).ToLocalChecked();
             H5LTread_dataset(idWrap->Value(), *dset_name, type_id, (char*)node::Buffer::Data(int64Buffer));
@@ -1496,14 +1503,11 @@ namespace NodeHDF5 {
             }
             args.GetReturnValue().Set(int64Buffer);
             H5Tclose(native_type_id);
-            H5Tclose(type_id);
-            H5Dclose(did);
             return;
 
           } else if (class_id == H5T_INTEGER && bufSize == 4) {
-            hid_t h = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
-            hid_t t = H5Dget_type(h);
-            if (H5Tget_sign(H5Dget_type(h)) == H5T_SGN_2) {
+            hid_t t = H5Dget_type(did);
+            if (H5Tget_sign(H5Dget_type(did)) == H5T_SGN_2) {
               type_id = H5T_NATIVE_INT;
               buffer  = Int32Array::New(arrayBuffer, 0, theSize);
             } else {
@@ -1511,11 +1515,9 @@ namespace NodeHDF5 {
               buffer  = Uint32Array::New(arrayBuffer, 0, theSize);
             }
             H5Tclose(t);
-            H5Dclose(h);
           } else if ((class_id == H5T_INTEGER || class_id == H5T_ENUM) && bufSize == 2) {
-            hid_t h = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
-            hid_t t = H5Dget_type(h);
-            if (H5Tget_sign(H5Dget_type(h)) == H5T_SGN_2) {
+            hid_t t = H5Dget_type(did);
+            if (H5Tget_sign(H5Dget_type(did)) == H5T_SGN_2) {
               type_id = H5T_NATIVE_SHORT;
               buffer  = Int16Array::New(arrayBuffer, 0, theSize);
             } else {
@@ -1523,11 +1525,9 @@ namespace NodeHDF5 {
               buffer  = Uint16Array::New(arrayBuffer, 0, theSize);
             }
             H5Tclose(t);
-            H5Dclose(h);
           } else if (class_id == H5T_INTEGER && bufSize == 1) {
-            hid_t h = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
-            hid_t t = H5Dget_type(h);
-            if (H5Tget_sign(H5Dget_type(h)) == H5T_SGN_2) {
+            hid_t t = H5Dget_type(did);
+            if (H5Tget_sign(H5Dget_type(did)) == H5T_SGN_2) {
               type_id = H5T_NATIVE_INT8;
               buffer  = Int8Array::New(arrayBuffer, 0, theSize);
             } else {
@@ -1535,7 +1535,6 @@ namespace NodeHDF5 {
               buffer  = Uint8Array::New(arrayBuffer, 0, theSize);
             }
             H5Tclose(t);
-            H5Dclose(h);
           } else {
             v8::Isolate::GetCurrent()->ThrowException(
                 v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type in reading")));
@@ -1543,16 +1542,52 @@ namespace NodeHDF5 {
             return;
           }
 
+          hid_t dataspace_id = H5S_ALL;
+          hid_t memspace_id  = H5S_ALL;
+          if (subsetOn) {
+              std::unique_ptr<hsize_t[]> maxsize(new hsize_t[rank]);
+              for(int rankIndex=0;rankIndex<rank;rankIndex++)
+                  maxsize[rankIndex]=H5S_UNLIMITED;
+            memspace_id           = H5Screate_simple(rank, count.get(), maxsize.get());
+            dataspace_id          = H5Dget_space(did);
+            herr_t err            = H5Sselect_hyperslab(dataspace_id, H5S_SELECT_SET, start.get(), stride.get(), count.get(), NULL);
+            if (err < 0) {
+              if (subsetOn) {
+                H5Sclose(memspace_id);
+                H5Sclose(dataspace_id);
+              }
+              H5Dclose(did);
+              v8::Isolate::GetCurrent()->ThrowException(
+                  v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+              args.GetReturnValue().SetUndefined();
+              return;
+            }
+          }
 #if NODE_VERSION_AT_LEAST(8,0,0)
-          err = H5LTread_dataset(idWrap->Value(), *dset_name, type_id, node::Buffer::Data(buffer->ToObject()));
+          //v8::Local<v8::Object> buffer = node::Buffer::New(v8::Isolate::GetCurrent(), bufSize * theSize).ToLocalChecked();
+          err                          = H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, (char*)node::Buffer::Data(buffer->ToObject()));
 #else
-          err = H5LTread_dataset(idWrap->Value(), *dset_name, type_id, buffer->Buffer()->Externalize().Data());
+          //v8::Local<v8::Object> buffer = node::Buffer::New(v8::Isolate::GetCurrent(), bufSize * theSize).ToLocalChecked();
+          err                          = H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, (char*)buffer->Buffer()->Externalize().Data());
 #endif
           if (err < 0) {
+            if (subsetOn) {
+              H5Sclose(memspace_id);
+              H5Sclose(dataspace_id);
+            }
+            H5Tclose( type_id);
+            H5Dclose(did);
             v8::Isolate::GetCurrent()->ThrowException(
                 v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset")));
             args.GetReturnValue().SetUndefined();
             return;
+          }
+          if (subsetOn) {
+            H5Sclose(memspace_id);
+            H5Sclose(dataspace_id);
+            for (int rankIndex = 0; rankIndex < rank; rankIndex++) {
+              values_dim.get()[rankIndex]= count.get()[rankIndex]/stride.get()[rankIndex];
+            }
           }
           if ((args.Length() == 3 && args[2]->IsFunction()) || (args.Length() == 4 && args[3]->IsFunction())) {
             const unsigned               argc = 1;
@@ -1641,12 +1676,11 @@ namespace NodeHDF5 {
           }
           }
           if(bindAttributes){
-            hid_t did                  = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
 
             v8::Local<v8::Object> focus=buffer->ToObject();
             refreshAttributes(focus, did);
-            H5Dclose(did);
           }
+          H5Dclose(did);
           args.GetReturnValue().Set(buffer);
           break;
       }
@@ -1788,9 +1822,9 @@ namespace NodeHDF5 {
           if (subsetOn) {
             H5Sclose(memspace_id);
             H5Sclose(dataspace_id);
-            H5Dclose(did);
-            args.GetReturnValue().Set(buffer);
-            return;
+            for (int rankIndex = 0; rankIndex < rank; rankIndex++) {
+              values_dim.get()[rankIndex]= count.get()[rankIndex]/stride.get()[rankIndex];
+            }
           }
           if ((args.Length() == 3 && args[2]->IsFunction()) || (args.Length() == 4 && args[3]->IsFunction())) {
             const unsigned               argc = 1;

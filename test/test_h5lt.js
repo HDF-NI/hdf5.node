@@ -550,6 +550,9 @@ describe("testing lite interface ", function() {
             readBuffer.length.should.match(8*10);
 
             const readAsBuffer=h5lt.readDatasetAsBuffer(group.id, 'Waldo', {start: [3,4], stride: [1,1], count: [2,2]});
+            readAsBuffer.rank.should.equal(2);
+            readAsBuffer.rows.should.equal(2);
+            readAsBuffer.columns.should.equal(2);
             readAsBuffer.readDoubleLE(0*8).should.equal(5.0);
             readAsBuffer.readDoubleLE(1*8).should.equal(5.0);
             readAsBuffer.readDoubleLE(2*8).should.equal(1.0);

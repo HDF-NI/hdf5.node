@@ -380,7 +380,7 @@ namespace NodeHDF5 {
     if (args.Length() < 1 || args.Length() > 2 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name and optional options")));
       args.GetReturnValue().SetUndefined();
       return;
     }

@@ -119,36 +119,27 @@ describe("testing attribute interface",function(){
         });
     });
 
-    describe.skip("read variable string attributes", function() {
+    describe("read variable string attributes", function() {
         let file;
         before(function(done) {
-          file = new hdf5Lib.hdf5.File('/home/roger/Downloads/sample.h5', globs.Access.ACC_RDONLY);
+          file = new hdf5Lib.hdf5.File('./sample.h5', globs.Access.ACC_TRUNC);
           done();
         });
 
         it("should be variable string info", function(done) {
-            const group   = file.openGroup('scada');
-            group.refresh();
-            var attrs = group.getDatasetAttributes("active_power");
+            const group   = file.createGroup('neuron_layer_0');
+            group.name = "mflayer";
+            group.size = new Float64Array(3);
+            group.size[0] = 0.1;
+            group.size[1] = 0.1;
+            group.size[2] = 0.1;
             var attrText = '';
-            Object.getOwnPropertyNames(attrs).forEach(function(val, idx, array) {
-//              if (val !=  'id') {
-                if (attrs[val].constructor.name === Array) {
-                  attrText += val + ' :  ';
-                  for (var mIndex = 0; mIndex < attrs[val].Length(); mIndex++) {
-                    attrText += attrs[val][mIndex];
-                    if (mIndex < attrs[val].Length() - 1) {
-                      attrText += ',';
-                    }
-                  }
-                }
-                else{
-                  attrText += val + ' :  ' + attrs[val] + '\n';
-                  console.dir("directly a string ");
-                }
-//              }
-            });
-            console.dir(attrText);
+            group.flush();
+            var attrs = group.getAttributeNames();
+            for(var attr in attrs){
+              var attrValue = group.readAttribute(attrs[attr]);
+              console.log(attrs[attr]+" "+attrValue);
+            }
             group.close();
             done();
         });
