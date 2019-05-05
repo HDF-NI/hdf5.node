@@ -25,13 +25,13 @@ namespace NodeHDF5 {
         return false;
       }
 
-      auto name(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "separate_attributes"));
+      auto name(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "separate_attributes", v8::NewStringType::kInternalized).ToLocalChecked());
 
       if (!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         return false;
       }
 
-      return options->Get(name)->BooleanValue(context).ToChecked();
+      return options->Get(context, name).ToLocalChecked()->BooleanValue(isolate);
     };
 
   Persistent<Function> Filters::Constructor;
@@ -51,7 +51,7 @@ namespace NodeHDF5 {
     Local<FunctionTemplate> t = FunctionTemplate::New(isolate, New);
 
     // set properties
-    t->SetClassName(String::NewFromUtf8(isolate, "Group"));
+    t->SetClassName(String::NewFromUtf8(isolate, "Group", v8::NewStringType::kInternalized).ToLocalChecked());
     t->InstanceTemplate()->SetInternalFieldCount(1);
 
     // member method prototypes
@@ -124,14 +124,14 @@ namespace NodeHDF5 {
             } else {
               std::string msg = "Group " + trail[index] + " doesn't exist";
               v8::Isolate::GetCurrent()->ThrowException(
-                  v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str())));
+                  v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
               args.GetReturnValue().SetUndefined();
               return;
             }
           } else {
             std::string msg = "Group " + trail[index] + " doesn't exist";
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str())));
+                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -144,7 +144,7 @@ namespace NodeHDF5 {
           herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->IntegerValue(context).ToChecked());
           if (err < 0) {
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -158,7 +158,10 @@ namespace NodeHDF5 {
           Local<Object> instance = Int64::Instantiate(args.This(), group->id);
           Int64*        idWrap   = ObjectWrap::Unwrap<Int64>(instance);
           idWrap->value          = group->id;
-          args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
+          v8::Maybe<bool> ret = args.This()->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "id", v8::NewStringType::kInternalized).ToLocalChecked(), instance);
+          if(ret.ToChecked()){
+            
+          }
         }
         else{
           Group* group   = new Group(-1);
@@ -168,23 +171,29 @@ namespace NodeHDF5 {
           Local<Object> instance = Int64::Instantiate(args.This(), group->id);
           Int64*        idWrap   = ObjectWrap::Unwrap<Int64>(instance);
           idWrap->value          = group->id;
-          args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
+          v8::Maybe<bool> ret = args.This()->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "id", v8::NewStringType::kInternalized).ToLocalChecked(), instance);
+          if(ret.ToChecked()){
+            
+          }
         }
 
       } else {
         Local<Object> instance = Int64::Instantiate(args.This(), -1);
         Int64*        idWrap   = ObjectWrap::Unwrap<Int64>(instance);
         idWrap->value          = -1;
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
+        v8::Maybe<bool> ret = args.This()->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "id", v8::NewStringType::kInternalized).ToLocalChecked(), instance);
+        if(ret.ToChecked()){
+          
+        }
       }
     } catch (std::exception& ex) {
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group open failed")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group open failed", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     } catch (...) {
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group open failed")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group open failed", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -200,7 +209,7 @@ namespace NodeHDF5 {
     if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -245,7 +254,7 @@ namespace NodeHDF5 {
                    (void*)&desc);
         }
         desc = "Group create failed: " + desc;
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), desc.c_str())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), desc.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -261,7 +270,7 @@ namespace NodeHDF5 {
         herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->IntegerValue(context).ToChecked());
         if (err < 0) {
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order", v8::NewStringType::kInternalized).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
         }
@@ -273,7 +282,10 @@ namespace NodeHDF5 {
         idWrap->value          = group->id;
 
         // attach various properties
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
+        v8::Maybe<bool> ret = args.This()->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "id", v8::NewStringType::kInternalized).ToLocalChecked(), instance);
+        if(ret.ToChecked()){
+          
+        }
         created = true;
       }
       previous_hid = hid;
@@ -285,7 +297,7 @@ namespace NodeHDF5 {
       herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->IntegerValue(context).ToChecked());
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -297,7 +309,10 @@ namespace NodeHDF5 {
       idWrap->value          = group->id;
 
       // attach various properties
-      args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
+      v8::Maybe<bool> ret = args.This()->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "id", v8::NewStringType::kInternalized).ToLocalChecked(), instance);
+      if(ret.ToChecked()){
+        
+      }
       created = true;
     }
     return;
@@ -310,7 +325,7 @@ namespace NodeHDF5 {
     if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -351,13 +366,13 @@ namespace NodeHDF5 {
         } else {
           std::string msg = "Group" + trail[index] + " doesn't exist";
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str())));
+              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
         }
       } else {
         std::string msg = "Group" + trail[index] + " doesn't exist";
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -367,7 +382,7 @@ namespace NodeHDF5 {
     herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->IntegerValue(context).ToChecked());
     if (err < 0) {
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -380,7 +395,10 @@ namespace NodeHDF5 {
     idWrap->value          = group->id;
 
     // attach various properties
-    args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
+    v8::Maybe<bool> ret = args.This()->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "id", v8::NewStringType::kInternalized).ToLocalChecked(), instance);
+    if(ret.ToChecked()){
+      
+    }
   }
 
   void Group::OpenGroup(const v8::FunctionCallbackInfo<Value>& args) {
@@ -391,7 +409,7 @@ namespace NodeHDF5 {
     if (args.Length() < 1 || args.Length() > 2 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name and optional options")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name and optional options", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -410,19 +428,19 @@ namespace NodeHDF5 {
           v8::Local<v8::Object> attrs = v8::Object::New(v8::Isolate::GetCurrent());
         Group* group = ObjectWrap::Unwrap<Group>(instance);
         refreshAttributes(attrs, group->id);
-        array->Set(0, instance);
-        array->Set(1, attrs);
+        v8::Maybe<bool> ret = array->Set(context, 0, instance);
+        ret = array->Set(context, 1, attrs);
         args.GetReturnValue().Set(array);
       }
       else
         args.GetReturnValue().Set(instance);
       return;
     } catch (Exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     } catch (std::exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -435,7 +453,7 @@ namespace NodeHDF5 {
     if (args.Length() != 3) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest group, dest name")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest group, dest name", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -449,7 +467,7 @@ namespace NodeHDF5 {
     if (err < 0) {
       std::string str(*dest_name);
       std::string errStr = "Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -462,7 +480,7 @@ namespace NodeHDF5 {
     if (args.Length() != 3) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest group, dest name")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest group, dest name", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -478,7 +496,7 @@ namespace NodeHDF5 {
     if (err < 0) {
       std::string str(*dest_name);
       std::string errStr = "Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -491,7 +509,7 @@ namespace NodeHDF5 {
     if (args.Length() != 3) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest group, dest name")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest group, dest name", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -504,7 +522,7 @@ namespace NodeHDF5 {
     if (err < 0) {
       std::string str(*dest_name);
       std::string errStr = "Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -517,7 +535,7 @@ namespace NodeHDF5 {
     if (args.Length() != 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group name")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group name", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -535,7 +553,7 @@ namespace NodeHDF5 {
     if (args.Length() > 0) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -572,7 +590,7 @@ namespace NodeHDF5 {
     auto isolate = v8::Isolate::GetCurrent();
     v8::Local<v8::Context> context = isolate->GetCurrentContext();
     // group name and parent reference
-    Local<Value> argv[3] = {Local<Value>::New(isolate, String::NewFromUtf8(isolate, name)), parent, Uint32::New(isolate, creationOrder)};
+    Local<Value> argv[3] = {Local<Value>::New(isolate, String::NewFromUtf8(isolate, name, v8::NewStringType::kInternalized).ToLocalChecked()), parent, Uint32::New(isolate, creationOrder)};
 
     Local<Object> tmp;
     Local<Value> value;

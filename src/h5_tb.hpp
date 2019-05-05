@@ -1363,16 +1363,16 @@ namespace NodeHDF5 {
           std::string errStr = "Failed inserting to table, " + tableName + " with return: " + std::to_string(err) + " " +
                                std::to_string(idWrap->Value()) + ".\n";
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
         }
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1380,11 +1380,12 @@ namespace NodeHDF5 {
 
     static void get_table_info(const v8::FunctionCallbackInfo<Value>& args) {
       v8::Isolate*    isolate = args.GetIsolate();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
       // fail out if arguments are not correct
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1394,18 +1395,20 @@ namespace NodeHDF5 {
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject(isolate->GetCurrentContext()).ToLocalChecked());
       H5TBget_table_info(idWrap->Value(), (*table_name), &nfields, &nrecords);
       v8::Local<v8::Object> obj = v8::Object::New(v8::Isolate::GetCurrent());
-      obj->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "nfields"), Uint32::New(v8::Isolate::GetCurrent(), nfields));
-      obj->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "nrecords"), Uint32::New(v8::Isolate::GetCurrent(), nrecords));
+      v8::Maybe<bool> ret = obj->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "nfields", v8::NewStringType::kInternalized).ToLocalChecked(), Uint32::New(v8::Isolate::GetCurrent(), nfields));
+      ret = obj->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "nrecords", v8::NewStringType::kInternalized).ToLocalChecked(), Uint32::New(v8::Isolate::GetCurrent(), nrecords));
+      if(ret.ToChecked()){};
       args.GetReturnValue().Set(obj);
     }
 
     static void get_field_info(const v8::FunctionCallbackInfo<Value>& args) {
       v8::Isolate*    isolate = args.GetIsolate();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
       // fail out if arguments are not correct
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1425,7 +1428,8 @@ namespace NodeHDF5 {
       v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), nfields);
 
       for (unsigned int i = 0; i < nfields; i++) {
-        array->Set(i, String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names.get()[i]));
+        v8::Maybe<bool> ret = array->Set(context, i, String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names.get()[i], v8::NewStringType::kInternalized).ToLocalChecked());
+        if(ret.ToChecked()){};
       }
       args.GetReturnValue().Set(array);
     }

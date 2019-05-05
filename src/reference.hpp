@@ -35,7 +35,7 @@ namespace NodeHDF5 {
       NODE_SET_PROTOTYPE_METHOD(tpl, "getName", getName);
 
       Constructor.Reset(isolate, tpl->GetFunction(context).ToLocalChecked());
-      v8::Maybe<bool> ret=exports->Set(context, v8::String::NewFromUtf8(isolate, "Reference"), tpl->GetFunction(context).ToLocalChecked());
+      v8::Maybe<bool> ret=exports->Set(context, v8::String::NewFromUtf8(isolate, "Reference", v8::NewStringType::kInternalized).ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
       if(ret.ToChecked()){
       
       }
@@ -130,7 +130,7 @@ namespace NodeHDF5 {
       size=H5Rget_name(locId, (H5R_type_t)args[1]->Int32Value(isolate->GetCurrentContext()).ToChecked(), (void *)&obj->objectId, NULL, size)+1;
       std::unique_ptr<char[]> name(new char[size+1]);
        size=H5Rget_name(locId, (H5R_type_t)args[1]->Int32Value(isolate->GetCurrentContext()).ToChecked(), (void *)&obj->objectId, name.get(), size);
-      args.GetReturnValue().Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), (const char*)name.get(), v8::String::kNormalString, size));
+      args.GetReturnValue().Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), (const char*)name.get(), v8::NewStringType::kNormal, size).ToLocalChecked());
     }
 
     static v8::Persistent<v8::Function> Constructor;

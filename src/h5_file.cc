@@ -26,13 +26,13 @@ namespace NodeHDF5 {
         return false;
       }
 
-      auto name(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "separate_attributes"));
+      auto name(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "separate_attributes", v8::NewStringType::kInternalized).ToLocalChecked());
 
       if (!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         return false;
       }
 
-      return options->Get(name)->BooleanValue(context).ToChecked();
+      return options->Get(context, name).ToLocalChecked()->BooleanValue(isolate);
     };
 
   File::File(const char* path) {
@@ -129,7 +129,7 @@ namespace NodeHDF5 {
 
     // instantiate constructor function template
     Local<FunctionTemplate> t = FunctionTemplate::New(isolate, New);
-    t->SetClassName(String::NewFromUtf8(isolate, "File"));
+    t->SetClassName(String::NewFromUtf8(isolate, "File", v8::NewStringType::kInternalized).ToLocalChecked());
     t->InstanceTemplate()->SetInternalFieldCount(1);
     Constructor.Reset(v8::Isolate::GetCurrent(), t);
     // member method prototypes
@@ -159,7 +159,10 @@ namespace NodeHDF5 {
     setPrototypeMethod(isolate, t, v8::String::NewFromUtf8(isolate, "visit", v8::NewStringType::kInternalized).ToLocalChecked(), visit);
 
     // append this function to the target object
-    target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "File"), t->GetFunction(context).ToLocalChecked());
+    v8::Maybe<bool> ret = target->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "File", v8::NewStringType::kInternalized).ToLocalChecked(), t->GetFunction(context).ToLocalChecked());
+    if(ret.ToChecked()){
+      
+    }
   }
 
   void File::New(const v8::FunctionCallbackInfo<Value>& args) {
@@ -169,7 +172,7 @@ namespace NodeHDF5 {
     if (args.Length() < 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected file path")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected file path", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -180,7 +183,7 @@ namespace NodeHDF5 {
     if (args.Length() < 2 && !H5Fis_hdf5(*path)) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "file is not hdf5 format")));
+          v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "file is not hdf5 format", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -202,34 +205,39 @@ namespace NodeHDF5 {
     f->Wrap(args.This());
 
     // attach various properties
-    args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "path"),
-                     String::NewFromUtf8(v8::Isolate::GetCurrent(), f->name.c_str()));
+    v8::Maybe<bool> ret = args.This()->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "path", v8::NewStringType::kInternalized).ToLocalChecked(),
+                     String::NewFromUtf8(v8::Isolate::GetCurrent(), f->name.c_str(), v8::NewStringType::kInternalized).ToLocalChecked());
+    if(ret.ToChecked()){
+      
+    }
     hsize_t file_size;
     herr_t  ret_value = H5Fget_filesize(f->id, &file_size);
     if (ret_value < 0) {
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "H5Fget_filesize failed")));
+          v8::Exception::TypeError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "H5Fget_filesize failed", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
 
-    args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "size"), Number::New(v8::Isolate::GetCurrent(), file_size));
-    args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "freeSpace"),
+    ret = args.This()->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "size", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), file_size));
+    ret = args.This()->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "freeSpace", v8::NewStringType::kInternalized).ToLocalChecked(),
                      Number::New(v8::Isolate::GetCurrent(), H5Fget_freespace(f->id)));
-    args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "objectCount"),
+    ret = args.This()->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "objectCount", v8::NewStringType::kInternalized).ToLocalChecked(),
                      Number::New(v8::Isolate::GetCurrent(), H5Fget_obj_count(f->id, H5F_OBJ_ALL)));
     Local<Object> idInstance = Int64::Instantiate(args.This(), f->id);
     Int64*        idWrap     = ObjectWrap::Unwrap<Int64>(idInstance);
     idWrap->value            = f->id;
 
-    args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), idInstance);
-    
+    ret = args.This()->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "id", v8::NewStringType::kInternalized).ToLocalChecked(), idInstance);
+    if(ret.ToChecked()){
+      
+    }
     } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
     } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
     }
@@ -240,7 +248,7 @@ namespace NodeHDF5 {
     if (args.Length() != 0) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected no arguments")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected no arguments", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -260,7 +268,7 @@ namespace NodeHDF5 {
     if (args.Length() != 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, callback")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, callback", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -306,7 +314,7 @@ namespace NodeHDF5 {
                    (void*)&desc);
         }
         desc = "Group create failed: " + desc;
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), desc.c_str())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), desc.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -319,7 +327,7 @@ namespace NodeHDF5 {
         herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->Uint32Value(context).ToChecked());
         if (err < 0) {
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order", v8::NewStringType::kInternalized).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
         }
@@ -329,7 +337,10 @@ namespace NodeHDF5 {
         Local<Object> idInstance = Int64::Instantiate(args.This(), group->id);
         Int64*        idWrap     = ObjectWrap::Unwrap<Int64>(idInstance);
         idWrap->value            = group->id;
-        instance->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), idInstance);
+        v8::Maybe<bool> ret = instance->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "id", v8::NewStringType::kInternalized).ToLocalChecked(), idInstance);
+        if(ret.ToChecked()){
+          
+        }
         group->Wrap(instance);
 
         created = true;
@@ -343,7 +354,7 @@ namespace NodeHDF5 {
       herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->Uint32Value(context).ToChecked());
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -352,7 +363,10 @@ namespace NodeHDF5 {
       v8::Local<v8::Object> idInstance = Int64::Instantiate(args.This(), group->id);
       Int64*                idWrap     = ObjectWrap::Unwrap<Int64>(idInstance);
       idWrap->value                    = group->id;
-      instance->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), idInstance);
+      v8::Maybe<bool>  ret = instance->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "id", v8::NewStringType::kInternalized).ToLocalChecked(), idInstance);
+      if(ret.ToChecked()){
+        
+      }
       group->Wrap(instance);
 
       created = true;
@@ -369,7 +383,7 @@ namespace NodeHDF5 {
     if (args.Length() < 1 || args.Length() > 2 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -388,19 +402,22 @@ namespace NodeHDF5 {
           v8::Local<v8::Object> attrs = v8::Object::New(v8::Isolate::GetCurrent());
         Group* group = ObjectWrap::Unwrap<Group>(instance);
         refreshAttributes(attrs, group->id);
-        array->Set(0, instance);
-        array->Set(1, attrs);
+        v8::Maybe<bool> ret = array->Set(context, 0, instance);
+        ret = array->Set(context, 1, attrs);
+        if(ret.ToChecked()){
+          
+        }
         args.GetReturnValue().Set(array);
       }
       else
         args.GetReturnValue().Set(instance);
       return;
     } catch (Exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     } catch (std::exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -414,7 +431,7 @@ namespace NodeHDF5 {
     if (args.Length() != 3) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest id, dest name")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest id, dest name", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -430,7 +447,7 @@ namespace NodeHDF5 {
     if (err < 0) {
       std::string str(*dest_name);
       std::string errStr = "Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -443,7 +460,7 @@ namespace NodeHDF5 {
     if (args.Length() != 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group name")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group name", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -461,7 +478,7 @@ namespace NodeHDF5 {
     if (args.Length() > 0) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -527,7 +544,7 @@ namespace NodeHDF5 {
     herr_t err = H5Fclose(file->id);
     if (err < 0) {
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to close h5")));
+          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to close h5", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
     }
 

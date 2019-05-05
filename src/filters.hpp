@@ -23,7 +23,7 @@ namespace NodeHDF5 {
 
       // Prepare constructor template
       v8::Local<v8::FunctionTemplate> tpl = FunctionTemplate::New(isolate, New);
-      tpl->SetClassName(v8::String::NewFromUtf8(isolate, "Filters"));
+      tpl->SetClassName(v8::String::NewFromUtf8(isolate, "Filters", v8::NewStringType::kInternalized).ToLocalChecked());
       tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
       // Prototype
@@ -32,7 +32,10 @@ namespace NodeHDF5 {
       NODE_SET_PROTOTYPE_METHOD(tpl, "getFilter", getFilter);
 
       Constructor.Reset(v8::Isolate::GetCurrent(), tpl->GetFunction(context).ToLocalChecked());
-      exports->Set(v8::String::NewFromUtf8(isolate, "Filters"), tpl->GetFunction(context).ToLocalChecked());
+      v8::Maybe<bool> ret = exports->Set(context, v8::String::NewFromUtf8(isolate, "Filters", v8::NewStringType::kInternalized).ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
+      if(ret.ToChecked()){
+        
+      }
     }
   
     static Local<Object> Instantiate(hid_t parentId, std::string dset_name) {
@@ -42,7 +45,7 @@ namespace NodeHDF5 {
       Int64*        idWrap             = ObjectWrap::Unwrap<Int64>(idInstance);
       idWrap->value                    = parentId;
       const unsigned        argc       = 2;
-      v8::Local<v8::Value> argv[argc] = {idInstance, v8::String::NewFromUtf8(isolate, dset_name.c_str())};
+      v8::Local<v8::Value> argv[argc] = {idInstance, v8::String::NewFromUtf8(isolate, dset_name.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()};
 
       return v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), argc, argv).ToLocalChecked();
     }

@@ -56,7 +56,7 @@ namespace NodeHDF5 {
 
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make long long array attribute")));
+            v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make long long array attribute", v8::NewStringType::kInternalized).ToLocalChecked()));
       }
 
 //      H5Tclose(arraytype_id);
@@ -80,7 +80,7 @@ namespace NodeHDF5 {
 
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make long long array attribute")));
+            v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make long long array attribute", v8::NewStringType::kInternalized).ToLocalChecked()));
       }
 
 //      H5Tclose(arraytype_id);
@@ -106,7 +106,7 @@ namespace NodeHDF5 {
 
     if (err < 0) {
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make var len array attribute")));
+          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make var len array attribute", v8::NewStringType::kInternalized).ToLocalChecked()));
     }
 
 //    H5Tclose(arraytype_id);
@@ -122,7 +122,7 @@ namespace NodeHDF5 {
     if (args.Length() > 0) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
+          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -133,11 +133,11 @@ namespace NodeHDF5 {
         v8::Local<v8::Object> focus=args.This();
       refreshAttributes(focus, group->id);
     } catch (Exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     } catch (std::exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -153,7 +153,7 @@ namespace NodeHDF5 {
     if (args.Length() > 0) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
+          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments", v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -164,74 +164,74 @@ namespace NodeHDF5 {
     v8::Local<v8::Array> propertyNames = args.This()->GetPropertyNames(context).ToLocalChecked();
     for (unsigned int index = 0; index < propertyNames->Length(); index++) {
       v8::Local<v8::Value> name = propertyNames->Get(context, index).ToLocalChecked();
-      if (!args.This()->Get(name)->IsFunction() && strncmp("id", (*v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked())), 2) != 0) {
+      if (!args.This()->Get(context, name).ToLocalChecked()->IsFunction() && strncmp("id", (*v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked())), 2) != 0) {
         htri_t attrExists = H5Aexists(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
-        if (args.This()->Get(name)->IsFloat64Array()) {
+        if (args.This()->Get(context, name).ToLocalChecked()->IsFloat64Array()) {
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
           }
           make_attribute_from_typed_array(group->id,
                                           *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
+                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(context, name).ToLocalChecked()),
                                           H5T_NATIVE_DOUBLE);
-        } else if (args.This()->Get(name)->IsFloat32Array()) {
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsFloat32Array()) {
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
           }
           make_attribute_from_typed_array(group->id,
                                           *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
+                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(context, name).ToLocalChecked()),
                                           H5T_NATIVE_FLOAT);
-        } else if (args.This()->Get(name)->IsInt32Array()) {
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsInt32Array()) {
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
           }
           make_attribute_from_typed_array(group->id,
                                           *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
+                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(context, name).ToLocalChecked()),
                                           H5T_NATIVE_INT);
-        } else if (args.This()->Get(name)->IsUint32Array()) {
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsUint32Array()) {
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
           }
           make_attribute_from_typed_array(group->id,
                                           *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
+                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(context, name).ToLocalChecked()),
                                           H5T_NATIVE_UINT);
-        } else if (args.This()->Get(name)->IsInt16Array()) {
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsInt16Array()) {
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
           }
           make_attribute_from_typed_array(group->id,
                                           *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
+                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(context, name).ToLocalChecked()),
                                           H5T_NATIVE_SHORT);
-        } else if (args.This()->Get(name)->IsUint16Array()) {
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsUint16Array()) {
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
           }
           make_attribute_from_typed_array(group->id,
                                           *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
+                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(context, name).ToLocalChecked()),
                                           H5T_NATIVE_USHORT);
-        } else if (args.This()->Get(name)->IsInt8Array()) {
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsInt8Array()) {
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
           }
           make_attribute_from_typed_array(group->id,
                                           *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
+                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(context, name).ToLocalChecked()),
                                           H5T_NATIVE_INT8);
-        } else if (args.This()->Get(name)->IsUint8Array()) {
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsUint8Array()) {
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
           }
           make_attribute_from_typed_array(group->id,
                                           *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
+                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(context, name).ToLocalChecked()),
                                           H5T_NATIVE_UINT8);
-        } else if (args.This()->Get(name)->IsUint32()) {
-          uint32_t value = args.This()->Get(name)->Uint32Value(context).ToChecked();
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsUint32()) {
+          uint32_t value = args.This()->Get(context, name).ToLocalChecked()->Uint32Value(context).ToChecked();
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
           }
@@ -242,7 +242,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -251,8 +251,8 @@ namespace NodeHDF5 {
           H5Tclose(attr_type);
           H5Aclose(attr_id);
 
-        } else if (args.This()->Get(name)->IsInt32()) {
-          int32_t value = args.This()->Get(name)->Int32Value(context).ToChecked();
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsInt32()) {
+          int32_t value = args.This()->Get(context, name).ToLocalChecked()->Int32Value(context).ToChecked();
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
           }
@@ -263,7 +263,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -272,8 +272,8 @@ namespace NodeHDF5 {
           H5Tclose(attr_type);
           H5Aclose(attr_id);
 
-        } else if (args.This()->Get(name)->IsNumber()) {
-          double value = args.This()->Get(name)->NumberValue(context).ToChecked();
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsNumber()) {
+          double value = args.This()->Get(context, name).ToLocalChecked()->NumberValue(context).ToChecked();
 
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
@@ -285,7 +285,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -294,8 +294,8 @@ namespace NodeHDF5 {
           H5Tclose(attr_type);
           H5Aclose(attr_id);
 
-        } else if (args.This()->Get(name)->IsStringObject()) {
-          std::string value((*v8::String::Utf8Value(isolate, v8::StringObject::Cast(*args.This()->Get(name))->ValueOf())));
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsStringObject()) {
+          std::string value((*v8::String::Utf8Value(isolate, v8::StringObject::Cast(*args.This()->Get(context, name).ToLocalChecked())->ValueOf())));
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
           }
@@ -307,7 +307,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -319,8 +319,8 @@ namespace NodeHDF5 {
           H5Tclose(attr_type);
           H5Aclose(attr_id);
 
-        } else if (args.This()->Get(name)->IsString()) {
-          std::string value((*v8::String::Utf8Value(isolate, args.This()->Get(name)->ToString(context).ToLocalChecked())));
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsString()) {
+          std::string value((*v8::String::Utf8Value(isolate, args.This()->Get(context, name).ToLocalChecked()->ToString(context).ToLocalChecked())));
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
           }
@@ -335,7 +335,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -344,13 +344,13 @@ namespace NodeHDF5 {
           H5Tclose(attr_type);
           H5Aclose(attr_id);
 
-        } else if (args.This()->Get(name)->IsArray()) {
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsArray()) {
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
           }
           make_attribute_from_array(
-              group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()), v8::Local<v8::Array>::Cast(args.This()->Get(name)));
-        } else if (args.This()->Get(name)->IsObject() && std::strncmp("Int64", (*v8::String::Utf8Value(isolate, args.This()->Get(name)->ToObject(context).ToLocalChecked()->GetConstructorName())), 5)==0) {
+              group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()), v8::Local<v8::Array>::Cast(args.This()->Get(context, name).ToLocalChecked()));
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsObject() && std::strncmp("Int64", (*v8::String::Utf8Value(isolate, args.This()->Get(context, name).ToLocalChecked()->ToObject(context).ToLocalChecked()->GetConstructorName())), 5)==0) {
           Int64* valueWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(name)->ToObject(context).ToLocalChecked());
           int64_t value = valueWrap->Value();
           if (attrExists) {
@@ -363,7 +363,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -372,8 +372,8 @@ namespace NodeHDF5 {
           H5Tclose(attr_type);
           H5Aclose(attr_id);
 
-        } else if (args.This()->Get(name)->IsObject() && std::strncmp("Uint64", (*v8::String::Utf8Value(isolate, args.This()->Get(name)->ToObject(context).ToLocalChecked()->GetConstructorName())), 6)==0) {
-          Uint64* valueWrap = ObjectWrap::Unwrap<Uint64>(args.This()->Get(name)->ToObject(context).ToLocalChecked());
+        } else if (args.This()->Get(context, name).ToLocalChecked()->IsObject() && std::strncmp("Uint64", (*v8::String::Utf8Value(isolate, args.This()->Get(context, name).ToLocalChecked()->ToObject(context).ToLocalChecked()->GetConstructorName())), 6)==0) {
+          Uint64* valueWrap = ObjectWrap::Unwrap<Uint64>(args.This()->Get(context, name).ToLocalChecked()->ToObject(context).ToLocalChecked());
           uint64_t value = valueWrap->Value();
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));
@@ -385,7 +385,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
