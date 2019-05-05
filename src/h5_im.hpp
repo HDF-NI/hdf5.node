@@ -16,24 +16,28 @@ namespace NodeHDF5 {
 
   class H5im {
   public:
-    static void Initialize(Handle<Object> target) {
+    static void Initialize(v8::Local<v8::Object> exports) {
+      v8::Isolate* isolate = exports->GetIsolate();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
       // append this function to the target object
-      target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeImage"),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::make_image)->GetFunction());
-      target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readImage"),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::read_image)->GetFunction());
-      target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readImageRegion"),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::read_image_region)->GetFunction());
-      target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "isImage"),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::is_image)->GetFunction());
-      target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "getImageInfo"),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::get_image_info)->GetFunction());
-      target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makePalette"),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::make_palette)->GetFunction());
+      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeImage"),
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::make_image)->GetFunction(context).ToLocalChecked());
+      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readImage"),
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::read_image)->GetFunction(context).ToLocalChecked());
+      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readImageRegion"),
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::read_image_region)->GetFunction(context).ToLocalChecked());
+      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "isImage"),
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::is_image)->GetFunction(context).ToLocalChecked());
+      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "getImageInfo"),
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::get_image_info)->GetFunction(context).ToLocalChecked());
+      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makePalette"),
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::make_palette)->GetFunction(context).ToLocalChecked());
     }
 
-    static void get_height(Handle<Object> options, std::function<void(hid_t)> cb) {
+    static void get_height(v8::Local<v8::Object> options, std::function<void(hid_t)> cb) {
+      v8::Isolate* isolate = v8::Isolate::GetCurrent();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
       if (options.IsEmpty()) {
         return;
       }
@@ -41,11 +45,13 @@ namespace NodeHDF5 {
       auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"));
 
       if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
-        cb((hsize_t)options->Get(name)->Uint32Value());
+        cb((hsize_t)options->Get(name)->Uint32Value(context).ToChecked());
       }
     }
     
-    static void get_width(Handle<Object> options, std::function<void(hsize_t)> cb) {
+    static void get_width(v8::Local<v8::Object> options, std::function<void(hsize_t)> cb) {
+      v8::Isolate* isolate = v8::Isolate::GetCurrent();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
       if (options.IsEmpty()) {
         return;
       }
@@ -53,11 +59,13 @@ namespace NodeHDF5 {
       auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"));
 
       if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
-        cb((hsize_t)options->Get(name)->Uint32Value());
+        cb((hsize_t)options->Get(name)->Uint32Value(context).ToChecked());
       }
     }
     
-    static void get_planes(Handle<Object> options, std::function<void(hsize_t)> cb) {
+    static void get_planes(v8::Local<v8::Object> options, std::function<void(hsize_t)> cb) {
+      v8::Isolate* isolate = v8::Isolate::GetCurrent();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
       if (options.IsEmpty()) {
         return;
       }
@@ -65,38 +73,40 @@ namespace NodeHDF5 {
       auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"));
 
       if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
-        cb((hsize_t)options->Get(name)->Uint32Value());
+        cb((hsize_t)options->Get(name)->Uint32Value(context).ToChecked());
       }
     }
     
     static void make_image(const v8::FunctionCallbackInfo<Value>& args) {
+      v8::Isolate* isolate = args.GetIsolate();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
-      String::Utf8Value dset_name(args[1]->ToString());
-      Local<v8::Object> buffer = args[2]->ToObject();
+      String::Utf8Value dset_name(isolate, args[1]->ToString(context).ToLocalChecked());
+      Local<v8::Object> buffer = args[2]->ToObject(context).ToLocalChecked();
       Local<Object>     options;
       if (args.Length() >= 4 && args[3]->IsObject()) {
-        options = args[3]->ToObject();
+        options = args[3]->ToObject(context).ToLocalChecked();
       }
 
-      String::Utf8Value interlace(buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"))->ToString());
+      String::Utf8Value interlace(isolate, buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"))->ToString(context).ToLocalChecked());
       herr_t            err;
       hsize_t           dims[3];
-      if (buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))) {
+      if (buffer->Has(context, String::NewFromUtf8(isolate, "height", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked()) {
         Local<Value> heightValue = buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"));
-        dims[0]                   = heightValue->Int32Value();
+        dims[0]                   = heightValue->Int32Value(context).ToChecked();
       }
       else get_height(options, [&](int _height){dims[0]=_height;});      
-      if (buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"))) {
+      if (buffer->Has(context, String::NewFromUtf8(isolate, "width", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked()) {
         Local<Value> widthValue = buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"));
-        dims[1]                   = widthValue->Int32Value();
+        dims[1]                   = widthValue->Int32Value(context).ToChecked();
       }
       else get_width(options, [&](int _width){dims[1]=_width;});      
-      if (buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"))) {
-        Local<Value> planesValue = buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes"));
-        dims[2]                   = planesValue->Int32Value();
+      if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked()) {
+        Local<Value> planesValue = buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "planes", v8::NewStringType::kInternalized).ToLocalChecked());
+        dims[2]                   = planesValue->Int32Value(context).ToChecked();
       }
       else get_planes(options, [&](int _planes){dims[2]=_planes;});      
-      Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+      Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject(context).ToLocalChecked());
      err           = H5LTmake_dataset(idWrap->Value(), *dset_name, 3, dims, H5T_NATIVE_UCHAR, (const char*)node::Buffer::Data(args[2]));
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
@@ -117,14 +127,16 @@ namespace NodeHDF5 {
     }
 
     static void read_image(const v8::FunctionCallbackInfo<Value>& args) {
+      v8::Isolate* isolate = args.GetIsolate();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      String::Utf8Value dset_name(isolate, args[1]->ToString(context).ToLocalChecked());
       hsize_t           width;
       hsize_t           height;
       hsize_t           planes;
       char              interlace[255];
       hssize_t          npals;
-      Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+      Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject(context).ToLocalChecked());
       herr_t            err    = H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
@@ -154,7 +166,7 @@ namespace NodeHDF5 {
           options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "npals"), Number::New(v8::Isolate::GetCurrent(), npals));
           v8::Local<v8::Value> argv[1] = {options};
           v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)
-              ->Call(v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), argc, argv);
+              ->Call(v8::Isolate::GetCurrent()->GetCurrentContext(), v8::Null(v8::Isolate::GetCurrent()), argc, argv);
         } else{
           buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "width"), Number::New(v8::Isolate::GetCurrent(), width));
           buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"), Number::New(v8::Isolate::GetCurrent(), height));
@@ -167,14 +179,16 @@ namespace NodeHDF5 {
     }
 
     static void read_image_region(const v8::FunctionCallbackInfo<Value>& args) {
+      v8::Isolate* isolate = args.GetIsolate();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      String::Utf8Value dset_name(isolate, args[1]->ToString(context).ToLocalChecked());
       hsize_t           width;
       hsize_t           height;
       hsize_t           planes;
       char              interlace[255];
       hssize_t          npals;
-      Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+      Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject(context).ToLocalChecked());
       herr_t            err    = H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
@@ -192,30 +206,30 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      Local<Array> names = args[2]->ToObject()->GetOwnPropertyNames();
+      Local<Array> names = args[2]->ToObject(context).ToLocalChecked()->GetOwnPropertyNames(context).ToLocalChecked();
       for (uint32_t index = 0; index < names->Length(); index++) {
-        String::Utf8Value _name(names->Get(index));
+        String::Utf8Value _name(isolate, names->Get(context, index).ToLocalChecked());
         std::string       name(*_name);
         if (name.compare("start") == 0) {
-          Local<Object> starts = args[2]->ToObject()->Get(names->Get(index))->ToObject();
+          Local<Object> starts = args[2]->ToObject(context).ToLocalChecked()->Get(context, names->Get(context, index).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
           for (unsigned int arrayIndex = 0;
-               arrayIndex < starts->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length"))->ToObject()->Uint32Value();
+               arrayIndex < starts->Get(context, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked()->Uint32Value(context).ToChecked();
                arrayIndex++) {
-            start.get()[arrayIndex] = starts->Get(arrayIndex)->Uint32Value();
+            start.get()[arrayIndex] = starts->Get(context, arrayIndex).ToLocalChecked()->Uint32Value(context).ToChecked();
           }
         } else if (name.compare("stride") == 0) {
-          Local<Object> strides = args[2]->ToObject()->Get(names->Get(index))->ToObject();
+          Local<Object> strides = args[2]->ToObject(context).ToLocalChecked()->Get(context, names->Get(context, index).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
           for (unsigned int arrayIndex = 0;
-               arrayIndex < strides->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length"))->ToObject()->Uint32Value();
+               arrayIndex < strides->Get(context, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked()->Uint32Value(context).ToChecked();
                arrayIndex++) {
-            stride.get()[arrayIndex] = strides->Get(arrayIndex)->Uint32Value();
+            stride.get()[arrayIndex] = strides->Get(context, arrayIndex).ToLocalChecked()->Uint32Value(context).ToChecked();
           }
         } else if (name.compare("count") == 0) {
-          Local<Object> counts = args[2]->ToObject()->Get(names->Get(index))->ToObject();
+          Local<Object> counts = args[2]->ToObject(context).ToLocalChecked()->Get(context, names->Get(index)).ToLocalChecked()->ToObject(context).ToLocalChecked();
           for (unsigned int arrayIndex = 0;
-               arrayIndex < counts->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length"))->ToObject()->Uint32Value();
+               arrayIndex < counts->Get(context, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length")).ToLocalChecked()->Uint32Value(context).ToChecked();
                arrayIndex++) {
-            count.get()[arrayIndex] = counts->Get(arrayIndex)->Uint32Value();
+            count.get()[arrayIndex] = counts->Get(context, arrayIndex).ToLocalChecked()->Uint32Value(context).ToChecked();
           }
         }
       }
@@ -273,22 +287,26 @@ namespace NodeHDF5 {
     }
 
     static void is_image(const v8::FunctionCallbackInfo<Value>& args) {
+      v8::Isolate* isolate = args.GetIsolate();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
-      String::Utf8Value dset_name(args[1]->ToString());
-      Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+      String::Utf8Value dset_name(isolate, args[1]->ToString(context).ToLocalChecked());
+      Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject(context).ToLocalChecked());
       herr_t            err    = H5IMis_image(idWrap->Value(), *dset_name);
       args.GetReturnValue().Set(err ? true : false);
     }
 
     static void get_image_info(const v8::FunctionCallbackInfo<Value>& args) {
+      v8::Isolate* isolate = args.GetIsolate();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      String::Utf8Value dset_name(isolate, args[1]->ToString(context).ToLocalChecked());
       hsize_t           width;
       hsize_t           height;
       hsize_t           planes;
       char              interlace[255];
       hssize_t          npals;
-      Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+      Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject(context).ToLocalChecked());
       herr_t            err    = H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
@@ -307,13 +325,15 @@ namespace NodeHDF5 {
     }
 
     static void make_palette(const v8::FunctionCallbackInfo<Value>& args) {
+      v8::Isolate* isolate = args.GetIsolate();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
       Local<Uint8Array> buffer = Local<Uint8Array>::Cast(args[2]);
-      String::Utf8Value dset_name(args[1]->ToString());
-      Local<Value>      rankValue = args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "size"));
-      hsize_t           pal_dims[1]{static_cast<hsize_t>(rankValue->Int32Value())};
-      Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
-      H5IMmake_palette(idWrap->Value(), *dset_name, pal_dims, (const unsigned char*)node::Buffer::Data(buffer->ToObject()));
+      String::Utf8Value dset_name(isolate, args[1]->ToString(context).ToLocalChecked());
+      Local<Value>      rankValue = args[2]->ToObject(context).ToLocalChecked()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "size")).ToLocalChecked();
+      hsize_t           pal_dims[1]{static_cast<hsize_t>(rankValue->Int32Value(context).ToChecked())};
+      Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject(context).ToLocalChecked());
+      H5IMmake_palette(idWrap->Value(), *dset_name, pal_dims, (const unsigned char*)node::Buffer::Data(buffer->ToObject(context).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
     }
   };

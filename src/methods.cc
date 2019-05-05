@@ -44,6 +44,8 @@ namespace NodeHDF5 {
   }
 
   void Methods::readAttribute(const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
     // fail out if arguments are not correct
     if (args.Length() != 1 || !args[0]->IsString()) {
 
@@ -54,7 +56,7 @@ namespace NodeHDF5 {
     }
 
     // store specified attribute name
-    v8::String::Utf8Value attribute_name(args[0]->ToString());
+    v8::String::Utf8Value attribute_name(isolate, args[0]->ToString(context).ToLocalChecked());
 
     // unwrap group
     Methods* group       = ObjectWrap::Unwrap<Methods>(args.This());
@@ -156,6 +158,8 @@ namespace NodeHDF5 {
   }
 
   void Methods::GetChildType(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
     // fail out if arguments are not correct
     if (args.Length() != 1 || !args[0]->IsString()) {
 
@@ -168,11 +172,13 @@ namespace NodeHDF5 {
     // unwrap group
     Methods* group = ObjectWrap::Unwrap<Methods>(args.This());
     // store specified child name
-    v8::String::Utf8Value child_name(args[0]->ToString());
+    v8::String::Utf8Value child_name(isolate, args[0]->ToString(context).ToLocalChecked());
     args.GetReturnValue().Set((uint32_t)group->childObjType(*child_name));
   }
 
   void Methods::getDatasetType(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
     // fail out if arguments are not correct
     if (args.Length() != 1 || !args[0]->IsString()) {
@@ -184,8 +190,8 @@ namespace NodeHDF5 {
     }
 
     // store specified child name
-    v8::String::Utf8Value child_name(args[0]->ToString());
-    Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
+    v8::String::Utf8Value child_name(isolate, args[0]->ToString(context).ToLocalChecked());
+    Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject(context).ToLocalChecked());
     hid_t  id     = idWrap->Value();
     HLType hlType = HLType::HL_TYPE_LITE;
     if (H5IMis_image(id, (*child_name))) {
@@ -228,6 +234,8 @@ namespace NodeHDF5 {
   }
 
   void Methods::getDatasetDimensions(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
     if (args.Length() != 1 || !args[0]->IsString()) {
       v8::Isolate::GetCurrent()->ThrowException(
           v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
@@ -235,9 +243,9 @@ namespace NodeHDF5 {
       return;
     }
 
-    const String::Utf8Value dataset_name(args[0]->ToString());
+    const String::Utf8Value dataset_name(isolate, args[0]->ToString(context).ToLocalChecked());
 
-    Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
+    Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject(context).ToLocalChecked());
     const hid_t location_id = idWrap->Value();
 
     const hid_t dataset   = H5Dopen(location_id, *dataset_name, H5P_DEFAULT);
@@ -274,6 +282,8 @@ namespace NodeHDF5 {
   }
 
   void Methods::getDataType(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
     // fail out if arguments are not correct
     if (args.Length() != 1 || !args[0]->IsString()) {
 
@@ -284,12 +294,12 @@ namespace NodeHDF5 {
     }
 
     // store specified child name
-    v8::String::Utf8Value child_name(args[0]->ToString());
-    Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
+    v8::String::Utf8Value child_name(isolate, args[0]->ToString(context).ToLocalChecked());
+    Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject(context).ToLocalChecked());
     hid_t  did    = H5Dopen(idWrap->Value(), *child_name, H5P_DEFAULT);
     hid_t  t      = H5Dget_type(did);
     bool   hit    = false;
-    H5T    etype  = NODE_H5T_UNKNOWN;
+    H5T    etype  = JS_H5T_UNKNOWN;
     for (std::map<H5T, hid_t>::iterator it = toTypeMap.begin(); !hit && it != toTypeMap.end(); it++) {
 
       if (H5Tequal(t, toTypeMap[(*it).first])) {
@@ -304,6 +314,8 @@ namespace NodeHDF5 {
   }
 
   void Methods::getDatasetAttributes(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
     // fail out if arguments are not correct
     if (args.Length() != 1 || !args[0]->IsString()) {
@@ -314,7 +326,7 @@ namespace NodeHDF5 {
       return;
     }
 
-    v8::String::Utf8Value dset_name(args[0]->ToString());
+    v8::String::Utf8Value dset_name(isolate, args[0]->ToString(context).ToLocalChecked());
     // unwrap group
     Methods*    group = ObjectWrap::Unwrap<Methods>(args.This());
     std::string name(*dset_name);
@@ -608,6 +620,8 @@ namespace NodeHDF5 {
   }
 
   void Methods::getDatasetAttribute(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
     // fail out if arguments are not correct
     if (args.Length() != 2 || !args[0]->IsString()|| !args[1]->IsString()) {
@@ -618,8 +632,8 @@ namespace NodeHDF5 {
       return;
     }
 
-    v8::String::Utf8Value dset_name(args[0]->ToString());
-    v8::String::Utf8Value attr_name(args[1]->ToString());
+    v8::String::Utf8Value dset_name(isolate, args[0]->ToString(context).ToLocalChecked());
+    v8::String::Utf8Value attr_name(isolate, args[1]->ToString(context).ToLocalChecked());
     // unwrap group
     Methods*    group = ObjectWrap::Unwrap<Methods>(args.This());
     std::string name(*dset_name);
@@ -900,6 +914,8 @@ namespace NodeHDF5 {
   }
 
   void Methods::getByteOrder(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
     // fail out if arguments are not correct
     if (args.Length() != 1 || !args[0]->IsString()) {
 
@@ -910,8 +926,8 @@ namespace NodeHDF5 {
     }
 
     // store specified child name
-    v8::String::Utf8Value child_name(args[0]->ToString());
-    Int64*      idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
+    v8::String::Utf8Value child_name(isolate, args[0]->ToString(context).ToLocalChecked());
+    Int64*      idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject(context).ToLocalChecked());
     hid_t       did    = H5Dopen(idWrap->Value(), *child_name, H5P_DEFAULT);
     hid_t       t      = H5Dget_type(did);
     H5T_order_t order  = H5Tget_order(t);
@@ -921,6 +937,8 @@ namespace NodeHDF5 {
   }
 
   void Methods::getFilters(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
     // fail out if arguments are not correct
     if (args.Length() != 1 || !args[0]->IsString()) {
@@ -931,7 +949,7 @@ namespace NodeHDF5 {
       return;
     }
 
-    v8::String::Utf8Value dset_name(args[0]->ToString());
+    v8::String::Utf8Value dset_name(isolate, args[0]->ToString(context).ToLocalChecked());
     // unwrap group
     Methods*                group = ObjectWrap::Unwrap<Methods>(args.This());
     std::string             name(*dset_name);
@@ -990,6 +1008,8 @@ namespace NodeHDF5 {
     void Methods::iterate(const v8::FunctionCallbackInfo<Value>& args) {
 
       Methods*                group = ObjectWrap::Unwrap<Methods>(args.This());
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
 //      hsize_t                          idx = args[0]->Int32Value();
       v8::Persistent<v8::Function> callback;
 //      const unsigned               argc = 2;
@@ -1002,7 +1022,7 @@ namespace NodeHDF5 {
                                         v8::Local<v8::Value> argv[2] = {v8::Int32::New(v8::Isolate::GetCurrent(), toEnumMap[info->type]),
                                                                         v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name)};
                                         ((v8::Local<v8::Function>*)op_data)[0]->Call(
-                                            v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), 3, argv);
+                                            v8::Isolate::GetCurrent()->GetCurrentContext(), v8::Null(v8::Isolate::GetCurrent()), 3, argv);
                                         return (herr_t)0;
                                       },
                                       &func);
@@ -1017,8 +1037,10 @@ namespace NodeHDF5 {
     }
 
     void Methods::visit(const v8::FunctionCallbackInfo<Value>& args) {
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      String::Utf8Value dset_name(isolate, args[1]->ToString(context).ToLocalChecked());
       Methods*                group = ObjectWrap::Unwrap<Methods>(args.This());
 //      hsize_t                          idx = args[0]->Int32Value();
       v8::Persistent<v8::Function> callback;
@@ -1039,7 +1061,7 @@ namespace NodeHDF5 {
                                         v8::Local<v8::Value> argv[2] = {v8::Int32::New(v8::Isolate::GetCurrent(), toEnumMap[info->type]),
                                                                         v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name)};
                                         ((v8::Local<v8::Function>*)op_data)[0]->Call(
-                                            v8::Isolate::GetCurrent()->GetCurrentContext()->Global(), 2, argv);
+                                            v8::Isolate::GetCurrent()->GetCurrentContext(), v8::Null(v8::Isolate::GetCurrent()), 2, argv);
                                         return (herr_t)0;
                                       },
                                       &func);

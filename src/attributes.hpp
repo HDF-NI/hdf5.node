@@ -18,7 +18,8 @@
 namespace NodeHDF5 {
     
 inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, hid_t id, std::string name){
-    v8::Local<v8::Value> value;
+      v8::Isolate*    isolate = v8::Isolate::GetCurrent();
+      v8::Local<v8::Value> value;
       bool indexedArray=true;
       hid_t attr_id   = H5Aopen(id, name.c_str(), H5P_DEFAULT);
       hid_t attr_type = H5Aget_type(attr_id);
@@ -221,7 +222,7 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
               }
               if(indexedArray){
 #if NODE_VERSION_AT_LEAST(8,0,0)
-                H5Aread(attr_id, attr_type, node::Buffer::Data(buffer->ToObject()));
+                H5Aread(attr_id, attr_type, node::Buffer::Data(buffer->ToObject(isolate->GetCurrentContext()).ToLocalChecked()));
 #else
                 H5Aread(attr_id, attr_type, buffer->Buffer()->Externalize().Data());
 #endif
@@ -283,9 +284,9 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
                  * Read the data.
                  */
                 status                                = H5Aread(attr_id, type, buffer.get());
-                v8::Local<v8::String> varLenStr       = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), buffer.get()[0]);
-                v8::Local<v8::Value>  varLenStrObject = v8::StringObject::New(varLenStr);
-                varLenStrObject->ToObject()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"),
+                v8::Local<v8::String> varLenStr       = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), buffer.get()[0], v8::NewStringType::kInternalized).ToLocalChecked();
+                v8::Local<v8::Value>  varLenStrObject = v8::StringObject::New(v8::Isolate::GetCurrent(), varLenStr);
+                varLenStrObject->ToObject(isolate->GetCurrentContext()).ToLocalChecked()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"),
                                                  v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "variable-length"));
                 value = varLenStrObject;
 
@@ -342,9 +343,9 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
 
     static void make_attribute_from_typed_array(const hid_t&               group_id,
                                                 const char*                attribute_name,
-                                                v8::Handle<v8::TypedArray> buffer,
+                                                v8::Local<v8::TypedArray> buffer,
                                                 hid_t                      type_id);
-    static void make_attribute_from_array(const hid_t& group_id, const char* attribute_name, v8::Handle<v8::Array> array);
+    static void make_attribute_from_array(const hid_t& group_id, const char* attribute_name, v8::Local<v8::Array> array);
     static void Refresh(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void Flush(const v8::FunctionCallbackInfo<v8::Value>& args);
 

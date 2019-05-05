@@ -10,7 +10,7 @@ using namespace NodeHDF5;
 
 extern "C" {
 
-static void init(Handle<Object> target) {
+static void init(v8::Local<v8::Object> target) {
 
   // create local scope
   HandleScope scope(v8::Isolate::GetCurrent());
@@ -59,6 +59,8 @@ namespace NodeHDF5 {
   }
   
   void isHDF5(const v8::FunctionCallbackInfo<v8::Value>& args) {
+      v8::Isolate* isolate = args.GetIsolate();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
     // fail out if arguments are not correct
     if (args.Length() != 1 || !args[0]->IsString() ) {
 
@@ -67,7 +69,7 @@ namespace NodeHDF5 {
       args.GetReturnValue().SetUndefined();
       return;
     }
-      String::Utf8Value path(args[0]->ToString());
+      String::Utf8Value path(isolate, args[0]->ToString(context).ToLocalChecked());
 
     htri_t ret_value = H5Fis_hdf5( *path );
    if( ret_value > 0 ){
