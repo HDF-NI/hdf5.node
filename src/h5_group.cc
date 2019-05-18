@@ -65,6 +65,7 @@ namespace NodeHDF5 {
     NODE_SET_PROTOTYPE_METHOD(t, "getNumAttrs", GetNumAttrs);
     NODE_SET_PROTOTYPE_METHOD(t, "getAttributeNames", getAttributeNames);
     NODE_SET_PROTOTYPE_METHOD(t, "readAttribute", readAttribute);
+    NODE_SET_PROTOTYPE_METHOD(t, "deleteAttribute", deleteAttribute);
     NODE_SET_PROTOTYPE_METHOD(t, "getNumObjs", GetNumObjs);
     NODE_SET_PROTOTYPE_METHOD(t, "getMemberNames", GetMemberNames);
     NODE_SET_PROTOTYPE_METHOD(t, "getMemberNamesByCreationOrder", GetMemberNamesByCreationOrder);
