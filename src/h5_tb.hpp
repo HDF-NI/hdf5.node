@@ -1,6 +1,7 @@
 #pragma once
 #include <v8.h>
 #include <uv.h>
+#include <nan.h>
 #include <node.h>
 
 #include <cstring>
@@ -23,7 +24,7 @@ namespace NodeHDF5 {
 
   class H5tb {
   public:
-    static void Initialize(Handle<Object> target) {
+    static void Initialize(Local<Object> target) {
 
       // append this function to the target object
       target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeTable"),
@@ -244,7 +245,7 @@ namespace NodeHDF5 {
 
           } else { // string array
             for (uint32_t j = 0; j < nrecords; j++) {
-              String::Utf8Value value(field->Get(j)->ToString());
+              Nan::Utf8String value(field->Get(j)->ToString());
               std::memcpy(&data[j * type_size + field_offsets[i]], (*value), H5Tget_size(field_types[i]));
             }
           }
@@ -438,13 +439,13 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value         table_name(args[1]->ToString());
+      Nan::Utf8String         table_name(args[1]->ToString());
       Local<v8::Array>          table = Local<v8::Array>::Cast(args[2]);
       std::unique_ptr<char* []> field_names(new char*[table->Length()]);
       for (unsigned int i = 0; i < table->Length(); i++) {
         field_names.get()[i] = (char*)malloc(sizeof(char) * 255);
         std::memset(field_names.get()[i], 0, 255);
-        String::Utf8Value field_name(table->Get(i)->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"))->ToString());
+        Nan::Utf8String field_name(table->Get(i)->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"))->ToString());
         std::string       fieldName((*field_name));
         std::memcpy(field_names.get()[i], fieldName.c_str(), fieldName.length());
       }
@@ -500,7 +501,7 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value table_name(args[1]->ToString());
+      Nan::Utf8String table_name(args[1]->ToString());
       hsize_t           nfields;
       hsize_t           nrecords;
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
@@ -583,7 +584,7 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value table_name(args[1]->ToString());
+      Nan::Utf8String table_name(args[1]->ToString());
       Local<v8::Array>  table = Local<v8::Array>::Cast(args[2]);
       std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&&
           data = prepareData(table);
@@ -623,7 +624,7 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value table_name(args[1]->ToString());
+      Nan::Utf8String table_name(args[1]->ToString());
       Local<v8::Array>  table = Local<v8::Array>::Cast(args[3]);
       std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&&
           data = prepareData(table);
@@ -664,7 +665,7 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value table_name(args[1]->ToString());
+      Nan::Utf8String table_name(args[1]->ToString());
       hsize_t           nfields;
       hsize_t           nrecords;
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
@@ -737,7 +738,7 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value table_name(args[1]->ToString());
+      Nan::Utf8String table_name(args[1]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       herr_t            err    = H5TBdelete_record(idWrap->Value(), (*table_name), args[2]->Int32Value(), args[3]->Int32Value());
       if (err < 0) {
@@ -758,7 +759,7 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value table_name(args[1]->ToString());
+      Nan::Utf8String table_name(args[1]->ToString());
       Local<v8::Array>  table = Local<v8::Array>::Cast(args[3]);
       std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&&
           data = prepareData(table);
@@ -800,14 +801,14 @@ namespace NodeHDF5 {
         return;
       }
 
-      String::Utf8Value         table_name(args[1]->ToString());
+      Nan::Utf8String         table_name(args[1]->ToString());
       Local<v8::Array>          table = Local<v8::Array>::Cast(args[3]);
       std::unique_ptr<char* []> model_field_names(new char*[table->Length()]);
       std::string               fieldNames = "";
       for (unsigned int i = 0; i < table->Length(); i++) {
         model_field_names.get()[i] = (char*)malloc(sizeof(char) * 255);
         std::memset(model_field_names.get()[i], 0, 255);
-        String::Utf8Value field_name(table->Get(i)->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"))->ToString());
+        Nan::Utf8String field_name(table->Get(i)->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"))->ToString());
         std::string       fieldName((*field_name));
         fieldNames += fieldName;
         std::memcpy(model_field_names.get()[i], fieldName.c_str(), fieldName.length());
@@ -882,7 +883,7 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value      table_name(args[1]->ToString());
+      Nan::Utf8String      table_name(args[1]->ToString());
       Local<v8::Array>       table   = Local<v8::Array>::Cast(args[3]);
       Local<v8::Array>       indices = Local<v8::Array>::Cast(args[4]);
       std::unique_ptr<int[]> field_indices(new int[indices->Length()]);
@@ -960,7 +961,7 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value table_name(args[1]->ToString());
+      Nan::Utf8String table_name(args[1]->ToString());
       hsize_t           nfields;
       hsize_t           nrecords;
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
@@ -977,7 +978,7 @@ namespace NodeHDF5 {
       std::string               fieldNames = "";
       std::unique_ptr<char* []> model_field_names(new char*[indices->Length()]);
       for (unsigned int i = 0; i < indices->Length(); i++) {
-        String::Utf8Value field_name(indices->Get(i)->ToString());
+        Nan::Utf8String field_name(indices->Get(i)->ToString());
         std::string       fieldName((*field_name));
         model_field_names.get()[i] = (char*)malloc(sizeof(char) * 255);
         std::memset(model_field_names.get()[i], 0, 255);
@@ -1007,7 +1008,7 @@ namespace NodeHDF5 {
       for (unsigned int j = 0; j < indices->Length(); j++) {
         size_t            model_type_offset = 0;
         bool              hit               = false;
-        String::Utf8Value field_name(indices->Get(j)->ToString());
+        Nan::Utf8String field_name(indices->Get(j)->ToString());
         std::string       fieldName((*field_name));
         for (unsigned int i = 0; !hit && i < nfields; i++) {
           hid_t type = H5Tget_member_type(dataset_type, i);
@@ -1083,7 +1084,7 @@ namespace NodeHDF5 {
         return;
       }
 
-      String::Utf8Value table_name(args[1]->ToString());
+      Nan::Utf8String table_name(args[1]->ToString());
       hsize_t           nfields;
       hsize_t           nrecords;
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
@@ -1205,8 +1206,8 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value table_name(args[1]->ToString());
-      String::Utf8Value field_name(args[2]->ToString());
+      Nan::Utf8String table_name(args[1]->ToString());
+      Nan::Utf8String field_name(args[2]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       herr_t            err    = H5TBdelete_field(idWrap->Value(), (*table_name), (*field_name));
       if (err < 0) {
@@ -1229,8 +1230,8 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value table_name1(args[1]->ToString());
-      String::Utf8Value table_name2(args[4]->ToString());
+      Nan::Utf8String table_name1(args[1]->ToString());
+      Nan::Utf8String table_name2(args[4]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       herr_t            err    = H5TBadd_records_from(
           idWrap->Value(), (*table_name1), args[2]->Int32Value(), args[3]->Int32Value(), (*table_name2), args[5]->Int32Value());
@@ -1253,9 +1254,9 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value table_name1(args[1]->ToString());
-      String::Utf8Value table_name2(args[3]->ToString());
-      String::Utf8Value table_name3(args[4]->ToString());
+      Nan::Utf8String table_name1(args[1]->ToString());
+      Nan::Utf8String table_name2(args[3]->ToString());
+      Nan::Utf8String table_name3(args[4]->ToString());
       Int64*            idWrap  = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       Int64*            id2Wrap = ObjectWrap::Unwrap<Int64>(args[2]->ToObject());
       herr_t            err     = H5TBcombine_tables(idWrap->Value(), (*table_name1), id2Wrap->Value(), (*table_name2), (*table_name3));
@@ -1277,9 +1278,9 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value table_name(args[1]->ToString());
+      Nan::Utf8String table_name(args[1]->ToString());
       Local<v8::Array>  table = Local<v8::Array>::Cast(args[3]);
-      String::Utf8Value field_name(table->Get(0)->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"))->ToString());
+      Nan::Utf8String field_name(table->Get(0)->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"))->ToString());
       std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&&
           data = prepareData(table);
       try {
@@ -1319,7 +1320,7 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value table_name(args[1]->ToString());
+      Nan::Utf8String table_name(args[1]->ToString());
       hsize_t           nfields;
       hsize_t           nrecords;
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
@@ -1338,7 +1339,7 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value table_name(args[1]->ToString());
+      Nan::Utf8String table_name(args[1]->ToString());
       hsize_t           nfields;
       hsize_t           nrecords;
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());

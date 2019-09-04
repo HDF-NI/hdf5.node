@@ -1,6 +1,7 @@
 #pragma once
 #include <v8.h>
 #include <uv.h>
+#include <nan.h>
 #include <node.h>
 
 #include <functional>
@@ -16,7 +17,7 @@ namespace NodeHDF5 {
 
   class H5ds {
   public:
-    static void Initialize(Handle<Object> target) {
+    static void Initialize(Local<Object> target) {
 
       // append this function to the target object
       target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "setScale"),
@@ -50,8 +51,8 @@ namespace NodeHDF5 {
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
-      String::Utf8Value dim_scale_name(args[2]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
+      Nan::Utf8String dim_scale_name(args[2]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       herr_t            err    = H5DSset_scale(did, *dim_scale_name);
@@ -74,8 +75,8 @@ namespace NodeHDF5 {
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
-      String::Utf8Value dim_scale_name(args[2]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
+      Nan::Utf8String dim_scale_name(args[2]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       hid_t             dsid   = H5Dopen(idWrap->Value(), *dim_scale_name, H5P_DEFAULT);
@@ -101,8 +102,8 @@ namespace NodeHDF5 {
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
-      String::Utf8Value dim_scale_name(args[2]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
+      Nan::Utf8String dim_scale_name(args[2]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       hid_t             dsid   = H5Dopen(idWrap->Value(), *dim_scale_name, H5P_DEFAULT);
@@ -128,8 +129,8 @@ namespace NodeHDF5 {
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
-      String::Utf8Value dim_scale_name(args[2]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
+      Nan::Utf8String dim_scale_name(args[2]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       hid_t             dsid   = H5Dopen(idWrap->Value(), *dim_scale_name, H5P_DEFAULT);
@@ -148,7 +149,7 @@ namespace NodeHDF5 {
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       htri_t            status = H5DSis_scale(did);
@@ -158,7 +159,7 @@ namespace NodeHDF5 {
 
     static void iterate_scales(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       int               rank;
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       H5LTget_dataset_ndims(idWrap->Value(), *dset_name, &rank);
@@ -207,10 +208,10 @@ namespace NodeHDF5 {
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
-      std::string       label(*String::Utf8Value(args[3]->ToString()));
+      std::string       label(*Nan::Utf8String(args[3]->ToString()));
       H5DSset_label(did, args[2]->Int32Value(), (char*)label.c_str());
       H5Dclose(did);
       args.GetReturnValue().SetUndefined();
@@ -226,7 +227,7 @@ namespace NodeHDF5 {
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       size_t            size   = 0;
@@ -246,7 +247,7 @@ namespace NodeHDF5 {
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       size_t            size   = 0;
@@ -267,7 +268,7 @@ namespace NodeHDF5 {
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       int               num    = H5DSget_num_scales(did, args[2]->Int32Value());

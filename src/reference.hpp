@@ -2,6 +2,7 @@
 #pragma once
 #include <v8.h>
 #include <uv.h>
+#include <nan.h>
 #include <node.h>
 
 #include <cstring>
@@ -20,7 +21,7 @@ namespace NodeHDF5 {
   class Reference : public node::ObjectWrap {
 
   public:
-    static void Init(v8::Handle<v8::Object> exports) {
+    static void Init(v8::Local<v8::Object> exports) {
       v8::Isolate* isolate = v8::Isolate::GetCurrent();
 
       // Prepare constructor template
@@ -44,7 +45,7 @@ namespace NodeHDF5 {
       Int64*        idWrap             = ObjectWrap::Unwrap<Int64>(idInstance);
       idWrap->value                    = objectId;
       const unsigned        argc       = 2;
-      v8::Handle<v8::Value> argv[argc] = {idInstance, v8::Uint32::New(isolate, nmembers)};
+      v8::Local<v8::Value> argv[argc] = {idInstance, v8::Uint32::New(isolate, nmembers)};
       return v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), argc, argv).ToLocalChecked();
     }
 
@@ -65,7 +66,7 @@ namespace NodeHDF5 {
       if(args.Length() == 3 && args[1]->IsString()){
         Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
         hid_t  locId  = args[0]->IsUndefined() ? -1 : idWrap->Value();
-        v8::String::Utf8Value name(args[1]->ToString());
+        Nan::Utf8String name(args[1]->ToString());
         size_t size=sizeof(hid_t);
         std::unique_ptr<char[]> ref(new char[size]);
         std::memset(ref.get(), 0, size);

@@ -1,6 +1,7 @@
 #pragma once
 #include <v8.h>
 #include <uv.h>
+#include <nan.h>
 #include <node.h>
 
 #include <cstring>
@@ -17,7 +18,7 @@ namespace NodeHDF5 {
 
   class Filters : public node::ObjectWrap {
   public:
-    static void Init(v8::Handle<v8::Object> exports) {
+    static void Init(v8::Local<v8::Object> exports) {
       v8::Isolate* isolate = Isolate::GetCurrent();
 
       // Prepare constructor template
@@ -41,7 +42,7 @@ namespace NodeHDF5 {
       Int64*        idWrap             = ObjectWrap::Unwrap<Int64>(idInstance);
       idWrap->value                    = parentId;
       const unsigned        argc       = 2;
-      v8::Handle<v8::Value> argv[argc] = {idInstance, v8::String::NewFromUtf8(isolate, dset_name.c_str())};
+      v8::Local<v8::Value> argv[argc] = {idInstance, v8::String::NewFromUtf8(isolate, dset_name.c_str())};
 
       return v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), argc, argv).ToLocalChecked();
     }
@@ -62,7 +63,7 @@ namespace NodeHDF5 {
       Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t  value  = args[0]->IsUndefined() ? -1 : idWrap->Value();
 
-      std::string name = args[1]->IsUndefined() ? std::string("") : std::string(*v8::String::Utf8Value(args[1]->ToString()));
+      std::string name = args[1]->IsUndefined() ? std::string("") : std::string(*Nan::Utf8String(args[1]->ToString()));
       Filters*    obj  = new Filters(value, name);
       obj->Wrap(args.This());
       args.GetReturnValue().Set(args.This());

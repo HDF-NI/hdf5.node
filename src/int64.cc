@@ -4,7 +4,7 @@ namespace NodeHDF5 {
 
   v8::Persistent<v8::Function> Int64::Constructor;
 
-  void Int64::Initialize(v8::Handle<v8::Object> target) {
+  void Int64::Initialize(v8::Local<v8::Object> target) {
     // instantiate constructor function template
     v8::Local<v8::FunctionTemplate> t = v8::FunctionTemplate::New(v8::Isolate::GetCurrent(), New);
     t->SetClassName(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "Int64"));

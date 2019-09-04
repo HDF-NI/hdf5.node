@@ -1,4 +1,5 @@
 #include <sstream>
+#include <nan.h>
 
 #include "hdf5.h"
 #include "hdf5_hl.h"
@@ -56,7 +57,7 @@ namespace NodeHDF5 {
     }
 
     // store specified attribute name
-    v8::String::Utf8Value attribute_name(args[0]->ToString());
+    Nan::Utf8String attribute_name(args[0]->ToString());
     // unwrap group
     Methods* group       = ObjectWrap::Unwrap<Methods>(args.This());
     if(!H5Aexists(group->id, (const char*)*attribute_name)){
@@ -83,7 +84,7 @@ namespace NodeHDF5 {
     }
 
     // store specified attribute name
-    v8::String::Utf8Value attribute_name(args[0]->ToString());
+    Nan::Utf8String attribute_name(args[0]->ToString());
 
     // unwrap group
     Methods* group       = ObjectWrap::Unwrap<Methods>(args.This());
@@ -179,7 +180,7 @@ namespace NodeHDF5 {
     // unwrap group
     Methods* group = ObjectWrap::Unwrap<Methods>(args.This());
     // store specified child name
-    v8::String::Utf8Value child_name(args[0]->ToString());
+    Nan::Utf8String child_name(args[0]->ToString());
     args.GetReturnValue().Set((uint32_t)group->childObjType(*child_name));
   }
 
@@ -195,7 +196,7 @@ namespace NodeHDF5 {
     }
 
     // store specified child name
-    v8::String::Utf8Value child_name(args[0]->ToString());
+    Nan::Utf8String child_name(args[0]->ToString());
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
     hid_t  id     = idWrap->Value();
     HLType hlType = HLType::HL_TYPE_LITE;
@@ -245,7 +246,7 @@ namespace NodeHDF5 {
       return;
     }
 
-    const String::Utf8Value dataset_name(args[0]->ToString());
+    const Nan::Utf8String dataset_name(args[0]->ToString());
 
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
     const hid_t location_id = idWrap->Value();
@@ -292,7 +293,7 @@ namespace NodeHDF5 {
     }
 
     // store specified child name
-    v8::String::Utf8Value child_name(args[0]->ToString());
+    Nan::Utf8String child_name(args[0]->ToString());
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
     hid_t  did    = H5Dopen(idWrap->Value(), *child_name, H5P_DEFAULT);
     hid_t  t      = H5Dget_type(did);
@@ -322,7 +323,7 @@ namespace NodeHDF5 {
       return;
     }
 
-    v8::String::Utf8Value dset_name(args[0]->ToString());
+    Nan::Utf8String dset_name(args[0]->ToString());
     // unwrap group
     Methods*    group = ObjectWrap::Unwrap<Methods>(args.This());
     std::string name(*dset_name);
@@ -626,8 +627,8 @@ namespace NodeHDF5 {
       return;
     }
 
-    v8::String::Utf8Value dset_name(args[0]->ToString());
-    v8::String::Utf8Value attr_name(args[1]->ToString());
+    Nan::Utf8String dset_name(args[0]->ToString());
+    Nan::Utf8String attr_name(args[1]->ToString());
     // unwrap group
     Methods*    group = ObjectWrap::Unwrap<Methods>(args.This());
     std::string name(*dset_name);
@@ -918,7 +919,7 @@ namespace NodeHDF5 {
     }
 
     // store specified child name
-    v8::String::Utf8Value child_name(args[0]->ToString());
+    Nan::Utf8String child_name(args[0]->ToString());
     Int64*      idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
     hid_t       did    = H5Dopen(idWrap->Value(), *child_name, H5P_DEFAULT);
     hid_t       t      = H5Dget_type(did);
@@ -939,7 +940,7 @@ namespace NodeHDF5 {
       return;
     }
 
-    v8::String::Utf8Value dset_name(args[0]->ToString());
+    Nan::Utf8String dset_name(args[0]->ToString());
     // unwrap group
     Methods*                group = ObjectWrap::Unwrap<Methods>(args.This());
     std::string             name(*dset_name);
@@ -1025,7 +1026,7 @@ namespace NodeHDF5 {
 
     void Methods::visit(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Methods*                group = ObjectWrap::Unwrap<Methods>(args.This());
 //      hsize_t                          idx = args[0]->Int32Value();
       v8::Persistent<v8::Function> callback;

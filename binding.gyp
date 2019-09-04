@@ -8,10 +8,13 @@
         "longlong_type%": "LONGLONG64BITS"
     },
     'targets': [
-        {
-            'target_name': 'hdf5',
-            'win_delay_load_hook': 'false',
-            'conditions': [
+    {
+        'target_name': 'hdf5',
+        'win_delay_load_hook': 'false',
+        'include_dirs': [
+            "<!(node -e \"require('nan')\")"
+        ],
+        'conditions': [
             ['OS=="linux"', {
                 'cflags!': [ '-fno-exceptions' ],
                 'cflags_cc!': [ '-fno-exceptions' ],
@@ -41,9 +44,9 @@
                 }
             }],
             ['OS=="win"', {
-				'defines': [
-					'H5_BUILT_AS_DYNAMIC_LIB'
-				],
+                'defines': [
+                    'H5_BUILT_AS_DYNAMIC_LIB'
+                ],
                 'include_dirs': [
                     '<(hdf5_home_win)/include',
                     './win/include',
@@ -61,27 +64,27 @@
                     'src/reference.cc'
                 ],
                 "configurations": {
-                            "Release": {
-                    'msvs_settings':
-                    {
-                        'VCCLCompilerTool':
+                    "Release": {
+                        'msvs_settings':
                         {
-                            'RuntimeLibrary': 2,        # shared release
-                            'ExceptionHandling': 1,     # /EHsc
-                            'AdditionalOptions':
-                            [
-                                '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
-                            ]
-                        },
-                        'VCLinkerTool':
-                        {
-                            'AdditionalOptions':
-                            [
-                                '/FORCE:MULTIPLE'
-                            ]
+                            'VCCLCompilerTool':
+                            {
+                                'RuntimeLibrary': 2,        # shared release
+                                    'ExceptionHandling': 1,     # /EHsc
+                                    'AdditionalOptions':
+                                    [
+                                    '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
+                                    ]
+                            },
+                            'VCLinkerTool':
+                            {
+                                'AdditionalOptions':
+                                    [
+                                    '/FORCE:MULTIPLE'
+                                    ]
+                            }
                         }
                     }
-                }
                 },
                 'link_settings': {
                     'libraries': [
@@ -125,12 +128,15 @@
                     ]
                 }
             }]
-          ]
-        },
-        {
-            'target_name': 'h5lt',
-            'win_delay_load_hook': 'false',
-            'conditions': [
+        ]
+    },
+    {
+        'target_name': 'h5lt',
+        'win_delay_load_hook': 'false',
+        'include_dirs': [
+            "<!(node -e \"require('nan')\")"
+        ],
+        'conditions': [
             ['OS=="linux"', {
                 'cflags!': [ '-fno-exceptions' ],
                 'cflags_cc!': [ '-fno-exceptions' ],
@@ -157,13 +163,13 @@
             }],
             ['OS=="win"', {
                 'defines': [
-					'H5_BUILT_AS_DYNAMIC_LIB'
-				],
+                    'H5_BUILT_AS_DYNAMIC_LIB'
+                ],
                 'include_dirs': [
                     '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
-                    'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
+                'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
                     'src/int64.cc',
@@ -172,27 +178,27 @@
                     'src/h5lt.cc'
                 ],
                 "configurations": {
-                            "Release": {
-                    'msvs_settings':
-                    {
-                        'VCCLCompilerTool':
+                    "Release": {
+                        'msvs_settings':
                         {
-                            'RuntimeLibrary': 2,        # shared release
-                            'ExceptionHandling': 1,     # /EHsc
-                            'AdditionalOptions':
-                            [
-                                '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
-                            ]
-                        },
-                        'VCLinkerTool':
-                        {
-                            'AdditionalOptions':
-                            [
-                                '/FORCE:MULTIPLE'
-                            ]
+                            'VCCLCompilerTool':
+                            {
+                                'RuntimeLibrary': 2,        # shared release
+                                    'ExceptionHandling': 1,     # /EHsc
+                                    'AdditionalOptions':
+                                    [
+                                    '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
+                                    ]
+                            },
+                            'VCLinkerTool':
+                            {
+                                'AdditionalOptions':
+                                    [
+                                    '/FORCE:MULTIPLE'
+                                    ]
+                            }
                         }
                     }
-                }
                 },
                 'link_settings': {
                     'libraries': [
@@ -230,12 +236,15 @@
                     ]
                 }
             }]
-          ]
-        },
-        {
-            'target_name': 'h5tb',
-            'win_delay_load_hook': 'false',
-            'conditions': [
+        ]
+    },
+    {
+        'target_name': 'h5tb',
+        'win_delay_load_hook': 'false',
+        'include_dirs': [
+            "<!(node -e \"require('nan')\")"
+        ],
+        'conditions': [
             ['OS=="linux"', {
                 'cflags!': [ '-fno-exceptions' ],
                 'cflags_cc!': [ '-fno-exceptions' ],
@@ -259,40 +268,40 @@
             }],
             ['OS=="win"', {
                 'defines': [
-					'H5_BUILT_AS_DYNAMIC_LIB',
-                                        "<(longlong_type)"
-				],
+                    'H5_BUILT_AS_DYNAMIC_LIB',
+                    "<(longlong_type)"
+                ],
                 'include_dirs': [
                     '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
-                    'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
+                'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
                     'src/h5tb.cc'
                 ],
                 "configurations": {
-                            "Release": {
-                    'msvs_settings':
-                    {
-                        'VCCLCompilerTool':
+                    "Release": {
+                        'msvs_settings':
                         {
-                            'RuntimeLibrary': 2,        # shared release
-                            'ExceptionHandling': 1,     # /EHsc
-                            'AdditionalOptions':
-                            [
-                                '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
-                            ]
-                        },
-                        'VCLinkerTool':
-                        {
-                            'AdditionalOptions':
-                            [
-                                '/FORCE:MULTIPLE'
-                            ]
+                            'VCCLCompilerTool':
+                            {
+                                'RuntimeLibrary': 2,        # shared release
+                                    'ExceptionHandling': 1,     # /EHsc
+                                    'AdditionalOptions':
+                                    [
+                                    '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
+                                    ]
+                            },
+                            'VCLinkerTool':
+                            {
+                                'AdditionalOptions':
+                                    [
+                                    '/FORCE:MULTIPLE'
+                                    ]
+                            }
                         }
                     }
-                }
                 },
                 'link_settings': {
                     'libraries': [
@@ -327,12 +336,15 @@
                     ]
                 }
             }]
-          ]
-        },
-        {
-            'target_name': 'h5pt',
-            'win_delay_load_hook': 'false',
-            'conditions': [
+        ]
+    },
+    {
+        'target_name': 'h5pt',
+        'win_delay_load_hook': 'false',
+        'include_dirs': [
+            "<!(node -e \"require('nan')\")"
+        ],
+        'conditions': [
             ['OS=="linux"', {
                 'cflags!': [ '-fno-exceptions' ],
                 'cflags_cc!': [ '-fno-exceptions' ],
@@ -359,13 +371,13 @@
             }],
             ['OS=="win"', {
                 'defines': [
-					'H5_BUILT_AS_DYNAMIC_LIB'
-				],
+                    'H5_BUILT_AS_DYNAMIC_LIB'
+                ],
                 'include_dirs': [
                     '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
-                    'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
+                'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
                     'src/int64.cc',
@@ -374,27 +386,27 @@
                     'src/h5_pt.cc'
                 ],
                 "configurations": {
-                            "Release": {
-                    'msvs_settings':
-                    {
-                        'VCCLCompilerTool':
+                    "Release": {
+                        'msvs_settings':
                         {
-                            'RuntimeLibrary': 2,        # shared release
-                            'ExceptionHandling': 1,     # /EHsc
-                            'AdditionalOptions':
-                            [
-                                '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
-                            ]
-                        },
-                        'VCLinkerTool':
-                        {
-                            'AdditionalOptions':
-                            [
-                                '/FORCE:MULTIPLE'
-                            ]
+                            'VCCLCompilerTool':
+                            {
+                                'RuntimeLibrary': 2,        # shared release
+                                    'ExceptionHandling': 1,     # /EHsc
+                                    'AdditionalOptions':
+                                    [
+                                    '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
+                                    ]
+                            },
+                            'VCLinkerTool':
+                            {
+                                'AdditionalOptions':
+                                    [
+                                    '/FORCE:MULTIPLE'
+                                    ]
+                            }
                         }
                     }
-                }
                 },
                 'link_settings': {
                     'libraries': [
@@ -430,12 +442,15 @@
                     ]
                 }
             }]
-          ]
-        },
-        {
-            'target_name': 'h5im',
-            'win_delay_load_hook': 'false',
-            'conditions': [
+        ]
+    },
+    {
+        'target_name': 'h5im',
+        'win_delay_load_hook': 'false',
+        'include_dirs': [
+            "<!(node -e \"require('nan')\")"
+        ],
+        'conditions': [
             ['OS=="linux"', {
                 'cflags!': [ '-fno-exceptions' ],
                 'cflags_cc!': [ '-fno-exceptions' ],
@@ -459,39 +474,39 @@
             }],
             ['OS=="win"', {
                 'defines': [
-					'H5_BUILT_AS_DYNAMIC_LIB'
-				],
+                    'H5_BUILT_AS_DYNAMIC_LIB'
+                ],
                 'include_dirs': [
                     '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
-                    'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
+                'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
                     'src/h5im.cc'
                 ],
                 "configurations": {
-                            "Release": {
-                    'msvs_settings':
-                    {
-                        'VCCLCompilerTool':
+                    "Release": {
+                        'msvs_settings':
                         {
-                            'RuntimeLibrary': 2,        # shared release
-                            'ExceptionHandling': 1,     # /EHsc
-                            'AdditionalOptions':
-                            [
-                                '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
-                            ]
-                        },
-                        'VCLinkerTool':
-                        {
-                            'AdditionalOptions':
-                            [
-                                '/FORCE:MULTIPLE'
-                            ]
+                            'VCCLCompilerTool':
+                            {
+                                'RuntimeLibrary': 2,        # shared release
+                                    'ExceptionHandling': 1,     # /EHsc
+                                    'AdditionalOptions':
+                                    [
+                                    '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
+                                    ]
+                            },
+                            'VCLinkerTool':
+                            {
+                                'AdditionalOptions':
+                                    [
+                                    '/FORCE:MULTIPLE'
+                                    ]
+                            }
                         }
                     }
-                }
                 },
                 'link_settings': {
                     'libraries': [
@@ -526,12 +541,15 @@
                     ]
                 }
             }]
-          ]
-        },
-        {
-            'target_name': 'h5ds',
-            'win_delay_load_hook': 'false',
-            'conditions': [
+        ]
+    },
+    {
+        'target_name': 'h5ds',
+        'win_delay_load_hook': 'false',
+        'include_dirs': [
+            "<!(node -e \"require('nan')\")"
+        ],
+        'conditions': [
             ['OS=="linux"', {
                 'cflags!': [ '-fno-exceptions' ],
                 'cflags_cc!': [ '-fno-exceptions' ],
@@ -555,39 +573,39 @@
             }],
             ['OS=="win"', {
                 'defines': [
-					'H5_BUILT_AS_DYNAMIC_LIB'
-				],
+                    'H5_BUILT_AS_DYNAMIC_LIB'
+                ],
                 'include_dirs': [
                     '<(hdf5_home_win)/include',
                     './win/include',
                     './src',
-                    'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
+                'C:/Program Files/Microsoft SDKs/Windows/v7.1/Include'
                 ],
                 'sources': [
                     'src/h5ds.cc'
                 ],
                 "configurations": {
-                            "Release": {
-                    'msvs_settings':
-                    {
-                        'VCCLCompilerTool':
+                    "Release": {
+                        'msvs_settings':
                         {
-                            'RuntimeLibrary': 2,        # shared release
-                            'ExceptionHandling': 1,     # /EHsc
-                            'AdditionalOptions':
-                            [
-                                '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
-                            ]
-                        },
-                        'VCLinkerTool':
-                        {
-                            'AdditionalOptions':
-                            [
-                                '/FORCE:MULTIPLE'
-                            ]
+                            'VCCLCompilerTool':
+                            {
+                                'RuntimeLibrary': 2,        # shared release
+                                    'ExceptionHandling': 1,     # /EHsc
+                                    'AdditionalOptions':
+                                    [
+                                    '/EHsc' # Enable unwind semantics for Exception Handling.  This one actually does the trick - and no warning either.
+                                    ]
+                            },
+                            'VCLinkerTool':
+                            {
+                                'AdditionalOptions':
+                                    [
+                                    '/FORCE:MULTIPLE'
+                                    ]
+                            }
                         }
                     }
-                }
                 },
                 'link_settings': {
                     'libraries': [
@@ -622,8 +640,8 @@
                     ]
                 }
             }]
-          ]
-        }
+        ]
+    }
 
     ]
 }

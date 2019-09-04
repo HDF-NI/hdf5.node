@@ -1,5 +1,6 @@
 
 
+#include <nan.h>
 #include <node.h>
 #include <string>
 #include <cstring>
@@ -19,7 +20,7 @@ namespace NodeHDF5 {
 
   using namespace v8;
 
-    static bool get_separate_attrs(v8::Handle<v8::Object> options) {
+    static bool get_separate_attrs(v8::Local<v8::Object> options) {
       if (options.IsEmpty()) {
         return false;
       }
@@ -119,7 +120,7 @@ namespace NodeHDF5 {
 
   Persistent<FunctionTemplate> File::Constructor;
 
-  void File::Initialize(Handle<Object> target) {
+  void File::Initialize(Local<Object> target) {
 
     HandleScope scope(v8::Isolate::GetCurrent());
 
@@ -168,7 +169,7 @@ namespace NodeHDF5 {
       return;
     }
 
-    String::Utf8Value path(args[0]->ToString());
+    Nan::Utf8String path(args[0]->ToString());
 
     // fail out if file is not valid hdf5
     if (args.Length() < 2 && !H5Fis_hdf5(*path)) {
@@ -255,7 +256,7 @@ namespace NodeHDF5 {
       return;
     }
 
-    String::Utf8Value group_name(args[0]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
 
     Local<Object> instance = Group::Instantiate(args.This());
 
@@ -366,7 +367,7 @@ namespace NodeHDF5 {
         options = args[1]->ToObject();
         separateAttrs = get_separate_attrs(options);
       }
-      String::Utf8Value group_name(args[0]->ToString());
+      Nan::Utf8String group_name(args[0]->ToString());
       Local<Object> instance = Group::Instantiate(*group_name, args.This(), args[1]->Uint32Value());
       if(separateAttrs){
          v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), 2);
@@ -403,8 +404,8 @@ namespace NodeHDF5 {
 
     // unwrap group
     File*             file = ObjectWrap::Unwrap<File>(args.This());
-    String::Utf8Value group_name(args[0]->ToString());
-    String::Utf8Value dest_name(args[2]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
+    Nan::Utf8String dest_name(args[2]->ToString());
     Int64*            idWrap   = ObjectWrap::Unwrap<Int64>(args[1]->ToObject());
     hid_t             group_id = idWrap->Value();
 
@@ -430,7 +431,7 @@ namespace NodeHDF5 {
     // unwrap group
     File* file = ObjectWrap::Unwrap<File>(args.This());
     // delete specified group name
-    String::Utf8Value group_name(args[0]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
     H5Ldelete(file->id, (*group_name), H5P_DEFAULT);
   }
 

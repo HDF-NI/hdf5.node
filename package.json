@@ -27,5 +27,8 @@
   "keywords": [],
   "bugs": {
     "url": "https://github.com/HDF-NI/hdf5.node/issues"
+  },
+  "dependencies": {
+    "nan": "^2.14.0"
   }
 }

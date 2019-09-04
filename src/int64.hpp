@@ -3,6 +3,7 @@
 
 #include <v8.h>
 #include <uv.h>
+#include <nan.h>
 #include <node.h>
 #include <node_object_wrap.h>
 #include <string>
@@ -22,7 +23,7 @@ namespace NodeHDF5 {
 
   protected:
   public:
-    static void Initialize(v8::Handle<v8::Object> target);
+    static void Initialize(v8::Local<v8::Object> target);
     static v8::Local<v8::Object> Instantiate(long long value);
     static v8::Local<v8::Object> Instantiate(std::string value = "0");
     static v8::Local<v8::Object> Instantiate(v8::Local<v8::Object> parent, long long value = 0);
@@ -55,7 +56,7 @@ namespace NodeHDF5 {
       if (args.Length() < 1)
         xp = new Int64(-1);
       else if((args.Length() == 1 || args.Length() == 2) && args[args.Length() - 1]->IsString()){
-        std::string value = args[args.Length() - 1]->IsUndefined() ? std::string("0") : std::string(*v8::String::Utf8Value(args[args.Length() - 1]->ToString()));
+        std::string value = args[args.Length() - 1]->IsUndefined() ? std::string("0") : std::string(*Nan::Utf8String(args[args.Length() - 1]->ToString()));
         char *end;
         xp = new Int64((long long)std::strtoll(value.c_str(), &end, 10));
           

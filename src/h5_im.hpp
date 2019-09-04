@@ -1,6 +1,7 @@
 #pragma once
 #include <v8.h>
 #include <uv.h>
+#include <nan.h>
 #include <node.h>
 #include <node_buffer.h>
 
@@ -17,7 +18,7 @@ namespace NodeHDF5 {
 
   class H5im {
   public:
-    static void Initialize(Handle<Object> target) {
+    static void Initialize(Local<Object> target) {
 
       // append this function to the target object
       target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeImage"),
@@ -34,7 +35,7 @@ namespace NodeHDF5 {
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::make_palette)->GetFunction());
     }
 
-    static void get_height(Handle<Object> options, std::function<void(hid_t)> cb) {
+    static void get_height(Local<Object> options, std::function<void(hid_t)> cb) {
       if (options.IsEmpty()) {
         return;
       }
@@ -46,7 +47,7 @@ namespace NodeHDF5 {
       }
     }
     
-    static void get_width(Handle<Object> options, std::function<void(hsize_t)> cb) {
+    static void get_width(Local<Object> options, std::function<void(hsize_t)> cb) {
       if (options.IsEmpty()) {
         return;
       }
@@ -58,7 +59,7 @@ namespace NodeHDF5 {
       }
     }
     
-    static void get_planes(Handle<Object> options, std::function<void(hsize_t)> cb) {
+    static void get_planes(Local<Object> options, std::function<void(hsize_t)> cb) {
       if (options.IsEmpty()) {
         return;
       }
@@ -72,14 +73,14 @@ namespace NodeHDF5 {
     
     static void make_image(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Local<v8::Object> buffer = args[2]->ToObject();
       Local<Object>     options;
       if (args.Length() >= 4 && args[3]->IsObject()) {
         options = args[3]->ToObject();
       }
 
-      String::Utf8Value interlace(buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"))->ToString());
+      Nan::Utf8String interlace(buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"))->ToString());
       herr_t            err;
       hsize_t           dims[3];
       if (buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))) {
@@ -118,7 +119,7 @@ namespace NodeHDF5 {
 
     static void read_image(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       hsize_t           width;
       hsize_t           height;
       hsize_t           planes;
@@ -166,7 +167,7 @@ namespace NodeHDF5 {
 
     static void read_image_region(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       hsize_t           width;
       hsize_t           height;
       hsize_t           planes;
@@ -190,7 +191,7 @@ namespace NodeHDF5 {
       }
       Local<Array> names = args[2]->ToObject()->GetOwnPropertyNames();
       for (uint32_t index = 0; index < names->Length(); index++) {
-        String::Utf8Value _name(names->Get(index));
+        Nan::Utf8String _name(names->Get(index));
         std::string       name(*_name);
         if (name.compare("start") == 0) {
           Local<Object> starts = args[2]->ToObject()->Get(names->Get(index))->ToObject();
@@ -268,7 +269,7 @@ namespace NodeHDF5 {
 
     static void is_image(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       herr_t            err    = H5IMis_image(idWrap->Value(), *dset_name);
       args.GetReturnValue().Set(err ? true : false);
@@ -276,7 +277,7 @@ namespace NodeHDF5 {
 
     static void get_image_info(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       hsize_t           width;
       hsize_t           height;
       hsize_t           planes;
@@ -302,7 +303,7 @@ namespace NodeHDF5 {
     static void make_palette(const v8::FunctionCallbackInfo<Value>& args) {
 
       Local<Uint8Array> buffer = Local<Uint8Array>::Cast(args[2]);
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Local<Value>      rankValue = args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "size"));
       hsize_t           pal_dims[1]{static_cast<hsize_t>(rankValue->Int32Value())};
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());

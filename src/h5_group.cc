@@ -1,3 +1,4 @@
+#include <nan.h>
 #include <node.h>
 #include <string>
 #include <cstring>
@@ -20,7 +21,7 @@ namespace NodeHDF5 {
 
   using namespace v8;
 
-    static bool get_separate_attrs(v8::Handle<v8::Object> options) {
+    static bool get_separate_attrs(v8::Local<v8::Object> options) {
       if (options.IsEmpty()) {
         return false;
       }
@@ -90,7 +91,7 @@ namespace NodeHDF5 {
     try {
       if (args.Length() == 3 && args[0]->IsString() && args[1]->IsObject()) {
         // store specified group name
-        String::Utf8Value        group_name(args[0]->ToString());
+        Nan::Utf8String        group_name(args[0]->ToString());
         std::vector<std::string> trail;
         std::vector<hid_t>       hidPath;
         std::istringstream       buf(*group_name);
@@ -101,7 +102,7 @@ namespace NodeHDF5 {
         hid_t previous_hid;
         // unwrap parent object
         std::string constructorName = "File";
-        if (constructorName.compare(*String::Utf8Value(args[1]->ToObject()->GetConstructorName())) == 0) {
+        if (constructorName.compare(*Nan::Utf8String(args[1]->ToObject()->GetConstructorName())) == 0) {
 
           File* parent = ObjectWrap::Unwrap<File>(args[1]->ToObject());
           previous_hid = parent->getId();
@@ -195,7 +196,7 @@ namespace NodeHDF5 {
     }
 
     // store specified group name
-    String::Utf8Value group_name(args[0]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
 
     // unwrap parent object
     File*                    parent = ObjectWrap::Unwrap<File>(args[1]->ToObject());
@@ -300,7 +301,7 @@ namespace NodeHDF5 {
     }
 
     // store specified group name
-    String::Utf8Value group_name(args[0]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
 
     std::vector<std::string> trail;
     std::vector<hid_t>       hidPath;
@@ -315,7 +316,7 @@ namespace NodeHDF5 {
 
     // unwrap parent object
     std::string constructorName = "File";
-    if (constructorName.compare(*String::Utf8Value(args[1]->ToObject()->GetConstructorName())) == 0) {
+    if (constructorName.compare(*Nan::Utf8String(args[1]->ToObject()->GetConstructorName())) == 0) {
 
       File* parent = ObjectWrap::Unwrap<File>(args[1]->ToObject());
       previous_hid = parent->getId();
@@ -382,7 +383,7 @@ namespace NodeHDF5 {
         options = args[1]->ToObject();
         separateAttrs = get_separate_attrs(options);
       }
-      String::Utf8Value group_name(args[0]->ToString());
+      Nan::Utf8String group_name(args[0]->ToString());
       Local<Object> instance = Group::Instantiate(*group_name, args.This(), args[1]->Uint32Value());
       if(separateAttrs){
          v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), 2);
@@ -418,8 +419,8 @@ namespace NodeHDF5 {
 
     // unwrap group
     Group*            group = ObjectWrap::Unwrap<Group>(args.This());
-    String::Utf8Value group_name(args[0]->ToString());
-    String::Utf8Value dest_name(args[2]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
+    Nan::Utf8String dest_name(args[2]->ToString());
 
     herr_t err = H5Ocopy(group->id, *group_name, args[1]->IntegerValue(), *dest_name, H5P_DEFAULT, H5P_DEFAULT);
     if (err < 0) {
@@ -442,8 +443,8 @@ namespace NodeHDF5 {
 
     // unwrap group
     Group*            group = ObjectWrap::Unwrap<Group>(args.This());
-    String::Utf8Value group_name(args[0]->ToString());
-    String::Utf8Value dest_name(args[2]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
+    Nan::Utf8String dest_name(args[2]->ToString());
     Int64*            idWrap   = ObjectWrap::Unwrap<Int64>(args[1]->ToObject());
     hid_t             file_id = idWrap->Value();
 
@@ -468,8 +469,8 @@ namespace NodeHDF5 {
 
     // unwrap group
     Group*            group = ObjectWrap::Unwrap<Group>(args.This());
-    String::Utf8Value group_name(args[0]->ToString());
-    String::Utf8Value dest_name(args[2]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
+    Nan::Utf8String dest_name(args[2]->ToString());
     herr_t err = H5Lcopy(group->id, *group_name, args[1]->IntegerValue(), *dest_name, H5P_DEFAULT, H5P_DEFAULT);
     if (err < 0) {
       std::string str(*dest_name);
@@ -492,7 +493,7 @@ namespace NodeHDF5 {
     // unwrap group
     Group* group = ObjectWrap::Unwrap<Group>(args.This());
     // delete specified group name
-    String::Utf8Value group_name(args[0]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
     H5Ldelete(group->id, (*group_name), H5P_DEFAULT);
   }
 

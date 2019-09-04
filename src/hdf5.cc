@@ -1,3 +1,4 @@
+#include <nan.h>
 #include <node.h>
 #include "file.h"
 #include "group.h"
@@ -11,7 +12,7 @@ using namespace NodeHDF5;
 
 extern "C" {
 
-static void init(Handle<Object> target) {
+static void init(Local<Object> target) {
 
   // create local scope
   HandleScope scope(v8::Isolate::GetCurrent());
@@ -65,7 +66,7 @@ namespace NodeHDF5 {
       args.GetReturnValue().SetUndefined();
       return;
     }
-      String::Utf8Value path(args[0]->ToString());
+      Nan::Utf8String path(args[0]->ToString());
 
     htri_t ret_value = H5Fis_hdf5( *path );
    if( ret_value > 0 ){

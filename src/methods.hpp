@@ -214,7 +214,7 @@ namespace NodeHDF5 {
     Methods(const Methods& orig) = delete;
     virtual ~Methods(){};
 
-    // static void Initialize (Handle<Object> target);
+    // static void Initialize (Local<Object> target);
 
     static void GetNumAttrs(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void getAttributeNames(const v8::FunctionCallbackInfo<v8::Value>& args);

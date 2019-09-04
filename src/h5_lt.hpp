@@ -1,6 +1,7 @@
 #pragma once
 #include <v8.h>
 #include <uv.h>
+#include <nan.h>
 #include <node.h>
 #include <node_object_wrap.h>
 #include <node_buffer.h>
@@ -75,7 +76,7 @@ namespace NodeHDF5 {
   class H5lt {
   protected:
   public:
-    static void Initialize(Handle<Object> target) {
+    static void Initialize(Local<Object> target) {
 
       // append this function to the target object
       target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeDataset"),
@@ -96,7 +97,7 @@ namespace NodeHDF5 {
         bool bindAttributes=false;
         Local<Array> names = args[argIndex]->ToObject()->GetOwnPropertyNames();
         for (uint32_t index = 0; index < names->Length(); index++) {
-          String::Utf8Value _name(names->Get(index));
+          Nan::Utf8String _name(names->Get(index));
           std::string       name(*_name);
           if (name.compare("bind_attributes") == 0) {
             bindAttributes = args[argIndex]->ToObject()->Get(names->Get(index))->ToBoolean()->BooleanValue();
@@ -113,7 +114,7 @@ namespace NodeHDF5 {
         unsigned int size=0;
         Local<Array> names = args[argIndex]->ToObject()->GetOwnPropertyNames();
         for (uint32_t index = 0; index < names->Length(); index++) {
-          String::Utf8Value _name(names->Get(index));
+          Nan::Utf8String _name(names->Get(index));
           std::string       name(*_name);
           if (name.compare("start") == 0) {
             Local<Object> starts = args[argIndex]->ToObject()->Get(names->Get(index))->ToObject();
@@ -165,7 +166,7 @@ namespace NodeHDF5 {
         return subsetOn;
     }
     
-    inline static uint32_t get_fixed_width(Handle<Object> options) {
+    inline static uint32_t get_fixed_width(Local<Object> options) {
       if (options.IsEmpty()) {
         return 0;
       }
@@ -179,7 +180,7 @@ namespace NodeHDF5 {
       return options->Get(name)->Uint32Value();
     }
 
-    static void get_type(Handle<Object> options, std::function<void(hid_t)> cb) {
+    static void get_type(Local<Object> options, std::function<void(hid_t)> cb) {
       if (options.IsEmpty()) {
         return;
       }
@@ -191,7 +192,7 @@ namespace NodeHDF5 {
       }
     }
     
-    static void get_rank(Handle<Object> options, std::function<void(int)> cb) {
+    static void get_rank(Local<Object> options, std::function<void(int)> cb) {
       if (options.IsEmpty()) {
         return;
       }
@@ -202,7 +203,7 @@ namespace NodeHDF5 {
       }
     }
     
-    static void get_rows(Handle<Object> options, std::function<void(int)> cb) {
+    static void get_rows(Local<Object> options, std::function<void(int)> cb) {
       if (options.IsEmpty()) {
         return;
       }
@@ -214,7 +215,7 @@ namespace NodeHDF5 {
       }
     }
     
-    static void get_columns(Handle<Object> options, std::function<void(int)> cb) {
+    static void get_columns(Local<Object> options, std::function<void(int)> cb) {
       if (options.IsEmpty()) {
         return;
       }
@@ -226,7 +227,7 @@ namespace NodeHDF5 {
       }
     }
     
-    static void get_sections(Handle<Object> options, std::function<void(int)> cb) {
+    static void get_sections(Local<Object> options, std::function<void(int)> cb) {
       if (options.IsEmpty()) {
         return;
       }
@@ -238,7 +239,7 @@ namespace NodeHDF5 {
       }
     }
     
-    static void get_files(Handle<Object> options, std::function<void(int)> cb) {
+    static void get_files(Local<Object> options, std::function<void(int)> cb) {
       if (options.IsEmpty()) {
         return;
       }
@@ -250,7 +251,7 @@ namespace NodeHDF5 {
       }
     }
     
-    static unsigned int get_compression(Handle<Object> options) {
+    static unsigned int get_compression(Local<Object> options) {
       if (options.IsEmpty()) {
         return 0;
       }
@@ -264,7 +265,7 @@ namespace NodeHDF5 {
       return options->Get(name)->Uint32Value();
     }
 
-    static int get_option_int(Handle<Object> options,const char * option_name, int default_value) {
+    static int get_option_int(Local<Object> options,const char * option_name, int default_value) {
       if (options.IsEmpty()) {
         return default_value;
       }
@@ -278,7 +279,7 @@ namespace NodeHDF5 {
       return options->Get(name)->Int32Value();
     }
 
-    static std::unique_ptr<hsize_t[]> get_chunk_size(Handle<Object> options, int rank) {
+    static std::unique_ptr<hsize_t[]> get_chunk_size(Local<Object> options, int rank) {
       std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);  
       for(int index=0;index<rank;index++){
         dims[index]=0;
@@ -293,7 +294,7 @@ namespace NodeHDF5 {
         return dims;
       }
       if(options->Get(name)->IsArray()){
-          v8::Handle<v8::Array> array = v8::Local<v8::Array>::Cast(options->Get(name));
+          v8::Local<v8::Array> array = v8::Local<v8::Array>::Cast(options->Get(name));
         for (unsigned int arrayIndex = 0; arrayIndex < std::min((uint32_t)rank, array->Length()); arrayIndex++) {
            dims.get()[arrayIndex]=array->Get(arrayIndex)->Uint32Value();
         }
@@ -340,9 +341,9 @@ namespace NodeHDF5 {
       return true;
     }
 
-    static void make_dataset_from_buffer(const hid_t& group_id, const char* dset_name, Handle<Object> buffer, Handle<Object> options) {
+    static void make_dataset_from_buffer(const hid_t& group_id, const char* dset_name, Local<Object> buffer, Local<Object> options) {
       Local<Value>      encodingValue = buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding"));
-      String::Utf8Value encoding(encodingValue->ToString());
+      Nan::Utf8String encoding(encodingValue->ToString());
       if (buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding")) && std::strcmp("binary", (*encoding))) {
         herr_t err = H5LTmake_dataset_string(group_id, dset_name, const_cast<char*>(node::Buffer::Data(buffer)));
         if (err < 0) {
@@ -487,46 +488,46 @@ namespace NodeHDF5 {
       for (hsize_t index = propertyStartIndex; index < propertyNames->Length(); index++) {
         v8::Local<v8::Value> name = propertyNames->Get(index);
         if (!buffer->Get(name)->IsFunction() && !buffer->Get(name)->IsArray() &&
-            strncmp("id", (*String::Utf8Value(name->ToString())), 2) != 0 &&
-            strncmp("rank", (*String::Utf8Value(name->ToString())), 4) != 0 &&
-            strncmp("rows", (*String::Utf8Value(name->ToString())), 4) != 0 &&
-            strncmp("columns", (*String::Utf8Value(name->ToString())), 7) != 0 &&
-            strncmp("buffer", (*String::Utf8Value(name->ToString())), 6) != 0) {
+            strncmp("id", (*Nan::Utf8String(name->ToString())), 2) != 0 &&
+            strncmp("rank", (*Nan::Utf8String(name->ToString())), 4) != 0 &&
+            strncmp("rows", (*Nan::Utf8String(name->ToString())), 4) != 0 &&
+            strncmp("columns", (*Nan::Utf8String(name->ToString())), 7) != 0 &&
+            strncmp("buffer", (*Nan::Utf8String(name->ToString())), 6) != 0) {
 
           if (buffer->Get(name)->IsObject() || buffer->Get(name)->IsExternal()) {
           } else if (buffer->Get(name)->IsUint32()) {
             uint32_t value = buffer->Get(name)->Uint32Value();
-            if (H5Aexists_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT) > 0) {
-              H5Adelete_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+            if (H5Aexists_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT) > 0) {
+              H5Adelete_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT);
             }
-            H5LTset_attribute_uint(group_id, dset_name, (*String::Utf8Value(name->ToString())), (unsigned int*)&value, 1);
+            H5LTset_attribute_uint(group_id, dset_name, (*Nan::Utf8String(name->ToString())), (unsigned int*)&value, 1);
 
           } else if (buffer->Get(name)->IsInt32()) {
             int32_t value = buffer->Get(name)->Int32Value();
-            if (H5Aexists_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT) > 0) {
-              H5Adelete_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+            if (H5Aexists_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT) > 0) {
+              H5Adelete_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT);
             }
-            H5LTset_attribute_int(group_id, dset_name, (*String::Utf8Value(name->ToString())), (int*)&value, 1);
+            H5LTset_attribute_int(group_id, dset_name, (*Nan::Utf8String(name->ToString())), (int*)&value, 1);
 
           } else if (buffer->Get(name)->IsString()) {
-            std::string value((*String::Utf8Value(buffer->Get(name)->ToString())));
-            if (H5Aexists_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT) > 0) {
-              H5Adelete_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+            std::string value((*Nan::Utf8String(buffer->Get(name)->ToString())));
+            if (H5Aexists_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT) > 0) {
+              H5Adelete_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT);
             }
-            H5LTset_attribute_string(group_id, dset_name, (*String::Utf8Value(name->ToString())), (const char*)value.c_str());
+            H5LTset_attribute_string(group_id, dset_name, (*Nan::Utf8String(name->ToString())), (const char*)value.c_str());
           } else if (buffer->Get(name)->IsNumber()) {
             double value = buffer->Get(name)->NumberValue();
-            if (H5Aexists_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT) > 0) {
-              H5Adelete_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+            if (H5Aexists_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT) > 0) {
+              H5Adelete_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT);
             }
-            H5LTset_attribute_double(group_id, dset_name, (*String::Utf8Value(name->ToString())), (double*)&value, 1);
+            H5LTset_attribute_double(group_id, dset_name, (*Nan::Utf8String(name->ToString())), (double*)&value, 1);
           }
         }
       }
     }
 
     static void make_dataset_from_typed_array(
-        const hid_t& group_id, const char* dset_name, Handle<TypedArray> buffer, Handle<Object> options, hid_t type_id) {
+        const hid_t& group_id, const char* dset_name, Local<TypedArray> buffer, Local<Object> options, hid_t type_id) {
       int rank = 1;
       get_rank(options, [&](int _rank){rank=_rank;});
       if (buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"))) {
@@ -647,14 +648,14 @@ namespace NodeHDF5 {
       for (unsigned int index = buffer->Length(); index < propertyNames->Length(); index++) {
         v8::Local<v8::Value> name = propertyNames->Get(index);
         if (!buffer->Get(name)->IsFunction() && !buffer->Get(name)->IsArray() &&
-            strncmp("id", (*String::Utf8Value(name->ToString())), 2) != 0 &&
-            strncmp("rank", (*String::Utf8Value(name->ToString())), 4) != 0 &&
-            strncmp("rows", (*String::Utf8Value(name->ToString())), 4) != 0 &&
-            strncmp("columns", (*String::Utf8Value(name->ToString())), 7) != 0 &&
-            strncmp("buffer", (*String::Utf8Value(name->ToString())), 6) != 0) {
+            strncmp("id", (*Nan::Utf8String(name->ToString())), 2) != 0 &&
+            strncmp("rank", (*Nan::Utf8String(name->ToString())), 4) != 0 &&
+            strncmp("rows", (*Nan::Utf8String(name->ToString())), 4) != 0 &&
+            strncmp("columns", (*Nan::Utf8String(name->ToString())), 7) != 0 &&
+            strncmp("buffer", (*Nan::Utf8String(name->ToString())), 6) != 0) {
           if (buffer->Get(name)->IsObject()){
             std::string constructorName = "Reference";
-            if (constructorName.compare(*String::Utf8Value(buffer->Get(name)->ToObject()->GetConstructorName())) == 0) {
+            if (constructorName.compare(*Nan::Utf8String(buffer->Get(name)->ToObject()->GetConstructorName())) == 0) {
                 v8::Local<v8::Object> obj=buffer->Get(name)->ToObject();
             // unwrap ref
             Reference* ref =  ObjectWrap::Unwrap<Reference>(obj);
@@ -664,7 +665,7 @@ namespace NodeHDF5 {
             hid_t attr_space     = H5Screate_simple(1, currentDims.get(), NULL);
 //            hid_t attr_space = H5Screate(H5S_SCALAR);
             hid_t  did = H5Dopen(group_id, dset_name, H5P_DEFAULT);
-            hid_t attr_id = H5Acreate(did, *v8::String::Utf8Value(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+            hid_t attr_id = H5Acreate(did, *Nan::Utf8String(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
             if (attr_id < 0) {
               H5Dclose(did);
               H5Sclose(attr_space);
@@ -684,37 +685,37 @@ namespace NodeHDF5 {
 
           } else if (buffer->Get(name)->IsUint32()) {
             uint32_t value = buffer->Get(name)->Uint32Value();
-            if (H5Aexists_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT) > 0) {
-              H5Adelete_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+            if (H5Aexists_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT) > 0) {
+              H5Adelete_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT);
             }
-            H5LTset_attribute_uint(group_id, dset_name, (*String::Utf8Value(name->ToString())), (unsigned int*)&value, 1);
+            H5LTset_attribute_uint(group_id, dset_name, (*Nan::Utf8String(name->ToString())), (unsigned int*)&value, 1);
 
           } else if (buffer->Get(name)->IsInt32()) {
             int32_t value = buffer->Get(name)->Int32Value();
-            if (H5Aexists_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT) > 0) {
-              H5Adelete_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+            if (H5Aexists_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT) > 0) {
+              H5Adelete_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT);
             }
-            H5LTset_attribute_int(group_id, dset_name, (*String::Utf8Value(name->ToString())), (int*)&value, 1);
+            H5LTset_attribute_int(group_id, dset_name, (*Nan::Utf8String(name->ToString())), (int*)&value, 1);
 
           } else if (buffer->Get(name)->IsString()) {
-            std::string value((*String::Utf8Value(buffer->Get(name)->ToString())));
-            if (H5Aexists_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT) > 0) {
-              H5Adelete_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+            std::string value((*Nan::Utf8String(buffer->Get(name)->ToString())));
+            if (H5Aexists_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT) > 0) {
+              H5Adelete_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT);
             }
 
-            H5LTset_attribute_string(group_id, dset_name, (*String::Utf8Value(name->ToString())), (const char*)value.c_str());
+            H5LTset_attribute_string(group_id, dset_name, (*Nan::Utf8String(name->ToString())), (const char*)value.c_str());
           } else if (buffer->Get(name)->IsNumber()) {
             double value = buffer->Get(name)->NumberValue();
-            if (H5Aexists_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT) > 0) {
-              H5Adelete_by_name(group_id, dset_name, (*String::Utf8Value(name->ToString())), H5P_DEFAULT);
+            if (H5Aexists_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT) > 0) {
+              H5Adelete_by_name(group_id, dset_name, (*Nan::Utf8String(name->ToString())), H5P_DEFAULT);
             }
-            H5LTset_attribute_double(group_id, dset_name, (*String::Utf8Value(name->ToString())), (double*)&value, 1);
+            H5LTset_attribute_double(group_id, dset_name, (*Nan::Utf8String(name->ToString())), (double*)&value, 1);
           }
         }
       }
     }
 
-    static void make_dataset_from_array(const hid_t& group_id, const char* dset_name, Handle<Array> array, Handle<Object> options) {
+    static void make_dataset_from_array(const hid_t& group_id, const char* dset_name, Local<Array> array, Local<Object> options) {
       hid_t        dcpl   = H5Pcreate(H5P_DATASET_CREATE);
       int          rank   = 1;
       uint32_t fixedWidth = get_fixed_width(options);
@@ -732,7 +733,7 @@ namespace NodeHDF5 {
 
         std::string s;
         for (unsigned int arrayIndex = 0; arrayIndex < length; arrayIndex++) {
-          String::Utf8Value buffer(array->Get(arrayIndex)->ToString());
+          Nan::Utf8String buffer(array->Get(arrayIndex)->ToString());
           s.assign(*buffer);
           if (fixedWidth < s.length()) {
             THROW_EXCEPTION("failed fixed length to make var len dataset");
@@ -835,7 +836,7 @@ namespace NodeHDF5 {
         std::unique_ptr<char*[]> vl(new char*[length]);
 
         for (size_t arrayIndex = 0; arrayIndex < length; arrayIndex++) {
-          String::Utf8Value string(array->Get(arrayIndex));
+          Nan::Utf8String string(array->Get(arrayIndex));
 
           vl.get()[arrayIndex] = new char[string.length() + 1];
           vl.get()[arrayIndex][string.length()] = 0;
@@ -861,8 +862,8 @@ namespace NodeHDF5 {
       }
     }
 
-    static void make_dataset_from_string(const hid_t& group_id, const char* dset_name, Handle<String> buffer, Handle<Object> /*options*/) {
-      String::Utf8Value str_buffer(buffer);
+    static void make_dataset_from_string(const hid_t& group_id, const char* dset_name, Local<String> buffer, Local<Object> /*options*/) {
+      Nan::Utf8String str_buffer(buffer);
       herr_t            err = H5LTmake_dataset_string(group_id, dset_name, const_cast<char*>(*str_buffer));
       if (err < 0) {
         THROW_EXCEPTION("failed to make char dataset");
@@ -871,7 +872,7 @@ namespace NodeHDF5 {
     }
 
     static void make_dataset(const v8::FunctionCallbackInfo<Value>& args) {
-      String::Utf8Value dset_name_ptr(args[1]->ToString());
+      Nan::Utf8String dset_name_ptr(args[1]->ToString());
       const char*       dset_name(*dset_name_ptr);
       Int64*            idWrap   = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             group_id = idWrap->Value();
@@ -923,7 +924,7 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       size_t            bufSize = 0;
       H5T_class_t       class_id;
       int               rank   = 1;
@@ -958,7 +959,7 @@ namespace NodeHDF5 {
 #endif
       if (bufferAsUnit8Array && node::Buffer::HasInstance(args[2])) {
         Local<Value>      encodingValue = args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding"));
-        String::Utf8Value encoding(encodingValue->ToString());
+        Nan::Utf8String encoding(encodingValue->ToString());
         if (args[2]->ToObject()->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding")) && std::strcmp("binary", (*encoding))) {
           Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
           hid_t  did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
@@ -1025,7 +1026,7 @@ namespace NodeHDF5 {
         return;
       }
       if (args[2]->IsString()) {
-        String::Utf8Value buffer(args[2]->ToString());
+        Nan::Utf8String buffer(args[2]->ToString());
         Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
         hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
         herr_t            err    = H5Dwrite(did, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, (char*)(*buffer));
@@ -1135,7 +1136,7 @@ namespace NodeHDF5 {
                                          std::unique_ptr<hsize_t[]>&            stride,
                                          std::unique_ptr<hsize_t[]>&            count) {
       int               rank = 1;
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Int64*            idWrap       = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did          = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       hid_t             dataspace_id = H5Dget_space(did);
@@ -1168,10 +1169,10 @@ namespace NodeHDF5 {
       H5Tset_size(type_id, H5T_VARIABLE);
       const unsigned int                              arraySize = array->Length();
       std::unique_ptr<char* []>                       vl(new char*[arraySize]);
-      std::vector<std::unique_ptr<String::Utf8Value>> string_values;
+      std::vector<std::unique_ptr<Nan::Utf8String>> string_values;
 
       for (unsigned int arrayIndex = 0; arrayIndex < arraySize; arrayIndex++) {
-        std::unique_ptr<String::Utf8Value> value(new String::Utf8Value(array->Get(arrayIndex)));
+        std::unique_ptr<Nan::Utf8String> value(new Nan::Utf8String(array->Get(arrayIndex)));
         vl.get()[arrayIndex] = **value;
         string_values.emplace_back(std::move(value));
       }
@@ -1203,7 +1204,7 @@ namespace NodeHDF5 {
         return;
       }
 
-      const String::Utf8Value dataset_name(args[1]->ToString());
+      const Nan::Utf8String dataset_name(args[1]->ToString());
 
       Int64*      idWrap      = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       const hid_t location_id = idWrap->Value();
@@ -1230,7 +1231,7 @@ namespace NodeHDF5 {
         return;
       }
 
-      const String::Utf8Value dataset_name(args[1]->ToString());
+      const Nan::Utf8String dataset_name(args[1]->ToString());
 
       Int64*      idWrap      = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       const hid_t location_id = idWrap->Value();
@@ -1262,7 +1263,7 @@ namespace NodeHDF5 {
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       size_t            bufSize = 0;
       H5T_class_t       class_id;
       int               rank;
@@ -1510,7 +1511,7 @@ namespace NodeHDF5 {
           } else if (class_id == H5T_INTEGER && bufSize == 8) {
 
             type_id                    = H5Dget_type(did);
-            Handle<Object> int64Buffer = node::Buffer::New(v8::Isolate::GetCurrent(), bufSize * theSize).ToLocalChecked();
+            Local<Object> int64Buffer = node::Buffer::New(v8::Isolate::GetCurrent(), bufSize * theSize).ToLocalChecked();
             H5LTread_dataset(idWrap->Value(), *dset_name, type_id, (char*)node::Buffer::Data(int64Buffer));
 
             hid_t native_type_id = H5Tget_native_type(type_id, H5T_DIR_ASCEND);
@@ -1718,7 +1719,7 @@ namespace NodeHDF5 {
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       size_t            bufSize = 0;
       H5T_class_t       class_id;
       int               rank;
