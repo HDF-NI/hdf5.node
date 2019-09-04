@@ -9,6 +9,7 @@
 #include "file.h"
 #include "group.h"
 #include "int64.hpp"
+#include "macros.h"
 #include "H5DSpublic.h"
 
 namespace NodeHDF5 {
@@ -44,8 +45,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name")));
+        THROW_EXCEPTION("expected group id, dataset name, name");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -57,8 +57,7 @@ namespace NodeHDF5 {
       herr_t            err    = H5DSset_scale(did, *dim_scale_name);
       if (err < 0) {
         H5Dclose(did);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed setting dimension scale")));
+        THROW_EXCEPTION("failed setting dimension scale");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -70,8 +69,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString() || !args[3]->IsInt32()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name, index")));
+        THROW_EXCEPTION("expected group id, dataset name, name, index");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -85,8 +83,7 @@ namespace NodeHDF5 {
       if (err < 0) {
         H5Dclose(dsid);
         H5Dclose(did);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed attaching dimension scale")));
+        THROW_EXCEPTION("failed attaching dimension scale");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -99,8 +96,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString() || !args[3]->IsInt32()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name, index")));
+        THROW_EXCEPTION("expected group id, dataset name, name, index");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -114,8 +110,7 @@ namespace NodeHDF5 {
       if (err < 0) {
         H5Dclose(dsid);
         H5Dclose(did);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed attaching dimension scale")));
+        THROW_EXCEPTION("failed attaching dimension scale");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -128,8 +123,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString() || !args[3]->IsInt32()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name, index")));
+        THROW_EXCEPTION("expected group id, dataset name, name, index");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -149,8 +143,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name")));
+        THROW_EXCEPTION("expected group id, dataset name");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -196,8 +189,7 @@ namespace NodeHDF5 {
                                       &func);
       if (err < 0) {
         H5Dclose(did);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed iterating through  scale indices")));
+        THROW_EXCEPTION("failed iterating through  scale indices");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -210,8 +202,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsInt32() || !args[3]->IsString()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, scale name, index, label")));
+        THROW_EXCEPTION("expected group id, scale name, index, label");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -230,8 +221,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsInt32()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, scale name, index")));
+        THROW_EXCEPTION("expected group id, scale name, index");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -251,8 +241,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, scale name")));
+        THROW_EXCEPTION("expected group id, scale name");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -273,8 +262,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsInt32()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, index")));
+        THROW_EXCEPTION("expected group id, dataset name, index");
         args.GetReturnValue().SetUndefined();
         return;
       }

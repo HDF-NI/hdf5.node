@@ -10,6 +10,7 @@
 #include "file.h"
 #include "group.h"
 #include "int64.hpp"
+#include "macros.h"
 #include "H5IMpublic.h"
 
 namespace NodeHDF5 {
@@ -99,8 +100,7 @@ namespace NodeHDF5 {
       Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
      err           = H5LTmake_dataset(idWrap->Value(), *dset_name, 3, dims, H5T_NATIVE_UCHAR, (const char*)node::Buffer::Data(args[2]));
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make image dataset")));
+        THROW_EXCEPTION("failed to make image dataset");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -127,8 +127,7 @@ namespace NodeHDF5 {
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       herr_t            err    = H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
+        THROW_EXCEPTION("failed to get image info");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -136,8 +135,7 @@ namespace NodeHDF5 {
       std::unique_ptr<unsigned char[]> contentBuffer(new unsigned char[(size_t)(planes * width * height)]);
       err = H5LTread_dataset(idWrap->Value(), *dset_name, H5T_NATIVE_UCHAR, contentBuffer.get());
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read image")));
+        THROW_EXCEPTION("failed to read image");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -177,8 +175,7 @@ namespace NodeHDF5 {
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       herr_t            err    = H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
+        THROW_EXCEPTION("failed to get image info");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -187,8 +184,7 @@ namespace NodeHDF5 {
       std::unique_ptr<hsize_t[]> stride(new hsize_t[rank]);
       std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
       if (args.Length() != 3) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "no region properties")));
+        THROW_EXCEPTION("no region properties");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -230,8 +226,7 @@ namespace NodeHDF5 {
         H5Sclose(memspace_id);
         H5Sclose(dataspace_id);
         H5Dclose(did);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+        THROW_EXCEPTION("failed to select hyperslab");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -249,8 +244,7 @@ namespace NodeHDF5 {
         H5Sclose(dataspace_id);
         H5Tclose(t);
         H5Dclose(did);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read image region")));
+        THROW_EXCEPTION("failed to read image region");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -291,8 +285,7 @@ namespace NodeHDF5 {
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       herr_t            err    = H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
+        THROW_EXCEPTION("failed to get image info");
         args.GetReturnValue().SetUndefined();
         return;
       }

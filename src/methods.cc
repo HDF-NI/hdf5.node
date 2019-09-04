@@ -5,6 +5,7 @@
 
 #include "reference.hpp"
 #include "attributes.hpp"
+#include "macros.h"
 #include "methods.hpp"
 #include "filters.hpp"
 
@@ -239,8 +240,7 @@ namespace NodeHDF5 {
 
   void Methods::getDatasetDimensions(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if (args.Length() != 1 || !args[0]->IsString()) {
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
+      THROW_EXCEPTION("expected name");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -252,16 +252,14 @@ namespace NodeHDF5 {
 
     const hid_t dataset   = H5Dopen(location_id, *dataset_name, H5P_DEFAULT);
     if(dataset<0){
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "can't open dataset")));
+      THROW_EXCEPTION("can't open dataset");
       args.GetReturnValue().SetUndefined();
       return;
     }
     const hid_t dataspace = H5Dget_space(dataset);
     if(dataspace<0){
       H5Dclose(dataset);
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "can't get dataset space")));
+      THROW_EXCEPTION("can't get dataset space");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -1017,8 +1015,7 @@ namespace NodeHDF5 {
                                       },
                                       &func);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed iterating through children")));
+        THROW_EXCEPTION("failed iterating through children");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1054,8 +1051,7 @@ namespace NodeHDF5 {
                                       },
                                       &func);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed iterating through children")));
+        THROW_EXCEPTION("failed iterating through children");
         args.GetReturnValue().SetUndefined();
         return;
       }

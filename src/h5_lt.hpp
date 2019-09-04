@@ -15,13 +15,12 @@
 #include "file.h"
 #include "group.h"
 #include "int64.hpp"
+#include "macros.h"
 #include "H5LTpublic.h"
 
 #include "attributes.hpp"
 
-#define THROW_ERROR(message) \
-  v8::Isolate::GetCurrent()->ThrowException( \
-    v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), message)))
+
 
 static herr_t H5LT_make_dataset_numerical(hid_t          loc_id,
                                           const char*    dset_name,
@@ -146,8 +145,8 @@ namespace NodeHDF5 {
         }
         if(!gotStart && !gotStride && !gotCount)
           return false;
-        if(!gotCount)v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Need to supply the subspace count dimensions. Start and stride are optional.")));
+        if(!gotCount)
+          THROW_EXCEPTION("Need to supply the subspace count dimensions. Start and stride are optional.");
         if(!gotStart){
           for (unsigned int arrayIndex = 0;
              arrayIndex < size;
@@ -315,8 +314,7 @@ namespace NodeHDF5 {
       if (chunk_dims[0]==0) {
         err = H5Pset_chunk(dcpl, rank, ds_dim);
         if (err) {
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
+          THROW_EXCEPTION("Failed to set chunked layout");
           return false;
         }
 
@@ -325,8 +323,7 @@ namespace NodeHDF5 {
 
       err = H5Pset_chunk(dcpl, rank, chunk_dims.get());
       if (err) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
+        THROW_EXCEPTION("Failed to set chunked layout");
         return false;
       }
 
@@ -336,8 +333,7 @@ namespace NodeHDF5 {
     static bool configure_compression(const hid_t& dcpl, const unsigned int& compression) {
       herr_t err = H5Pset_deflate(dcpl, compression);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set zip filter")));
+        THROW_EXCEPTION("Failed to set zip filter");
         return false;
       }
 
@@ -350,8 +346,7 @@ namespace NodeHDF5 {
       if (buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding")) && std::strcmp("binary", (*encoding))) {
         herr_t err = H5LTmake_dataset_string(group_id, dset_name, const_cast<char*>(node::Buffer::Data(buffer)));
         if (err < 0) {
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make char dataset")));
+          THROW_EXCEPTION("failed to make char dataset");
           return;
         }
         return;
@@ -460,8 +455,7 @@ namespace NodeHDF5 {
           maxdims.get()[0] = get_option_int(options,"maxRows",dims.get()[0]);
           break;
         default:
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported rank")));
+          THROW_EXCEPTION("unsupported rank");
           return;
           break;
       }
@@ -482,8 +476,7 @@ namespace NodeHDF5 {
           group_id, dset_name, rank, dims.get(), maxdims.get(), type_id, H5P_DEFAULT, dcpl, H5P_DEFAULT, node::Buffer::Data(buffer));
       if (err < 0) {
         H5Pclose(dcpl);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
+        THROW_EXCEPTION("failed to make dataset");
         return;
       }
       H5Pclose(dcpl);
@@ -566,8 +559,7 @@ namespace NodeHDF5 {
 #endif
         if (err < 0) {
           H5Pclose(dcpl);
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
+          THROW_EXCEPTION("failed to make dataset");
           return;
         }
         H5Pclose(dcpl);
@@ -603,8 +595,7 @@ namespace NodeHDF5 {
 #endif
         if (err < 0) {
           H5Pclose(dcpl);
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
+          THROW_EXCEPTION("failed to make dataset");
           return;
         }
         H5Pclose(dcpl);
@@ -642,14 +633,12 @@ namespace NodeHDF5 {
 #endif
         if (err < 0) {
           H5Pclose(dcpl);
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
+          THROW_EXCEPTION("failed to make dataset");
           return;
         }
         H5Pclose(dcpl);
       } else {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported rank")));
+        THROW_EXCEPTION("unsupported rank");
         return;
       }
 
@@ -746,8 +735,7 @@ namespace NodeHDF5 {
           String::Utf8Value buffer(array->Get(arrayIndex)->ToString());
           s.assign(*buffer);
           if (fixedWidth < s.length()) {
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed fixed length to make var len dataset")));
+            THROW_EXCEPTION("failed fixed length to make var len dataset");
             return;
           }
           std::strncpy(&vl.get()[fixedWidth * arrayIndex], s.c_str(), s.length());
@@ -760,7 +748,7 @@ namespace NodeHDF5 {
         hid_t  did = H5Dcreate(group_id, dset_name, type_id, memspace_id, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         herr_t err = H5Dwrite(did, type_id, memspace_id, H5S_ALL, H5P_DEFAULT, vl.get());
         if (err < 0) {
-          THROW_ERROR("failed to make var len dataset");
+          THROW_EXCEPTION("failed to make var len dataset");
           return;
         }
 
@@ -808,7 +796,7 @@ namespace NodeHDF5 {
           maxdims.get()[3] = get_option_int(options, "maxColumns", dims.get()[3]);
           break;
         default:
-          THROW_ERROR("unsupported rank");
+          THROW_EXCEPTION("unsupported rank");
           return;
           break;
       }
@@ -832,7 +820,7 @@ namespace NodeHDF5 {
 
         herr_t err = H5Dwrite(did, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, vl.get());
         if (err < 0) {
-          THROW_ERROR("failed to make var len dataset");
+          THROW_EXCEPTION("failed to make var len dataset");
           return;
         }
 
@@ -862,7 +850,7 @@ namespace NodeHDF5 {
 
         herr_t err = H5Dwrite(did, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, vl.get());
         if (err < 0) {
-          THROW_ERROR("failed to make var len dataset");
+          THROW_EXCEPTION("failed to make var len dataset");
           return;
         }
 
@@ -877,8 +865,7 @@ namespace NodeHDF5 {
       String::Utf8Value str_buffer(buffer);
       herr_t            err = H5LTmake_dataset_string(group_id, dset_name, const_cast<char*>(*str_buffer));
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make char dataset")));
+        THROW_EXCEPTION("failed to make char dataset");
         return;
       }
     }
@@ -923,8 +910,7 @@ namespace NodeHDF5 {
       } else if (buffer->IsUint8Array()) {
         make_dataset_from_typed_array(group_id, dset_name, Local<Uint8Array>::Cast(buffer), options, H5T_NATIVE_UINT8);
       } else {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
+        THROW_EXCEPTION("unsupported data type");
       }
     }
 
@@ -933,8 +919,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() < 3 || args.Length() > 4 || !args[0]->IsObject() || !args[1]->IsString()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, buffer, [options]")));
+        THROW_EXCEPTION("expected id, name, buffer, [options]");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -945,16 +930,14 @@ namespace NodeHDF5 {
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       herr_t            err    = H5LTget_dataset_ndims(idWrap->Value(), *dset_name, &rank);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset rank")));
+        THROW_EXCEPTION("failed to find dataset rank");
         args.GetReturnValue().SetUndefined();
         return;
       }
       std::unique_ptr<hsize_t[]> values_dim(new hsize_t[rank]);
       err = H5LTget_dataset_info(idWrap->Value(), *dset_name, values_dim.get(), &class_id, &bufSize);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset info")));
+        THROW_EXCEPTION("failed to find dataset info");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -982,8 +965,7 @@ namespace NodeHDF5 {
           herr_t err    = H5Dwrite(did, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, (char*)node::Buffer::Data(args[2]));
           if (err < 0) {
             H5Dclose(did);
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to overwrite char dataset")));
+            THROW_EXCEPTION("failed to overwrite char dataset");
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -1007,8 +989,7 @@ namespace NodeHDF5 {
               H5Sclose(dataspace_id);
             }
             H5Dclose(did);
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+            THROW_EXCEPTION("failed to select hyperslab");
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -1030,8 +1011,7 @@ namespace NodeHDF5 {
             H5Sclose(dataspace_id);
           }
           H5Dclose(did);
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to overwrite dataset")));
+          THROW_EXCEPTION("failed to overwrite dataset");
           args.GetReturnValue().SetUndefined();
           return;
         }
@@ -1051,8 +1031,7 @@ namespace NodeHDF5 {
         herr_t            err    = H5Dwrite(did, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, (char*)(*buffer));
         if (err < 0) {
           H5Dclose(did);
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to overwrite char dataset")));
+          THROW_EXCEPTION("failed to overwrite char dataset");
           args.GetReturnValue().SetUndefined();
           return;
         }
@@ -1090,8 +1069,7 @@ namespace NodeHDF5 {
         type_id = H5T_NATIVE_UINT8;
         buffer  = Local<Uint8Array>::Cast(args[2]);
       } else {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
+        THROW_EXCEPTION("unsupported data type");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1117,8 +1095,7 @@ namespace NodeHDF5 {
             H5Sclose(dataspace_id);
           }
           H5Dclose(did);
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+          THROW_EXCEPTION("failed to select hyperslab");
           args.GetReturnValue().SetUndefined();
           return;
         }
@@ -1135,8 +1112,7 @@ namespace NodeHDF5 {
         }
         H5Dclose(did);
         // H5Pclose(dcpl);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
+        THROW_EXCEPTION("failed to make dataset");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1183,8 +1159,7 @@ namespace NodeHDF5 {
             H5Sclose(dataspace_id);
           }
           H5Dclose(did);
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+          THROW_EXCEPTION("failed to select hyperslab");
           args.GetReturnValue().SetUndefined();
           return;
         }
@@ -1208,8 +1183,7 @@ namespace NodeHDF5 {
         }
         H5Dclose(did);
         // H5Pclose(dcpl);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
+        THROW_EXCEPTION("failed to make dataset");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1224,8 +1198,7 @@ namespace NodeHDF5 {
 
     static void read_dataset_length(const v8::FunctionCallbackInfo<Value>& args) {
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+        THROW_EXCEPTION("expected id, name");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1252,8 +1225,7 @@ namespace NodeHDF5 {
 
     static void read_dataset_datatype(const v8::FunctionCallbackInfo<Value>& args) {
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+        THROW_EXCEPTION("expected id, name");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1274,21 +1246,18 @@ namespace NodeHDF5 {
     static void read_dataset(const v8::FunctionCallbackInfo<Value>& args) {
       // fail out if arguments are not correct
       if (args.Length() == 4 && (!args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsObject() || !args[3]->IsFunction())) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, [options], callback")));
+        THROW_EXCEPTION("expected id, name, [options], callback");
         args.GetReturnValue().SetUndefined();
         return;
 
       } else if (args.Length() == 3 && (!args[0]->IsObject() || !args[1]->IsString() || (!args[2]->IsObject() && !args[2]->IsFunction()))) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, callback[options]")));
+        THROW_EXCEPTION("expected id, name, callback[options]");
         args.GetReturnValue().SetUndefined();
         return;
 
       } else if (args.Length() == 2 && (!args[0]->IsObject() || !args[1]->IsString())) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+        THROW_EXCEPTION("expected id, name");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1300,8 +1269,7 @@ namespace NodeHDF5 {
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       herr_t            err    = H5LTget_dataset_ndims(idWrap->Value(), *dset_name, &rank);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset rank")));
+        THROW_EXCEPTION("failed to find dataset rank");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1317,8 +1285,7 @@ namespace NodeHDF5 {
       std::unique_ptr<hsize_t[]> values_dim(new hsize_t[rank]);
       err = H5LTget_dataset_info(idWrap->Value(), *dset_name, values_dim.get(), &class_id, &bufSize);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset info")));
+        THROW_EXCEPTION("failed to find dataset info");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1331,8 +1298,7 @@ namespace NodeHDF5 {
         case 1: theSize = values_dim.get()[0]; break;
         case 0: theSize = bufSize; break;
         default:
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported rank")));
+          THROW_EXCEPTION("unsupported rank");
           args.GetReturnValue().SetUndefined();
           return;
           break;
@@ -1369,8 +1335,7 @@ namespace NodeHDF5 {
             H5Tclose(type_id);
             H5Tclose(basetype_id);
             H5Dclose(did);
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read array dataset")));
+            THROW_EXCEPTION("failed to read array dataset");
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -1414,8 +1379,7 @@ namespace NodeHDF5 {
                   H5Sclose(dataspace_id);
                 }
                 H5Dclose(did);
-                v8::Isolate::GetCurrent()->ThrowException(
-                    v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+                THROW_EXCEPTION("failed to select hyperslab");
                 args.GetReturnValue().SetUndefined();
                 return;
               }
@@ -1449,8 +1413,7 @@ namespace NodeHDF5 {
               H5Tclose(t);
               H5Tclose(type_id);
               H5Dclose(did);
-              v8::Isolate::GetCurrent()->ThrowException(
-                  v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read array dataset")));
+              THROW_EXCEPTION("failed to read array dataset");
               args.GetReturnValue().SetUndefined();
               return;
             }
@@ -1478,8 +1441,7 @@ namespace NodeHDF5 {
             std::string buffer(theSize + 1, 0);
             err = H5LTread_dataset_string(idWrap->Value(), *dset_name, (char*)buffer.c_str());
             if (err < 0) {
-              v8::Isolate::GetCurrent()->ThrowException(
-                  v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset into string")));
+              THROW_EXCEPTION("failed to read dataset into string");
               args.GetReturnValue().SetUndefined();
               return;
             }
@@ -1505,8 +1467,7 @@ namespace NodeHDF5 {
             std::unique_ptr<hvl_t[]> vl(new hvl_t[arrayMaximum]);
           herr_t err=H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, (void*)vl.get());
           if (err < 0) {
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to vlen read dataset")));
+            THROW_EXCEPTION("failed to vlen read dataset");
             args.GetReturnValue().SetUndefined();
           }
           else{
@@ -1592,8 +1553,7 @@ namespace NodeHDF5 {
             }
             H5Tclose(t);
           } else {
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type in reading")));
+            THROW_EXCEPTION("unsupported data type in reading");
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -1613,8 +1573,7 @@ namespace NodeHDF5 {
                 H5Sclose(dataspace_id);
               }
               H5Dclose(did);
-              v8::Isolate::GetCurrent()->ThrowException(
-                  v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+              THROW_EXCEPTION("failed to select hyperslab");
               args.GetReturnValue().SetUndefined();
               return;
             }
@@ -1633,8 +1592,7 @@ namespace NodeHDF5 {
             }
             H5Tclose( type_id);
             H5Dclose(did);
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset")));
+            THROW_EXCEPTION("failed to read dataset");
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -1744,21 +1702,18 @@ namespace NodeHDF5 {
     static void readDatasetAsBuffer(const v8::FunctionCallbackInfo<Value>& args) {
       // fail out if arguments are not correct
       if (args.Length() == 4 && (!args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsObject() || !args[3]->IsFunction())) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, [options], callback")));
+        THROW_EXCEPTION("expected id, name, [options], callback");
         args.GetReturnValue().SetUndefined();
         return;
 
       } else if (args.Length() == 3 && (!args[0]->IsObject() || !args[1]->IsString() || (!args[2]->IsObject() && !args[2]->IsFunction()))) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, callback[options]")));
+        THROW_EXCEPTION("expected id, name, callback[options]");
         args.GetReturnValue().SetUndefined();
         return;
 
       } else if (args.Length() == 2 && (!args[0]->IsObject() || !args[1]->IsString())) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+        THROW_EXCEPTION("expected id, name");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1770,16 +1725,14 @@ namespace NodeHDF5 {
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       herr_t            err    = H5LTget_dataset_ndims(idWrap->Value(), *dset_name, &rank);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset rank")));
+        THROW_EXCEPTION("failed to find dataset rank");
         args.GetReturnValue().SetUndefined();
         return;
       }
       std::unique_ptr<hsize_t[]> values_dim(new hsize_t[rank]);
       err = H5LTget_dataset_info(idWrap->Value(), *dset_name, values_dim.get(), &class_id, &bufSize);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset info")));
+        THROW_EXCEPTION("failed to find dataset info");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1800,8 +1753,7 @@ namespace NodeHDF5 {
         case 1: theSize = values_dim.get()[0]; break;
         case 0: theSize = bufSize; break;
         default:
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported rank")));
+          THROW_EXCEPTION("unsupported rank");
           args.GetReturnValue().SetUndefined();
           return;
           break;
@@ -1811,8 +1763,7 @@ namespace NodeHDF5 {
           std::string buffer(theSize + 1, 0);
           err = H5LTread_dataset_string(idWrap->Value(), *dset_name, (char*)buffer.c_str());
           if (err < 0) {
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset into string")));
+            THROW_EXCEPTION("failed to read dataset into string");
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -1840,8 +1791,7 @@ namespace NodeHDF5 {
                 H5Sclose(dataspace_id);
               }
               H5Dclose(did);
-              v8::Isolate::GetCurrent()->ThrowException(
-                  v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+              THROW_EXCEPTION("failed to select hyperslab");
               args.GetReturnValue().SetUndefined();
               return;
             }
@@ -1859,8 +1809,7 @@ namespace NodeHDF5 {
             }
             H5Tclose( type_id);
             H5Dclose(did);
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset")));
+            THROW_EXCEPTION("failed to read dataset");
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -1958,8 +1907,7 @@ namespace NodeHDF5 {
           args.GetReturnValue().Set(buffer);
         } break;
         default:
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
+          THROW_EXCEPTION("unsupported data type");
           args.GetReturnValue().SetUndefined();
           break;
       }

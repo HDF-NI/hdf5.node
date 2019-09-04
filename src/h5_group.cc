@@ -11,6 +11,7 @@
 #include "group.h"
 #include "int64.hpp"
 #include "filters.hpp"
+#include "macros.h"
 #include "H5LTpublic.h"
 #include "H5PTpublic.h"
 #include "H5Lpublic.h"
@@ -119,15 +120,13 @@ namespace NodeHDF5 {
               continue;
             } else {
               std::string msg = "Group " + trail[index] + " doesn't exist";
-              v8::Isolate::GetCurrent()->ThrowException(
-                  v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str())));
+              THROW_EXCEPTION(msg.c_str());
               args.GetReturnValue().SetUndefined();
               return;
             }
           } else {
             std::string msg = "Group " + trail[index] + " doesn't exist";
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str())));
+            THROW_EXCEPTION(msg.c_str());
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -139,8 +138,7 @@ namespace NodeHDF5 {
           group->gcpl_id = H5Pcreate(H5P_GROUP_CREATE);
           herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->IntegerValue());
           if (err < 0) {
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+            THROW_EXCEPTION("Failed to set link creation order");
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -174,13 +172,11 @@ namespace NodeHDF5 {
         args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
       }
     } catch (std::exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group open failed")));
+      THROW_EXCEPTION("Group open failed");
       args.GetReturnValue().SetUndefined();
       return;
     } catch (...) {
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group open failed")));
+      THROW_EXCEPTION("Group open failed");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -193,8 +189,7 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file")));
+      THROW_EXCEPTION("expected name, file");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -239,7 +234,7 @@ namespace NodeHDF5 {
                    (void*)&desc);
         }
         desc = "Group create failed: " + desc;
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), desc.c_str())));
+        THROW_EXCEPTION(desc.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -254,8 +249,7 @@ namespace NodeHDF5 {
         group->gcpl_id = H5Pcreate(H5P_GROUP_CREATE);
         herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->IntegerValue());
         if (err < 0) {
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+          THROW_EXCEPTION("Failed to set link creation order");
           args.GetReturnValue().SetUndefined();
           return;
         }
@@ -278,8 +272,7 @@ namespace NodeHDF5 {
       group->gcpl_id = H5Pcreate(H5P_GROUP_CREATE);
       herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->IntegerValue());
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+        THROW_EXCEPTION("Failed to set link creation order");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -301,8 +294,7 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file")));
+      THROW_EXCEPTION("expected name, file");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -342,14 +334,13 @@ namespace NodeHDF5 {
           continue;
         } else {
           std::string msg = "Group" + trail[index] + " doesn't exist";
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str())));
+          THROW_EXCEPTION(msg.c_str());
           args.GetReturnValue().SetUndefined();
           return;
         }
       } else {
         std::string msg = "Group" + trail[index] + " doesn't exist";
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str())));
+        THROW_EXCEPTION(msg.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -358,8 +349,7 @@ namespace NodeHDF5 {
     group->gcpl_id = H5Pcreate(H5P_GROUP_CREATE);
     herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->IntegerValue());
     if (err < 0) {
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+      THROW_EXCEPTION("Failed to set link creation order");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -380,8 +370,7 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() < 1 || args.Length() > 2 || !args[0]->IsString()) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name and optional options")));
+      THROW_EXCEPTION("expected name and optional options");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -408,11 +397,11 @@ namespace NodeHDF5 {
         args.GetReturnValue().Set(instance);
       return;
     } catch (Exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      THROW_EXCEPTION(ex.what());
       args.GetReturnValue().SetUndefined();
       return;
     } catch (std::exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      THROW_EXCEPTION(ex.what());
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -422,8 +411,7 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() != 3) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest group, dest name")));
+      THROW_EXCEPTION("expected src name, dest group, dest name");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -437,7 +425,7 @@ namespace NodeHDF5 {
     if (err < 0) {
       std::string str(*dest_name);
       std::string errStr = "Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+      THROW_EXCEPTION(errStr.c_str());
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -447,8 +435,7 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() != 3) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest group, dest name")));
+      THROW_EXCEPTION("expected src name, dest group, dest name");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -464,7 +451,7 @@ namespace NodeHDF5 {
     if (err < 0) {
       std::string str(*dest_name);
       std::string errStr = "Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+      THROW_EXCEPTION(errStr.c_str());
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -474,8 +461,7 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() != 3) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest group, dest name")));
+      THROW_EXCEPTION("expected src name, dest group, dest name");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -488,7 +474,7 @@ namespace NodeHDF5 {
     if (err < 0) {
       std::string str(*dest_name);
       std::string errStr = "Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+      THROW_EXCEPTION(errStr.c_str());
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -498,8 +484,7 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() != 1 || !args[0]->IsString()) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group name")));
+      THROW_EXCEPTION("expected group name");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -516,8 +501,7 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() > 0) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
+      THROW_EXCEPTION("expected arguments");
       args.GetReturnValue().SetUndefined();
       return;
     }

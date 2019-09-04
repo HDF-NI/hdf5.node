@@ -10,6 +10,7 @@
 #include "file.h"
 #include "group.h"
 #include "int64.hpp"
+#include "macros.h"
 #include "H5PTpublic.h"
 
 namespace NodeHDF5 {
@@ -163,8 +164,7 @@ namespace NodeHDF5 {
         H5Tclose(vlenID);
         std::string errStr = "Failed creating table, " + std::string(*table_name) + " with return: " + std::to_string(obj->packetTableID) +
                              " " + std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -185,8 +185,7 @@ namespace NodeHDF5 {
       if (packetTableID == H5I_BADID) {
         std::string errStr = "Failed opening table, " + std::string(*table_name) + " with return: " + std::to_string(packetTableID) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -200,8 +199,7 @@ namespace NodeHDF5 {
       if (err < 0) {
         std::string errStr = "Failed to get size of Events table, " + std::string(*table_name) + " with return: " + std::to_string(err) +
                              " " + std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }

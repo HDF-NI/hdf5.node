@@ -12,6 +12,7 @@
 #include "file.h"
 #include "group.h"
 #include "int64.hpp"
+#include "macros.h"
 #include "H5TBpublic.h"
 #include "H5Dpublic.h"
 #include "H5Tpublic.h"
@@ -433,8 +434,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsArray()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, model")));
+        THROW_EXCEPTION("expected id, name, model");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -477,17 +477,16 @@ namespace NodeHDF5 {
           std::string tableName(*table_name);
           std::string errStr =
               "Failed making table , " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+          THROW_EXCEPTION(errStr.c_str());
           args.GetReturnValue().SetUndefined();
           return;
         }
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -497,8 +496,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+        THROW_EXCEPTION("expected id, name");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -511,8 +509,7 @@ namespace NodeHDF5 {
         std::string tableName(*table_name);
         std::string errStr = "Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -529,8 +526,7 @@ namespace NodeHDF5 {
         std::string tableName(*table_name);
         std::string errStr = "Failed getting field info , " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -547,8 +543,7 @@ namespace NodeHDF5 {
         std::string tableName(*table_name);
         std::string errStr =
             "Failed reading table , " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -567,11 +562,11 @@ namespace NodeHDF5 {
                      std::move(data),
                      table);
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -584,8 +579,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsArray()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, model")));
+        THROW_EXCEPTION("expected id, name, model");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -606,17 +600,16 @@ namespace NodeHDF5 {
           std::string tableName(*table_name);
           std::string errStr = "Failed appending to table , " + tableName + " with return: " + std::to_string(err) + " " +
                                std::to_string(idWrap->Value()) + ".\n";
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+          THROW_EXCEPTION(errStr.c_str());
           args.GetReturnValue().SetUndefined();
           return;
         }
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -626,8 +619,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model")));
+        THROW_EXCEPTION("expected id, name, start, model");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -649,17 +641,16 @@ namespace NodeHDF5 {
           std::string tableName(*table_name);
           std::string errStr = "Failed writing to table, " + tableName + " with return: " + std::to_string(err) + " " +
                                std::to_string(idWrap->Value()) + ".\n";
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+          THROW_EXCEPTION(errStr.c_str());
           args.GetReturnValue().SetUndefined();
           return;
         }
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -669,8 +660,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsUint32()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, nrecords")));
+        THROW_EXCEPTION("expected id, name, start, nrecords");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -683,8 +673,7 @@ namespace NodeHDF5 {
         std::string tableName(*table_name);
         std::string errStr = "Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -727,11 +716,11 @@ namespace NodeHDF5 {
                      std::move(data),
                      table);
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -744,8 +733,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsUint32()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, nrecords")));
+        THROW_EXCEPTION("expected id, name, start, nrecords");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -756,8 +744,7 @@ namespace NodeHDF5 {
         std::string tableName(*table_name);
         std::string errStr = "Failed deleting records from table, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -767,8 +754,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model")));
+        THROW_EXCEPTION("expected id, name, start, model");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -790,17 +776,16 @@ namespace NodeHDF5 {
           std::string tableName(*table_name);
           std::string errStr = "Failed inserting to table, " + tableName + " with return: " + std::to_string(err) + " " +
                                std::to_string(idWrap->Value()) + ".\n";
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+          THROW_EXCEPTION(errStr.c_str());
           args.GetReturnValue().SetUndefined();
           return;
         }
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -810,8 +795,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model")));
+        THROW_EXCEPTION("expected id, name, start, model");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -838,8 +822,7 @@ namespace NodeHDF5 {
         std::string tableName(*table_name);
         std::string errStr = "Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -873,17 +856,16 @@ namespace NodeHDF5 {
           std::string tableName(*table_name);
           std::string errStr = "Failed overwriting fields in table, " + tableName + " with return: " + std::to_string(err) + " " +
                                std::to_string(idWrap->Value()) + ".\n";
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+          THROW_EXCEPTION(errStr.c_str());
           args.GetReturnValue().SetUndefined();
           return;
         }
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -896,8 +878,7 @@ namespace NodeHDF5 {
       if (args.Length() != 5 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray() ||
           !args[4]->IsArray()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model, indices")));
+        THROW_EXCEPTION("expected id, name, start, model, indices");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -916,8 +897,7 @@ namespace NodeHDF5 {
         std::string tableName(*table_name);
         std::string errStr = "Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -953,17 +933,16 @@ namespace NodeHDF5 {
           std::string tableName(*table_name);
           std::string errStr = "Failed overwriting fields in table, " + tableName + " with return: " + std::to_string(err) + " " +
                                std::to_string(idWrap->Value()) + ".\n";
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+          THROW_EXCEPTION(errStr.c_str());
           args.GetReturnValue().SetUndefined();
           return;
         }
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -990,8 +969,7 @@ namespace NodeHDF5 {
         std::string tableName(*table_name);
         std::string errStr = "Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1062,8 +1040,7 @@ namespace NodeHDF5 {
         std::string tableName(*table_name);
         std::string errStr = "Failed reading fields in table, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1082,11 +1059,11 @@ namespace NodeHDF5 {
                      std::move(data),
                      table);
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1115,8 +1092,7 @@ namespace NodeHDF5 {
         std::string tableName(*table_name);
         std::string errStr = "Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1189,8 +1165,7 @@ namespace NodeHDF5 {
         std::string tableName(*table_name);
         std::string errStr = "Failed reading fields in table, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1209,11 +1184,11 @@ namespace NodeHDF5 {
                      std::move(data),
                      table);
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1226,8 +1201,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, field name")));
+        THROW_EXCEPTION("expected id, name, field name");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1239,8 +1213,7 @@ namespace NodeHDF5 {
         std::string tableName(*table_name);
         std::string errStr = "Failed deleting field from table, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1265,8 +1238,7 @@ namespace NodeHDF5 {
         std::string tableName(*table_name1);
         std::string errStr = "Failed add records from table, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1277,8 +1249,7 @@ namespace NodeHDF5 {
       if (args.Length() != 5 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsObject() || !args[3]->IsString() ||
           !args[4]->IsString()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id1, name1, id2, name2, name3")));
+        THROW_EXCEPTION("expected id1, name1, id2, name2, name3");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1292,8 +1263,7 @@ namespace NodeHDF5 {
         std::string tableName(*table_name1);
         std::string errStr = "Failed combining from table, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+        THROW_EXCEPTION(errStr.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1303,8 +1273,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model")));
+        THROW_EXCEPTION("expected id, name, start, model");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1327,17 +1296,16 @@ namespace NodeHDF5 {
           std::string tableName(*table_name);
           std::string errStr = "Failed inserting to table, " + tableName + " with return: " + std::to_string(err) + " " +
                                std::to_string(idWrap->Value()) + ".\n";
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+          THROW_EXCEPTION(errStr.c_str());
           args.GetReturnValue().SetUndefined();
           return;
         }
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        THROW_EXCEPTION(ex.what());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1347,8 +1315,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+        THROW_EXCEPTION("expected id, name");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1367,8 +1334,7 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+        THROW_EXCEPTION("expected id, name");
         args.GetReturnValue().SetUndefined();
         return;
       }

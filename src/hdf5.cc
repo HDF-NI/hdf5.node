@@ -2,6 +2,7 @@
 #include "file.h"
 #include "group.h"
 #include "filters.hpp"
+#include "macros.h"
 #include "reference.hpp"
 #include "hdf5node.hpp"
 
@@ -38,8 +39,7 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() != 0) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected empty")));
+      THROW_EXCEPTION("expected empty");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -51,8 +51,7 @@ namespace NodeHDF5 {
     args.GetReturnValue().Set(v8::String::NewFromUtf8(
         v8::Isolate::GetCurrent(), (std::to_string(majnum) + "." + std::to_string(minnum) + "." + std::to_string(relnum)).c_str()));
     if (err < 0) {
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get lib version")));
+      THROW_EXCEPTION("failed to get lib version");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -62,8 +61,7 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() != 1 || !args[0]->IsString() ) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected string")));
+      THROW_EXCEPTION("expected string");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -79,8 +77,7 @@ namespace NodeHDF5 {
        
    } else // Raise exception when H5Fis_hdf5 returns a negative value
    {
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to check")));
+      THROW_EXCEPTION("failed to check");
       args.GetReturnValue().SetUndefined();
    }
   }
