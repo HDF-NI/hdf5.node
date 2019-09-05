@@ -180,6 +180,18 @@ namespace NodeHDF5 {
       return options->Get(name)->Uint32Value();
     }
 
+    static void get_padding(Local<Object> options, std::function<void(H5T_str_t)> cb) {
+      if (options.IsEmpty()) {
+        return;
+      }
+
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "padding"));
+
+      if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
+        cb(static_cast<H5T_str_t>(options->Get(name)->Uint32Value()));
+      }
+    }
+
     static void get_type(Local<Object> options, std::function<void(hid_t)> cb) {
       if (options.IsEmpty()) {
         return;
@@ -277,6 +289,34 @@ namespace NodeHDF5 {
       }
 
       return options->Get(name)->Int32Value();
+    }
+
+    static int get_option_boolean(Local<Object> options, const char * option_name, bool default_value) {
+      if (options.IsEmpty()) {
+        return default_value;
+      }
+
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), option_name));
+
+      if (!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
+        return default_value;
+      }
+
+      return options->Get(name)->BooleanValue();
+    }
+
+    static size_t get_max_length(Local<Array> array) {
+      size_t maxLength = 0;
+
+
+      for (uint32_t index = 0; index < array->Length(); index++) {
+        auto currentLength = array->Get(index)->ToString()->Length();
+
+        if (currentLength > maxLength)
+          maxLength = currentLength;
+      }
+
+      return maxLength;
     }
 
     static std::unique_ptr<hsize_t[]> get_chunk_size(Local<Object> options, int rank) {
@@ -719,6 +759,8 @@ namespace NodeHDF5 {
       hid_t        dcpl   = H5Pcreate(H5P_DATASET_CREATE);
       int          rank   = 1;
       uint32_t fixedWidth = get_fixed_width(options);
+      bool    isFixedSize = get_option_boolean(options, "fixedSize", false);
+      const size_t maxLength = isFixedSize ? get_max_length(array) : 0;
       hid_t options_type_id = H5T_C_S1;
       get_type(options, [&](hid_t _type_id) {
         options_type_id = _type_id;
@@ -766,17 +808,20 @@ namespace NodeHDF5 {
 
       std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);
       std::unique_ptr<hsize_t[]> maxdims(new hsize_t[rank]);
+      size_t elementsCount = 0;
 
       switch (rank) {
         case 1:
           dims.get()[0] = length;
           maxdims.get()[0] = get_option_int(options, "maxRows", dims.get()[0]);
+          elementsCount = dims.get()[0];
           break;
         case 2:
           get_rows(options,    [&](int value) { dims.get()[0] = value; });
           get_columns(options, [&](int value) { dims.get()[1] = value; });
           maxdims.get()[0] = get_option_int(options, "maxRows",    dims.get()[0]);
           maxdims.get()[1] = get_option_int(options, "maxColumns", dims.get()[1]);
+          elementsCount = dims.get()[0] * dims.get()[1];
           break;
         case 3:
           get_sections(options, [&](int value) { dims.get()[0] = value; });
@@ -785,6 +830,7 @@ namespace NodeHDF5 {
           maxdims.get()[0] = get_option_int(options, "maxSections", dims.get()[0]);
           maxdims.get()[1] = get_option_int(options, "maxRows", dims.get()[1]);
           maxdims.get()[2] = get_option_int(options, "maxColumns", dims.get()[2]);
+          elementsCount = dims.get()[0] * dims.get()[1] * dims.get()[2];
           break;
         case 4:
           get_files(options,    [&](int value){dims.get()[0] = value;});
@@ -795,6 +841,7 @@ namespace NodeHDF5 {
           maxdims.get()[1] = get_option_int(options, "maxSections", dims.get()[1]);
           maxdims.get()[2] = get_option_int(options, "maxRows", dims.get()[2]);
           maxdims.get()[3] = get_option_int(options, "maxColumns", dims.get()[3]);
+          elementsCount = dims.get()[0] * dims.get()[1] * dims.get()[2] * dims.get()[3];
           break;
         default:
           THROW_EXCEPTION("unsupported rank");
@@ -802,17 +849,22 @@ namespace NodeHDF5 {
           break;
       }
 
+      if (length < elementsCount) {
+        THROW_EXCEPTION("Missing elements in array");
+        return;
+      }
+
       if (options_type_id != H5T_C_S1) {
         std::unique_ptr<hvl_t[]> vl(new hvl_t[length]);
 
         for (uint32_t arrayIndex = 0; arrayIndex < length; arrayIndex++) {
           char* buffer = (char*) node::Buffer::Data(array->Get(arrayIndex));
-          hsize_t length = Local<v8::Int8Array>::Cast(array->Get(arrayIndex))->Length();
+          hsize_t elementLength = Local<v8::Int8Array>::Cast(array->Get(arrayIndex))->Length();
 
-          vl.get()[arrayIndex].p = new char[length];
-          vl.get()[arrayIndex].len = length;
+          vl.get()[arrayIndex].p = new char[elementLength];
+          vl.get()[arrayIndex].len = elementLength;
 
-          std::memcpy(vl.get()[arrayIndex].p, buffer, length);
+          std::memcpy(vl.get()[arrayIndex].p, buffer, elementLength);
         }
 
         hid_t memspace_id = H5Screate_simple(rank, dims.get(), maxdims.get());
@@ -833,23 +885,40 @@ namespace NodeHDF5 {
       }
       else /* options_type_id == H5T_C_S1 */ {
 
-        std::unique_ptr<char*[]> vl(new char*[length]);
+        const size_t fixedSize = maxLength;
 
-        for (size_t arrayIndex = 0; arrayIndex < length; arrayIndex++) {
-          Nan::Utf8String string(array->Get(arrayIndex));
+        std::unique_ptr<char*[]> variableData;
+        std::unique_ptr<char[]> fixedData;
 
-          vl.get()[arrayIndex] = new char[string.length() + 1];
-          vl.get()[arrayIndex][string.length()] = 0;
+        if (isFixedSize) {
+          fixedData = std::unique_ptr<char[]>(new char[length * fixedSize]());
 
-          std::memcpy(vl.get()[arrayIndex], *string, string.length());
+          for (size_t arrayIndex = 0; arrayIndex < length; arrayIndex++) {
+            Nan::Utf8String string(array->Get(arrayIndex));
+
+            std::memcpy(fixedData.get() + arrayIndex * fixedSize, *string, string.length());
+          }
+        }
+        else {
+          variableData = std::unique_ptr<char*[]>(new char*[length]);
+
+          for (size_t arrayIndex = 0; arrayIndex < length; arrayIndex++) {
+            Nan::Utf8String string(array->Get(arrayIndex));
+
+            variableData.get()[arrayIndex] = new char[string.length() + 1];
+            variableData.get()[arrayIndex][string.length()] = 0;
+
+            std::memcpy(variableData.get()[arrayIndex], *string, string.length());
+          }
         }
 
         hid_t memspace_id = H5Screate_simple(rank, dims.get(), maxdims.get());
         hid_t type_id     = H5Tcopy(H5T_C_S1);
-        H5Tset_size(type_id, H5T_VARIABLE);
+        H5Tset_size(type_id, isFixedSize ? fixedSize : H5T_VARIABLE);
+        get_padding(options, [&](H5T_str_t padding) { H5Tset_strpad(type_id, padding); });
         hid_t did = H5Dcreate(group_id, dset_name, type_id, memspace_id, H5P_DEFAULT, dcpl, H5P_DEFAULT);
 
-        herr_t err = H5Dwrite(did, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, vl.get());
+        herr_t err = H5Dwrite(did, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, isFixedSize ? (void*)fixedData.get() : (void*)variableData.get());
         if (err < 0) {
           THROW_EXCEPTION("failed to make var len dataset");
           return;
