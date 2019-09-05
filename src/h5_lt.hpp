@@ -162,10 +162,10 @@ namespace NodeHDF5 {
                 stride.get()[arrayIndex] = 1;
           }
         }
-              
+
         return subsetOn;
     }
-    
+
     inline static uint32_t get_fixed_width(Local<Object> options) {
       if (options.IsEmpty()) {
         return 0;
@@ -184,73 +184,73 @@ namespace NodeHDF5 {
       if (options.IsEmpty()) {
         return;
       }
-      
+
       auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"));
 
       if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         cb(toTypeMap[(H5T)options->Get(name)->Uint32Value()]);
       }
     }
-    
+
     static void get_rank(Local<Object> options, std::function<void(int)> cb) {
       if (options.IsEmpty()) {
         return;
       }
-      
+
       auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"));
       if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         cb(options->Get(name)->Uint32Value());
       }
     }
-    
+
     static void get_rows(Local<Object> options, std::function<void(int)> cb) {
       if (options.IsEmpty()) {
         return;
       }
-      
+
       auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"));
 
       if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         cb(options->Get(name)->Uint32Value());
       }
     }
-    
+
     static void get_columns(Local<Object> options, std::function<void(int)> cb) {
       if (options.IsEmpty()) {
         return;
       }
-      
+
       auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"));
 
       if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         cb(options->Get(name)->Uint32Value());
       }
     }
-    
+
     static void get_sections(Local<Object> options, std::function<void(int)> cb) {
       if (options.IsEmpty()) {
         return;
       }
-      
+
       auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"));
 
       if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         cb(options->Get(name)->Uint32Value());
       }
     }
-    
+
     static void get_files(Local<Object> options, std::function<void(int)> cb) {
       if (options.IsEmpty()) {
         return;
       }
-      
+
       auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"));
 
       if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         cb(options->Get(name)->Uint32Value());
       }
     }
-    
+
     static unsigned int get_compression(Local<Object> options) {
       if (options.IsEmpty()) {
         return 0;
@@ -280,7 +280,7 @@ namespace NodeHDF5 {
     }
 
     static std::unique_ptr<hsize_t[]> get_chunk_size(Local<Object> options, int rank) {
-      std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);  
+      std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);
       for(int index=0;index<rank;index++){
         dims[index]=0;
       }
@@ -298,7 +298,7 @@ namespace NodeHDF5 {
         for (unsigned int arrayIndex = 0; arrayIndex < std::min((uint32_t)rank, array->Length()); arrayIndex++) {
            dims.get()[arrayIndex]=array->Get(arrayIndex)->Uint32Value();
         }
-          
+
       }
       else {
         for(int index=0;index<rank;index++){
@@ -391,11 +391,11 @@ namespace NodeHDF5 {
       std::unique_ptr<hsize_t[]> dims(new hsize_t[rank]);
       std::unique_ptr<hsize_t[]> maxdims(new hsize_t[rank]);
       switch (rank) {
-        case 1: 
-          dims.get()[0] = {node::Buffer::Length(buffer) / H5Tget_size(type_id)}; 
+        case 1:
+          dims.get()[0] = {node::Buffer::Length(buffer) / H5Tget_size(type_id)};
           maxdims.get()[0] = get_option_int(options,"maxRows",dims.get()[0]);
           break;
-        case 4: 
+        case 4:
           if (buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"))) {
             dims.get()[0] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"))->Int32Value();
           }else{
@@ -420,8 +420,8 @@ namespace NodeHDF5 {
           maxdims.get()[1] = get_option_int(options,"maxSections",dims.get()[1]);
           maxdims.get()[3] = get_option_int(options,"maxColumns",dims.get()[3]);
           maxdims.get()[2] = get_option_int(options,"maxRows",dims.get()[2]);
-          break;        
-        case 3: 
+          break;
+        case 3:
           if (buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))) {
             dims.get()[0] = (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"))->Int32Value();
           }else{
@@ -565,7 +565,7 @@ namespace NodeHDF5 {
         }
         H5Pclose(dcpl);
       } else if (rank == 2) {
-          
+
         hsize_t dims[2];
         if (buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))) {
           dims[0]= (hsize_t)buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"))->Int32Value();
@@ -678,7 +678,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             H5Aclose(attr_id);
-                
+
             }
           }
           else if( buffer->Get(name)->IsExternal()) {
@@ -778,7 +778,7 @@ namespace NodeHDF5 {
           maxdims.get()[0] = get_option_int(options, "maxRows",    dims.get()[0]);
           maxdims.get()[1] = get_option_int(options, "maxColumns", dims.get()[1]);
           break;
-        case 3: 
+        case 3:
           get_sections(options, [&](int value) { dims.get()[0] = value; });
           get_rows(options,     [&](int value) { dims.get()[1] = value; });
           get_columns(options,  [&](int value) { dims.get()[2] = value; });
@@ -786,7 +786,7 @@ namespace NodeHDF5 {
           maxdims.get()[1] = get_option_int(options, "maxRows", dims.get()[1]);
           maxdims.get()[2] = get_option_int(options, "maxColumns", dims.get()[2]);
           break;
-        case 4: 
+        case 4:
           get_files(options,    [&](int value){dims.get()[0] = value;});
           get_sections(options, [&](int value){dims.get()[1] = value;});
           get_rows(options,     [&](int value){dims.get()[2] = value;});
@@ -1122,7 +1122,7 @@ namespace NodeHDF5 {
         H5Sclose(dataspace_id);
       }
       if(bindAttributes){
-          
+
       }
       H5Dclose(did);
 
@@ -1310,7 +1310,7 @@ namespace NodeHDF5 {
               theSize *= count.get()[rankIndex];
             }
       }
-      
+
       switch (class_id) {
         case H5T_ARRAY: {
           hid_t                      did          = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
@@ -1486,15 +1486,15 @@ namespace NodeHDF5 {
           Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), vl.get()[arrayIndex].p, typeSize * vl.get()[arrayIndex].len);
               array->Set(arrayIndex-arrayStart,
                           v8::Uint8Array::New(arrayBuffer, 0, vl.get()[arrayIndex].len));
-              
+
             }
           }
           args.GetReturnValue().Set(array);
           }
-            
+
             H5Tclose(type_id);
             H5Dclose(did);
-          
+
         } break;
         default:
 
@@ -1643,7 +1643,7 @@ namespace NodeHDF5 {
                     unsigned int value;
                     H5Tget_member_value( t, idx, (void *)&value );
                     hsize_t dvalue=value;
-                    enumeration->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), mname), Number::New(v8::Isolate::GetCurrent(), dvalue));                    
+                    enumeration->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), mname), Number::New(v8::Isolate::GetCurrent(), dvalue));
 #if  H5_VERSION_GE(1,8,13)
                     H5free_memory((void *)mname);
 #endif
@@ -1651,7 +1651,7 @@ namespace NodeHDF5 {
                 H5Tclose(t);
                 H5Dclose(h);
                 options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "enumeration"), enumeration);
-                
+
             }
             v8::Local<v8::Value> argv[1] = {options};
             v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)
