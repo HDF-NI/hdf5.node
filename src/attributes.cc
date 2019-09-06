@@ -127,75 +127,53 @@ namespace NodeHDF5 {
 
     htri_t attrExists = H5Aexists(groupId, *Nan::Utf8String(name));
 
+    if (attrExists) {
+      H5Adelete(groupId, *Nan::Utf8String(name));
+    }
+
     if (value->IsFloat64Array()) {
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
       make_attribute_from_typed_array(groupId,
                                       *Nan::Utf8String(name),
                                       v8::Local<v8::Float64Array>::Cast(value),
                                       H5T_NATIVE_DOUBLE);
     } else if (value->IsFloat32Array()) {
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
       make_attribute_from_typed_array(groupId,
                                       *Nan::Utf8String(name),
                                       v8::Local<v8::Float64Array>::Cast(value),
                                       H5T_NATIVE_FLOAT);
     } else if (value->IsInt32Array()) {
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
       make_attribute_from_typed_array(groupId,
                                       *Nan::Utf8String(name),
                                       v8::Local<v8::Float64Array>::Cast(value),
                                       H5T_NATIVE_INT);
     } else if (value->IsUint32Array()) {
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
       make_attribute_from_typed_array(groupId,
                                       *Nan::Utf8String(name),
                                       v8::Local<v8::Float64Array>::Cast(value),
                                       H5T_NATIVE_UINT);
     } else if (value->IsInt16Array()) {
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
       make_attribute_from_typed_array(groupId,
                                       *Nan::Utf8String(name),
                                       v8::Local<v8::Float64Array>::Cast(value),
                                       H5T_NATIVE_SHORT);
     } else if (value->IsUint16Array()) {
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
       make_attribute_from_typed_array(groupId,
                                       *Nan::Utf8String(name),
                                       v8::Local<v8::Float64Array>::Cast(value),
                                       H5T_NATIVE_USHORT);
     } else if (value->IsInt8Array()) {
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
       make_attribute_from_typed_array(groupId,
                                       *Nan::Utf8String(name),
                                       v8::Local<v8::Float64Array>::Cast(value),
                                       H5T_NATIVE_INT8);
     } else if (value->IsUint8Array()) {
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
       make_attribute_from_typed_array(groupId,
                                       *Nan::Utf8String(name),
                                       v8::Local<v8::Float64Array>::Cast(value),
                                       H5T_NATIVE_UINT8);
     } else if (value->IsUint32()) {
       uint32_t uint32Value = value->Uint32Value();
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
+
       hid_t attr_type  = H5Tcopy(H5T_NATIVE_UINT);
       hid_t attr_space = H5Screate(H5S_SCALAR);
       hid_t attr_id = H5Acreate(groupId, *Nan::Utf8String(name), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
@@ -212,9 +190,7 @@ namespace NodeHDF5 {
 
     } else if (value->IsInt32()) {
       int32_t int32Value = value->Int32Value();
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
+
       hid_t attr_type  = H5Tcopy(H5T_NATIVE_INT);
       hid_t attr_space = H5Screate(H5S_SCALAR);
       hid_t attr_id = H5Acreate(groupId, *Nan::Utf8String(name), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
@@ -232,9 +208,6 @@ namespace NodeHDF5 {
     } else if (value->IsNumber()) {
       double doubleValue = value->NumberValue();
 
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
       hid_t attr_type  = H5Tcopy(H5T_NATIVE_DOUBLE);
       hid_t attr_space = H5Screate(H5S_SCALAR);
       hid_t attr_id = H5Acreate(groupId, *Nan::Utf8String(name), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
@@ -256,10 +229,6 @@ namespace NodeHDF5 {
         stringValue = std::string(*Nan::Utf8String(value->ToString()));
       else
         stringValue = std::string(*Nan::Utf8String(v8::StringObject::Cast(*value)->ValueOf()));
-
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
 
       hid_t  attr_type = H5Tcopy(H5T_C_S1);
       size_t s         = stringValue.length();
@@ -286,17 +255,13 @@ namespace NodeHDF5 {
       H5Aclose(attr_id);
 
     } else if (value->IsArray()) {
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
       make_attribute_from_array(
           groupId, *Nan::Utf8String(name), v8::Local<v8::Array>::Cast(value));
+
     } else if (value->IsObject() && std::strncmp("Int64", (*Nan::Utf8String(value->ToObject()->GetConstructorName())), 5)==0) {
       Int64* valueWrap = node::ObjectWrap::Unwrap<Int64>(value->ToObject());
       int64_t int64Value = valueWrap->Value();
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
+
       hid_t attr_type  = H5Tcopy(H5T_NATIVE_INT64);
       hid_t attr_space = H5Screate(H5S_SCALAR);
       hid_t attr_id = H5Acreate(groupId, *Nan::Utf8String(name), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
@@ -314,9 +279,7 @@ namespace NodeHDF5 {
     } else if (value->IsObject() && std::strncmp("Uint64", (*Nan::Utf8String(value->ToObject()->GetConstructorName())), 6)==0) {
       Uint64* valueWrap = node::ObjectWrap::Unwrap<Uint64>(value->ToObject());
       uint64_t uint64Value = valueWrap->Value();
-      if (attrExists) {
-        H5Adelete(groupId, *Nan::Utf8String(name));
-      }
+
       hid_t attr_type  = H5Tcopy(H5T_NATIVE_UINT64);
       hid_t attr_space = H5Screate(H5S_SCALAR);
       hid_t attr_id = H5Acreate(groupId, *Nan::Utf8String(name), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
