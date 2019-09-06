@@ -125,9 +125,7 @@ namespace NodeHDF5 {
       return;
     }
 
-    htri_t attrExists = H5Aexists(groupId, *Nan::Utf8String(name));
-
-    if (attrExists) {
+    if (H5Aexists(groupId, *Nan::Utf8String(name))) {
       H5Adelete(groupId, *Nan::Utf8String(name));
     }
 
