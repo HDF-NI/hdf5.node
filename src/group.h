@@ -27,6 +27,7 @@ namespace NodeHDF5 {
     using Attributes::gcpl_id;
     using Attributes::Refresh;
     using Attributes::Flush;
+    using Attributes::SetAttribute;
 
   protected:
     std::vector<hid_t> hidPath;

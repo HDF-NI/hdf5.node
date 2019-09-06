@@ -142,6 +142,7 @@ namespace NodeHDF5 {
     NODE_SET_PROTOTYPE_METHOD(t, "delete", Delete);
     NODE_SET_PROTOTYPE_METHOD(t, "flush", Flush);
     NODE_SET_PROTOTYPE_METHOD(t, "close", Close);
+    NODE_SET_PROTOTYPE_METHOD(t, "setAttribute", SetAttribute);
     NODE_SET_PROTOTYPE_METHOD(t, "getNumObjs", GetNumObjs);
     NODE_SET_PROTOTYPE_METHOD(t, "getMemberNames", GetMemberNames);
     NODE_SET_PROTOTYPE_METHOD(t, "getMemberNamesByCreationOrder", GetMemberNamesByCreationOrder);

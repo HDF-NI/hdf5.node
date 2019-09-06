@@ -1,17 +1,24 @@
 #include <nan.h>
 
+#include "macros.h"
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
 #include "reference.hpp"
 #include "attributes.hpp"
 
+using v8::Object;
+using v8::String;
+using v8::Local;
+using v8::Value;
+using Nan::MaybeLocal;
+
 namespace NodeHDF5 {
 
-  void Attributes::make_attribute_from_typed_array(const hid_t&               group_id,
-                                                   const char*                attribute_name,
-                                                   v8::Local<v8::TypedArray> buffer,
-                                                   hid_t                      type_id) {
+  static void make_attribute_from_typed_array(const hid_t&               group_id,
+                                              const char*                attribute_name,
+                                              v8::Local<v8::TypedArray> buffer,
+                                              hid_t                      type_id) {
     std::unique_ptr<hsize_t[]> currentDims(new hsize_t[1]);
     currentDims.get()[0] = buffer->Length();
     hid_t attr_space     = H5Screate_simple(1, currentDims.get(), NULL);
@@ -30,8 +37,8 @@ namespace NodeHDF5 {
     }
   }
 
-  void Attributes::make_attribute_from_array(const hid_t& group_id, const char* attribute_name, v8::Local<v8::Array> array) {
-   int                        rank = 1;
+  static void make_attribute_from_array(const hid_t& group_id, const char* attribute_name, v8::Local<v8::Array> array) {
+    int                        rank = 1;
     std::unique_ptr<hsize_t[]> countSpace(new hsize_t[rank]);
     countSpace.get()[0] = array->Length();
     std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
@@ -44,7 +51,7 @@ namespace NodeHDF5 {
       hid_t                     attr_id      = H5Acreate(group_id, attribute_name, type_id, memspace_id, H5P_DEFAULT, H5P_DEFAULT);
       std::unique_ptr<long long []> vl(new long long[array->Length()]);
       for (unsigned int arrayIndex = 0; arrayIndex < array->Length(); arrayIndex++) {
-        Int64* valueWrap = ObjectWrap::Unwrap<Int64>(array->Get(arrayIndex)->ToObject());
+        Int64* valueWrap = node::ObjectWrap::Unwrap<Int64>(array->Get(arrayIndex)->ToObject());
         int64_t value = valueWrap->Value();
         vl.get()[arrayIndex] = value;
       }
@@ -59,7 +66,7 @@ namespace NodeHDF5 {
 //      H5Tclose(arraytype_id);
       H5Tclose(type_id);
       H5Aclose(attr_id);
-      
+
     }
     else if(array->Length()>0 && array->Get(0)->IsObject() && std::strncmp("Uint64", (*Nan::Utf8String(array->Get(0)->ToObject()->GetConstructorName())), 5)==0){
       hid_t type_id     =  H5Tcopy(H5T_NATIVE_UINT64);
@@ -68,7 +75,7 @@ namespace NodeHDF5 {
       hid_t                     attr_id      = H5Acreate(group_id, attribute_name, type_id, memspace_id, H5P_DEFAULT, H5P_DEFAULT);
       std::unique_ptr<unsigned long long []> vl(new unsigned long long[array->Length()]);
       for (unsigned int arrayIndex = 0; arrayIndex < array->Length(); arrayIndex++) {
-        Uint64* valueWrap = ObjectWrap::Unwrap<Uint64>(array->Get(arrayIndex)->ToObject());
+        Uint64* valueWrap = node::ObjectWrap::Unwrap<Uint64>(array->Get(arrayIndex)->ToObject());
         uint64_t value = valueWrap->Value();
         vl.get()[arrayIndex] = value;
       }
@@ -83,7 +90,7 @@ namespace NodeHDF5 {
 //      H5Tclose(arraytype_id);
       H5Tclose(type_id);
       H5Aclose(attr_id);
-      
+
     }
     else{
     hid_t type_id     = H5Tcopy(H5T_C_S1);
@@ -113,29 +120,237 @@ namespace NodeHDF5 {
     H5Sclose(memspace_id);
   }
 
+  static void set_attribute(hid_t groupId, Local<String> name, Local<Value> value, MaybeLocal<Object> maybeOptions) {
+    if (value->IsFunction() || strncmp("id", (*Nan::Utf8String(name)), 2) == 0) {
+      return;
+    }
+
+    htri_t attrExists = H5Aexists(groupId, *Nan::Utf8String(name));
+
+    if (value->IsFloat64Array()) {
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+      make_attribute_from_typed_array(groupId,
+                                      *Nan::Utf8String(name),
+                                      v8::Local<v8::Float64Array>::Cast(value),
+                                      H5T_NATIVE_DOUBLE);
+    } else if (value->IsFloat32Array()) {
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+      make_attribute_from_typed_array(groupId,
+                                      *Nan::Utf8String(name),
+                                      v8::Local<v8::Float64Array>::Cast(value),
+                                      H5T_NATIVE_FLOAT);
+    } else if (value->IsInt32Array()) {
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+      make_attribute_from_typed_array(groupId,
+                                      *Nan::Utf8String(name),
+                                      v8::Local<v8::Float64Array>::Cast(value),
+                                      H5T_NATIVE_INT);
+    } else if (value->IsUint32Array()) {
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+      make_attribute_from_typed_array(groupId,
+                                      *Nan::Utf8String(name),
+                                      v8::Local<v8::Float64Array>::Cast(value),
+                                      H5T_NATIVE_UINT);
+    } else if (value->IsInt16Array()) {
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+      make_attribute_from_typed_array(groupId,
+                                      *Nan::Utf8String(name),
+                                      v8::Local<v8::Float64Array>::Cast(value),
+                                      H5T_NATIVE_SHORT);
+    } else if (value->IsUint16Array()) {
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+      make_attribute_from_typed_array(groupId,
+                                      *Nan::Utf8String(name),
+                                      v8::Local<v8::Float64Array>::Cast(value),
+                                      H5T_NATIVE_USHORT);
+    } else if (value->IsInt8Array()) {
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+      make_attribute_from_typed_array(groupId,
+                                      *Nan::Utf8String(name),
+                                      v8::Local<v8::Float64Array>::Cast(value),
+                                      H5T_NATIVE_INT8);
+    } else if (value->IsUint8Array()) {
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+      make_attribute_from_typed_array(groupId,
+                                      *Nan::Utf8String(name),
+                                      v8::Local<v8::Float64Array>::Cast(value),
+                                      H5T_NATIVE_UINT8);
+    } else if (value->IsUint32()) {
+      uint32_t uint32Value = value->Uint32Value();
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+      hid_t attr_type  = H5Tcopy(H5T_NATIVE_UINT);
+      hid_t attr_space = H5Screate(H5S_SCALAR);
+      hid_t attr_id = H5Acreate(groupId, *Nan::Utf8String(name), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+      if (attr_id < 0) {
+        H5Sclose(attr_space);
+        H5Tclose(attr_type);
+        THROW_EXCEPTION("failed creating attribute");
+        return;
+      }
+      H5Awrite(attr_id, attr_type, &uint32Value);
+      H5Sclose(attr_space);
+      H5Tclose(attr_type);
+      H5Aclose(attr_id);
+
+    } else if (value->IsInt32()) {
+      int32_t int32Value = value->Int32Value();
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+      hid_t attr_type  = H5Tcopy(H5T_NATIVE_INT);
+      hid_t attr_space = H5Screate(H5S_SCALAR);
+      hid_t attr_id = H5Acreate(groupId, *Nan::Utf8String(name), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+      if (attr_id < 0) {
+        H5Sclose(attr_space);
+        H5Tclose(attr_type);
+        THROW_EXCEPTION("failed creating attribute");
+        return;
+      }
+      H5Awrite(attr_id, attr_type, &int32Value);
+      H5Sclose(attr_space);
+      H5Tclose(attr_type);
+      H5Aclose(attr_id);
+
+    } else if (value->IsNumber()) {
+      double doubleValue = value->NumberValue();
+
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+      hid_t attr_type  = H5Tcopy(H5T_NATIVE_DOUBLE);
+      hid_t attr_space = H5Screate(H5S_SCALAR);
+      hid_t attr_id = H5Acreate(groupId, *Nan::Utf8String(name), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+      if (attr_id < 0) {
+        H5Sclose(attr_space);
+        H5Tclose(attr_type);
+        THROW_EXCEPTION("failed creating attribute");
+        return;
+      }
+      H5Awrite(attr_id, attr_type, &doubleValue);
+      H5Sclose(attr_space);
+      H5Tclose(attr_type);
+      H5Aclose(attr_id);
+
+    } else if (value->IsString() || value->IsStringObject()) {
+      std::string stringValue;
+
+      if (value->IsString())
+        stringValue = std::string(*Nan::Utf8String(value->ToString()));
+      else
+        stringValue = std::string(*Nan::Utf8String(v8::StringObject::Cast(*value)->ValueOf()));
+
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+
+      hid_t  attr_type = H5Tcopy(H5T_C_S1);
+      size_t s         = stringValue.length();
+      if (s) {
+        H5Tset_size(attr_type, s);
+      }
+      if (!maybeOptions.IsEmpty()) {
+        Local<Object> options = maybeOptions.ToLocalChecked();
+        if (OBJECT_HAS(options, "padding")) {
+          H5Tset_strpad(attr_type, (H5T_str_t) Nan::To<uint32_t>(OBJECT_GET(options, "padding")).ToChecked());
+        }
+      }
+      hid_t attr_space = H5Screate(H5S_SCALAR);
+      hid_t attr_id = H5Acreate(groupId, *Nan::Utf8String(name), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+      if (attr_id < 0) {
+        H5Sclose(attr_space);
+        H5Tclose(attr_type);
+        THROW_EXCEPTION("failed creating attribute");
+        return;
+      }
+      H5Awrite(attr_id, attr_type, stringValue.c_str());
+      H5Sclose(attr_space);
+      H5Tclose(attr_type);
+      H5Aclose(attr_id);
+
+    } else if (value->IsArray()) {
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+      make_attribute_from_array(
+          groupId, *Nan::Utf8String(name), v8::Local<v8::Array>::Cast(value));
+    } else if (value->IsObject() && std::strncmp("Int64", (*Nan::Utf8String(value->ToObject()->GetConstructorName())), 5)==0) {
+      Int64* valueWrap = node::ObjectWrap::Unwrap<Int64>(value->ToObject());
+      int64_t int64Value = valueWrap->Value();
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+      hid_t attr_type  = H5Tcopy(H5T_NATIVE_INT64);
+      hid_t attr_space = H5Screate(H5S_SCALAR);
+      hid_t attr_id = H5Acreate(groupId, *Nan::Utf8String(name), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+      if (attr_id < 0) {
+        H5Sclose(attr_space);
+        H5Tclose(attr_type);
+        THROW_EXCEPTION("failed creating attribute");
+        return;
+      }
+      H5Awrite(attr_id, attr_type, &int64Value);
+      H5Sclose(attr_space);
+      H5Tclose(attr_type);
+      H5Aclose(attr_id);
+
+    } else if (value->IsObject() && std::strncmp("Uint64", (*Nan::Utf8String(value->ToObject()->GetConstructorName())), 6)==0) {
+      Uint64* valueWrap = node::ObjectWrap::Unwrap<Uint64>(value->ToObject());
+      uint64_t uint64Value = valueWrap->Value();
+      if (attrExists) {
+        H5Adelete(groupId, *Nan::Utf8String(name));
+      }
+      hid_t attr_type  = H5Tcopy(H5T_NATIVE_UINT64);
+      hid_t attr_space = H5Screate(H5S_SCALAR);
+      hid_t attr_id = H5Acreate(groupId, *Nan::Utf8String(name), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
+      if (attr_id < 0) {
+        H5Sclose(attr_space);
+        H5Tclose(attr_type);
+        THROW_EXCEPTION("failed creating attribute");
+        return;
+      }
+      H5Awrite(attr_id, attr_type, &uint64Value);
+      H5Sclose(attr_space);
+      H5Tclose(attr_type);
+      H5Aclose(attr_id);
+    }
+  };
+
   void Attributes::Refresh(const v8::FunctionCallbackInfo<v8::Value>& args) {
-
-    // fail out if arguments are not correct
+    // Fail out if arguments are not correct
     if (args.Length() > 0) {
-
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
-      args.GetReturnValue().SetUndefined();
+      THROW_EXCEPTION("expected arguments");
       return;
     }
 
     // unwrap group
     Attributes*              group = ObjectWrap::Unwrap<Attributes>(args.This());
+
     try{
-        v8::Local<v8::Object> focus=args.This();
+      Local<Object> focus = args.This();
       refreshAttributes(focus, group->id);
     } catch (Exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
-      args.GetReturnValue().SetUndefined();
+      THROW_EXCEPTION(ex.what());
       return;
     } catch (std::exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
-      args.GetReturnValue().SetUndefined();
+      THROW_EXCEPTION(ex.what());
       return;
     }
 
@@ -143,260 +358,38 @@ namespace NodeHDF5 {
   };
 
   void Attributes::Flush(const v8::FunctionCallbackInfo<v8::Value>& args) {
-
-    // fail out if arguments are not correct
+    // Fail out if arguments are not correct
     if (args.Length() > 0) {
+      THROW_EXCEPTION("expected arguments");
+      return;
+    }
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
-      args.GetReturnValue().SetUndefined();
+    Attributes* group = Unwrap<Attributes>(args.This());
+
+    Local<v8::Array> propertyNames = args.This()->GetPropertyNames();
+    for (uint32_t index = 0; index < propertyNames->Length(); index++) {
+      Local<String> name = Nan::To<String>(propertyNames->Get(index)).ToLocalChecked();
+
+      set_attribute(group->id, name, args.This()->Get(name), MaybeLocal<Object>());
+    }
+
+    return;
+  };
+
+  void Attributes::SetAttribute(const v8::FunctionCallbackInfo<v8::Value>& args) {
+
+    if (args.Length() < 2) {
+      THROW_EXCEPTION("Missing arguments");
       return;
     }
 
     // unwrap group
     Attributes* group = Unwrap<Attributes>(args.This());
 
-    v8::Local<v8::Array> propertyNames = args.This()->GetPropertyNames();
-    for (unsigned int index = 0; index < propertyNames->Length(); index++) {
-      v8::Local<v8::Value> name = propertyNames->Get(index);
-      if (!args.This()->Get(name)->IsFunction() && strncmp("id", (*Nan::Utf8String(name->ToString())), 2) != 0) {
-        htri_t attrExists = H5Aexists(group->id, *Nan::Utf8String(name->ToString()));
-        if (args.This()->Get(name)->IsFloat64Array()) {
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          make_attribute_from_typed_array(group->id,
-                                          *Nan::Utf8String(name->ToString()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
-                                          H5T_NATIVE_DOUBLE);
-        } else if (args.This()->Get(name)->IsFloat32Array()) {
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          make_attribute_from_typed_array(group->id,
-                                          *Nan::Utf8String(name->ToString()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
-                                          H5T_NATIVE_FLOAT);
-        } else if (args.This()->Get(name)->IsInt32Array()) {
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          make_attribute_from_typed_array(group->id,
-                                          *Nan::Utf8String(name->ToString()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
-                                          H5T_NATIVE_INT);
-        } else if (args.This()->Get(name)->IsUint32Array()) {
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          make_attribute_from_typed_array(group->id,
-                                          *Nan::Utf8String(name->ToString()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
-                                          H5T_NATIVE_UINT);
-        } else if (args.This()->Get(name)->IsInt16Array()) {
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          make_attribute_from_typed_array(group->id,
-                                          *Nan::Utf8String(name->ToString()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
-                                          H5T_NATIVE_SHORT);
-        } else if (args.This()->Get(name)->IsUint16Array()) {
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          make_attribute_from_typed_array(group->id,
-                                          *Nan::Utf8String(name->ToString()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
-                                          H5T_NATIVE_USHORT);
-        } else if (args.This()->Get(name)->IsInt8Array()) {
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          make_attribute_from_typed_array(group->id,
-                                          *Nan::Utf8String(name->ToString()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
-                                          H5T_NATIVE_INT8);
-        } else if (args.This()->Get(name)->IsUint8Array()) {
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          make_attribute_from_typed_array(group->id,
-                                          *Nan::Utf8String(name->ToString()),
-                                          v8::Local<v8::Float64Array>::Cast(args.This()->Get(name)),
-                                          H5T_NATIVE_UINT8);
-        } else if (args.This()->Get(name)->IsUint32()) {
-          uint32_t value = args.This()->Get(name)->Uint32Value();
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          hid_t attr_type  = H5Tcopy(H5T_NATIVE_UINT);
-          hid_t attr_space = H5Screate(H5S_SCALAR);
-          hid_t attr_id = H5Acreate(group->id, *Nan::Utf8String(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
-          if (attr_id < 0) {
-            H5Sclose(attr_space);
-            H5Tclose(attr_type);
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
-            args.GetReturnValue().SetUndefined();
-            return;
-          }
-          H5Awrite(attr_id, attr_type, &value);
-          H5Sclose(attr_space);
-          H5Tclose(attr_type);
-          H5Aclose(attr_id);
+    auto name = args[0]->ToString();
+    auto value = args[1];
+    auto options = args.Length() == 3 ? MaybeLocal<Object>(args[2]->ToObject()) : MaybeLocal<Object>();
 
-        } else if (args.This()->Get(name)->IsInt32()) {
-          int32_t value = args.This()->Get(name)->Int32Value();
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          hid_t attr_type  = H5Tcopy(H5T_NATIVE_INT);
-          hid_t attr_space = H5Screate(H5S_SCALAR);
-          hid_t attr_id = H5Acreate(group->id, *Nan::Utf8String(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
-          if (attr_id < 0) {
-            H5Sclose(attr_space);
-            H5Tclose(attr_type);
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
-            args.GetReturnValue().SetUndefined();
-            return;
-          }
-          H5Awrite(attr_id, attr_type, &value);
-          H5Sclose(attr_space);
-          H5Tclose(attr_type);
-          H5Aclose(attr_id);
-
-        } else if (args.This()->Get(name)->IsNumber()) {
-          double value = args.This()->Get(name)->NumberValue();
-
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          hid_t attr_type  = H5Tcopy(H5T_NATIVE_DOUBLE);
-          hid_t attr_space = H5Screate(H5S_SCALAR);
-          hid_t attr_id = H5Acreate(group->id, *Nan::Utf8String(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
-          if (attr_id < 0) {
-            H5Sclose(attr_space);
-            H5Tclose(attr_type);
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
-            args.GetReturnValue().SetUndefined();
-            return;
-          }
-          H5Awrite(attr_id, attr_type, &value);
-          H5Sclose(attr_space);
-          H5Tclose(attr_type);
-          H5Aclose(attr_id);
-
-        } else if (args.This()->Get(name)->IsStringObject()) {
-          std::string value((*Nan::Utf8String(v8::StringObject::Cast(*args.This()->Get(name))->ValueOf())));
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          hid_t attr_type = H5Tcopy(H5T_C_S1);
-          H5Tset_size(attr_type, H5T_VARIABLE);
-          hid_t attr_space = H5Screate(H5S_SCALAR);
-          hid_t attr_id = H5Acreate(group->id, *Nan::Utf8String(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
-          if (attr_id < 0) {
-            H5Sclose(attr_space);
-            H5Tclose(attr_type);
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
-            args.GetReturnValue().SetUndefined();
-            return;
-          }
-          std::unique_ptr<char* []> vl(new char*[1]);
-          vl.get()[0] = new char[value.length() + 1];
-          std::strncpy(vl.get()[0], value.c_str(), value.length() + 1);
-          H5Awrite(attr_id, attr_type, vl.get());
-          H5Sclose(attr_space);
-          H5Tclose(attr_type);
-          H5Aclose(attr_id);
-
-        } else if (args.This()->Get(name)->IsString()) {
-          std::string value((*Nan::Utf8String(args.This()->Get(name)->ToString())));
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          hid_t  attr_type = H5Tcopy(H5T_C_S1);
-          size_t s         = std::strlen(value.c_str());
-          if (s) {
-            H5Tset_size(attr_type, s);
-          }
-          hid_t attr_space = H5Screate(H5S_SCALAR);
-          hid_t attr_id = H5Acreate(group->id, *Nan::Utf8String(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
-          if (attr_id < 0) {
-            H5Sclose(attr_space);
-            H5Tclose(attr_type);
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
-            args.GetReturnValue().SetUndefined();
-            return;
-          }
-          H5Awrite(attr_id, attr_type, value.c_str());
-          H5Sclose(attr_space);
-          H5Tclose(attr_type);
-          H5Aclose(attr_id);
-
-        } else if (args.This()->Get(name)->IsArray()) {
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          make_attribute_from_array(
-              group->id, *Nan::Utf8String(name->ToString()), v8::Local<v8::Array>::Cast(args.This()->Get(name)));
-        } else if (args.This()->Get(name)->IsObject() && std::strncmp("Int64", (*Nan::Utf8String(args.This()->Get(name)->ToObject()->GetConstructorName())), 5)==0) {
-          Int64* valueWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(name)->ToObject());
-          int64_t value = valueWrap->Value();
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          hid_t attr_type  = H5Tcopy(H5T_NATIVE_INT64);
-          hid_t attr_space = H5Screate(H5S_SCALAR);
-          hid_t attr_id = H5Acreate(group->id, *Nan::Utf8String(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
-          if (attr_id < 0) {
-            H5Sclose(attr_space);
-            H5Tclose(attr_type);
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
-            args.GetReturnValue().SetUndefined();
-            return;
-          }
-          H5Awrite(attr_id, attr_type, &value);
-          H5Sclose(attr_space);
-          H5Tclose(attr_type);
-          H5Aclose(attr_id);
-
-        } else if (args.This()->Get(name)->IsObject() && std::strncmp("Uint64", (*Nan::Utf8String(args.This()->Get(name)->ToObject()->GetConstructorName())), 6)==0) {
-          Uint64* valueWrap = ObjectWrap::Unwrap<Uint64>(args.This()->Get(name)->ToObject());
-          uint64_t value = valueWrap->Value();
-          if (attrExists) {
-            H5Adelete(group->id, *Nan::Utf8String(name->ToString()));
-          }
-          hid_t attr_type  = H5Tcopy(H5T_NATIVE_UINT64);
-          hid_t attr_space = H5Screate(H5S_SCALAR);
-          hid_t attr_id = H5Acreate(group->id, *Nan::Utf8String(name->ToString()), attr_type, attr_space, H5P_DEFAULT, H5P_DEFAULT);
-          if (attr_id < 0) {
-            H5Sclose(attr_space);
-            H5Tclose(attr_type);
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
-            args.GetReturnValue().SetUndefined();
-            return;
-          }
-          H5Awrite(attr_id, attr_type, &value);
-          H5Sclose(attr_space);
-          H5Tclose(attr_type);
-          H5Aclose(attr_id);
-
-        }
-        
-      }
-    }
-
-    return;
+    set_attribute(group->id, name, value, options);
   };
-  
-    //void refreshAttributes(v8::Local<v8::Object>& focus, hid_t id)
-    
 }
