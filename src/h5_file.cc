@@ -440,19 +440,16 @@ namespace NodeHDF5 {
 
     // fail out if arguments are not correct
     if (args.Length() > 0) {
-
-      THROW_EXCEPTION("expected arguments");
-      args.GetReturnValue().SetUndefined();
+      THROW_EXCEPTION("expected no arguments");
       return;
     }
 
-    // unwrap file object
+    // Unwrap file object
     File* file = ObjectWrap::Unwrap<File>(args.This());
     if (!file->id) {
       return;
     }
 
-    H5Pclose(file->gcpl);
     ssize_t size = 0;
     if (H5Fget_obj_count(file->id, H5F_OBJ_FILE) == 1) {
       if ((size = H5Fget_obj_count(file->id, H5F_OBJ_GROUP)) > 0) {
@@ -465,6 +462,8 @@ namespace NodeHDF5 {
           H5Iget_name(groupList[i], buffer.get(), 1024);
           ss << groupList[i] << " " << buffer.get() << std::endl;
         }
+        THROW_EXCEPTION(ss.str().c_str());
+        return;
       }
 
       if ((size = H5Fget_obj_count(file->id, H5F_OBJ_ATTR)) > 0) {
@@ -477,6 +476,8 @@ namespace NodeHDF5 {
           H5Iget_name(groupList[i], buffer.get(), 1024);
           ss << groupList[i] << " " << buffer.get() << std::endl;
         }
+        THROW_EXCEPTION(ss.str().c_str());
+        return;
       }
 
       if ((size = H5Fget_obj_count(file->id, H5F_OBJ_DATASET)) > 0) {
@@ -489,6 +490,8 @@ namespace NodeHDF5 {
           H5Iget_name(groupList[i], buffer.get(), 1024);
           ss << groupList[i] << " " << buffer.get() << std::endl;
         }
+        THROW_EXCEPTION(ss.str().c_str());
+        return;
       }
 
       if ((size = H5Fget_obj_count(file->id, H5F_OBJ_DATATYPE)) > 0) {
@@ -501,13 +504,17 @@ namespace NodeHDF5 {
           H5Iget_name(groupList[i], buffer.get(), 1024);
           ss << groupList[i] << " " << buffer.get() << std::endl;
         }
+        THROW_EXCEPTION(ss.str().c_str());
+        return;
       }
     }
 
+    H5Pclose(file->gcpl);
+
     herr_t err = H5Fclose(file->id);
     if (err < 0) {
-      THROW_EXCEPTION("failed to close h5");
-      args.GetReturnValue().SetUndefined();
+      THROW_EXCEPTION("Failed to close h5");
+      return;
     }
 
     file->id = 0;
