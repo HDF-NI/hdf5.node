@@ -1,6 +1,7 @@
 #pragma once
 #include <v8.h>
 #include <uv.h>
+#include <nan.h>
 #include <node.h>
 
 #include <functional>
@@ -9,13 +10,14 @@
 #include "file.h"
 #include "group.h"
 #include "int64.hpp"
+#include "macros.h"
 #include "H5DSpublic.h"
 
 namespace NodeHDF5 {
 
   class H5ds {
   public:
-    static void Initialize(Handle<Object> target) {
+    static void Initialize(Local<Object> target) {
 
       // append this function to the target object
       target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "setScale"),
@@ -44,21 +46,19 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name")));
+        THROW_EXCEPTION("expected group id, dataset name, name");
         args.GetReturnValue().SetUndefined();
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
-      String::Utf8Value dim_scale_name(args[2]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
+      Nan::Utf8String dim_scale_name(args[2]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       herr_t            err    = H5DSset_scale(did, *dim_scale_name);
       if (err < 0) {
         H5Dclose(did);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed setting dimension scale")));
+        THROW_EXCEPTION("failed setting dimension scale");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -70,14 +70,13 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString() || !args[3]->IsInt32()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name, index")));
+        THROW_EXCEPTION("expected group id, dataset name, name, index");
         args.GetReturnValue().SetUndefined();
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
-      String::Utf8Value dim_scale_name(args[2]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
+      Nan::Utf8String dim_scale_name(args[2]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       hid_t             dsid   = H5Dopen(idWrap->Value(), *dim_scale_name, H5P_DEFAULT);
@@ -85,8 +84,7 @@ namespace NodeHDF5 {
       if (err < 0) {
         H5Dclose(dsid);
         H5Dclose(did);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed attaching dimension scale")));
+        THROW_EXCEPTION("failed attaching dimension scale");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -99,14 +97,13 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString() || !args[3]->IsInt32()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name, index")));
+        THROW_EXCEPTION("expected group id, dataset name, name, index");
         args.GetReturnValue().SetUndefined();
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
-      String::Utf8Value dim_scale_name(args[2]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
+      Nan::Utf8String dim_scale_name(args[2]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       hid_t             dsid   = H5Dopen(idWrap->Value(), *dim_scale_name, H5P_DEFAULT);
@@ -114,8 +111,7 @@ namespace NodeHDF5 {
       if (err < 0) {
         H5Dclose(dsid);
         H5Dclose(did);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed attaching dimension scale")));
+        THROW_EXCEPTION("failed attaching dimension scale");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -128,14 +124,13 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString() || !args[3]->IsInt32()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name, index")));
+        THROW_EXCEPTION("expected group id, dataset name, name, index");
         args.GetReturnValue().SetUndefined();
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
-      String::Utf8Value dim_scale_name(args[2]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
+      Nan::Utf8String dim_scale_name(args[2]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       hid_t             dsid   = H5Dopen(idWrap->Value(), *dim_scale_name, H5P_DEFAULT);
@@ -149,13 +144,12 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name")));
+        THROW_EXCEPTION("expected group id, dataset name");
         args.GetReturnValue().SetUndefined();
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       htri_t            status = H5DSis_scale(did);
@@ -165,7 +159,7 @@ namespace NodeHDF5 {
 
     static void iterate_scales(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       int               rank;
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       H5LTget_dataset_ndims(idWrap->Value(), *dset_name, &rank);
@@ -196,8 +190,7 @@ namespace NodeHDF5 {
                                       &func);
       if (err < 0) {
         H5Dclose(did);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed iterating through  scale indices")));
+        THROW_EXCEPTION("failed iterating through  scale indices");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -210,16 +203,15 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsInt32() || !args[3]->IsString()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, scale name, index, label")));
+        THROW_EXCEPTION("expected group id, scale name, index, label");
         args.GetReturnValue().SetUndefined();
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
-      std::string       label(*String::Utf8Value(args[3]->ToString()));
+      std::string       label(*Nan::Utf8String(args[3]->ToString()));
       H5DSset_label(did, args[2]->Int32Value(), (char*)label.c_str());
       H5Dclose(did);
       args.GetReturnValue().SetUndefined();
@@ -230,13 +222,12 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsInt32()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, scale name, index")));
+        THROW_EXCEPTION("expected group id, scale name, index");
         args.GetReturnValue().SetUndefined();
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       size_t            size   = 0;
@@ -251,13 +242,12 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, scale name")));
+        THROW_EXCEPTION("expected group id, scale name");
         args.GetReturnValue().SetUndefined();
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       size_t            size   = 0;
@@ -273,13 +263,12 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsInt32()) {
 
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, index")));
+        THROW_EXCEPTION("expected group id, dataset name, index");
         args.GetReturnValue().SetUndefined();
         return;
       }
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       hid_t             did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
       int               num    = H5DSget_num_scales(did, args[2]->Int32Value());

@@ -8,7 +8,7 @@ using namespace NodeHDF5;
 
 extern "C" {
 
-static void init_ds(Handle<Object> target) {
+static void init_ds(Local<Object> target) {
 
   // create local scope
   HandleScope scope(v8::Isolate::GetCurrent());

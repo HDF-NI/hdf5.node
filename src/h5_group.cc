@@ -1,3 +1,4 @@
+#include <nan.h>
 #include <node.h>
 #include <string>
 #include <cstring>
@@ -11,6 +12,7 @@
 #include "group.h"
 #include "int64.hpp"
 #include "filters.hpp"
+#include "macros.h"
 #include "H5LTpublic.h"
 #include "H5PTpublic.h"
 #include "H5Lpublic.h"
@@ -19,7 +21,7 @@ namespace NodeHDF5 {
 
   using namespace v8;
 
-    static bool get_separate_attrs(v8::Handle<v8::Object> options) {
+    static bool get_separate_attrs(v8::Local<v8::Object> options) {
       if (options.IsEmpty()) {
         return false;
       }
@@ -62,6 +64,7 @@ namespace NodeHDF5 {
     NODE_SET_PROTOTYPE_METHOD(t, "link", Link);
     NODE_SET_PROTOTYPE_METHOD(t, "delete", Delete);
     NODE_SET_PROTOTYPE_METHOD(t, "close", Close);
+    NODE_SET_PROTOTYPE_METHOD(t, "setAttribute", SetAttribute);
     NODE_SET_PROTOTYPE_METHOD(t, "getNumAttrs", GetNumAttrs);
     NODE_SET_PROTOTYPE_METHOD(t, "getAttributeNames", getAttributeNames);
     NODE_SET_PROTOTYPE_METHOD(t, "readAttribute", readAttribute);
@@ -89,7 +92,7 @@ namespace NodeHDF5 {
     try {
       if (args.Length() == 3 && args[0]->IsString() && args[1]->IsObject()) {
         // store specified group name
-        String::Utf8Value        group_name(args[0]->ToString());
+        Nan::Utf8String        group_name(args[0]->ToString());
         std::vector<std::string> trail;
         std::vector<hid_t>       hidPath;
         std::istringstream       buf(*group_name);
@@ -100,7 +103,7 @@ namespace NodeHDF5 {
         hid_t previous_hid;
         // unwrap parent object
         std::string constructorName = "File";
-        if (constructorName.compare(*String::Utf8Value(args[1]->ToObject()->GetConstructorName())) == 0) {
+        if (constructorName.compare(*Nan::Utf8String(args[1]->ToObject()->GetConstructorName())) == 0) {
 
           File* parent = ObjectWrap::Unwrap<File>(args[1]->ToObject());
           previous_hid = parent->getId();
@@ -119,15 +122,13 @@ namespace NodeHDF5 {
               continue;
             } else {
               std::string msg = "Group " + trail[index] + " doesn't exist";
-              v8::Isolate::GetCurrent()->ThrowException(
-                  v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str())));
+              THROW_EXCEPTION(msg.c_str());
               args.GetReturnValue().SetUndefined();
               return;
             }
           } else {
             std::string msg = "Group " + trail[index] + " doesn't exist";
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str())));
+            THROW_EXCEPTION(msg.c_str());
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -139,8 +140,7 @@ namespace NodeHDF5 {
           group->gcpl_id = H5Pcreate(H5P_GROUP_CREATE);
           herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->IntegerValue());
           if (err < 0) {
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+            THROW_EXCEPTION("Failed to set link creation order");
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -174,13 +174,11 @@ namespace NodeHDF5 {
         args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), instance);
       }
     } catch (std::exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group open failed")));
+      THROW_EXCEPTION("Group open failed");
       args.GetReturnValue().SetUndefined();
       return;
     } catch (...) {
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group open failed")));
+      THROW_EXCEPTION("Group open failed");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -193,14 +191,13 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file")));
+      THROW_EXCEPTION("expected name, file");
       args.GetReturnValue().SetUndefined();
       return;
     }
 
     // store specified group name
-    String::Utf8Value group_name(args[0]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
 
     // unwrap parent object
     File*                    parent = ObjectWrap::Unwrap<File>(args[1]->ToObject());
@@ -239,7 +236,7 @@ namespace NodeHDF5 {
                    (void*)&desc);
         }
         desc = "Group create failed: " + desc;
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), desc.c_str())));
+        THROW_EXCEPTION(desc.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -254,8 +251,7 @@ namespace NodeHDF5 {
         group->gcpl_id = H5Pcreate(H5P_GROUP_CREATE);
         herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->IntegerValue());
         if (err < 0) {
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+          THROW_EXCEPTION("Failed to set link creation order");
           args.GetReturnValue().SetUndefined();
           return;
         }
@@ -278,8 +274,7 @@ namespace NodeHDF5 {
       group->gcpl_id = H5Pcreate(H5P_GROUP_CREATE);
       herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->IntegerValue());
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+        THROW_EXCEPTION("Failed to set link creation order");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -301,14 +296,13 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, file")));
+      THROW_EXCEPTION("expected name, file");
       args.GetReturnValue().SetUndefined();
       return;
     }
 
     // store specified group name
-    String::Utf8Value group_name(args[0]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
 
     std::vector<std::string> trail;
     std::vector<hid_t>       hidPath;
@@ -323,7 +317,7 @@ namespace NodeHDF5 {
 
     // unwrap parent object
     std::string constructorName = "File";
-    if (constructorName.compare(*String::Utf8Value(args[1]->ToObject()->GetConstructorName())) == 0) {
+    if (constructorName.compare(*Nan::Utf8String(args[1]->ToObject()->GetConstructorName())) == 0) {
 
       File* parent = ObjectWrap::Unwrap<File>(args[1]->ToObject());
       previous_hid = parent->getId();
@@ -342,14 +336,13 @@ namespace NodeHDF5 {
           continue;
         } else {
           std::string msg = "Group" + trail[index] + " doesn't exist";
-          v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str())));
+          THROW_EXCEPTION(msg.c_str());
           args.GetReturnValue().SetUndefined();
           return;
         }
       } else {
         std::string msg = "Group" + trail[index] + " doesn't exist";
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), msg.c_str())));
+        THROW_EXCEPTION(msg.c_str());
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -358,8 +351,7 @@ namespace NodeHDF5 {
     group->gcpl_id = H5Pcreate(H5P_GROUP_CREATE);
     herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->IntegerValue());
     if (err < 0) {
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+      THROW_EXCEPTION("Failed to set link creation order");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -380,8 +372,7 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() < 1 || args.Length() > 2 || !args[0]->IsString()) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name and optional options")));
+      THROW_EXCEPTION("expected name and optional options");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -393,7 +384,7 @@ namespace NodeHDF5 {
         options = args[1]->ToObject();
         separateAttrs = get_separate_attrs(options);
       }
-      String::Utf8Value group_name(args[0]->ToString());
+      Nan::Utf8String group_name(args[0]->ToString());
       Local<Object> instance = Group::Instantiate(*group_name, args.This(), args[1]->Uint32Value());
       if(separateAttrs){
          v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), 2);
@@ -408,11 +399,11 @@ namespace NodeHDF5 {
         args.GetReturnValue().Set(instance);
       return;
     } catch (Exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      THROW_EXCEPTION(ex.what());
       args.GetReturnValue().SetUndefined();
       return;
     } catch (std::exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      THROW_EXCEPTION(ex.what());
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -422,22 +413,21 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() != 3) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest group, dest name")));
+      THROW_EXCEPTION("expected src name, dest group, dest name");
       args.GetReturnValue().SetUndefined();
       return;
     }
 
     // unwrap group
     Group*            group = ObjectWrap::Unwrap<Group>(args.This());
-    String::Utf8Value group_name(args[0]->ToString());
-    String::Utf8Value dest_name(args[2]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
+    Nan::Utf8String dest_name(args[2]->ToString());
 
     herr_t err = H5Ocopy(group->id, *group_name, args[1]->IntegerValue(), *dest_name, H5P_DEFAULT, H5P_DEFAULT);
     if (err < 0) {
       std::string str(*dest_name);
       std::string errStr = "Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+      THROW_EXCEPTION(errStr.c_str());
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -447,16 +437,15 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() != 3) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest group, dest name")));
+      THROW_EXCEPTION("expected src name, dest group, dest name");
       args.GetReturnValue().SetUndefined();
       return;
     }
 
     // unwrap group
     Group*            group = ObjectWrap::Unwrap<Group>(args.This());
-    String::Utf8Value group_name(args[0]->ToString());
-    String::Utf8Value dest_name(args[2]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
+    Nan::Utf8String dest_name(args[2]->ToString());
     Int64*            idWrap   = ObjectWrap::Unwrap<Int64>(args[1]->ToObject());
     hid_t             file_id = idWrap->Value();
 
@@ -464,7 +453,7 @@ namespace NodeHDF5 {
     if (err < 0) {
       std::string str(*dest_name);
       std::string errStr = "Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+      THROW_EXCEPTION(errStr.c_str());
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -474,21 +463,20 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() != 3) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest group, dest name")));
+      THROW_EXCEPTION("expected src name, dest group, dest name");
       args.GetReturnValue().SetUndefined();
       return;
     }
 
     // unwrap group
     Group*            group = ObjectWrap::Unwrap<Group>(args.This());
-    String::Utf8Value group_name(args[0]->ToString());
-    String::Utf8Value dest_name(args[2]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
+    Nan::Utf8String dest_name(args[2]->ToString());
     herr_t err = H5Lcopy(group->id, *group_name, args[1]->IntegerValue(), *dest_name, H5P_DEFAULT, H5P_DEFAULT);
     if (err < 0) {
       std::string str(*dest_name);
       std::string errStr = "Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+      THROW_EXCEPTION(errStr.c_str());
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -498,8 +486,7 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() != 1 || !args[0]->IsString()) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group name")));
+      THROW_EXCEPTION("expected group name");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -507,7 +494,7 @@ namespace NodeHDF5 {
     // unwrap group
     Group* group = ObjectWrap::Unwrap<Group>(args.This());
     // delete specified group name
-    String::Utf8Value group_name(args[0]->ToString());
+    Nan::Utf8String group_name(args[0]->ToString());
     H5Ldelete(group->id, (*group_name), H5P_DEFAULT);
   }
 
@@ -516,8 +503,7 @@ namespace NodeHDF5 {
     // fail out if arguments are not correct
     if (args.Length() > 0) {
 
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
+      THROW_EXCEPTION("expected arguments");
       args.GetReturnValue().SetUndefined();
       return;
     }

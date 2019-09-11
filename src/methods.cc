@@ -1,10 +1,12 @@
 #include <sstream>
+#include <nan.h>
 
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
 #include "reference.hpp"
 #include "attributes.hpp"
+#include "macros.h"
 #include "methods.hpp"
 #include "filters.hpp"
 
@@ -55,7 +57,7 @@ namespace NodeHDF5 {
     }
 
     // store specified attribute name
-    v8::String::Utf8Value attribute_name(args[0]->ToString());
+    Nan::Utf8String attribute_name(args[0]->ToString());
     // unwrap group
     Methods* group       = ObjectWrap::Unwrap<Methods>(args.This());
     if(!H5Aexists(group->id, (const char*)*attribute_name)){
@@ -82,7 +84,7 @@ namespace NodeHDF5 {
     }
 
     // store specified attribute name
-    v8::String::Utf8Value attribute_name(args[0]->ToString());
+    Nan::Utf8String attribute_name(args[0]->ToString());
 
     // unwrap group
     Methods* group       = ObjectWrap::Unwrap<Methods>(args.This());
@@ -178,7 +180,7 @@ namespace NodeHDF5 {
     // unwrap group
     Methods* group = ObjectWrap::Unwrap<Methods>(args.This());
     // store specified child name
-    v8::String::Utf8Value child_name(args[0]->ToString());
+    Nan::Utf8String child_name(args[0]->ToString());
     args.GetReturnValue().Set((uint32_t)group->childObjType(*child_name));
   }
 
@@ -194,7 +196,7 @@ namespace NodeHDF5 {
     }
 
     // store specified child name
-    v8::String::Utf8Value child_name(args[0]->ToString());
+    Nan::Utf8String child_name(args[0]->ToString());
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
     hid_t  id     = idWrap->Value();
     HLType hlType = HLType::HL_TYPE_LITE;
@@ -239,29 +241,26 @@ namespace NodeHDF5 {
 
   void Methods::getDatasetDimensions(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if (args.Length() != 1 || !args[0]->IsString()) {
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
+      THROW_EXCEPTION("expected name");
       args.GetReturnValue().SetUndefined();
       return;
     }
 
-    const String::Utf8Value dataset_name(args[0]->ToString());
+    const Nan::Utf8String dataset_name(args[0]->ToString());
 
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
     const hid_t location_id = idWrap->Value();
 
     const hid_t dataset   = H5Dopen(location_id, *dataset_name, H5P_DEFAULT);
     if(dataset<0){
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "can't open dataset")));
+      THROW_EXCEPTION("can't open dataset");
       args.GetReturnValue().SetUndefined();
       return;
     }
     const hid_t dataspace = H5Dget_space(dataset);
     if(dataspace<0){
       H5Dclose(dataset);
-      v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "can't get dataset space")));
+      THROW_EXCEPTION("can't get dataset space");
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -294,7 +293,7 @@ namespace NodeHDF5 {
     }
 
     // store specified child name
-    v8::String::Utf8Value child_name(args[0]->ToString());
+    Nan::Utf8String child_name(args[0]->ToString());
     Int64* idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
     hid_t  did    = H5Dopen(idWrap->Value(), *child_name, H5P_DEFAULT);
     hid_t  t      = H5Dget_type(did);
@@ -324,7 +323,7 @@ namespace NodeHDF5 {
       return;
     }
 
-    v8::String::Utf8Value dset_name(args[0]->ToString());
+    Nan::Utf8String dset_name(args[0]->ToString());
     // unwrap group
     Methods*    group = ObjectWrap::Unwrap<Methods>(args.This());
     std::string name(*dset_name);
@@ -628,8 +627,8 @@ namespace NodeHDF5 {
       return;
     }
 
-    v8::String::Utf8Value dset_name(args[0]->ToString());
-    v8::String::Utf8Value attr_name(args[1]->ToString());
+    Nan::Utf8String dset_name(args[0]->ToString());
+    Nan::Utf8String attr_name(args[1]->ToString());
     // unwrap group
     Methods*    group = ObjectWrap::Unwrap<Methods>(args.This());
     std::string name(*dset_name);
@@ -920,7 +919,7 @@ namespace NodeHDF5 {
     }
 
     // store specified child name
-    v8::String::Utf8Value child_name(args[0]->ToString());
+    Nan::Utf8String child_name(args[0]->ToString());
     Int64*      idWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"))->ToObject());
     hid_t       did    = H5Dopen(idWrap->Value(), *child_name, H5P_DEFAULT);
     hid_t       t      = H5Dget_type(did);
@@ -941,7 +940,7 @@ namespace NodeHDF5 {
       return;
     }
 
-    v8::String::Utf8Value dset_name(args[0]->ToString());
+    Nan::Utf8String dset_name(args[0]->ToString());
     // unwrap group
     Methods*                group = ObjectWrap::Unwrap<Methods>(args.This());
     std::string             name(*dset_name);
@@ -1017,8 +1016,7 @@ namespace NodeHDF5 {
                                       },
                                       &func);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed iterating through children")));
+        THROW_EXCEPTION("failed iterating through children");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1028,7 +1026,7 @@ namespace NodeHDF5 {
 
     void Methods::visit(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Methods*                group = ObjectWrap::Unwrap<Methods>(args.This());
 //      hsize_t                          idx = args[0]->Int32Value();
       v8::Persistent<v8::Function> callback;
@@ -1054,8 +1052,7 @@ namespace NodeHDF5 {
                                       },
                                       &func);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed iterating through children")));
+        THROW_EXCEPTION("failed iterating through children");
         args.GetReturnValue().SetUndefined();
         return;
       }

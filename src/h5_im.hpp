@@ -1,6 +1,7 @@
 #pragma once
 #include <v8.h>
 #include <uv.h>
+#include <nan.h>
 #include <node.h>
 #include <node_buffer.h>
 
@@ -10,13 +11,14 @@
 #include "file.h"
 #include "group.h"
 #include "int64.hpp"
+#include "macros.h"
 #include "H5IMpublic.h"
 
 namespace NodeHDF5 {
 
   class H5im {
   public:
-    static void Initialize(Handle<Object> target) {
+    static void Initialize(Local<Object> target) {
 
       // append this function to the target object
       target->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeImage"),
@@ -33,7 +35,7 @@ namespace NodeHDF5 {
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5im::make_palette)->GetFunction());
     }
 
-    static void get_height(Handle<Object> options, std::function<void(hid_t)> cb) {
+    static void get_height(Local<Object> options, std::function<void(hid_t)> cb) {
       if (options.IsEmpty()) {
         return;
       }
@@ -45,7 +47,7 @@ namespace NodeHDF5 {
       }
     }
     
-    static void get_width(Handle<Object> options, std::function<void(hsize_t)> cb) {
+    static void get_width(Local<Object> options, std::function<void(hsize_t)> cb) {
       if (options.IsEmpty()) {
         return;
       }
@@ -57,7 +59,7 @@ namespace NodeHDF5 {
       }
     }
     
-    static void get_planes(Handle<Object> options, std::function<void(hsize_t)> cb) {
+    static void get_planes(Local<Object> options, std::function<void(hsize_t)> cb) {
       if (options.IsEmpty()) {
         return;
       }
@@ -71,14 +73,14 @@ namespace NodeHDF5 {
     
     static void make_image(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Local<v8::Object> buffer = args[2]->ToObject();
       Local<Object>     options;
       if (args.Length() >= 4 && args[3]->IsObject()) {
         options = args[3]->ToObject();
       }
 
-      String::Utf8Value interlace(buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"))->ToString());
+      Nan::Utf8String interlace(buffer->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "interlace"))->ToString());
       herr_t            err;
       hsize_t           dims[3];
       if (buffer->Has(String::NewFromUtf8(v8::Isolate::GetCurrent(), "height"))) {
@@ -99,8 +101,7 @@ namespace NodeHDF5 {
       Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
      err           = H5LTmake_dataset(idWrap->Value(), *dset_name, 3, dims, H5T_NATIVE_UCHAR, (const char*)node::Buffer::Data(args[2]));
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make image dataset")));
+        THROW_EXCEPTION("failed to make image dataset");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -118,7 +119,7 @@ namespace NodeHDF5 {
 
     static void read_image(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       hsize_t           width;
       hsize_t           height;
       hsize_t           planes;
@@ -127,8 +128,7 @@ namespace NodeHDF5 {
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       herr_t            err    = H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
+        THROW_EXCEPTION("failed to get image info");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -136,8 +136,7 @@ namespace NodeHDF5 {
       std::unique_ptr<unsigned char[]> contentBuffer(new unsigned char[(size_t)(planes * width * height)]);
       err = H5LTread_dataset(idWrap->Value(), *dset_name, H5T_NATIVE_UCHAR, contentBuffer.get());
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read image")));
+        THROW_EXCEPTION("failed to read image");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -168,7 +167,7 @@ namespace NodeHDF5 {
 
     static void read_image_region(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       hsize_t           width;
       hsize_t           height;
       hsize_t           planes;
@@ -177,8 +176,7 @@ namespace NodeHDF5 {
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       herr_t            err    = H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
+        THROW_EXCEPTION("failed to get image info");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -187,14 +185,13 @@ namespace NodeHDF5 {
       std::unique_ptr<hsize_t[]> stride(new hsize_t[rank]);
       std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
       if (args.Length() != 3) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "no region properties")));
+        THROW_EXCEPTION("no region properties");
         args.GetReturnValue().SetUndefined();
         return;
       }
       Local<Array> names = args[2]->ToObject()->GetOwnPropertyNames();
       for (uint32_t index = 0; index < names->Length(); index++) {
-        String::Utf8Value _name(names->Get(index));
+        Nan::Utf8String _name(names->Get(index));
         std::string       name(*_name);
         if (name.compare("start") == 0) {
           Local<Object> starts = args[2]->ToObject()->Get(names->Get(index))->ToObject();
@@ -230,8 +227,7 @@ namespace NodeHDF5 {
         H5Sclose(memspace_id);
         H5Sclose(dataspace_id);
         H5Dclose(did);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+        THROW_EXCEPTION("failed to select hyperslab");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -249,8 +245,7 @@ namespace NodeHDF5 {
         H5Sclose(dataspace_id);
         H5Tclose(t);
         H5Dclose(did);
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read image region")));
+        THROW_EXCEPTION("failed to read image region");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -274,7 +269,7 @@ namespace NodeHDF5 {
 
     static void is_image(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       herr_t            err    = H5IMis_image(idWrap->Value(), *dset_name);
       args.GetReturnValue().Set(err ? true : false);
@@ -282,7 +277,7 @@ namespace NodeHDF5 {
 
     static void get_image_info(const v8::FunctionCallbackInfo<Value>& args) {
 
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       hsize_t           width;
       hsize_t           height;
       hsize_t           planes;
@@ -291,8 +286,7 @@ namespace NodeHDF5 {
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
       herr_t            err    = H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
       if (err < 0) {
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
+        THROW_EXCEPTION("failed to get image info");
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -309,7 +303,7 @@ namespace NodeHDF5 {
     static void make_palette(const v8::FunctionCallbackInfo<Value>& args) {
 
       Local<Uint8Array> buffer = Local<Uint8Array>::Cast(args[2]);
-      String::Utf8Value dset_name(args[1]->ToString());
+      Nan::Utf8String dset_name(args[1]->ToString());
       Local<Value>      rankValue = args[2]->ToObject()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "size"));
       hsize_t           pal_dims[1]{static_cast<hsize_t>(rankValue->Int32Value())};
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());

@@ -27,6 +27,7 @@ namespace NodeHDF5 {
     using Attributes::gcpl_id;
     using Attributes::Refresh;
     using Attributes::Flush;
+    using Attributes::SetAttribute;
 
   protected:
     hid_t plist_id, gcpl, dtpl_id, dapl_id, dcpl_id;
@@ -35,7 +36,7 @@ namespace NodeHDF5 {
     bool         error       = false;
 
   public:
-    static void Initialize(Handle<Object> target);
+    static void Initialize(Local<Object> target);
 
     hid_t getId() {
       return id;

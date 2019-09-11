@@ -340,13 +340,9 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
     Attributes(const Attributes& orig) = delete;
     virtual ~Attributes(){};
 
-    static void make_attribute_from_typed_array(const hid_t&               group_id,
-                                                const char*                attribute_name,
-                                                v8::Handle<v8::TypedArray> buffer,
-                                                hid_t                      type_id);
-    static void make_attribute_from_array(const hid_t& group_id, const char* attribute_name, v8::Handle<v8::Array> array);
     static void Refresh(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void Flush(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void SetAttribute(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   protected:
     virtual int getNumAttrs() = 0;
