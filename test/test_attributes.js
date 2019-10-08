@@ -79,6 +79,37 @@ describe("testing attribute interface",function(){
         });
     });
 
+    describe("should modify attributes", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5Lib.hdf5.File('./attributes.h5', globs.Access.ACC_RDWR);
+          done();
+        });
+
+        it("should create and delete attribute ", function(done) {
+            const group   = file.openGroup('pmc/refinement');
+            group.refresh();
+            group.spaceGroup="P63/m";
+            group.flush();
+            var spaceGroup = group.readAttribute("spaceGroup");
+            spaceGroup.should.equal("P63/m");
+            group.deleteAttribute("spaceGroup");
+            try{
+              spaceGroup = group.readAttribute("spaceGroup");
+              }
+              catch (e) {
+                e.message.should.equal("Attribute 'spaceGroup' does not exist.");
+              }
+            group.close();
+            done();
+        });
+        
+        after(function(done){
+            file.close();
+            done();
+        });
+    });
+
     describe.skip("should read biom attributes", function() {
         let file;
         before(function(done) {

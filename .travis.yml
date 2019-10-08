@@ -4,7 +4,6 @@ node_js:
   - "10"
   - "9"
   - "8"
-  - "6"
   
 env:
   - GCC_VERSION="export CC=gcc-7 && export CXX=g++-7"
