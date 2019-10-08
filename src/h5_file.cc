@@ -492,11 +492,13 @@ namespace NodeHDF5 {
 
     H5Pclose(file->gcpl);
     ssize_t size = 0;
+    std::stringstream ss;
+    bool allClosed=true;
     if (H5Fget_obj_count(file->id, H5F_OBJ_FILE) == 1) {
       if ((size = H5Fget_obj_count(file->id, H5F_OBJ_GROUP)) > 0) {
+        allClosed=false;
         std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
         H5Fget_obj_ids(file->id, H5F_OBJ_GROUP, size, groupList.get());
-        std::stringstream ss;
         ss << "H5 has not closed all groups: " << H5Fget_obj_count(file->id, H5F_OBJ_GROUP) << " H5F_OBJ_GROUPs OPEN" << std::endl;
         for (int i = 0; i < (int)size; i++) {
           std::unique_ptr<char[]> buffer(new char[1024]);
@@ -518,9 +520,9 @@ namespace NodeHDF5 {
       }
 
       if ((size = H5Fget_obj_count(file->id, H5F_OBJ_DATASET)) > 0) {
+        allClosed=false;
         std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
         H5Fget_obj_ids(file->id, H5F_OBJ_DATASET, size, groupList.get());
-        std::stringstream ss;
         ss << "H5 has not closed all datasets" << H5Fget_obj_count(file->id, H5F_OBJ_DATASET) << " H5F_OBJ_DATASETs OPEN" << std::endl;
         for (int i = 0; i < (int)size; i++) {
           std::unique_ptr<char[]> buffer(new char[1024]);
@@ -530,9 +532,9 @@ namespace NodeHDF5 {
       }
 
       if ((size = H5Fget_obj_count(file->id, H5F_OBJ_DATATYPE)) > 0) {
+        allClosed=false;
         std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
         H5Fget_obj_ids(file->id, H5F_OBJ_DATATYPE, size, groupList.get());
-        std::stringstream ss;
         ss << "H5 has not closed all datatypes" << H5Fget_obj_count(file->id, H5F_OBJ_DATATYPE) << " H5F_OBJ_DATATYPEs OPEN" << std::endl;
         for (int i = 0; i < (int)size; i++) {
           std::unique_ptr<char[]> buffer(new char[1024]);
@@ -544,8 +546,14 @@ namespace NodeHDF5 {
 
     herr_t err = H5Fclose(file->id);
     if (err < 0) {
+      ss<<"Failed to close h5"<<std::endl;
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to close h5", v8::NewStringType::kInternalized).ToLocalChecked()));
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
+      args.GetReturnValue().SetUndefined();
+    }
+    else if(!allClosed){
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
     }
 
