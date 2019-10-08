@@ -87,13 +87,16 @@ describe("testing c interface ", function() {
             catch(error) {
             error.message.should.equal("Failed to read group. Group pmc doesn\'t exist.");
           }
+          var group;
           try{
-            const group=file.openGroup('pmcservices');
+            group=file.openGroup('pmcservices');
               const groupPmc=group.openGroup('polywog');
               groupPmc.id.should.equal(-1);
               groupPmc.close();
           }
             catch(error) {
+              group.close();
+                console.log(error.message);
             error.message.should.equal("Failed to read group. Group polywog doesn\'t exist.");
           }
             done();

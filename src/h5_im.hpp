@@ -100,7 +100,7 @@ namespace NodeHDF5 {
      err           = H5LTmake_dataset(idWrap->Value(), *dset_name, 3, dims, H5T_NATIVE_UCHAR, (const char*)node::Buffer::Data(args[2]));
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make image dataset")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make image dataset")));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -128,7 +128,7 @@ namespace NodeHDF5 {
       herr_t            err    = H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -137,7 +137,7 @@ namespace NodeHDF5 {
       err = H5LTread_dataset(idWrap->Value(), *dset_name, H5T_NATIVE_UCHAR, contentBuffer.get());
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read image")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read image")));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -178,7 +178,7 @@ namespace NodeHDF5 {
       herr_t            err    = H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -188,7 +188,7 @@ namespace NodeHDF5 {
       std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
       if (args.Length() != 3) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "no region properties")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "no region properties")));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -231,7 +231,7 @@ namespace NodeHDF5 {
         H5Sclose(dataspace_id);
         H5Dclose(did);
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -250,7 +250,7 @@ namespace NodeHDF5 {
         H5Tclose(t);
         H5Dclose(did);
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read image region")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read image region")));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -292,7 +292,7 @@ namespace NodeHDF5 {
       herr_t            err    = H5IMget_image_info(idWrap->Value(), *dset_name, &width, &height, &planes, interlace, &npals);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get image info")));
         args.GetReturnValue().SetUndefined();
         return;
       }

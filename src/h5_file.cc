@@ -163,7 +163,7 @@ namespace NodeHDF5 {
     if (args.Length() < 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected file path")));
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected file path")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -219,11 +219,11 @@ namespace NodeHDF5 {
     args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "id"), idInstance);
     
     } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
         args.GetReturnValue().SetUndefined();
         return;
     } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
         args.GetReturnValue().SetUndefined();
         return;
     }
@@ -234,7 +234,7 @@ namespace NodeHDF5 {
     if (args.Length() != 0) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected no arguments")));
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected no arguments")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -252,7 +252,7 @@ namespace NodeHDF5 {
     if (args.Length() != 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, callback")));
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name, callback")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -298,7 +298,7 @@ namespace NodeHDF5 {
                    (void*)&desc);
         }
         desc = "Group create failed: " + desc;
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), desc.c_str())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), desc.c_str())));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -311,7 +311,7 @@ namespace NodeHDF5 {
         herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->Uint32Value());
         if (err < 0) {
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
           args.GetReturnValue().SetUndefined();
           return;
         }
@@ -335,7 +335,7 @@ namespace NodeHDF5 {
       herr_t err     = H5Pset_link_creation_order(group->gcpl_id, args[2]->Uint32Value());
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set link creation order")));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -359,7 +359,7 @@ namespace NodeHDF5 {
     if (args.Length() < 1 || args.Length() > 2 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -386,11 +386,11 @@ namespace NodeHDF5 {
         args.GetReturnValue().Set(instance);
       return;
     } catch (Exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
       args.GetReturnValue().SetUndefined();
       return;
     } catch (std::exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -402,7 +402,7 @@ namespace NodeHDF5 {
     if (args.Length() != 3) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest id, dest name")));
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected src name, dest id, dest name")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -418,7 +418,7 @@ namespace NodeHDF5 {
     if (err < 0) {
       std::string str(*dest_name);
       std::string errStr = "Failed move link to , " + str + " with return: " + std::to_string(err) + ".\n";
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -429,7 +429,7 @@ namespace NodeHDF5 {
     if (args.Length() != 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group name")));
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group name")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -447,7 +447,7 @@ namespace NodeHDF5 {
     if (args.Length() > 0) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -460,11 +460,13 @@ namespace NodeHDF5 {
 
     H5Pclose(file->gcpl);
     ssize_t size = 0;
+    std::stringstream ss;
+    bool allClosed=true;
     if (H5Fget_obj_count(file->id, H5F_OBJ_FILE) == 1) {
       if ((size = H5Fget_obj_count(file->id, H5F_OBJ_GROUP)) > 0) {
+        allClosed=false;
         std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
         H5Fget_obj_ids(file->id, H5F_OBJ_GROUP, size, groupList.get());
-        std::stringstream ss;
         ss << "H5 has not closed all groups: " << H5Fget_obj_count(file->id, H5F_OBJ_GROUP) << " H5F_OBJ_GROUPs OPEN" << std::endl;
         for (int i = 0; i < (int)size; i++) {
           std::unique_ptr<char[]> buffer(new char[1024]);
@@ -474,9 +476,9 @@ namespace NodeHDF5 {
       }
 
       if ((size = H5Fget_obj_count(file->id, H5F_OBJ_ATTR)) > 0) {
+        allClosed=false;
         std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
         H5Fget_obj_ids(file->id, H5F_OBJ_ATTR, size, groupList.get());
-        std::stringstream ss;
         ss << "H5 has not closed all attributes: " << H5Fget_obj_count(file->id, H5F_OBJ_ATTR) << " H5F_OBJ_ATTRs OPEN" << std::endl;
         for (int i = 0; i < (int)size; i++) {
           std::unique_ptr<char[]> buffer(new char[1024]);
@@ -486,9 +488,9 @@ namespace NodeHDF5 {
       }
 
       if ((size = H5Fget_obj_count(file->id, H5F_OBJ_DATASET)) > 0) {
+        allClosed=false;
         std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
         H5Fget_obj_ids(file->id, H5F_OBJ_DATASET, size, groupList.get());
-        std::stringstream ss;
         ss << "H5 has not closed all datasets" << H5Fget_obj_count(file->id, H5F_OBJ_DATASET) << " H5F_OBJ_DATASETs OPEN" << std::endl;
         for (int i = 0; i < (int)size; i++) {
           std::unique_ptr<char[]> buffer(new char[1024]);
@@ -498,9 +500,9 @@ namespace NodeHDF5 {
       }
 
       if ((size = H5Fget_obj_count(file->id, H5F_OBJ_DATATYPE)) > 0) {
+        allClosed=false;
         std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
         H5Fget_obj_ids(file->id, H5F_OBJ_DATATYPE, size, groupList.get());
-        std::stringstream ss;
         ss << "H5 has not closed all datatypes" << H5Fget_obj_count(file->id, H5F_OBJ_DATATYPE) << " H5F_OBJ_DATATYPEs OPEN" << std::endl;
         for (int i = 0; i < (int)size; i++) {
           std::unique_ptr<char[]> buffer(new char[1024]);
@@ -512,8 +514,14 @@ namespace NodeHDF5 {
 
     herr_t err = H5Fclose(file->id);
     if (err < 0) {
+      ss<<"Failed to close h5"<<std::endl;
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to close h5")));
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
+      args.GetReturnValue().SetUndefined();
+    }
+    else if(!allClosed){
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
       args.GetReturnValue().SetUndefined();
     }
 

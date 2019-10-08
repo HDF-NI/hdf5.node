@@ -52,7 +52,7 @@ namespace NodeHDF5 {
 
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make long long array attribute")));
+            v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make long long array attribute")));
       }
 
 //      H5Tclose(arraytype_id);
@@ -76,7 +76,7 @@ namespace NodeHDF5 {
 
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make long long array attribute")));
+            v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make long long array attribute")));
       }
 
 //      H5Tclose(arraytype_id);
@@ -102,7 +102,7 @@ namespace NodeHDF5 {
 
     if (err < 0) {
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make var len array attribute")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make var len array attribute")));
     }
 
 //    H5Tclose(arraytype_id);
@@ -118,7 +118,7 @@ namespace NodeHDF5 {
     if (args.Length() > 0) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -129,11 +129,11 @@ namespace NodeHDF5 {
         v8::Local<v8::Object> focus=args.This();
       refreshAttributes(focus, group->id);
     } catch (Exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
       args.GetReturnValue().SetUndefined();
       return;
     } catch (std::exception& ex) {
-      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+      v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -147,7 +147,7 @@ namespace NodeHDF5 {
     if (args.Length() > 0) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected arguments")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -236,7 +236,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -257,7 +257,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -279,7 +279,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -301,7 +301,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -329,7 +329,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -357,7 +357,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -379,7 +379,7 @@ namespace NodeHDF5 {
             H5Sclose(attr_space);
             H5Tclose(attr_type);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
+                v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed creating attribute")));
             args.GetReturnValue().SetUndefined();
             return;
           }

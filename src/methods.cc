@@ -49,7 +49,7 @@ namespace NodeHDF5 {
     if (args.Length() != 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected attribute name")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected attribute name")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -62,7 +62,7 @@ namespace NodeHDF5 {
         std::stringstream ss;
       ss<<"Attribute '"<<(*attribute_name)<<"' does not exist.";
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -76,7 +76,7 @@ namespace NodeHDF5 {
     if (args.Length() != 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected attribute name")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected attribute name")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -133,7 +133,7 @@ namespace NodeHDF5 {
     H5G_info_t group_info;
     if ((err = H5Gget_info(group->id, &group_info)) < 0) {
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), " has no info")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), " has no info")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -170,7 +170,7 @@ namespace NodeHDF5 {
     if (args.Length() != 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected child object's name")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected child object's name")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -188,7 +188,7 @@ namespace NodeHDF5 {
     if (args.Length() != 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected child object's name")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected child object's name")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -240,7 +240,7 @@ namespace NodeHDF5 {
   void Methods::getDatasetDimensions(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if (args.Length() != 1 || !args[0]->IsString()) {
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected name")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -253,7 +253,7 @@ namespace NodeHDF5 {
     const hid_t dataset   = H5Dopen(location_id, *dataset_name, H5P_DEFAULT);
     if(dataset<0){
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "can't open dataset")));
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "can't open dataset")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -261,7 +261,7 @@ namespace NodeHDF5 {
     if(dataspace<0){
       H5Dclose(dataset);
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "can't get dataset space")));
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "can't get dataset space")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -288,7 +288,7 @@ namespace NodeHDF5 {
     if (args.Length() != 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected child object's name")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected child object's name")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -319,7 +319,7 @@ namespace NodeHDF5 {
     if (args.Length() != 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected dataset name")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected dataset name")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -332,7 +332,7 @@ namespace NodeHDF5 {
     herr_t      err = H5Oget_info_by_name(group->id, *dset_name, &object_info, H5P_DEFAULT);
     if (err < 0) {
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get attr info")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get attr info")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -341,7 +341,7 @@ namespace NodeHDF5 {
       hid_t attr_id = H5Aopen_by_idx(group->id, *dset_name, H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, index, H5P_DEFAULT, H5P_DEFAULT);
       if (attr_id < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to open attr")));
+            v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to open attr")));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -623,7 +623,7 @@ namespace NodeHDF5 {
     if (args.Length() != 2 || !args[0]->IsString()|| !args[1]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected dataset and attribute name")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected dataset and attribute name")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -637,7 +637,7 @@ namespace NodeHDF5 {
     herr_t      err = H5Oget_info_by_name(group->id, *dset_name, &object_info, H5P_DEFAULT);
     if (err < 0) {
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get attr info")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to get attr info")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -645,7 +645,7 @@ namespace NodeHDF5 {
       hid_t attr_id = H5Aopen_by_name(group->id, *dset_name, *attr_name, H5P_DEFAULT, H5P_DEFAULT);
       if (attr_id < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to open attr")));
+            v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to open attr")));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -914,7 +914,7 @@ namespace NodeHDF5 {
     if (args.Length() != 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected child object's name")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected child object's name")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -936,7 +936,7 @@ namespace NodeHDF5 {
     if (args.Length() != 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::SyntaxError(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected dataset name")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected dataset name")));
       args.GetReturnValue().SetUndefined();
       return;
     }
@@ -1018,7 +1018,7 @@ namespace NodeHDF5 {
                                       &func);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed iterating through children")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed iterating through children")));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1055,7 +1055,7 @@ namespace NodeHDF5 {
                                       &func);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::SyntaxError(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed iterating through children")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed iterating through children")));
         args.GetReturnValue().SetUndefined();
         return;
       }
