@@ -504,5 +504,88 @@ describe("testing table interface ",function(){
         });
     });
 
+    describe.skip("Reading a large test case", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5.File('/home/roger/Downloads/MillionSongSubset/data/A/A/A/TRAAAAW128F429D538.h5', Access.ACC_RDONLY);
+          done();
+        });
+        let groupTarget;
+        it("loop thru", function(done) {
+            console.log(file.getNumObjs());
+            var memberNames=file.getMemberNamesByCreationOrder();
+            try {
+                for(var mn in memberNames){
+                   console.log(memberNames[mn]);
+                   var childType=file.getChildType(memberNames[mn]);
+                   switch(childType){
+                       case H5OType.H5O_TYPE_GROUP:
+                       var group=file.openGroup(memberNames[mn]);
+                       var groupMemberNames=group.getMemberNamesByCreationOrder();
+                       for(var gmn in groupMemberNames){
+                          console.log("\t"+groupMemberNames[gmn]);
+                       }
+                       group.close();
+                       break;
+
+                       case H5OType.H5O_TYPE_DATASET:
+
+                   var dsType=file.getDatasetType(memberNames[mn]);
+                   console.log("dsType "+dsType);
+                   switch(dsType){
+                     case HLType.HL_TYPE_LITE:
+                       var ds=h5lt.readDataset(file.id, memberNames[mn]);
+                   console.log("rank: "+ds.rank);
+                       break;
+
+
+                   }
+                   break;
+                   }
+                }
+                 var group=file.openGroup("metadata");
+                 var childType=group.getChildType("songs");
+                 var dsType=group.getDatasetType("songs");
+                 console.log("type "+dsType+" "+HLType.HL_TYPE_TABLE);
+                 var tableInfo=h5tb.getTableInfo(group.id, "songs");
+                 console.log("tableInfo "+tableInfo.nfields+" "+tableInfo.nrecords);
+                 var readTable=h5tb.readTable(group.id, "songs");
+                 for(var fieldIndex in readTable){
+                   console.log(readTable[fieldIndex].name);
+                   console.log(readTable[fieldIndex][0]);
+                 }
+
+                 //console.log("readTable "+readTable);
+                 group.close();
+            } catch (e) {
+                console.log(e.message);
+            }
+            done();
+        });
+        
+        it.skip("visit thru", function(done) {
+            groupTarget=file.openGroup('pmcservices/sodium-icosanoate/Documents', CreationOrder.H5P_CRT_ORDER_TRACKED| CreationOrder.H5P_CRT_ORDER_TRACKED);
+            groupTarget.id.should.not.equal(-1);
+            try {
+                var count=0;
+                file.visit(1, function(r, xpath) {
+                    //console.dir("visiting name: "+xpath);
+                    count++;
+                });
+                console.log("cout "+count);
+                count.should.equal(204);
+            } catch (e) {
+                console.log(e.message);
+            }
+            groupTarget.close();
+            done();
+        });
+        
+        after(function(done) {
+          file.close();
+          done();
+        });
+    });
+
 });
 
