@@ -168,6 +168,98 @@ namespace NodeHDF5 {
         return subsetOn;
     }
     
+    inline static int get_array_rank(v8::Local<v8::Array> array){
+      v8::Isolate* isolate = v8::Isolate::GetCurrent();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
+        int rank=1;
+        v8::Local<v8::Array> arrayCheck=array;
+        bool look=true;
+        while(look){
+        v8::Local<v8::Array> names = arrayCheck->ToObject(context).ToLocalChecked()->GetOwnPropertyNames(context).ToLocalChecked();
+        bool hit=false;
+        for (uint32_t index = 0; !hit && index < names->Length(); index++) {
+          if (arrayCheck->ToObject(context).ToLocalChecked()->Get(names->Get(index))->ToObject(context).ToLocalChecked()->IsArray()) {
+              arrayCheck=v8::Local<v8::Array>::Cast(arrayCheck->ToObject(context).ToLocalChecked()->Get(names->Get(index))->ToObject(context).ToLocalChecked());
+              hit=true;
+              rank++;
+          }
+        }
+        if(!hit)look=false;
+        }
+        return rank;
+    }
+    
+    inline static void get_array_dimensions(v8::Local<v8::Array> array, std::unique_ptr<hsize_t[]>& dims, int rank){
+      v8::Isolate* isolate = v8::Isolate::GetCurrent();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
+        v8::Local<v8::Array> arrayCheck=array;
+        int count=0;
+        dims[count++]=arrayCheck->Length();
+        bool look=true;
+        while(look && count<rank){
+        v8::Local<v8::Array> names = arrayCheck->ToObject(context).ToLocalChecked()->GetOwnPropertyNames(context).ToLocalChecked();
+        bool hit=false;
+        for (uint32_t index = 0; !hit && index < names->Length(); index++) {
+          if (arrayCheck->ToObject(context).ToLocalChecked()->Get(names->Get(index))->ToObject(context).ToLocalChecked()->IsArray()) {
+            arrayCheck=v8::Local<v8::Array>::Cast(arrayCheck->ToObject(context).ToLocalChecked()->Get(names->Get(index))->ToObject(context).ToLocalChecked());
+            hit=true;
+            dims[count++]=arrayCheck->Length();
+          }
+        }
+        if(!hit)look=false;
+        }
+    }
+
+    static void fill_buffer_from_multi_array(v8::Local<v8::Array> array, std::unique_ptr<char[]>& vl, unsigned int fixedWidth, unsigned int& index, int rank){
+      v8::Isolate* isolate = v8::Isolate::GetCurrent();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
+        v8::Local<v8::Array> names = array->ToObject(context).ToLocalChecked()->GetOwnPropertyNames(context).ToLocalChecked();
+        for (uint32_t arrayIndex = 0; arrayIndex < names->Length(); arrayIndex++) {
+          if (array->ToObject(context).ToLocalChecked()->Get(names->Get(arrayIndex))->ToObject(context).ToLocalChecked()->IsArray()) {
+            v8::Local<v8::Array> arrayCheck=Local<v8::Array>::Cast(array->ToObject(context).ToLocalChecked()->Get(names->Get(arrayIndex))->ToObject(context).ToLocalChecked());
+            fill_buffer_from_multi_array(arrayCheck, vl, fixedWidth, index, rank);
+          }
+          else{
+          std::string s;
+          v8::String::Utf8Value buffer(isolate, array->Get(arrayIndex)->ToString(context).ToLocalChecked());
+          s.assign(*buffer);
+          if (fixedWidth < s.length()) {
+              throw Exception("failed fixed width was too small: "+std::to_string(fixedWidth));
+          }
+          std::strncpy(&vl.get()[fixedWidth * index], s.c_str(), s.length());
+          index++;
+              
+          }
+        }
+    }
+    
+    static void fill_multi_array(v8::Local<v8::Array>& array, std::unique_ptr<char[]>& tbuffer, std::unique_ptr<hsize_t[]>& dims, std::unique_ptr<hsize_t[]>& count, size_t fixedWidth, hsize_t& index, int depth, int rank){
+      v8::Isolate* isolate = v8::Isolate::GetCurrent();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
+
+        for (uint32_t arrayIndex = 0; arrayIndex < std::min(dims.get()[depth], count.get()[depth]); arrayIndex++) {
+          if (depth<rank-1) {
+            v8::Local<v8::Array> arrayCheck=v8::Array::New(v8::Isolate::GetCurrent(), std::min(dims.get()[depth], count.get()[depth]));
+            int ldepth=depth+1;
+            fill_multi_array(arrayCheck, tbuffer, dims, count, fixedWidth, index, ldepth, rank);
+            array->Set(arrayIndex, arrayCheck);
+          }
+          else{
+              hsize_t realLength=0;
+              while(realLength<fixedWidth && ((char)tbuffer.get()[fixedWidth * index+realLength])!=0){
+                realLength++;
+              }
+              array->Set(arrayIndex,
+                         v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),
+                                             &tbuffer.get()[fixedWidth * index],
+                                             v8::String::kNormalString,
+                                             realLength));
+              index++;
+              
+          }
+        }
+    }
+    
     inline static unsigned int get_fixed_width(v8::Local<v8::Object> options) {
       v8::Isolate* isolate = v8::Isolate::GetCurrent();
       v8::Local<v8::Context> context = isolate->GetCurrentContext();
@@ -757,24 +849,26 @@ namespace NodeHDF5 {
       bool hasOptionType=false;
       get_type(options, [&](hid_t _type_id){hasOptionType=true;});
       hid_t        dcpl       = H5Pcreate(H5P_DATASET_CREATE);
-      int          rank       = 1;
+      int          rank       = get_array_rank(array);
+      std::unique_ptr<hsize_t[]> countSpace(new hsize_t[rank]);
+      get_array_dimensions(array, countSpace, rank);
       unsigned int fixedWidth = get_fixed_width(options);
+      std::unique_ptr<hsize_t[]> maxsize(new hsize_t[rank]);
+      unsigned int totalSize=1;
+      for(int rankIndex=0;rankIndex<rank;rankIndex++){
+        totalSize*=countSpace[rankIndex];
+        maxsize[rankIndex]=H5S_UNLIMITED;
+      }
       if (fixedWidth > 0) {
-        std::unique_ptr<char[]> vl(new char[fixedWidth * array->Length()]);
-        std::memset(vl.get(), 0, fixedWidth * array->Length());
-          std::string s;
-        for (unsigned int arrayIndex = 0; arrayIndex < array->Length(); arrayIndex++) {
-          String::Utf8Value buffer(isolate, array->Get(context, arrayIndex).ToLocalChecked()->ToString(context).ToLocalChecked());
-          s.assign(*buffer);
-          if (fixedWidth < s.length()) {
-            v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed fixed length to make var len dataset")));
+        std::unique_ptr<char[]> vl(new char[fixedWidth * totalSize]);
+        std::memset(vl.get(), 0, fixedWidth * totalSize);
+        unsigned int index=0;
+        try{
+          fill_buffer_from_multi_array(array, vl, fixedWidth, index, rank);
+        } catch (Exception& ex) {
+          v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
             return;
-          }
-          std::strncpy(&vl.get()[fixedWidth * arrayIndex], s.c_str(), s.length());
         }
-        std::unique_ptr<hsize_t[]> countSpace(new hsize_t[rank]);
-        countSpace.get()[0] = array->Length();
         hid_t memspace_id   = H5Screate_simple(rank, countSpace.get(), NULL);
         hid_t type_id       = H5Tcopy(H5T_C_S1);
         H5Tset_size(type_id, fixedWidth);
@@ -791,8 +885,6 @@ namespace NodeHDF5 {
         H5Sclose(memspace_id);
         H5Pclose(dcpl);
       } else if(hasOptionType){
-        std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
-        count.get()[0] = array->Length();
         std::unique_ptr<hvl_t[]> vl(new hvl_t[array->Length()]);
         for (unsigned int arrayIndex = 0; arrayIndex < array->Length(); arrayIndex++) {
           char* buffer = (char*)node::Buffer::Data(array->Get(arrayIndex));
@@ -802,7 +894,7 @@ namespace NodeHDF5 {
           vl.get()[arrayIndex].len = length;
           std::memcpy(vl.get()[arrayIndex].p, buffer, length);
         }
-        hid_t memspace_id = H5Screate_simple(rank, count.get(), NULL);
+        hid_t memspace_id = H5Screate_simple(rank, countSpace.get(), NULL);
         hid_t type_id;
           get_type(options, [&](hid_t _type_id){type_id=H5Tvlen_create(_type_id);});
         hid_t did = H5Dcreate(group_id, dset_name, type_id, memspace_id, H5P_DEFAULT, dcpl, H5P_DEFAULT);
@@ -820,8 +912,6 @@ namespace NodeHDF5 {
         H5Pclose(dcpl);
         
       } else {
-        std::unique_ptr<hsize_t[]> count(new hsize_t[rank]);
-        count.get()[0] = array->Length();
         std::unique_ptr<char*[]> vl(new char*[array->Length()]);
         for (unsigned int arrayIndex = 0; arrayIndex < array->Length(); arrayIndex++) {
           String::Utf8Value buffer(isolate, array->Get(context, arrayIndex).ToLocalChecked());
@@ -830,7 +920,7 @@ namespace NodeHDF5 {
           vl.get()[arrayIndex][buffer.length()]=0;
           std::memcpy(vl.get()[arrayIndex], *buffer, buffer.length());
         }
-        hid_t memspace_id = H5Screate_simple(rank, count.get(), NULL);
+        hid_t memspace_id = H5Screate_simple(rank, countSpace.get(), NULL);
         hid_t type_id     = H5Tcopy(H5T_C_S1);
         H5Tset_size(type_id, H5T_VARIABLE);
         hid_t did = H5Dcreate(group_id, dset_name, type_id, memspace_id, H5P_DEFAULT, dcpl, H5P_DEFAULT);
@@ -1428,11 +1518,11 @@ namespace NodeHDF5 {
             }
             args.GetReturnValue().Set(array);
             H5Tclose(basetype_id);
-          } else if (rank == 1 && values_dim.get()[0] > 0) {
+          } else if (rank > 1 && values_dim.get()[0] > 0) {
             hid_t                   dataspace_id = H5S_ALL;
             hid_t                   memspace_id  = H5S_ALL;
             size_t                  typeSize     = H5Tget_size(t);
-            std::unique_ptr<char[]> tbuffer(new char[typeSize * values_dim.get()[0]]);
+            std::unique_ptr<char[]> tbuffer(new char[typeSize * theSize]);
             size_t                  nalloc;
             H5Tencode(type_id, NULL, &nalloc);
             H5Tencode(type_id, tbuffer.get(), &nalloc);
@@ -1454,23 +1544,10 @@ namespace NodeHDF5 {
               arrayMaximum=std::min(values_dim.get()[0], arrayStart+count.get()[0]);
             }
             Local<Array> array = Array::New(v8::Isolate::GetCurrent(), std::min(values_dim.get()[0], count.get()[0]));
-            for (unsigned int arrayIndex = arrayStart; arrayIndex < arrayMaximum; arrayIndex++) {
-              realLength=0;
-              while(realLength<typeSize && ((char)tbuffer.get()[typeSize * arrayIndex+realLength])!=0){
-                realLength++;
-              }
-              v8::Maybe<bool> ret = array->Set(context, arrayIndex-arrayStart,
-                         String::NewFromUtf8(v8::Isolate::GetCurrent(),
-                                             &tbuffer.get()[typeSize * arrayIndex],
-                                             v8::NewStringType::kNormal,
-                                             realLength).ToLocalChecked());
-              if(ret.ToChecked()){
-                
-              }
-            }
+            fill_multi_array(array, tbuffer, values_dim, count, typeSize, arrayStart, 0, rank);
             args.GetReturnValue().Set(array);
           } else {
-            std::string buffer(theSize + 1, 0);
+            std::string buffer(bufSize*theSize + 1, 0);
             err = H5LTread_dataset_string(idWrap->Value(), *dset_name, (char*)buffer.c_str());
             if (err < 0) {
               v8::Isolate::GetCurrent()->ThrowException(

@@ -11,11 +11,13 @@ const globs         = require('../lib/globals');
 
 const hdf5          = hdf5Lib.hdf5;
 const h5lt          = hdf5Lib.h5lt;
+
 const Access        = globs.Access;
 const CreationOrder = globs.CreationOrder;
 const State         = globs.State;
 const HLType        = globs.HLType;
 const H5Type        = globs.H5Type;
+const H5OType       = globs.H5OType;
 
 describe("testing lite interface ", function() {
 
@@ -741,6 +743,51 @@ describe("testing lite interface ", function() {
             group=file.openGroup('pmcservices/Quotes');
             const array=h5lt.readDataset(group.id, 'Mark Twain');
             group.close();
+            done();
+        });
+        after(function(done) {
+          file.close();
+          done();
+        });
+    });
+
+    describe("fixed char multi-dimension arrays", function() {
+        let file;
+        before(function(done) {
+          file = new hdf5.File('./pmc.h5', Access.ACC_RDWR);
+          done();
+        });
+        it("create 2d array of strings", function(done) {
+           try{
+           let group=file.createGroup('pmcservices');
+            const rotation=new Array(3);
+            rotation[0]=new Array(3);
+            rotation[0][0]="1";
+            rotation[0][1]="0";
+            rotation[0][2]="0";
+            rotation[1]=new Array(3);
+            rotation[1][0]="0";
+            rotation[1][1]="\\cos\\theta";
+            rotation[1][2]="-\\sin\\theta";
+            rotation[2]=new Array(3);
+            rotation[2][0]="0";
+            rotation[2][1]="\\sin\\theta";
+            rotation[2][2]="\\cos\\theta";
+
+
+
+            h5lt.makeDataset(group.id, "Rotation", rotation, {fixed_width : 12});
+            group.close();
+            file.close();
+            file = new hdf5.File('./pmc.h5', Access.ACC_RDWR);
+            group=file.openGroup('pmcservices');
+            const matrix=h5lt.readDataset(group.id, 'Rotation');
+            matrix[1][1].should.equal("\\cos\\theta");
+            console.dir(matrix);
+            group.close();
+            } catch (e) {
+                console.log(e.message);
+            }
             done();
         });
         after(function(done) {

@@ -1,9 +1,6 @@
 language: node_js
 node_js:
-  - "node"
-  - "10"
-  - "9"
-  - "8"
+  - "12"
   
 env:
   - GCC_VERSION="export CC=gcc-7 && export CXX=g++-7"
