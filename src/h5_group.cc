@@ -50,6 +50,8 @@ namespace NodeHDF5 {
     // set properties
     t->SetClassName(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Group"));
     t->InstanceTemplate()->SetInternalFieldCount(1);
+    t->InstanceTemplate()->SetHandler(v8::NamedPropertyHandlerConfiguration(
+      nullptr, nullptr, nullptr, QueryCallbackDelete));
 
     // member method prototypes
     NODE_SET_PROTOTYPE_METHOD(t, "create", Create);

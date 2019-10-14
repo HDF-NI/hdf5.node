@@ -104,6 +104,24 @@ describe("testing attribute interface",function(){
             done();
         });
         
+        it("should create and delete attribute via delete", function(done) {
+            const group   = file.openGroup('pmc/refinement');
+            group.refresh();
+            group.unitCell="1 1 1 90 90 90";
+            group.flush();
+            var unitCell = group.readAttribute("unitCell");
+            unitCell.should.equal("1 1 1 90 90 90");
+            delete group.unitCell;
+            try{
+              unitCell = group.readAttribute("unitCell");
+              }
+              catch (e) {
+                e.message.should.equal("Attribute 'unitCell' does not exist.");
+              }
+            group.close();
+            done();
+        });
+        
         after(function(done){
             file.close();
             done();

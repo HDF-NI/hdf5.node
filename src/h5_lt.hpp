@@ -260,6 +260,20 @@ namespace NodeHDF5 {
       return options->Get(name)->Uint32Value();
     }
 
+    inline static H5T_str_t get_padding(Handle<Object> options) {
+      if (options.IsEmpty()) {
+        return H5T_STR_NULLTERM;
+      }
+
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "padding"));
+
+      if (!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
+        return H5T_STR_NULLTERM;
+      }
+
+      return (H5T_str_t)options->Get(name)->Uint32Value();
+    }
+
     static void get_type(Handle<Object> options, std::function<void(hid_t)> cb) {
       if (options.IsEmpty()) {
         return;
@@ -813,6 +827,7 @@ namespace NodeHDF5 {
       std::unique_ptr<hsize_t[]> countSpace(new hsize_t[rank]);
       get_array_dimensions(array, countSpace, rank);
       unsigned int fixedWidth = get_fixed_width(options);
+      H5T_str_t padding = get_padding(options);
       std::unique_ptr<hsize_t[]> maxsize(new hsize_t[rank]);
       unsigned int totalSize=1;
       for(int rankIndex=0;rankIndex<rank;rankIndex++){
@@ -832,6 +847,7 @@ namespace NodeHDF5 {
         hid_t memspace_id   = H5Screate_simple(rank, countSpace.get(), NULL);
         hid_t type_id       = H5Tcopy(H5T_C_S1);
         H5Tset_size(type_id, fixedWidth);
+        if(padding>0)H5Tset_strpad(type_id, padding);
         hid_t  did = H5Dcreate(group_id, dset_name, type_id, memspace_id, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         herr_t err = H5Dwrite(did, type_id, memspace_id, H5S_ALL, H5P_DEFAULT, vl.get());
         if (err < 0) {
