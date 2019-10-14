@@ -782,6 +782,8 @@ describe("testing lite interface ", function() {
             file = new hdf5.File('./pmc.h5', Access.ACC_RDWR);
             group=file.openGroup('pmcservices');
             const matrix=h5lt.readDataset(group.id, 'Rotation');
+            matrix.length.should.equal(3);
+            matrix[1].length.should.equal(3);
             matrix[1][1].should.equal("\\cos\\theta");
             console.dir(matrix);
             group.close();
@@ -1089,6 +1091,7 @@ var start = process.hrtime();
             } catch (e) {
 
             }
+            groupTarget.close();
             done();
         });
         

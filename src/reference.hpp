@@ -104,7 +104,7 @@ namespace NodeHDF5 {
       //H5Rdereference(locId, H5P_DEFAULT, (H5R_type_t)args[1]->Int32Value(), (void *)obj->objectId);
       H5Rdereference2(locId, H5P_DEFAULT, (H5R_type_t)args[1]->Int32Value(isolate->GetCurrentContext()).ToChecked(), (void *)obj->objectId);
 #else
-      H5Rdereference(locId, (H5R_type_t)args[1]->Int32Value(), (void *)obj->objectId);
+      H5Rdereference(locId, (H5R_type_t)args[1]->Int32Value(isolate->GetCurrentContext()).ToChecked(), (void *)obj->objectId);
 #endif
       args.GetReturnValue().SetUndefined();
     }
