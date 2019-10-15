@@ -68,3 +68,13 @@ If attribute names conflict with this API you can read the attributes separately
     [group, attrs]= file.openGroup('pmc/refinement', {separate_attributes: true});
 
 ```
+
+If you want to delete an attribute on the file or a group
+```
+group.deleteAttribute("unitCell");
+```
+or
+```
+delete group.unitCell;
+```
+both will delete from the h5 without any further steps.
