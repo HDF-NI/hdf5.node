@@ -53,6 +53,8 @@ namespace NodeHDF5 {
     // set properties
     t->SetClassName(String::NewFromUtf8(isolate, "Group", v8::NewStringType::kInternalized).ToLocalChecked());
     t->InstanceTemplate()->SetInternalFieldCount(1);
+    t->InstanceTemplate()->SetHandler(v8::NamedPropertyHandlerConfiguration(
+      nullptr, nullptr, nullptr, QueryCallbackDelete));
 
     // member method prototypes
     setPrototypeMethod(isolate, t, v8::String::NewFromUtf8(isolate, "create", v8::NewStringType::kInternalized).ToLocalChecked(), Create);

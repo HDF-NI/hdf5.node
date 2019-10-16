@@ -776,12 +776,47 @@ describe("testing lite interface ", function() {
 
 
 
-            h5lt.makeDataset(group.id, "Rotation", rotation, {fixed_width : 12});
+            h5lt.makeDataset(group.id, "RotationX", rotation, {fixed_width : 12});
             group.close();
             file.close();
             file = new hdf5.File('./pmc.h5', Access.ACC_RDWR);
             group=file.openGroup('pmcservices');
-            const matrix=h5lt.readDataset(group.id, 'Rotation');
+            const matrix=h5lt.readDataset(group.id, 'RotationX');
+            matrix.length.should.equal(3);
+            matrix[1].length.should.equal(3);
+            matrix[1][1].should.equal("\\cos\\theta");
+            console.dir(matrix);
+            group.close();
+            } catch (e) {
+                console.log(e.message);
+            }
+            done();
+        });
+        it("create 2d array of strings with padding", function(done) {
+           try{
+           let group=file.createGroup('pmcservices');
+            const rotation=new Array(3);
+            rotation[0]=new Array(3);
+            rotation[0][0]="\\cos\\theta";
+            rotation[0][1]="-\\sin\\theta";
+            rotation[0][2]="0";
+            rotation[1]=new Array(3);
+            rotation[1][0]="\\sin\\theta";
+            rotation[1][1]="\\cos\\theta";
+            rotation[1][2]="0";
+            rotation[2]=new Array(3);
+            rotation[2][0]="0";
+            rotation[2][1]="0";
+            rotation[2][2]="1";
+
+
+
+            h5lt.makeDataset(group.id, "RotationZ", rotation, {fixed_width : 12, padding : H5Type.H5T_STR_SPACEPAD});
+            group.close();
+            file.close();
+            file = new hdf5.File('./pmc.h5', Access.ACC_RDWR);
+            group=file.openGroup('pmcservices');
+            const matrix=h5lt.readDataset(group.id, 'RotationZ');
             matrix.length.should.equal(3);
             matrix[1].length.should.equal(3);
             matrix[1][1].should.equal("\\cos\\theta");
@@ -830,6 +865,7 @@ describe("testing lite interface ", function() {
             group.close();
             done();
         });
+
         after(function(done) {
           file.close();
           done();

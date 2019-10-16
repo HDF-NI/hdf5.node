@@ -13,6 +13,20 @@
 
 namespace NodeHDF5 {
 
+    void Methods::QueryCallbackDelete(
+        v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Boolean>& info) {
+    v8::Isolate* isolate = info.GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
+      //info.GetReturnValue().Set(v8::PropertyAttribute::DontDelete);
+     v8::String::Utf8Value attribute_name(isolate, property->ToString(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocalChecked());
+        
+        // unwrap group
+        Methods* group       = ObjectWrap::Unwrap<Methods>(info.This());
+        if(H5Aexists(group->id, (const char*)*attribute_name)){
+            herr_t err = H5Adelete(group->id, (const char*)*attribute_name);
+        }
+    }
+
   void Methods::GetNumAttrs(const v8::FunctionCallbackInfo<v8::Value>& args) {
     // unwrap group
     Methods* group = ObjectWrap::Unwrap<Methods>(args.This());
