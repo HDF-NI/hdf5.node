@@ -214,32 +214,33 @@ namespace NodeHDF5 {
           if (fixedWidth < s.length()) {
               throw Exception("failed fixed width was too small: "+std::to_string(fixedWidth));
           }
-          std::strncpy(&vl.get()[fixedWidth * index], s.c_str(), s.length());
+            std::strncpy(&vl.get()[fixedWidth * index], s.c_str(), s.length());
           index++;
               
           }
         }
     }
     
-    static void fill_multi_array(Handle<Array>& array, std::unique_ptr<char[]>& tbuffer, std::unique_ptr<hsize_t[]>& dims, std::unique_ptr<hsize_t[]>& count, size_t fixedWidth, hsize_t& index, int depth, int rank){
+    static void fill_multi_array(Handle<Array>& array, std::unique_ptr<char[]>& tbuffer, std::unique_ptr<hsize_t[]>& dims, std::unique_ptr<hsize_t[]>& count, size_t fixedWidth, hsize_t& index, int depth, int rank, H5T_str_t paddingType){
 
         for (uint32_t arrayIndex = 0; arrayIndex < std::min(dims.get()[depth], count.get()[depth]); arrayIndex++) {
           if (depth<rank-1) {
             Handle<Array> arrayCheck=Array::New(v8::Isolate::GetCurrent(), std::min(dims.get()[depth], count.get()[depth]));
             int ldepth=depth+1;
-            fill_multi_array(arrayCheck, tbuffer, dims, count, fixedWidth, index, ldepth, rank);
+            fill_multi_array(arrayCheck, tbuffer, dims, count, fixedWidth, index, ldepth, rank, paddingType);
             array->Set(arrayIndex, arrayCheck);
           }
           else{
-              hsize_t realLength=0;
-              while(realLength<fixedWidth && ((char)tbuffer.get()[fixedWidth * index+realLength])!=0){
-                realLength++;
-              }
-              array->Set(arrayIndex,
-                         String::NewFromUtf8(v8::Isolate::GetCurrent(),
-                                             &tbuffer.get()[fixedWidth * index],
-                                             String::kNormalString,
-                                             realLength));
+            hsize_t realLength=0;
+            char delimiter=(paddingType==H5T_STR_SPACEPAD) ? ' ' : 0;
+            while(realLength<fixedWidth && ((char)tbuffer.get()[fixedWidth * index+realLength])!=delimiter){
+              realLength++;
+            }
+            array->Set(arrayIndex,
+                       String::NewFromUtf8(v8::Isolate::GetCurrent(),
+                                           &tbuffer.get()[fixedWidth * index],
+                                           String::kNormalString,
+                                           realLength));
               index++;
               
           }
@@ -258,6 +259,20 @@ namespace NodeHDF5 {
       }
 
       return options->Get(name)->Uint32Value();
+    }
+
+    inline static H5T_str_t get_padding_type(Handle<Object> options) {
+      if (options.IsEmpty()) {
+        return H5T_STR_NULLTERM;
+      }
+
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "padding"));
+
+      if (!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
+        return H5T_STR_NULLTERM;
+      }
+
+      return (H5T_str_t)options->Get(name)->Uint32Value();
     }
 
     static void get_type(Handle<Object> options, std::function<void(hid_t)> cb) {
@@ -813,6 +828,7 @@ namespace NodeHDF5 {
       std::unique_ptr<hsize_t[]> countSpace(new hsize_t[rank]);
       get_array_dimensions(array, countSpace, rank);
       unsigned int fixedWidth = get_fixed_width(options);
+      H5T_str_t paddingType = get_padding_type(options);
       std::unique_ptr<hsize_t[]> maxsize(new hsize_t[rank]);
       unsigned int totalSize=1;
       for(int rankIndex=0;rankIndex<rank;rankIndex++){
@@ -821,7 +837,9 @@ namespace NodeHDF5 {
       }
       if (fixedWidth > 0) {
         std::unique_ptr<char[]> vl(new char[fixedWidth * totalSize]);
-        std::memset(vl.get(), 0, fixedWidth * totalSize);
+        
+        if(paddingType==H5T_STR_NULLTERM || paddingType==H5T_STR_NULLPAD)std::memset(vl.get(), 0, fixedWidth * totalSize);
+        else std::memset(vl.get(), ' ', fixedWidth * totalSize);
         unsigned int index=0;
         try{
           fill_buffer_from_multi_array(array, vl, fixedWidth, index, rank);
@@ -832,6 +850,7 @@ namespace NodeHDF5 {
         hid_t memspace_id   = H5Screate_simple(rank, countSpace.get(), NULL);
         hid_t type_id       = H5Tcopy(H5T_C_S1);
         H5Tset_size(type_id, fixedWidth);
+        if(paddingType>0)H5Tset_strpad(type_id, paddingType);
         hid_t  did = H5Dcreate(group_id, dset_name, type_id, memspace_id, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         herr_t err = H5Dwrite(did, type_id, memspace_id, H5S_ALL, H5P_DEFAULT, vl.get());
         if (err < 0) {
@@ -1470,6 +1489,7 @@ namespace NodeHDF5 {
             size_t                  nalloc;
             H5Tencode(type_id, NULL, &nalloc);
             H5Tencode(type_id, tbuffer.get(), &nalloc);
+            H5T_str_t paddingType=H5Tget_strpad(type_id);
             err = H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, tbuffer.get());
             if (err < 0) {
               H5Tclose(t);
@@ -1488,7 +1508,7 @@ namespace NodeHDF5 {
               arrayMaximum=std::min(values_dim.get()[0], arrayStart+count.get()[0]);
             }
             Local<Array> array = Array::New(v8::Isolate::GetCurrent(), std::min(values_dim.get()[0], count.get()[0]));
-            fill_multi_array(array, tbuffer, values_dim, count, typeSize, arrayStart, 0, rank);
+            fill_multi_array(array, tbuffer, values_dim, count, typeSize, arrayStart, 0, rank, paddingType);
             args.GetReturnValue().Set(array);
           } else {
             std::string buffer(bufSize*theSize + 1, 0);

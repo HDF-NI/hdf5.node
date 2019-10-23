@@ -126,6 +126,8 @@ namespace NodeHDF5 {
     Local<FunctionTemplate> t = FunctionTemplate::New(v8::Isolate::GetCurrent(), New);
     t->SetClassName(String::NewFromUtf8(v8::Isolate::GetCurrent(), "File"));
     t->InstanceTemplate()->SetInternalFieldCount(1);
+    t->InstanceTemplate()->SetHandler(v8::NamedPropertyHandlerConfiguration(
+      nullptr, nullptr, nullptr, QueryCallbackDelete));
     Constructor.Reset(v8::Isolate::GetCurrent(), t);
     // member method prototypes
     NODE_SET_PROTOTYPE_METHOD(t, "enableSingleWriteMultiRead", EnableSingleWriteMultiRead);

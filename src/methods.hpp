@@ -216,6 +216,7 @@ namespace NodeHDF5 {
 
     // static void Initialize (Handle<Object> target);
 
+    static void QueryCallbackDelete(v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Boolean>& info);
     static void GetNumAttrs(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void getAttributeNames(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void readAttribute(const v8::FunctionCallbackInfo<v8::Value>& args);
