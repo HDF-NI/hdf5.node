@@ -11,7 +11,7 @@
     "node": ">=6.0.0"
   },
   "devDependencies": {
-    "mocha": "5.1.1",
+    "mocha": "6.2.2",
     "should": "*",
     "xml2js": "*"
   },

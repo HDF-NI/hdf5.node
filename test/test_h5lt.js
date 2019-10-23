@@ -22,6 +22,7 @@ const H5OType       = globs.H5OType;
 describe("testing lite interface ", function() {
 
     describe("create an h5, group and some datasets ", function() {
+            this.timeout(10000);
         // open hdf file
         let file;
         before(function(done) {
@@ -372,7 +373,12 @@ describe("testing lite interface ", function() {
             done();
         });
         it("should close pmc ", function(done){
+            try{
             group.close();
+        }
+        catch(err){
+            console.log("err "+err.message);
+        }
             done();
         });
         after(function(done) {
@@ -382,6 +388,7 @@ describe("testing lite interface ", function() {
     });
 
     describe("create an h5, group and some documents ", function() {
+            this.timeout(35000);
         let file;
         before(function(done) {
           file = new hdf5.File('./pmc.h5', Access.ACC_TRUNC);
@@ -461,8 +468,8 @@ describe("testing lite interface ", function() {
                             h5lt.makeDataset(groupGeometries.id, '0', firstTrajectory, {rank: 2, rows: numberOfDataLines, columns: 3});
                             h5lt.makeDataset(groupGeometries.id, '1', lastTrajectory, {rank: 2, rows: numberOfDataLines, columns: 3});
                             const groupFrequencies=file.createGroup('pmcservices/sodium-icosanoate/Frequency Data/Frequencies');
-                            groupGeometries.close();
                             groupFrequencies.close();
+                            groupGeometries.close();
                             firstFrequency=false;
                             }
                             catch(err){
@@ -759,7 +766,7 @@ describe("testing lite interface ", function() {
         });
         it("create 2d array of strings", function(done) {
            try{
-           let group=file.createGroup('pmcservices');
+           let group=file.openGroup('pmcservices');
             const rotation=new Array(3);
             rotation[0]=new Array(3);
             rotation[0][0]="1";
@@ -786,7 +793,8 @@ describe("testing lite interface ", function() {
             console.dir(matrix);
             group.close();
             } catch (e) {
-                console.log(e.message);
+                console.log("bad "+e.message);
+                group.close();
             }
             done();
         });
@@ -922,6 +930,7 @@ var start = process.hrtime();
     });
     
     describe("create an xmol with frequency pulled from h5 ", function() {
+            this.timeout(35000);
         let file;
         before(function(done) {
           file = new hdf5.File('./pmc.h5', Access.ACC_RDONLY);
