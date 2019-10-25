@@ -766,7 +766,7 @@ describe("testing lite interface ", function() {
         });
         it("create 2d array of strings", function(done) {
            try{
-           let group=file.openGroup('pmcservices');
+           let group=file.createGroup('pmcservices');
             const rotation=new Array(3);
             rotation[0]=new Array(3);
             rotation[0][0]="1";
@@ -800,8 +800,9 @@ describe("testing lite interface ", function() {
             done();
         });
         it("create 2d array of strings with padding", function(done) {
+            let group;
            try{
-           let group=file.createGroup('pmcservices');
+            group=file.openGroup('pmcservices');
             const rotation=new Array(3);
             rotation[0]=new Array(3);
             rotation[0][0]="\\cos\\theta";
@@ -848,6 +849,7 @@ describe("testing lite interface ", function() {
           done();
         });
         it("create huge array of varlen's", function(done) {
+            this.timeout(7000);
             let group=file.createGroup('pmcservices/Huge Quotes');
             const quotes=new Array(7);
             quotes[0]="Never put off till tomorrow what may be done day after tomorrow just as well.";
