@@ -1423,7 +1423,11 @@ namespace NodeHDF5 {
         args.GetReturnValue().SetUndefined();
         return;
       }
-
+      if(!subsetOn){
+          for(int index=0;index<rank;index++){
+              count.get()[index]=values_dim.get()[index];
+          }
+      }
       hsize_t theSize = bufSize;
       switch (rank) {
         case 4: theSize = values_dim.get()[0] * values_dim.get()[1] * values_dim.get()[2] * values_dim.get()[3]; break;
@@ -1897,6 +1901,11 @@ namespace NodeHDF5 {
       if (args.Length() >= 3 && args[2]->IsObject()) {
         bindAttributes = is_bind_attributes(args, 2);
         subsetOn=get_dimensions(args, 2, start, stride, count, rank);
+      }
+      if(!subsetOn){
+          for(int index=0;index<rank;index++){
+              count.get()[index]=values_dim.get()[index];
+          }
       }
       switch (rank) {
         case 4: theSize = values_dim.get()[0] * values_dim.get()[1] * values_dim.get()[2] * values_dim.get()[3]; break;
