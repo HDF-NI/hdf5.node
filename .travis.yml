@@ -40,16 +40,17 @@ before_install:
       cd build;
       cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=../dist -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHDF5_BUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT=OFF  ..;
       cmake --build . > screen.txt;
+      ls 
       cmake --install;
       cd ../../;
+      export HDF5_HOME_WIN=`pwd`/hdf5-1.10.5/dist;
     fi
   
 install:
-  - export HDF5_HOME_MAC=`pwd`/hdf5-1.10.5/dist
   - export HDF5_HOME_LINUX=/usr/lib/x86_64-linux-gnu/hdf5/serial
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then echo ${HDF5_HOME} ; else eval "${GCC_VERSION}" ; fi
   # ${CXX} --version
-  - npm install --longlong_type=LONGLONG53BITS --hdf5_home_mac=${HDF5_HOME_MAC} --hdf5_home_linux=${HDF5_HOME_LINUX}
+  - npm install --longlong_type=LONGLONG53BITS --hdf5_home_mac=${HDF5_HOME_MAC} --hdf5_home_linux=${HDF5_HOME_LINUX} --hdf5_home_win=${HDF5_HOME_WIN}
 
 before-scripte:
   - export PATH=`pwd`/node_modules/.bin:${PATH}
