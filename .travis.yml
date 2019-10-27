@@ -33,13 +33,13 @@ before_install:
       cd ..;
       export HDF5_HOME_MAC=`pwd`/hdf5-1.10.5/dist;
     elif [[ "$TRAVIS_OS_NAME" == "windows" ]] ; then
-      wget --no-check-certificate https://cmake.org/files/v3.15/cmake-3.15.4-win64-x64.zip -O /tmp/cmake-3.15.4-win64-x64.zip;
+      wget -q --no-check-certificate https://cmake.org/files/v3.15/cmake-3.15.4-win64-x64.zip -O /tmp/cmake-3.15.4-win64-x64.zip;
       unzip -q /tmp/cmake-3.15.4-win64-x64.zip;
       cd cmake-3.15.4-win64-x64;
       ls .;
       cd ..;
-      export PATH=`pwd`/cmake-3.15.4-win64-x64/dist/bin:${PATH}
-      wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.zip -O /tmp/hdf5-1.10.5.zip;
+      export PATH=`pwd`/cmake-3.15.4-win64-x64/dist/bin:${PATH};
+      wget -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.zip -O /tmp/hdf5-1.10.5.zip;
       unzip -q /tmp/hdf5-1.10.5.zip;
       cd hdf5-1.10.5;
       mkdir -p build;
