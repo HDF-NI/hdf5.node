@@ -30,7 +30,7 @@ before_install:
       ./configure --prefix=`pwd`/dist --enable-shared=yes --enable-static=no --enable-parallel=no --enable-hl --enable-build-mode=production --without-szlib;
       make -j2 2>&1 &> hdf5_screen.txt;
       make install;
-      cd ..
+      cd ..;
       export HDF5_HOME_MAC=`pwd`/hdf5-1.10.5/dist;
     elif [[ "$TRAVIS_OS_NAME" == "windows" ]] ; then
       wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.zip -O /tmp/hdf5-1.10.5.zip;
@@ -43,6 +43,7 @@ before_install:
       ls .;
       cmake --install;
       cd ../../;
+      ls `pwd`/hdf5-1.10.5/dist;
       export HDF5_HOME_WIN=`pwd`/hdf5-1.10.5/dist;
     fi
   
