@@ -42,6 +42,8 @@ before_install:
       cmake --build . > screen.txt;
       ls .;
       cmake --install;
+      nnake;
+      nmake install;
       cd ../../;
       ls `pwd`/hdf5-1.10.5/dist;
       export HDF5_HOME_WIN=`pwd`/hdf5-1.10.5/dist;
