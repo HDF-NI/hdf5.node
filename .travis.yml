@@ -37,11 +37,8 @@ before_install:
       unzip -q /tmp/cmake-3.15.4-win64-x64.zip;
       cd cmake-3.15.4-win64-x64;
       ls .;
-      #./bootstrap --prefix=`pwd`/dist --no-qt-gui;
-      #nmake;
-      #nmake install;
       cd ..;
-      export PATH=`pwd`/cmake-3.15.4-win64-x64/dist:${PATH}
+      export PATH=`pwd`/cmake-3.15.4-win64-x64/dist/bin:${PATH}
       wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.zip -O /tmp/hdf5-1.10.5.zip;
       unzip -q /tmp/hdf5-1.10.5.zip;
       cd hdf5-1.10.5;
