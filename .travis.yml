@@ -41,7 +41,7 @@ before_install:
       mkdir -p build;
       cd build;
       cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=../dist -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHDF5_BUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT=OFF  ..;
-      cmake --build . > screen.txt;
+      cmake --build;
       which devenv.exe;
       devenv.exe //build;
       cd ../../;
