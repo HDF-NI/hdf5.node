@@ -43,7 +43,8 @@ before_install:
       cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=../dist -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHDF5_BUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT=OFF  ..;
       cmake --build . > screen.txt;
       ls .;
-      devenv.exe /build;
+      which devenv.exe;
+      devenv.exe //build;
       cd ../../;
       ls `pwd`/hdf5-1.10.5/dist;
       export HDF5_HOME_WIN=`pwd`/hdf5-1.10.5/dist;
