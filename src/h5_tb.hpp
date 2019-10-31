@@ -321,7 +321,7 @@ namespace NodeHDF5 {
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 8);
                     buffer->Set(context, j, Number::New(v8::Isolate::GetCurrent(), value));
                   }
-                  table->Set(i, buffer);
+                  table->Set(context, i, buffer);
                 } else {
                   Local<Array> buffer = Array::New(v8::Isolate::GetCurrent(), nrecords);
                   buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
