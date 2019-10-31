@@ -230,7 +230,7 @@ namespace NodeHDF5 {
 
           if (field->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kNormal).ToLocalChecked()).ToChecked()) { // explicit type
 #ifdef LONGLONG53BITS
-            hid_t type_id = toTypeMap[(H5T)field->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type")).ToLocalChecked()->Int32Value(context).ToChecked()];
+            hid_t type_id = toTypeMap[(H5T)field->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked()->Int32Value(context).ToChecked()];
             if (type_id==H5T_NATIVE_LLONG) {
               for (uint32_t j = 0; j < nrecords; j++) {
                 long long value = field->Get(context, j).ToLocalChecked()->NumberValue(context).ToChecked();
@@ -312,28 +312,28 @@ namespace NodeHDF5 {
               case 64:
                 if (H5Tget_sign(type) == H5T_SGN_NONE) {
                   Local<Array> buffer = Array::New(v8::Isolate::GetCurrent(), nrecords);
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"),
+                  buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
+                  buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kNormal).ToLocalChecked(),
                               Int32::New(v8::Isolate::GetCurrent(), toEnumMap[H5T_NATIVE_ULLONG]));
                   for (uint32_t j = 0; j < nrecords; j++) {
                     unsigned long long value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 8);
-                    buffer->Set(j, Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, Number::New(v8::Isolate::GetCurrent(), value));
                   }
                   table->Set(i, buffer);
                 } else {
                   Local<Array> buffer = Array::New(v8::Isolate::GetCurrent(), nrecords);
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"),
+                  buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
+                  buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"),
                               Int32::New(v8::Isolate::GetCurrent(), toEnumMap[H5T_NATIVE_LLONG]));
                   for (uint32_t j = 0; j < nrecords; j++) {
                     long long value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 8);
                     buffer->Set(j, Number::New(v8::Isolate::GetCurrent(), value));
                   }
-                  table->Set(i, buffer);
+                  table->Set(context, i, buffer);
                 }
                 break;
 #endif
