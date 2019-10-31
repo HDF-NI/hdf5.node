@@ -27,39 +27,39 @@ namespace NodeHDF5 {
       v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
       // append this function to the exports object
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeTable"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeTable", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::make_table)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readTable"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "readTable", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::read_table)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "appendRecords"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "appendRecords", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::append_records)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "writeRecords"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "writeRecords", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::write_records)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readRecords"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "readRecords", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::read_records)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "deleteRecord"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "deleteRecord", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::delete_record)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "insertRecord"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "insertRecord", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::insert_record)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "writeFieldsName"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "writeFieldsName", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::write_fields_name)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "writeFieldsIndex"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "writeFieldsIndex", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::write_fields_index)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readFieldsName"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "readFieldsName", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::read_fields_name)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readFieldsIndex"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "readFieldsIndex", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::read_fields_index)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "getTableInfo"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "getTableInfo", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::get_table_info)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "getFieldInfo"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "getFieldInfo", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::get_field_info)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "deleteField"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "deleteField", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::delete_field)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "insertField"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "insertField", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::insert_field)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "addRecordsFrom"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "addRecordsFrom", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::add_records_from)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "combineTables"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "combineTables", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::combine_tables)->GetFunction(context).ToLocalChecked());
     }
 
@@ -135,9 +135,9 @@ namespace NodeHDF5 {
           nrecords               = field->Length();
           field_offsets[i]       = type_size;
 
-          if (field->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type")).ToChecked()) { // explicit type
+          if (field->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kNormal).ToLocalChecked()).ToChecked()) { // explicit type
 #ifdef LONGLONG53BITS
-            hid_t type_id = toTypeMap[(H5T)field->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type")).ToLocalChecked()->Int32Value(context).ToChecked()];
+            hid_t type_id = toTypeMap[(H5T)field->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked()->Int32Value(context).ToChecked()];
             if (type_id==H5T_NATIVE_LLONG || type_id==H5T_NATIVE_ULLONG) {
               field_sizes[i] = 8;
               type_size += 8;
@@ -228,7 +228,7 @@ namespace NodeHDF5 {
         } else if (table->Get(context, i).ToLocalChecked()->IsArray()) {
           Local<v8::Array> field = Local<v8::Array>::Cast(table->Get(context, i).ToLocalChecked());
 
-          if (field->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type")).ToChecked()) { // explicit type
+          if (field->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kNormal).ToLocalChecked()).ToChecked()) { // explicit type
 #ifdef LONGLONG53BITS
             hid_t type_id = toTypeMap[(H5T)field->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type")).ToLocalChecked()->Int32Value(context).ToChecked()];
             if (type_id==H5T_NATIVE_LLONG) {
@@ -270,6 +270,9 @@ namespace NodeHDF5 {
                              std::unique_ptr<size_t[]> field_offsets,
                              std::unique_ptr<char[]>   data,
                              Local<v8::Array>&         table) {
+      v8::Isolate*    isolate = v8::Isolate::GetCurrent();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
+           
       for (uint32_t i = 0; i < nfields; i++) {
         hid_t type = H5Tget_member_type(dataset_type, field_indices[i]);
 
@@ -278,29 +281,29 @@ namespace NodeHDF5 {
             if (H5Tget_precision(type) == 64) {
               Local<ArrayBuffer>  arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), 8 * nrecords);
               Local<Float64Array> buffer      = Float64Array::New(arrayBuffer, 0, nrecords);
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
-                          String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
+              buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
+                          String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
 
               for (uint32_t j = 0; j < nrecords; j++) {
                 double value;
                 std::memcpy(&value, &data[j * type_size + field_offsets[i]], 8);
-                buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
               }
 
-              table->Set(i, buffer);
+              table->Set(context, i, buffer);
             } else if (H5Tget_precision(type) == 32) {
               Local<ArrayBuffer>  arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), 4 * nrecords);
               Local<Float32Array> buffer      = Float32Array::New(arrayBuffer, 0, nrecords);
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
-                          String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
+              buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
+                          String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
 
               for (uint32_t j = 0; j < nrecords; j++) {
                 float value;
                 std::memcpy(&value, &data[j * type_size + field_offsets[i]], 4);
-                buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
               }
 
-              table->Set(i, buffer);
+              table->Set(context, i, buffer);
             }
             break;
           case H5T_INTEGER:
@@ -338,95 +341,95 @@ namespace NodeHDF5 {
                 if (H5Tget_sign(type) == H5T_SGN_NONE) {
                   Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), 4 * nrecords);
                   Local<Uint32Array> buffer      = Uint32Array::New(arrayBuffer, 0, nrecords);
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
+                  buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
                   for (uint32_t j = 0; j < nrecords; j++) {
                     unsigned int value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 4);
-                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
                   }
 
-                  table->Set(i, buffer);
+                  table->Set(context, i, buffer);
                 } else {
                   Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), 4 * nrecords);
                   Local<Int32Array>  buffer      = Int32Array::New(arrayBuffer, 0, nrecords);
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
+                  buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
                   for (uint32_t j = 0; j < nrecords; j++) {
                     int value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 4);
-                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
                   }
 
-                  table->Set(i, buffer);
+                  table->Set(context, i, buffer);
                 }
                 break;
               case 16:
                 if (H5Tget_sign(type) == H5T_SGN_NONE) {
                   Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), 2 * nrecords);
                   Local<Uint16Array> buffer      = Uint16Array::New(arrayBuffer, 0, nrecords);
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
+                  buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
                   for (uint32_t j = 0; j < nrecords; j++) {
                     unsigned short value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 2);
-                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
                   }
 
-                  table->Set(i, buffer);
+                  table->Set(context, i, buffer);
                 } else {
                   Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), 2 * nrecords);
                   Local<Int16Array>  buffer      = Int16Array::New(arrayBuffer, 0, nrecords);
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
+                  buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
                   for (uint32_t j = 0; j < nrecords; j++) {
                     short value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 2);
-                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
                   }
 
-                  table->Set(i, buffer);
+                  table->Set(context, i, buffer);
                 }
                 break;
               case 8:
                 if (H5Tget_sign(type) == H5T_SGN_NONE) {
                   Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), nrecords);
                   Local<Uint8Array>  buffer      = Uint8Array::New(arrayBuffer, 0, nrecords);
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
+                  buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
                   for (uint32_t j = 0; j < nrecords; j++) {
                     unsigned char value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 1);
-                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
                   }
 
-                  table->Set(i, buffer);
+                  table->Set(context, i, buffer);
                 } else {
                   Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), nrecords);
                   Local<Int8Array>   buffer      = Int8Array::New(arrayBuffer, 0, nrecords);
-                  buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
+                  buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
                   for (uint32_t j = 0; j < nrecords; j++) {
                     char value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 1);
-                    buffer->Set(j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
                   }
 
-                  table->Set(i, buffer);
+                  table->Set(context, i, buffer);
                 }
                 break;
             }
             break;
           case H5T_STRING: {
             Local<Array> buffer = Array::New(v8::Isolate::GetCurrent(), nrecords);
-            buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "name"),
-                        String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i]));
+            buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
+                        String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
             for (uint32_t j = 0; j < nrecords; j++) {
               std::string cell(&data[j * type_size + field_offsets[i]], H5Tget_size(type));
-              buffer->Set(j, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), cell.c_str()));
+              buffer->Set(context, j, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), cell.c_str(), v8::NewStringType::kNormal).ToLocalChecked());
             }
 
-            table->Set(i, buffer);
+            table->Set(context, i, buffer);
           } break;
           default: throw Exception("unsupported data type"); break;
         }
@@ -441,7 +444,7 @@ namespace NodeHDF5 {
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsArray()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, model")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, model", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -451,7 +454,7 @@ namespace NodeHDF5 {
       for (unsigned int i = 0; i < table->Length(); i++) {
         field_names.get()[i] = (char*)malloc(sizeof(char) * 255);
         std::memset(field_names.get()[i], 0, 255);
-        String::Utf8Value field_name(isolate, table->Get(context, i).ToLocalChecked()->ToObject(context).ToLocalChecked()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name")).ToLocalChecked()->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+        String::Utf8Value field_name(isolate, table->Get(context, i).ToLocalChecked()->ToObject(context).ToLocalChecked()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked()->ToString(isolate->GetCurrentContext()).ToLocalChecked());
         std::string       fieldName((*field_name));
         std::memcpy(field_names.get()[i], fieldName.c_str(), fieldName.length());
       }
@@ -485,16 +488,16 @@ namespace NodeHDF5 {
           std::string errStr =
               "Failed making table , " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
         }
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -507,7 +510,7 @@ namespace NodeHDF5 {
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -521,7 +524,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -539,7 +542,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed getting field info , " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -557,7 +560,7 @@ namespace NodeHDF5 {
         std::string errStr =
             "Failed reading table , " + tableName + " with return: " + std::to_string(err) + " " + std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -576,11 +579,11 @@ namespace NodeHDF5 {
                      std::move(data),
                      table);
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -596,7 +599,7 @@ namespace NodeHDF5 {
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsArray()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, model")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, model", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -618,16 +621,16 @@ namespace NodeHDF5 {
           std::string errStr = "Failed appending to table , " + tableName + " with return: " + std::to_string(err) + " " +
                                std::to_string(idWrap->Value()) + ".\n";
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
         }
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -640,7 +643,7 @@ namespace NodeHDF5 {
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -663,16 +666,16 @@ namespace NodeHDF5 {
           std::string errStr = "Failed writing to table, " + tableName + " with return: " + std::to_string(err) + " " +
                                std::to_string(idWrap->Value()) + ".\n";
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
         }
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -685,7 +688,7 @@ namespace NodeHDF5 {
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsUint32()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, nrecords")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, nrecords", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -699,7 +702,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -742,11 +745,11 @@ namespace NodeHDF5 {
                      std::move(data),
                      table);
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -762,7 +765,7 @@ namespace NodeHDF5 {
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsUint32()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, nrecords")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, nrecords", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -774,7 +777,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed deleting records from table, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -787,7 +790,7 @@ namespace NodeHDF5 {
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -810,16 +813,16 @@ namespace NodeHDF5 {
           std::string errStr = "Failed inserting to table, " + tableName + " with return: " + std::to_string(err) + " " +
                                std::to_string(idWrap->Value()) + ".\n";
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
         }
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -832,7 +835,7 @@ namespace NodeHDF5 {
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -844,7 +847,7 @@ namespace NodeHDF5 {
       for (unsigned int i = 0; i < table->Length(); i++) {
         model_field_names.get()[i] = (char*)malloc(sizeof(char) * 255);
         std::memset(model_field_names.get()[i], 0, 255);
-        String::Utf8Value field_name(isolate, table->Get(i)->ToObject(context).ToLocalChecked()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name")).ToLocalChecked()->ToString(context).ToLocalChecked());
+        String::Utf8Value field_name(isolate, table->Get(context, i).ToLocalChecked()->ToObject(context).ToLocalChecked()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked()->ToString(context).ToLocalChecked());
         std::string       fieldName((*field_name));
         fieldNames += fieldName;
         std::memcpy(model_field_names.get()[i], fieldName.c_str(), fieldName.length());
@@ -860,7 +863,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -895,16 +898,16 @@ namespace NodeHDF5 {
           std::string errStr = "Failed overwriting fields in table, " + tableName + " with return: " + std::to_string(err) + " " +
                                std::to_string(idWrap->Value()) + ".\n";
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
         }
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -920,7 +923,7 @@ namespace NodeHDF5 {
           !args[4]->IsArray()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model, indices")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model, indices", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -929,7 +932,7 @@ namespace NodeHDF5 {
       Local<v8::Array>       indices = Local<v8::Array>::Cast(args[4]);
       std::unique_ptr<int[]> field_indices(new int[indices->Length()]);
       for (unsigned int i = 0; i < indices->Length(); i++) {
-        field_indices[i] = indices->Get(i)->Uint32Value(context).ToChecked();
+        field_indices[i] = indices->Get(context, i).ToLocalChecked()->Uint32Value(context).ToChecked();
       }
       hsize_t nfields;
       hsize_t nrecords;
@@ -940,7 +943,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -977,16 +980,16 @@ namespace NodeHDF5 {
           std::string errStr = "Failed overwriting fields in table, " + tableName + " with return: " + std::to_string(err) + " " +
                                std::to_string(idWrap->Value()) + ".\n";
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
         }
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1002,7 +1005,7 @@ namespace NodeHDF5 {
           !args[4]->IsArray()) {
 
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(
-            String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, nrecords, model, field names")));
+            String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, nrecords, model, field names", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1016,7 +1019,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1088,7 +1091,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed reading fields in table, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1107,11 +1110,11 @@ namespace NodeHDF5 {
                      std::move(data),
                      table);
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1128,7 +1131,7 @@ namespace NodeHDF5 {
           !args[4]->IsArray()) {
 
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(
-            String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, nrecords, model, field indices")));
+            String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, nrecords, model, field indices", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1143,7 +1146,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed getting table info, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1153,7 +1156,7 @@ namespace NodeHDF5 {
       std::unique_ptr<char* []> model_field_names(new char*[indices->Length()]);
       std::unique_ptr<int[]>    field_indices(new int[indices->Length()]);
       for (unsigned int i = 0; i < indices->Length(); i++) {
-        field_indices[i]           = indices->Get(i)->Uint32Value(context).ToChecked();
+        field_indices[i]           = indices->Get(context, i).ToLocalChecked()->Uint32Value(context).ToChecked();
         model_field_names.get()[i] = (char*)malloc(sizeof(char) * 255);
         std::memset(model_field_names.get()[i], 0, 255);
       }
@@ -1217,7 +1220,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed reading fields in table, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1236,11 +1239,11 @@ namespace NodeHDF5 {
                      std::move(data),
                      table);
       } catch (Exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       } catch (std::exception& ex) {
-        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+        v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1256,7 +1259,7 @@ namespace NodeHDF5 {
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, field name")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, field name", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1269,7 +1272,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed deleting field from table, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1283,7 +1286,7 @@ namespace NodeHDF5 {
           !args[4]->IsString() || !args[5]->IsUint32()) {
 
         v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(
-            String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name1, start1, nrecords, name2, start2")));
+            String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name1, start1, nrecords, name2, start2", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1297,7 +1300,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed add records from table, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1311,7 +1314,7 @@ namespace NodeHDF5 {
           !args[4]->IsString()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id1, name1, id2, name2, name3")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id1, name1, id2, name2, name3", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1326,7 +1329,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed combining from table, " + tableName + " with return: " + std::to_string(err) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1339,13 +1342,13 @@ namespace NodeHDF5 {
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsUint32() || !args[3]->IsArray()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, start, model", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
       String::Utf8Value table_name(isolate, args[1]->ToString(context).ToLocalChecked());
       Local<v8::Array>  table = Local<v8::Array>::Cast(args[3]);
-      String::Utf8Value field_name(isolate, table->Get(context, 0).ToLocalChecked()->ToObject(context).ToLocalChecked()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name")).ToLocalChecked()->ToString(context).ToLocalChecked());
+      String::Utf8Value field_name(isolate, table->Get(context, 0).ToLocalChecked()->ToObject(context).ToLocalChecked()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked()->ToString(context).ToLocalChecked());
       std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>&&
           data = prepareData(table);
       try {

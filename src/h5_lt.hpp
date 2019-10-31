@@ -77,17 +77,17 @@ namespace NodeHDF5 {
       v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
       // append this function to the target object
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeDataset"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeDataset", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::make_dataset)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "writeDataset"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "writeDataset", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::write_dataset)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDatasetLength"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDatasetLength", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::read_dataset_length)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDatasetDatatype"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDatasetDatatype", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::read_dataset_datatype)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDataset"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDataset", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::read_dataset)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDatasetAsBuffer"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "readDatasetAsBuffer", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5lt::readDatasetAsBuffer)->GetFunction(context).ToLocalChecked());
     }
 
@@ -100,7 +100,7 @@ namespace NodeHDF5 {
           String::Utf8Value _name(isolate, names->Get(context, index).ToLocalChecked());
           std::string       name(*_name);
           if (name.compare("bind_attributes") == 0) {
-            bindAttributes = args[argIndex]->ToObject(context).ToLocalChecked()->Get(context, names->Get(context, index).ToLocalChecked()).ToLocalChecked()->ToBoolean(context).ToLocalChecked()->BooleanValue(isolate);
+            bindAttributes = args[argIndex]->ToObject(context).ToLocalChecked()->Get(context, names->Get(context, index).ToLocalChecked()).ToLocalChecked()->ToBoolean(isolate)->Value();
           }
         }
         return bindAttributes;
@@ -121,15 +121,15 @@ namespace NodeHDF5 {
           if (name.compare("start") == 0) {
             Local<Object> starts = args[argIndex]->ToObject(context).ToLocalChecked()->Get(context, names->Get(context, index).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
             for (unsigned int arrayIndex = 0;
-                 arrayIndex < starts->Get(context, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length")).ToLocalChecked()->ToObject(context).ToLocalChecked()->Uint32Value(context).ToChecked();
+                 arrayIndex < starts->Get(context, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length", v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked()->Uint32Value(context).ToChecked();
                  arrayIndex++) {
               start.get()[arrayIndex] = starts->Get(context, arrayIndex).ToLocalChecked()->Uint32Value(context).ToChecked();
             }
             gotStart=true;
           } else if (name.compare("stride") == 0) {
-            Local<Object> strides = args[argIndex]->ToObject(context).ToLocalChecked()->Get(context, names->Get(index)).ToLocalChecked()->ToObject(context).ToLocalChecked();
+            Local<Object> strides = args[argIndex]->ToObject(context).ToLocalChecked()->Get(context, names->Get(context, index).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
             for (unsigned int arrayIndex = 0;
-                 arrayIndex < strides->Get(context, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length")).ToLocalChecked()->ToObject(context).ToLocalChecked()->Uint32Value(context).ToChecked();
+                 arrayIndex < strides->Get(context, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length", v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked()->Uint32Value(context).ToChecked();
                  arrayIndex++) {
               stride.get()[arrayIndex] = strides->Get(context, arrayIndex).ToLocalChecked()->Uint32Value(context).ToChecked();
             }
@@ -137,7 +137,7 @@ namespace NodeHDF5 {
           } else if (name.compare("count") == 0) {
             Local<Object> counts = args[argIndex]->ToObject(context).ToLocalChecked()->Get(context, names->Get(context, index).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
             for (unsigned int arrayIndex = 0;
-                 arrayIndex < counts->Get(context, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length")).ToLocalChecked()->ToObject(context).ToLocalChecked()->Uint32Value(context).ToChecked();
+                 arrayIndex < counts->Get(context, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "length", v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked()->Uint32Value(context).ToChecked();
                  arrayIndex++) {
               count.get()[arrayIndex] = counts->Get(context, arrayIndex).ToLocalChecked()->Uint32Value(context).ToChecked();
               size++;
@@ -149,7 +149,7 @@ namespace NodeHDF5 {
         if(!gotStart && !gotStride && !gotCount)
           return false;
         if(!gotCount)v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Need to supply the subspace count dimensions. Start and stride are optional.")));
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Need to supply the subspace count dimensions. Start and stride are optional.", v8::NewStringType::kNormal).ToLocalChecked()));
         if(!gotStart){
           for (unsigned int arrayIndex = 0;
              arrayIndex < size;
@@ -178,8 +178,8 @@ namespace NodeHDF5 {
         v8::Local<v8::Array> names = arrayCheck->ToObject(context).ToLocalChecked()->GetOwnPropertyNames(context).ToLocalChecked();
         bool hit=false;
         for (uint32_t index = 0; !hit && index < names->Length(); index++) {
-          if (arrayCheck->ToObject(context).ToLocalChecked()->Get(names->Get(index))->ToObject(context).ToLocalChecked()->IsArray()) {
-              arrayCheck=v8::Local<v8::Array>::Cast(arrayCheck->ToObject(context).ToLocalChecked()->Get(names->Get(index))->ToObject(context).ToLocalChecked());
+          if (arrayCheck->ToObject(context).ToLocalChecked()->Get(context, names->Get(context, index).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked()->IsArray()) {
+              arrayCheck=v8::Local<v8::Array>::Cast(arrayCheck->ToObject(context).ToLocalChecked()->Get(context, names->Get(context, index).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked());
               hit=true;
               rank++;
           }
@@ -200,8 +200,8 @@ namespace NodeHDF5 {
         v8::Local<v8::Array> names = arrayCheck->ToObject(context).ToLocalChecked()->GetOwnPropertyNames(context).ToLocalChecked();
         bool hit=false;
         for (uint32_t index = 0; !hit && index < names->Length(); index++) {
-          if (arrayCheck->ToObject(context).ToLocalChecked()->Get(names->Get(index))->ToObject(context).ToLocalChecked()->IsArray()) {
-            arrayCheck=v8::Local<v8::Array>::Cast(arrayCheck->ToObject(context).ToLocalChecked()->Get(names->Get(index))->ToObject(context).ToLocalChecked());
+          if (arrayCheck->ToObject(context).ToLocalChecked()->Get(context, names->Get(context, index).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked()->IsArray()) {
+            arrayCheck=v8::Local<v8::Array>::Cast(arrayCheck->ToObject(context).ToLocalChecked()->Get(context, names->Get(context, index).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked());
             hit=true;
             dims[count++]=arrayCheck->Length();
           }
@@ -215,13 +215,13 @@ namespace NodeHDF5 {
       v8::Local<v8::Context> context = isolate->GetCurrentContext();
         v8::Local<v8::Array> names = array->ToObject(context).ToLocalChecked()->GetOwnPropertyNames(context).ToLocalChecked();
         for (uint32_t arrayIndex = 0; arrayIndex < names->Length(); arrayIndex++) {
-          if (array->ToObject(context).ToLocalChecked()->Get(names->Get(arrayIndex))->ToObject(context).ToLocalChecked()->IsArray()) {
-            v8::Local<v8::Array> arrayCheck=Local<v8::Array>::Cast(array->ToObject(context).ToLocalChecked()->Get(names->Get(arrayIndex))->ToObject(context).ToLocalChecked());
+          if (array->ToObject(context).ToLocalChecked()->Get(context, names->Get(context, arrayIndex).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked()->IsArray()) {
+            v8::Local<v8::Array> arrayCheck=Local<v8::Array>::Cast(array->ToObject(context).ToLocalChecked()->Get(context, names->Get(context, arrayIndex).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked());
             fill_buffer_from_multi_array(arrayCheck, vl, fixedWidth, index, rank);
           }
           else{
           std::string s;
-          v8::String::Utf8Value buffer(isolate, array->Get(arrayIndex)->ToString(context).ToLocalChecked());
+          v8::String::Utf8Value buffer(isolate, array->Get(context, arrayIndex).ToLocalChecked()->ToString(context).ToLocalChecked());
           s.assign(*buffer);
           if (fixedWidth < s.length()) {
               throw Exception("failed fixed width was too small: "+std::to_string(fixedWidth));
@@ -242,7 +242,7 @@ namespace NodeHDF5 {
             v8::Local<v8::Array> arrayCheck=v8::Array::New(v8::Isolate::GetCurrent(), std::min(dims.get()[depth], count.get()[depth]));
             int ldepth=depth+1;
             fill_multi_array(arrayCheck, tbuffer, dims, count, fixedWidth, index, ldepth, rank, paddingType);
-            array->Set(arrayIndex, arrayCheck);
+            array->Set(context, arrayIndex, arrayCheck);
           }
           else{
               hsize_t realLength=0;
@@ -250,11 +250,11 @@ namespace NodeHDF5 {
               while(realLength<fixedWidth && ((char)tbuffer.get()[fixedWidth * index+realLength])!=delimiter){
                 realLength++;
               }
-              array->Set(arrayIndex,
+              array->Set(context, arrayIndex,
                          v8::String::NewFromUtf8(v8::Isolate::GetCurrent(),
                                              &tbuffer.get()[fixedWidth * index],
-                                             v8::String::kNormalString,
-                                             realLength));
+                                             v8::NewStringType::kNormal,
+                                             realLength).ToLocalChecked());
               index++;
               
           }
@@ -284,13 +284,13 @@ namespace NodeHDF5 {
         return H5T_STR_NULLTERM;
       }
 
-      auto name(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "padding"));
+      auto name(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "padding", v8::NewStringType::kInternalized).ToLocalChecked());
 
       if (!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         return H5T_STR_NULLTERM;
       }
 
-      return (H5T_str_t)options->Get(name)->Uint32Value(context).ToChecked();
+      return (H5T_str_t)options->Get(context, name).ToLocalChecked()->Uint32Value(context).ToChecked();
     }
 
     static void get_type(v8::Local<v8::Object> options, std::function<void(hid_t)> cb) {
@@ -314,7 +314,7 @@ namespace NodeHDF5 {
         return;
       }
       
-      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"));
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank", v8::NewStringType::kInternalized).ToLocalChecked());
       if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         cb(options->Get(context, name).ToLocalChecked()->Uint32Value(context).ToChecked());
       }
@@ -327,7 +327,7 @@ namespace NodeHDF5 {
         return;
       }
       
-      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"));
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked());
 
       if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         cb(options->Get(context, name).ToLocalChecked()->Uint32Value(context).ToChecked());
@@ -341,7 +341,7 @@ namespace NodeHDF5 {
         return;
       }
       
-      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"));
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked());
 
       if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         cb(options->Get(context, name).ToLocalChecked()->Uint32Value(context).ToChecked());
@@ -355,7 +355,7 @@ namespace NodeHDF5 {
         return;
       }
       
-      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"));
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections", v8::NewStringType::kInternalized).ToLocalChecked());
 
       if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         cb(options->Get(context, name).ToLocalChecked()->Uint32Value(context).ToChecked());
@@ -369,7 +369,7 @@ namespace NodeHDF5 {
         return;
       }
       
-      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"));
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files", v8::NewStringType::kInternalized).ToLocalChecked());
 
       if (options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         cb(options->Get(context, name).ToLocalChecked()->Uint32Value(context).ToChecked());
@@ -383,7 +383,7 @@ namespace NodeHDF5 {
         return 0;
       }
 
-      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "compression"));
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "compression", v8::NewStringType::kInternalized).ToLocalChecked());
 
       if (!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         return 0;
@@ -399,7 +399,7 @@ namespace NodeHDF5 {
         return default_value;
       }
 
-      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), option_name));
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), option_name, v8::NewStringType::kInternalized).ToLocalChecked());
 
       if (!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         return default_value;
@@ -419,7 +419,7 @@ namespace NodeHDF5 {
         return dims;
       }
 
-      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "chunkSize"));
+      auto name(String::NewFromUtf8(v8::Isolate::GetCurrent(), "chunkSize", v8::NewStringType::kInternalized).ToLocalChecked());
 
       if (!options->HasOwnProperty(v8::Isolate::GetCurrent()->GetCurrentContext(), name).FromJust()) {
         return dims;
@@ -447,7 +447,7 @@ namespace NodeHDF5 {
         err = H5Pset_chunk(dcpl, rank, ds_dim);
         if (err) {
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout", v8::NewStringType::kInternalized).ToLocalChecked()));
           return false;
         }
 
@@ -457,7 +457,7 @@ namespace NodeHDF5 {
       err = H5Pset_chunk(dcpl, rank, chunk_dims.get());
       if (err) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set chunked layout", v8::NewStringType::kInternalized).ToLocalChecked()));
         return false;
       }
 
@@ -468,7 +468,7 @@ namespace NodeHDF5 {
       herr_t err = H5Pset_deflate(dcpl, compression);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set zip filter")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "Failed to set zip filter", v8::NewStringType::kInternalized).ToLocalChecked()));
         return false;
       }
 
@@ -478,13 +478,13 @@ namespace NodeHDF5 {
     static void make_dataset_from_buffer(const hid_t& group_id, const char* dset_name, v8::Local<v8::Object> buffer, v8::Local<v8::Object> options) {
       v8::Isolate* isolate = v8::Isolate::GetCurrent();
       v8::Local<v8::Context> context = isolate->GetCurrentContext();
-      Local<Value>      encodingValue = buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding")).ToLocalChecked();
+      Local<Value>      encodingValue = buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked();
       String::Utf8Value encoding(isolate, encodingValue->ToString(context).ToLocalChecked());
-      if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding")).ToChecked() && std::strcmp("binary", (*encoding))) {
+      if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked() && std::strcmp("binary", (*encoding))) {
         herr_t err = H5LTmake_dataset_string(group_id, dset_name, const_cast<char*>(node::Buffer::Data(buffer)));
         if (err < 0) {
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make char dataset")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make char dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
           return;
         }
         return;
@@ -514,14 +514,14 @@ namespace NodeHDF5 {
         propertyStartIndex=Local<Int8Array>::Cast(buffer)->Length();
       }
       else{
-        if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type")).ToChecked()) {
-          type_id = toTypeMap[(H5T)buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type")).ToLocalChecked()->Int32Value(context).ToChecked()];
+        if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked()) {
+          type_id = toTypeMap[(H5T)buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked()->Int32Value(context).ToChecked()];
         }
         else get_type(options, [&](hid_t _type_id){type_id=_type_id;});
       }
       int   rank    = 1;
-      if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank")).ToChecked()) {
-        Local<Value> rankValue = buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank")).ToLocalChecked();
+      if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked()) {
+        Local<Value> rankValue = buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked();
         rank                   = rankValue->Int32Value(context).ToChecked();
       }
       else get_rank(options, [&](int _rank){rank=_rank;});
@@ -543,12 +543,12 @@ namespace NodeHDF5 {
           }else{
             get_sections(options, [&](int sections){dims.get()[1]=sections;});
           }
-          if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns")).ToChecked()) {
+          if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked()) {
             dims.get()[3] = (hsize_t)buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked()->Int32Value(context).ToChecked();
           }else{
             get_columns(options, [&](int columns){dims.get()[3]=columns;});
           }
-          if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows")).ToChecked()) {
+          if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked()) {
             dims.get()[2] = (hsize_t)buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked()->Int32Value(context).ToChecked();
           }else{
             get_rows(options, [&](int rows){dims.get()[2]=rows;});
@@ -616,7 +616,7 @@ namespace NodeHDF5 {
       if (err < 0) {
         H5Pclose(dcpl);
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
         return;
       }
       H5Pclose(dcpl);
@@ -625,15 +625,15 @@ namespace NodeHDF5 {
       v8::Local<v8::Array> propertyNames = buffer->GetPropertyNames(context).ToLocalChecked();
       if(propertyStartIndex==0)propertyStartIndex=propertyNames->Length();
       for (hsize_t index = propertyStartIndex; index < propertyNames->Length(); index++) {
-        v8::Local<v8::Value> name = propertyNames->Get(index);
-        if (!buffer->Get(name)->IsFunction() && !buffer->Get(name)->IsArray() &&
+        v8::Local<v8::Value> name = propertyNames->Get(context, index).ToLocalChecked();
+        if (!buffer->Get(context, name).ToLocalChecked()->IsFunction() && !buffer->Get(context, name).ToLocalChecked()->IsArray() &&
             strncmp("id", (*String::Utf8Value(isolate, name->ToString(context).ToLocalChecked())), 2) != 0 &&
             strncmp("rank", (*String::Utf8Value(isolate, name->ToString(context).ToLocalChecked())), 4) != 0 &&
             strncmp("rows", (*String::Utf8Value(isolate, name->ToString(context).ToLocalChecked())), 4) != 0 &&
             strncmp("columns", (*String::Utf8Value(isolate, name->ToString(context).ToLocalChecked())), 7) != 0 &&
             strncmp("buffer", (*String::Utf8Value(isolate, name->ToString(context).ToLocalChecked())), 6) != 0) {
 
-          if (buffer->Get(name)->IsObject() || buffer->Get(name)->IsExternal()) {
+          if (buffer->Get(context, name).ToLocalChecked()->IsObject() || buffer->Get(context, name).ToLocalChecked()->IsExternal()) {
           } else if (buffer->Get(context, name).ToLocalChecked()->IsUint32()) {
             uint32_t value = buffer->Get(context, name).ToLocalChecked()->Uint32Value(context).ToChecked();
             if (H5Aexists_by_name(group_id, dset_name, (*String::Utf8Value(isolate, name->ToString(context).ToLocalChecked())), H5P_DEFAULT) > 0) {
@@ -702,18 +702,18 @@ namespace NodeHDF5 {
         if (err < 0) {
           H5Pclose(dcpl);
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
           return;
         }
         H5Pclose(dcpl);
       } else if (rank == 2) {
           
         hsize_t dims[2];
-        if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows")).ToChecked()) {
-          dims[0]= (hsize_t)buffer->Get(context, String::NewFromUtf8(isolate, "rows")).ToLocalChecked()->Int32Value(context).ToChecked();
+        if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked()) {
+          dims[0]= (hsize_t)buffer->Get(context, String::NewFromUtf8(isolate, "rows", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked()->Int32Value(context).ToChecked();
         }else get_rows(options, [&](int rows){dims[0]=rows;});
-        if (buffer->Has(context, String::NewFromUtf8(isolate, "columns")).ToChecked()) {
-        dims[1]= (hsize_t)buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns")).ToLocalChecked()->Int32Value(context).ToChecked();
+        if (buffer->Has(context, String::NewFromUtf8(isolate, "columns", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked()) {
+        dims[1]= (hsize_t)buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked()->Int32Value(context).ToChecked();
         }else get_columns(options, [&](int columns){dims[1]=columns;});
         unsigned int compression = get_compression(options);
         std::unique_ptr<hsize_t[]>&& chunk_dims = get_chunk_size(options, rank);
@@ -739,20 +739,20 @@ namespace NodeHDF5 {
         if (err < 0) {
           H5Pclose(dcpl);
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
           return;
         }
         H5Pclose(dcpl);
       } else if (rank == 3) {
         hsize_t dims[3];
-        if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows")).ToChecked()) {
-          dims[0]=(hsize_t)buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows")).ToLocalChecked()->Int32Value(context).ToChecked();
+        if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked()) {
+          dims[0]=(hsize_t)buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked()->Int32Value(context).ToChecked();
         }else get_rows(options, [&](int rows){dims[0]=rows;});
-        if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns")).ToChecked()) {
-          dims[1]=(hsize_t)buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns")).ToLocalChecked()->Int32Value(context).ToChecked();
+        if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked()) {
+          dims[1]=(hsize_t)buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked()->Int32Value(context).ToChecked();
         }else get_columns(options, [&](int columns){dims[1]=columns;});
-        if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections")).ToChecked()) {
-          dims[2]=(hsize_t)buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections")).ToLocalChecked()->Int32Value(context).ToChecked();
+        if (buffer->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked()) {
+          dims[2]=(hsize_t)buffer->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked()->Int32Value(context).ToChecked();
         }else get_sections(options, [&](int sections){dims[2]=sections;});
         unsigned int compression = get_compression(options);
         std::unique_ptr<hsize_t[]>&& chunk_dims  = get_chunk_size(options, rank);
@@ -778,20 +778,20 @@ namespace NodeHDF5 {
         if (err < 0) {
           H5Pclose(dcpl);
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
           return;
         }
         H5Pclose(dcpl);
       } else {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported rank")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported rank", v8::NewStringType::kInternalized).ToLocalChecked()));
         return;
       }
 
       // Atributes
       v8::Local<v8::Array> propertyNames = buffer->GetPropertyNames(context).ToLocalChecked();
       for (unsigned int index = buffer->Length(); index < propertyNames->Length(); index++) {
-        v8::Local<v8::Value> name = propertyNames->Get(index);
+        v8::Local<v8::Value> name = propertyNames->Get(context, index).ToLocalChecked();
         if (!buffer->Get(context, name).ToLocalChecked()->IsFunction() && !buffer->Get(context, name).ToLocalChecked()->IsArray() &&
             strncmp("id", (*String::Utf8Value(isolate, name->ToString(context).ToLocalChecked())), 2) != 0 &&
             strncmp("rank", (*String::Utf8Value(isolate, name->ToString(context).ToLocalChecked())), 4) != 0 &&
@@ -886,7 +886,7 @@ namespace NodeHDF5 {
         try{
           fill_buffer_from_multi_array(array, vl, fixedWidth, index, rank);
         } catch (Exception& ex) {
-          v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what())));
+          v8::Isolate::GetCurrent()->ThrowException(v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ex.what(), v8::NewStringType::kInternalized).ToLocalChecked()));
             return;
         }
         hid_t memspace_id   = H5Screate_simple(rank, countSpace.get(), NULL);
@@ -897,7 +897,7 @@ namespace NodeHDF5 {
         herr_t err = H5Dwrite(did, type_id, memspace_id, H5S_ALL, H5P_DEFAULT, vl.get());
         if (err < 0) {
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make var len dataset")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make var len dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
           return;
         }
 
@@ -908,8 +908,8 @@ namespace NodeHDF5 {
       } else if(hasOptionType){
         std::unique_ptr<hvl_t[]> vl(new hvl_t[array->Length()]);
         for (unsigned int arrayIndex = 0; arrayIndex < array->Length(); arrayIndex++) {
-          char* buffer = (char*)node::Buffer::Data(array->Get(arrayIndex));
-           hsize_t length=Local<v8::Int8Array>::Cast(array->Get(arrayIndex))->Length();
+          char* buffer = (char*)node::Buffer::Data(array->Get(context, arrayIndex).ToLocalChecked());
+           hsize_t length=Local<v8::Int8Array>::Cast(array->Get(context, arrayIndex).ToLocalChecked())->Length();
           //s.assign(*buffer);
           vl.get()[arrayIndex].p = new char[length];
           vl.get()[arrayIndex].len = length;
@@ -923,7 +923,7 @@ namespace NodeHDF5 {
         herr_t err = H5Dwrite(did, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, vl.get());
         if (err < 0) {
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make var len dataset")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make var len dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
           return;
         }
 //H5Dvlen_reclaim(type_id, did, dcpl, vl.get());
@@ -949,7 +949,7 @@ namespace NodeHDF5 {
         herr_t err = H5Dwrite(did, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, vl.get());
         if (err < 0) {
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make var len dataset")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make var len dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
           return;
         }
 
@@ -991,7 +991,7 @@ namespace NodeHDF5 {
 #else
       bufferAsUnit8Array=buffer->ToObject(context).ToLocalChecked()->IsUint8Array();
 #endif
-      if ((hasOptionType && !buffer->IsArray()) || (bufferAsUnit8Array && node::Buffer::HasInstance(buffer) && buffer->ToObject(context).ToLocalChecked()->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type")).ToChecked())) {
+      if ((hasOptionType && !buffer->IsArray()) || (bufferAsUnit8Array && node::Buffer::HasInstance(buffer) && buffer->ToObject(context).ToLocalChecked()->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked())) {
         make_dataset_from_buffer(group_id, dset_name, buffer->ToObject(context).ToLocalChecked(), options);
       } else if (buffer->IsString()) {
         make_dataset_from_string(group_id, dset_name, buffer->ToString(context).ToLocalChecked(), options);
@@ -1015,7 +1015,7 @@ namespace NodeHDF5 {
         make_dataset_from_typed_array(group_id, dset_name, Local<Uint8Array>::Cast(buffer), options, H5T_NATIVE_UINT8);
       } else {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type", v8::NewStringType::kInternalized).ToLocalChecked()));
       }
     }
 
@@ -1027,7 +1027,7 @@ namespace NodeHDF5 {
       if (args.Length() < 3 || args.Length() > 4 || !args[0]->IsObject() || !args[1]->IsString()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, buffer, [options]")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, buffer, [options]", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1039,7 +1039,7 @@ namespace NodeHDF5 {
       herr_t            err    = H5LTget_dataset_ndims(idWrap->Value(), *dset_name, &rank);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset rank")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset rank", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1047,7 +1047,7 @@ namespace NodeHDF5 {
       err = H5LTget_dataset_info(idWrap->Value(), *dset_name, values_dim.get(), &class_id, &bufSize);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset info")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset info", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1067,16 +1067,16 @@ namespace NodeHDF5 {
       bufferAsUnit8Array=args[2]->ToObject()->IsUint8Array();
 #endif
       if (bufferAsUnit8Array && node::Buffer::HasInstance(args[2])) {
-        Local<Value>      encodingValue = args[2]->ToObject(context).ToLocalChecked()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding")).ToLocalChecked();
+        Local<Value>      encodingValue = args[2]->ToObject(context).ToLocalChecked()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked();
         String::Utf8Value encoding(isolate, encodingValue->ToString(context).ToLocalChecked());
-        if (args[2]->ToObject(context).ToLocalChecked()->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding")).ToChecked() && std::strcmp("binary", (*encoding))) {
+        if (args[2]->ToObject(context).ToLocalChecked()->Has(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "encoding", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked() && std::strcmp("binary", (*encoding))) {
           Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject(context).ToLocalChecked());
           hid_t  did    = H5Dopen(idWrap->Value(), *dset_name, H5P_DEFAULT);
           herr_t err    = H5Dwrite(did, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, (char*)node::Buffer::Data(args[2]));
           if (err < 0) {
             H5Dclose(did);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to overwrite char dataset")));
+                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to overwrite char dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -1101,7 +1101,7 @@ namespace NodeHDF5 {
             }
             H5Dclose(did);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -1124,7 +1124,7 @@ namespace NodeHDF5 {
           }
           H5Dclose(did);
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to overwrite dataset")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to overwrite dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
         }
@@ -1145,7 +1145,7 @@ namespace NodeHDF5 {
         if (err < 0) {
           H5Dclose(did);
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to overwrite char dataset")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to overwrite char dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
         }
@@ -1184,7 +1184,7 @@ namespace NodeHDF5 {
         buffer  = Local<Uint8Array>::Cast(args[2]);
       } else {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1211,7 +1211,7 @@ namespace NodeHDF5 {
           }
           H5Dclose(did);
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab", v8::NewStringType::kInternalized).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
         }
@@ -1229,7 +1229,7 @@ namespace NodeHDF5 {
         H5Dclose(did);
         // H5Pclose(dcpl);
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1279,7 +1279,7 @@ namespace NodeHDF5 {
           }
           H5Dclose(did);
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab", v8::NewStringType::kInternalized).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
         }
@@ -1304,7 +1304,7 @@ namespace NodeHDF5 {
         H5Dclose(did);
         // H5Pclose(dcpl);
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to make dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1322,7 +1322,7 @@ namespace NodeHDF5 {
       v8::Local<v8::Context> context = isolate->GetCurrentContext();
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1352,7 +1352,7 @@ namespace NodeHDF5 {
       v8::Local<v8::Context> context = isolate->GetCurrentContext();
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1376,20 +1376,20 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() == 4 && (!args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsObject() || !args[3]->IsFunction())) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, [options], callback")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, [options], callback", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
 
       } else if (args.Length() == 3 && (!args[0]->IsObject() || !args[1]->IsString() || (!args[2]->IsObject() && !args[2]->IsFunction()))) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, callback[options]")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, callback[options]", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
 
       } else if (args.Length() == 2 && (!args[0]->IsObject() || !args[1]->IsString())) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1402,7 +1402,7 @@ namespace NodeHDF5 {
       herr_t            err    = H5LTget_dataset_ndims(idWrap->Value(), *dset_name, &rank);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset rank")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset rank", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1419,7 +1419,7 @@ namespace NodeHDF5 {
       err = H5LTget_dataset_info(idWrap->Value(), *dset_name, values_dim.get(), &class_id, &bufSize);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset info")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset info", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1437,7 +1437,7 @@ namespace NodeHDF5 {
         case 0: theSize = bufSize; break;
         default:
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported rank")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported rank", v8::NewStringType::kInternalized).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
           break;
@@ -1475,7 +1475,7 @@ namespace NodeHDF5 {
             H5Tclose(basetype_id);
             H5Dclose(did);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read array dataset")));
+                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read array dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -1522,7 +1522,7 @@ namespace NodeHDF5 {
                 }
                 H5Dclose(did);
                 v8::Isolate::GetCurrent()->ThrowException(
-                    v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+                    v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab", v8::NewStringType::kInternalized).ToLocalChecked()));
                 args.GetReturnValue().SetUndefined();
                 return;
               }
@@ -1536,7 +1536,7 @@ namespace NodeHDF5 {
             Local<Array> array = Array::New(v8::Isolate::GetCurrent(), std::min(values_dim.get()[0], theSize));
             for (unsigned int arrayIndex = 0; arrayIndex < std::min(values_dim.get()[0], theSize); arrayIndex++) {
               //std::string s(tbuffer.get()[arrayIndex]);
-              array->Set(
+              array->Set(context,
                   arrayIndex,
                   String::NewFromUtf8(
                       v8::Isolate::GetCurrent(), tbuffer.get()[arrayIndex], v8::NewStringType::kNormal, std::strlen(tbuffer.get()[arrayIndex])).ToLocalChecked());
@@ -1558,7 +1558,7 @@ namespace NodeHDF5 {
               H5Tclose(type_id);
               H5Dclose(did);
               v8::Isolate::GetCurrent()->ThrowException(
-                  v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read array dataset")));
+                  v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read array dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
               args.GetReturnValue().SetUndefined();
               return;
             }
@@ -1577,7 +1577,7 @@ namespace NodeHDF5 {
             err = H5LTread_dataset_string(idWrap->Value(), *dset_name, (char*)buffer.c_str());
             if (err < 0) {
               v8::Isolate::GetCurrent()->ThrowException(
-                  v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset into string")));
+                  v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset into string", v8::NewStringType::kInternalized).ToLocalChecked()));
               args.GetReturnValue().SetUndefined();
               return;
             }
@@ -1604,7 +1604,7 @@ namespace NodeHDF5 {
           herr_t err=H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, (void*)vl.get());
           if (err < 0) {
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to vlen read dataset")));
+                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to vlen read dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
           }
           else{
@@ -1658,7 +1658,7 @@ namespace NodeHDF5 {
 
             hid_t native_type_id = H5Tget_native_type(type_id, H5T_DIR_ASCEND);
             if (H5Tequal(H5T_NATIVE_LLONG, native_type_id)) {
-              int64Buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"),
+              int64Buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kInternalized).ToLocalChecked(),
                                Int32::New(v8::Isolate::GetCurrent(), toEnumMap[H5T_NATIVE_LLONG]));
             }
             args.GetReturnValue().Set(int64Buffer);
@@ -1697,7 +1697,7 @@ namespace NodeHDF5 {
             H5Tclose(t);
           } else {
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type in reading")));
+                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type in reading", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -1718,7 +1718,7 @@ namespace NodeHDF5 {
               }
               H5Dclose(did);
               v8::Isolate::GetCurrent()->ThrowException(
-                  v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+                  v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab", v8::NewStringType::kInternalized).ToLocalChecked()));
               args.GetReturnValue().SetUndefined();
               return;
             }
@@ -1738,7 +1738,7 @@ namespace NodeHDF5 {
             H5Tclose( type_id);
             H5Dclose(did);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset")));
+                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -1753,27 +1753,27 @@ namespace NodeHDF5 {
             const unsigned               argc = 1;
             v8::Persistent<v8::Function> callback(v8::Isolate::GetCurrent(), args[args.Length()-1].As<Function>());
             v8::Local<v8::Object> options = v8::Object::New(v8::Isolate::GetCurrent());
-            options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"), Number::New(v8::Isolate::GetCurrent(), rank));
+            options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), rank));
             H5T_order_t order = H5Tget_order(type_id);
-            options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "endian"), Number::New(v8::Isolate::GetCurrent(), order));
+            options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "endian", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), order));
             switch (rank) {
               case 4:
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[3]));
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[3]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "files", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
                 break;
               case 3:
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
                 break;
               case 2:
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
                 break;
               case 1:
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
                 break;
             }
             if(class_id == H5T_ENUM){
@@ -1788,14 +1788,14 @@ namespace NodeHDF5 {
                     unsigned int value;
                     H5Tget_member_value( t, idx, (void *)&value );
                     hsize_t dvalue=value;
-                    enumeration->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), mname), Number::New(v8::Isolate::GetCurrent(), dvalue));                    
+                    enumeration->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), mname, v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), dvalue));                    
 #if  H5_VERSION_GE(1,8,13)
                     H5free_memory((void *)mname);
 #endif
                 }
                 H5Tclose(t);
                 H5Dclose(h);
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "enumeration"), enumeration);
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "enumeration", v8::NewStringType::kInternalized).ToLocalChecked(), enumeration);
                 
             }
             v8::Local<v8::Value> argv[1] = {options};
@@ -1854,20 +1854,20 @@ namespace NodeHDF5 {
       // fail out if arguments are not correct
       if (args.Length() == 4 && (!args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsObject() || !args[3]->IsFunction())) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, [options], callback")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, [options], callback", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
 
       } else if (args.Length() == 3 && (!args[0]->IsObject() || !args[1]->IsString() || (!args[2]->IsObject() && !args[2]->IsFunction()))) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, callback[options]")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name, callback[options]", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
 
       } else if (args.Length() == 2 && (!args[0]->IsObject() || !args[1]->IsString())) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected id, name", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1880,7 +1880,7 @@ namespace NodeHDF5 {
       herr_t            err    = H5LTget_dataset_ndims(idWrap->Value(), *dset_name, &rank);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset rank")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset rank", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1888,7 +1888,7 @@ namespace NodeHDF5 {
       err = H5LTget_dataset_info(idWrap->Value(), *dset_name, values_dim.get(), &class_id, &bufSize);
       if (err < 0) {
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset info")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to find dataset info", v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -1915,7 +1915,7 @@ namespace NodeHDF5 {
         case 0: theSize = bufSize; break;
         default:
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported rank")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported rank", v8::NewStringType::kInternalized).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           return;
           break;
@@ -1926,7 +1926,7 @@ namespace NodeHDF5 {
           err = H5LTread_dataset_string(idWrap->Value(), *dset_name, (char*)buffer.c_str());
           if (err < 0) {
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset into string")));
+                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset into string", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -1955,7 +1955,7 @@ namespace NodeHDF5 {
               }
               H5Dclose(did);
               v8::Isolate::GetCurrent()->ThrowException(
-                  v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab")));
+                  v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to select hyperslab", v8::NewStringType::kInternalized).ToLocalChecked()));
               args.GetReturnValue().SetUndefined();
               return;
             }
@@ -1974,7 +1974,7 @@ namespace NodeHDF5 {
             H5Tclose( type_id);
             H5Dclose(did);
             v8::Isolate::GetCurrent()->ThrowException(
-                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset")));
+                v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed to read dataset", v8::NewStringType::kInternalized).ToLocalChecked()));
             args.GetReturnValue().SetUndefined();
             return;
           }
@@ -1988,7 +1988,7 @@ namespace NodeHDF5 {
             }
           }
 
-          buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"), Int32::New(v8::Isolate::GetCurrent(), etype));
+          buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kInternalized).ToLocalChecked(), Int32::New(v8::Isolate::GetCurrent(), etype));
           if (subsetOn) {
             H5Sclose(memspace_id);
             H5Sclose(dataspace_id);
@@ -2000,62 +2000,62 @@ namespace NodeHDF5 {
             const unsigned               argc = 1;
             v8::Persistent<v8::Function> callback(v8::Isolate::GetCurrent(), args[args.Length()-1].As<Function>());
             v8::Local<v8::Object> options = v8::Object::New(v8::Isolate::GetCurrent());
-            options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"), Number::New(v8::Isolate::GetCurrent(), rank));
+            options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), rank));
             H5T_order_t order = H5Tget_order(type_id);
-            options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "endian"), Number::New(v8::Isolate::GetCurrent(), order));
+            options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "endian", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), order));
             switch (rank) {
               case 4:
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[3]));
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[3]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "files", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
                 break;
               case 3:
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
                 break;
               case 2:
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
                 break;
               case 1:
-                options->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
+                options->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
                 break;
             }
             v8::Local<v8::Value> argv[1] = {options};
             v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)
                 ->Call(v8::Isolate::GetCurrent()->GetCurrentContext(), v8::Null(isolate), argc, argv);
           } else{
-            buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank"), Number::New(v8::Isolate::GetCurrent(), rank));
+            buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rank", v8::NewStringType::kInternalized).ToLocalChecked(), Number::New(v8::Isolate::GetCurrent(), rank));
             switch (rank) {
             case 4:
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
+              buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked(),
                           Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"),
+              buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked(),
                           Number::New(v8::Isolate::GetCurrent(), values_dim.get()[3]));
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"),
+              buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections", v8::NewStringType::kInternalized).ToLocalChecked(),
                           Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "files"),
+              buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "files", v8::NewStringType::kInternalized).ToLocalChecked(),
                           Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
               break;
             case 3:
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
+              buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked(),
                           Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"),
+              buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked(),
                           Number::New(v8::Isolate::GetCurrent(), values_dim.get()[2]));
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections"),
+              buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "sections", v8::NewStringType::kInternalized).ToLocalChecked(),
                           Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
               break;
             case 2:
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
+              buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked(),
                           Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
               if (rank > 1)
-                buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns"),
+                buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "columns", v8::NewStringType::kInternalized).ToLocalChecked(),
                             Number::New(v8::Isolate::GetCurrent(), values_dim.get()[1]));
               break;
             case 1:
-              buffer->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows"),
+              buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "rows", v8::NewStringType::kInternalized).ToLocalChecked(),
                           Number::New(v8::Isolate::GetCurrent(), values_dim.get()[0]));
               break;
           }
@@ -2073,7 +2073,7 @@ namespace NodeHDF5 {
         } break;
         default:
           v8::Isolate::GetCurrent()->ThrowException(
-              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
+              v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type", v8::NewStringType::kInternalized).ToLocalChecked()));
           args.GetReturnValue().SetUndefined();
           break;
       }

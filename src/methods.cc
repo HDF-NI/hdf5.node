@@ -108,7 +108,7 @@ namespace NodeHDF5 {
     if (args.Length() != 1 || !args[0]->IsString()) {
 
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected attribute name")));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected attribute name", v8::NewStringType::kNormal).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }

@@ -20,25 +20,25 @@ namespace NodeHDF5 {
       v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
       // append this function to the target object
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "setScale"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "setScale", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::set_scale)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "attachScale"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "attachScale", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::attach_scale)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "detachScale"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "detachScale", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::detach_scale)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "isAttached"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "isAttached", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::is_attached)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "isScale"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "isScale", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::is_scale)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "iterateScale"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "iterateScale", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::iterate_scales)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "setLabel"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "setLabel", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::set_label)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "getLabel"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "getLabel", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::get_label)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "getScaleName"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "getScaleName", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::get_scale_name)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "getNumberOfScales"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "getNumberOfScales", v8::NewStringType::kNormal).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::get_num_scales)->GetFunction(context).ToLocalChecked());
     }
 
@@ -50,7 +50,7 @@ namespace NodeHDF5 {
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -63,7 +63,7 @@ namespace NodeHDF5 {
       if (err < 0) {
         H5Dclose(did);
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed setting dimension scale")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed setting dimension scale", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -78,7 +78,7 @@ namespace NodeHDF5 {
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString() || !args[3]->IsInt32()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name, index")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name, index", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -93,7 +93,7 @@ namespace NodeHDF5 {
         H5Dclose(dsid);
         H5Dclose(did);
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed attaching dimension scale")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed attaching dimension scale", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -109,7 +109,7 @@ namespace NodeHDF5 {
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString() || !args[3]->IsInt32()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name, index")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name, index", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -124,7 +124,7 @@ namespace NodeHDF5 {
         H5Dclose(dsid);
         H5Dclose(did);
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed attaching dimension scale")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed attaching dimension scale", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -140,7 +140,7 @@ namespace NodeHDF5 {
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsString() || !args[3]->IsInt32()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name, index")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, name, index", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -163,7 +163,7 @@ namespace NodeHDF5 {
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -212,7 +212,7 @@ namespace NodeHDF5 {
       if (err < 0) {
         H5Dclose(did);
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed iterating through  scale indices")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "failed iterating through  scale indices", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -228,7 +228,7 @@ namespace NodeHDF5 {
       if (args.Length() != 4 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsInt32() || !args[3]->IsString()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, scale name, index, label")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, scale name, index, label", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -250,7 +250,7 @@ namespace NodeHDF5 {
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsInt32()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, scale name, index")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, scale name, index", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -262,7 +262,7 @@ namespace NodeHDF5 {
       size                     = H5DSget_label(did, args[2]->Int32Value(context).ToChecked(), NULL, size);
       std::string name(size + 1, '\0');
       size = H5DSget_label(did, args[2]->Int32Value(context).ToChecked(), (char*)name.c_str(), size + 1);
-      args.GetReturnValue().Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name.c_str()));
+      args.GetReturnValue().Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name.c_str(), v8::NewStringType::kNormal).ToLocalChecked());
       H5Dclose(did);
     }
 
@@ -273,7 +273,7 @@ namespace NodeHDF5 {
       if (args.Length() != 2 || !args[0]->IsObject() || !args[1]->IsString()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, scale name")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, scale name", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -285,7 +285,7 @@ namespace NodeHDF5 {
       size                     = H5DSget_scale_name(did, NULL, size);
       std::string name(size + 1, '\0');
       size = H5DSget_scale_name(did, (char*)name.c_str(), size + 1);
-      args.GetReturnValue().Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name.c_str()));
+      args.GetReturnValue().Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name.c_str(), v8::NewStringType::kNormal).ToLocalChecked());
       H5Dclose(did);
     }
 
@@ -297,7 +297,7 @@ namespace NodeHDF5 {
       if (args.Length() != 3 || !args[0]->IsObject() || !args[1]->IsString() || !args[2]->IsInt32()) {
 
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, index")));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "expected group id, dataset name, index", v8::NewStringType::kNormal).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }

@@ -47,7 +47,7 @@ namespace NodeHDF5 {
       hid_t                     attr_id      = H5Acreate(group_id, attribute_name, type_id, memspace_id, H5P_DEFAULT, H5P_DEFAULT);
       std::unique_ptr<long long []> vl(new long long[array->Length()]);
       for (unsigned int arrayIndex = 0; arrayIndex < array->Length(); arrayIndex++) {
-        Int64* valueWrap = ObjectWrap::Unwrap<Int64>(array->Get(arrayIndex)->ToObject(context).ToLocalChecked());
+        Int64* valueWrap = ObjectWrap::Unwrap<Int64>(array->Get(context, arrayIndex).ToLocalChecked()->ToObject(context).ToLocalChecked());
         int64_t value = valueWrap->Value();
         vl.get()[arrayIndex] = value;
       }
@@ -71,7 +71,7 @@ namespace NodeHDF5 {
       hid_t                     attr_id      = H5Acreate(group_id, attribute_name, type_id, memspace_id, H5P_DEFAULT, H5P_DEFAULT);
       std::unique_ptr<unsigned long long []> vl(new unsigned long long[array->Length()]);
       for (unsigned int arrayIndex = 0; arrayIndex < array->Length(); arrayIndex++) {
-        Uint64* valueWrap = ObjectWrap::Unwrap<Uint64>(array->Get(arrayIndex)->ToObject(context).ToLocalChecked());
+        Uint64* valueWrap = ObjectWrap::Unwrap<Uint64>(array->Get(context, arrayIndex).ToLocalChecked()->ToObject(context).ToLocalChecked());
         uint64_t value = valueWrap->Value();
         vl.get()[arrayIndex] = value;
       }
@@ -351,7 +351,7 @@ namespace NodeHDF5 {
           make_attribute_from_array(
               group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()), v8::Local<v8::Array>::Cast(args.This()->Get(context, name).ToLocalChecked()));
         } else if (args.This()->Get(context, name).ToLocalChecked()->IsObject() && std::strncmp("Int64", (*v8::String::Utf8Value(isolate, args.This()->Get(context, name).ToLocalChecked()->ToObject(context).ToLocalChecked()->GetConstructorName())), 5)==0) {
-          Int64* valueWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(name)->ToObject(context).ToLocalChecked());
+          Int64* valueWrap = ObjectWrap::Unwrap<Int64>(args.This()->Get(context, name).ToLocalChecked()->ToObject(context).ToLocalChecked());
           int64_t value = valueWrap->Value();
           if (attrExists) {
             H5Adelete(group->id, *v8::String::Utf8Value(isolate, name->ToString(context).ToLocalChecked()));

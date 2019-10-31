@@ -24,7 +24,7 @@ namespace NodeHDF5 {
 
       // Prepare constructor template
       v8::Local<v8::FunctionTemplate> tpl = FunctionTemplate::New(isolate, New);
-      tpl->SetClassName(v8::String::NewFromUtf8(isolate, "PacketTable"));
+      tpl->SetClassName(v8::String::NewFromUtf8(isolate, "PacketTable", v8::NewStringType::kInternalized).ToLocalChecked());
       tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
       // Prototype
@@ -33,7 +33,7 @@ namespace NodeHDF5 {
       NODE_SET_PROTOTYPE_METHOD(tpl, "close", close);
 
       Constructor.Reset(v8::Isolate::GetCurrent(), tpl->GetFunction(context).ToLocalChecked());
-      exports->Set(v8::String::NewFromUtf8(isolate, "PacketTable"), tpl->GetFunction(context).ToLocalChecked());
+      exports->Set(context, v8::String::NewFromUtf8(isolate, "PacketTable", v8::NewStringType::kInternalized).ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
     }
 
     static Local<Object> Instantiate(hid_t packetId, int nmembers) {
@@ -84,11 +84,11 @@ namespace NodeHDF5 {
       }
       v8::Local<v8::Object> record = v8::Object::New(v8::Isolate::GetCurrent());
       for (unsigned int index = 0; index < obj->nmembers; index++) {
-        record->Set(
-            args.This()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "record")).ToLocalChecked()->ToObject(context).ToLocalChecked()->GetOwnPropertyNames(context).ToLocalChecked()->Get(context, index).ToLocalChecked(),
-            String::NewFromUtf8(v8::Isolate::GetCurrent(), obj->p_data[index]));
+        record->Set(context,
+            args.This()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "record", v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked()->GetOwnPropertyNames(context).ToLocalChecked()->Get(context, index).ToLocalChecked(),
+            String::NewFromUtf8(v8::Isolate::GetCurrent(), obj->p_data[index], v8::NewStringType::kNormal).ToLocalChecked());
       }
-      args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "record"), record);
+      args.This()->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "record", v8::NewStringType::kInternalized).ToLocalChecked(), record);
       args.GetReturnValue().Set(true);
     }
 
@@ -99,7 +99,7 @@ namespace NodeHDF5 {
 
       PacketTable* obj = ObjectWrap::Unwrap<PacketTable>(args.Holder());
       obj->p_data.reset(new char*[obj->nmembers]);
-      v8::Local<v8::Object> record = args.This()->ToObject(context).ToLocalChecked()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "record")).ToLocalChecked()->ToObject(context).ToLocalChecked();
+      v8::Local<v8::Object> record = args.This()->ToObject(context).ToLocalChecked()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "record", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
       for (unsigned int index = 0; index < obj->nmembers; index++) {
         String::Utf8Value record_value(isolate, record->Get(context, record->GetOwnPropertyNames(context).ToLocalChecked()->Get(context, index).ToLocalChecked()).ToLocalChecked()->ToString(context).ToLocalChecked());
         obj->p_data[index] = new char[std::strlen(*record_value) + 1];
@@ -137,9 +137,9 @@ namespace NodeHDF5 {
       v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
       // append this function to the target object
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeTable"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeTable", v8::NewStringType::kInternalized).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5pt::make_table)->GetFunction(context).ToLocalChecked());
-      exports->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "readTable"),
+      exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "readTable", v8::NewStringType::kInternalized).ToLocalChecked(),
                   FunctionTemplate::New(v8::Isolate::GetCurrent(), H5pt::read_table)->GetFunction(context).ToLocalChecked());
     }
 
@@ -150,7 +150,7 @@ namespace NodeHDF5 {
 
       PacketTable*          obj        = ObjectWrap::Unwrap<PacketTable>(args[2]->ToObject(context).ToLocalChecked());
       hid_t                 compoundID = H5Tcreate(H5T_COMPOUND, obj->nmembers * sizeof(char*));
-      v8::Local<v8::Object> record     = args[2]->ToObject(context).ToLocalChecked()->Get(String::NewFromUtf8(v8::Isolate::GetCurrent(), "record"))->ToObject(context).ToLocalChecked();
+      v8::Local<v8::Object> record     = args[2]->ToObject(context).ToLocalChecked()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "record", v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
       hid_t                 vlenID     = H5Tcopy(H5T_C_S1);
       H5Tset_size(vlenID, H5T_VARIABLE);
       for (unsigned int index = 0; index < obj->nmembers; index++) {
@@ -172,7 +172,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed creating table, " + std::string(*table_name) + " with return: " + std::to_string(obj->packetTableID) +
                              " " + std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -196,7 +196,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed opening table, " + std::string(*table_name) + " with return: " + std::to_string(packetTableID) + " " +
                              std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -211,7 +211,7 @@ namespace NodeHDF5 {
         std::string errStr = "Failed to get size of Events table, " + std::string(*table_name) + " with return: " + std::to_string(err) +
                              " " + std::to_string(idWrap->Value()) + ".\n";
         v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str())));
+            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), errStr.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
         args.GetReturnValue().SetUndefined();
         return;
       }
@@ -227,11 +227,11 @@ namespace NodeHDF5 {
           for (int memberIndex = 0; memberIndex < nmembers; memberIndex++) {
             hid_t memberType = H5Tget_member_type(type, memberIndex);
             if (H5Tis_variable_str(memberType)>0) {
-              record->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), H5Tget_member_name(type, memberIndex)),
-                          String::NewFromUtf8(v8::Isolate::GetCurrent(), "huh"));
+              record->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), H5Tget_member_name(type, memberIndex), v8::NewStringType::kInternalized).ToLocalChecked(),
+                          String::NewFromUtf8(v8::Isolate::GetCurrent(), "huh", v8::NewStringType::kInternalized).ToLocalChecked());
             } else {
-              record->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), H5Tget_member_name(type, memberIndex)),
-                          String::NewFromUtf8(v8::Isolate::GetCurrent(), "huh2"));
+              record->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), H5Tget_member_name(type, memberIndex), v8::NewStringType::kInternalized).ToLocalChecked(),
+                          String::NewFromUtf8(v8::Isolate::GetCurrent(), "huh2", v8::NewStringType::kInternalized).ToLocalChecked());
             }
             H5Tclose(memberType);
           }
@@ -241,8 +241,8 @@ namespace NodeHDF5 {
       }
 
       v8::Local<v8::Object>&& pt = PacketTable::Instantiate(packetTableID, nmembers);
-      pt->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "nrecords"), Uint32::New(v8::Isolate::GetCurrent(), nrecords));
-      pt->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), "record"), record);
+      pt->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "nrecords", v8::NewStringType::kInternalized).ToLocalChecked(), Uint32::New(v8::Isolate::GetCurrent(), nrecords));
+      pt->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "record", v8::NewStringType::kInternalized).ToLocalChecked(), record);
       args.GetReturnValue().Set(pt);
     }
   };
