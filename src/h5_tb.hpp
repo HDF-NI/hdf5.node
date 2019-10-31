@@ -326,12 +326,12 @@ namespace NodeHDF5 {
                   Local<Array> buffer = Array::New(v8::Isolate::GetCurrent(), nrecords);
                   buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
                               String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
-                  buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"),
+                  buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kNormal).ToLocalChecked(),
                               Int32::New(v8::Isolate::GetCurrent(), toEnumMap[H5T_NATIVE_LLONG]));
                   for (uint32_t j = 0; j < nrecords; j++) {
                     long long value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 8);
-                    buffer->Set(j, Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, Number::New(v8::Isolate::GetCurrent(), value));
                   }
                   table->Set(context, i, buffer);
                 }
