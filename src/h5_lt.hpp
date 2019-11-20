@@ -1423,6 +1423,10 @@ namespace NodeHDF5 {
             args.GetReturnValue().SetUndefined();
             return;
           }
+          if(*vl.get() == nullptr) {
+            args.GetReturnValue().SetUndefined();
+            return;
+          }
           hsize_t arrayStart=0;
           hsize_t arrayMaximum=values_dim.get()[0];
           if(subsetOn){
