@@ -21,25 +21,25 @@ namespace NodeHDF5 {
 
       // append this function to the target object
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "setScale", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::set_scale)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::set_scale)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "attachScale", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::attach_scale)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::attach_scale)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "detachScale", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::detach_scale)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::detach_scale)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "isAttached", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::is_attached)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::is_attached)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "isScale", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::is_scale)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::is_scale)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "iterateScale", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::iterate_scales)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::iterate_scales)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "setLabel", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::set_label)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::set_label)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "getLabel", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::get_label)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::get_label)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "getScaleName", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::get_scale_name)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::get_scale_name)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "getNumberOfScales", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::get_num_scales)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5ds::get_num_scales)->GetFunction(context).ToLocalChecked()).Check();
     }
 
     static void set_scale(const v8::FunctionCallbackInfo<Value>& args) {
@@ -193,8 +193,11 @@ namespace NodeHDF5 {
           [&](hid_t did, unsigned int dim, hid_t dsid, void* visitor_data) {
             v8::Local<v8::Value> argv[2] = {v8::Int32::New(isolate, dim),
                                             v8::String::NewFromUtf8(isolate, "success", v8::NewStringType::kInternalized).ToLocalChecked()};
-            v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)
+            v8::MaybeLocal<v8::Value> ret = v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)
                 ->Call(context, v8::Null(isolate), argc, argv);
+            if(ret.ToLocalChecked()->IsNumber()){
+
+            }
             return (herr_t)0;
           };
       v8::Local<v8::Function> func = v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback);
@@ -204,8 +207,11 @@ namespace NodeHDF5 {
                                       [](hid_t did, unsigned int dim, hid_t dsid, void* visitor_data) -> herr_t {
                                         v8::Local<v8::Value> argv[2] = {v8::Int32::New(v8::Isolate::GetCurrent(), dim),
                                                                         v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "success", v8::NewStringType::kInternalized).ToLocalChecked()};
-                                        ((v8::Local<v8::Function>*)visitor_data)[0]->Call(
+                                        v8::MaybeLocal<v8::Value> ret = ((v8::Local<v8::Function>*)visitor_data)[0]->Call(
                                             v8::Isolate::GetCurrent()->GetCurrentContext(), v8::Null(v8::Isolate::GetCurrent()), 3, argv);
+                                        if(ret.ToLocalChecked()->IsNumber()){
+                                            
+                                        }
                                         return (herr_t)0;
                                       },
                                       &func);

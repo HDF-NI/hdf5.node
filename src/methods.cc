@@ -2,6 +2,7 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
+#include "hdf5V8.hpp"
 #include "reference.hpp"
 #include "attributes.hpp"
 #include "methods.hpp"
@@ -16,14 +17,13 @@ namespace NodeHDF5 {
     void Methods::QueryCallbackDelete(
         v8::Local<v8::Name> property, const v8::PropertyCallbackInfo<v8::Boolean>& info) {
     v8::Isolate* isolate = info.GetIsolate();
-    v8::Local<v8::Context> context = isolate->GetCurrentContext();
       //info.GetReturnValue().Set(v8::PropertyAttribute::DontDelete);
      v8::String::Utf8Value attribute_name(isolate, property->ToString(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocalChecked());
         
         // unwrap group
         Methods* group       = ObjectWrap::Unwrap<Methods>(info.This());
         if(H5Aexists(group->id, (const char*)*attribute_name)){
-            herr_t err = H5Adelete(group->id, (const char*)*attribute_name);
+            /*herr_t err =*/ H5Adelete(group->id, (const char*)*attribute_name);
         }
     }
 
@@ -119,7 +119,7 @@ namespace NodeHDF5 {
     // unwrap group
     Methods* group       = ObjectWrap::Unwrap<Methods>(args.This());
     if(H5Aexists(group->id, (const char*)*attribute_name)){
-        herr_t err = H5Adelete(group->id, (const char*)*attribute_name);
+        /*herr_t err =*/ H5Adelete(group->id, (const char*)*attribute_name);
     }
     
   }
@@ -1122,8 +1122,11 @@ namespace NodeHDF5 {
                                       [](hid_t group, const char *name, const H5L_info_t *info, void *op_data) -> herr_t {
                                         v8::Local<v8::Value> argv[2] = {v8::Int32::New(v8::Isolate::GetCurrent(), toEnumMap[info->type]),
                                                                         v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name, v8::NewStringType::kInternalized).ToLocalChecked()};
-                                        ((v8::Local<v8::Function>*)op_data)[0]->Call(
+                                        v8::MaybeLocal<v8::Value> ret = ((v8::Local<v8::Function>*)op_data)[0]->Call(
                                             v8::Isolate::GetCurrent()->GetCurrentContext(), v8::Null(v8::Isolate::GetCurrent()), 3, argv);
+                                        if(ret.ToLocalChecked()->IsNumber()){
+                                            
+                                        }
                                         return (herr_t)0;
                                       },
                                       &func);
@@ -1161,8 +1164,11 @@ namespace NodeHDF5 {
                                       [](hid_t group, const char *name, const H5L_info_t *info, void *op_data) -> herr_t {
                                         v8::Local<v8::Value> argv[2] = {v8::Int32::New(v8::Isolate::GetCurrent(), toEnumMap[info->type]),
                                                                         v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name, v8::NewStringType::kInternalized).ToLocalChecked()};
-                                        ((v8::Local<v8::Function>*)op_data)[0]->Call(
+                                        v8::MaybeLocal<v8::Value> ret = ((v8::Local<v8::Function>*)op_data)[0]->Call(
                                             v8::Isolate::GetCurrent()->GetCurrentContext(), v8::Null(v8::Isolate::GetCurrent()), 2, argv);
+                                        if(ret.ToLocalChecked()->IsNumber()){
+                                            
+                                        }
                                         return (herr_t)0;
                                       },
                                       &func);

@@ -1,4 +1,5 @@
 #include <node.h>
+#include "hdf5V8.hpp"
 #include "file.h"
 #include "group.h"
 #include "h5_pt.hpp"

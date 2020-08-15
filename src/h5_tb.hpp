@@ -28,39 +28,39 @@ namespace NodeHDF5 {
 
       // append this function to the exports object
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "makeTable", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::make_table)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::make_table)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "readTable", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::read_table)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::read_table)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "appendRecords", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::append_records)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::append_records)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "writeRecords", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::write_records)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::write_records)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "readRecords", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::read_records)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::read_records)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "deleteRecord", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::delete_record)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::delete_record)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "insertRecord", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::insert_record)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::insert_record)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "writeFieldsName", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::write_fields_name)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::write_fields_name)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "writeFieldsIndex", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::write_fields_index)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::write_fields_index)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "readFieldsName", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::read_fields_name)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::read_fields_name)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "readFieldsIndex", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::read_fields_index)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::read_fields_index)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "getTableInfo", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::get_table_info)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::get_table_info)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "getFieldInfo", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::get_field_info)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::get_field_info)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "deleteField", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::delete_field)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::delete_field)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "insertField", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::insert_field)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::insert_field)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "addRecordsFrom", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::add_records_from)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::add_records_from)->GetFunction(context).ToLocalChecked()).Check();
       exports->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "combineTables", v8::NewStringType::kNormal).ToLocalChecked(),
-                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::combine_tables)->GetFunction(context).ToLocalChecked());
+                  FunctionTemplate::New(v8::Isolate::GetCurrent(), H5tb::combine_tables)->GetFunction(context).ToLocalChecked()).Check();
     }
 
     static std::tuple<hsize_t, size_t, std::unique_ptr<size_t[]>, std::unique_ptr<size_t[]>, std::unique_ptr<hid_t[]>, std::unique_ptr<char[]>>
@@ -282,28 +282,28 @@ namespace NodeHDF5 {
               Local<ArrayBuffer>  arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), 8 * nrecords);
               Local<Float64Array> buffer      = Float64Array::New(arrayBuffer, 0, nrecords);
               buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
-                          String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
+                          String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked()).Check();
 
               for (uint32_t j = 0; j < nrecords; j++) {
                 double value;
                 std::memcpy(&value, &data[j * type_size + field_offsets[i]], 8);
-                buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value)).Check();
               }
 
-              table->Set(context, i, buffer);
+              table->Set(context, i, buffer).Check();
             } else if (H5Tget_precision(type) == 32) {
               Local<ArrayBuffer>  arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), 4 * nrecords);
               Local<Float32Array> buffer      = Float32Array::New(arrayBuffer, 0, nrecords);
               buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
-                          String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
+                          String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked()).Check();
 
               for (uint32_t j = 0; j < nrecords; j++) {
                 float value;
                 std::memcpy(&value, &data[j * type_size + field_offsets[i]], 4);
-                buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value)).Check();
               }
 
-              table->Set(context, i, buffer);
+              table->Set(context, i, buffer).Check();
             }
             break;
           case H5T_INTEGER:
@@ -313,27 +313,27 @@ namespace NodeHDF5 {
                 if (H5Tget_sign(type) == H5T_SGN_NONE) {
                   Local<Array> buffer = Array::New(v8::Isolate::GetCurrent(), nrecords);
                   buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked()).Check();
                   buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kNormal).ToLocalChecked(),
-                              Int32::New(v8::Isolate::GetCurrent(), toEnumMap[H5T_NATIVE_ULLONG]));
+                              Int32::New(v8::Isolate::GetCurrent(), toEnumMap[H5T_NATIVE_ULLONG])).Check();
                   for (uint32_t j = 0; j < nrecords; j++) {
                     unsigned long long value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 8);
-                    buffer->Set(context, j, Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, Number::New(v8::Isolate::GetCurrent(), value)).Check();
                   }
                   table->Set(context, i, buffer);
                 } else {
                   Local<Array> buffer = Array::New(v8::Isolate::GetCurrent(), nrecords);
                   buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked()).Check();
                   buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kNormal).ToLocalChecked(),
-                              Int32::New(v8::Isolate::GetCurrent(), toEnumMap[H5T_NATIVE_LLONG]));
+                              Int32::New(v8::Isolate::GetCurrent(), toEnumMap[H5T_NATIVE_LLONG])).Check();
                   for (uint32_t j = 0; j < nrecords; j++) {
                     long long value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 8);
-                    buffer->Set(context, j, Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, Number::New(v8::Isolate::GetCurrent(), value)).Check();
                   }
-                  table->Set(context, i, buffer);
+                  table->Set(context, i, buffer).Check();
                 }
                 break;
 #endif
@@ -342,26 +342,26 @@ namespace NodeHDF5 {
                   Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), 4 * nrecords);
                   Local<Uint32Array> buffer      = Uint32Array::New(arrayBuffer, 0, nrecords);
                   buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked()).Check();
                   for (uint32_t j = 0; j < nrecords; j++) {
                     unsigned int value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 4);
-                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value)).Check();
                   }
 
-                  table->Set(context, i, buffer);
+                  table->Set(context, i, buffer).Check();
                 } else {
                   Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), 4 * nrecords);
                   Local<Int32Array>  buffer      = Int32Array::New(arrayBuffer, 0, nrecords);
                   buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked()).Check();
                   for (uint32_t j = 0; j < nrecords; j++) {
                     int value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 4);
-                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value)).Check();
                   }
 
-                  table->Set(context, i, buffer);
+                  table->Set(context, i, buffer).Check();
                 }
                 break;
               case 16:
@@ -369,26 +369,26 @@ namespace NodeHDF5 {
                   Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), 2 * nrecords);
                   Local<Uint16Array> buffer      = Uint16Array::New(arrayBuffer, 0, nrecords);
                   buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked()).Check();
                   for (uint32_t j = 0; j < nrecords; j++) {
                     unsigned short value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 2);
-                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value)).Check();
                   }
 
-                  table->Set(context, i, buffer);
+                  table->Set(context, i, buffer).Check();
                 } else {
                   Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), 2 * nrecords);
                   Local<Int16Array>  buffer      = Int16Array::New(arrayBuffer, 0, nrecords);
                   buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked()).Check();
                   for (uint32_t j = 0; j < nrecords; j++) {
                     short value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 2);
-                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value)).Check();
                   }
 
-                  table->Set(context, i, buffer);
+                  table->Set(context, i, buffer).Check();
                 }
                 break;
               case 8:
@@ -396,26 +396,26 @@ namespace NodeHDF5 {
                   Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), nrecords);
                   Local<Uint8Array>  buffer      = Uint8Array::New(arrayBuffer, 0, nrecords);
                   buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked()).Check();
                   for (uint32_t j = 0; j < nrecords; j++) {
                     unsigned char value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 1);
-                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value)).Check();
                   }
 
-                  table->Set(context, i, buffer);
+                  table->Set(context, i, buffer).Check();
                 } else {
                   Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(v8::Isolate::GetCurrent(), nrecords);
                   Local<Int8Array>   buffer      = Int8Array::New(arrayBuffer, 0, nrecords);
                   buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
-                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
+                              String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked()).Check();
                   for (uint32_t j = 0; j < nrecords; j++) {
                     char value;
                     std::memcpy(&value, &data[j * type_size + field_offsets[i]], 1);
-                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value));
+                    buffer->Set(context, j, v8::Number::New(v8::Isolate::GetCurrent(), value)).Check();
                   }
 
-                  table->Set(context, i, buffer);
+                  table->Set(context, i, buffer).Check();
                 }
                 break;
             }
@@ -423,13 +423,13 @@ namespace NodeHDF5 {
           case H5T_STRING: {
             Local<Array> buffer = Array::New(v8::Isolate::GetCurrent(), nrecords);
             buffer->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "name", v8::NewStringType::kNormal).ToLocalChecked(),
-                        String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked());
+                        String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names[i], v8::NewStringType::kNormal).ToLocalChecked()).Check();
             for (uint32_t j = 0; j < nrecords; j++) {
               std::string cell(&data[j * type_size + field_offsets[i]], H5Tget_size(type));
-              buffer->Set(context, j, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), cell.c_str(), v8::NewStringType::kNormal).ToLocalChecked());
+              buffer->Set(context, j, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), cell.c_str(), v8::NewStringType::kNormal).ToLocalChecked()).Check();
             }
 
-            table->Set(context, i, buffer);
+            table->Set(context, i, buffer).Check();
           } break;
           default: throw Exception("unsupported data type"); break;
         }
@@ -1398,9 +1398,8 @@ namespace NodeHDF5 {
       Int64*            idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject(isolate->GetCurrentContext()).ToLocalChecked());
       H5TBget_table_info(idWrap->Value(), (*table_name), &nfields, &nrecords);
       v8::Local<v8::Object> obj = v8::Object::New(v8::Isolate::GetCurrent());
-      v8::Maybe<bool> ret = obj->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "nfields", v8::NewStringType::kInternalized).ToLocalChecked(), Uint32::New(v8::Isolate::GetCurrent(), nfields));
-      ret = obj->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "nrecords", v8::NewStringType::kInternalized).ToLocalChecked(), Uint32::New(v8::Isolate::GetCurrent(), nrecords));
-      if(ret.ToChecked()){};
+      obj->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "nfields", v8::NewStringType::kInternalized).ToLocalChecked(), Uint32::New(v8::Isolate::GetCurrent(), nfields)).Check();
+      obj->Set(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "nrecords", v8::NewStringType::kInternalized).ToLocalChecked(), Uint32::New(v8::Isolate::GetCurrent(), nrecords)).Check();
       args.GetReturnValue().Set(obj);
     }
 
@@ -1431,8 +1430,7 @@ namespace NodeHDF5 {
       v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), nfields);
 
       for (unsigned int i = 0; i < nfields; i++) {
-        v8::Maybe<bool> ret = array->Set(context, i, String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names.get()[i], v8::NewStringType::kInternalized).ToLocalChecked());
-        if(ret.ToChecked()){};
+        array->Set(context, i, String::NewFromUtf8(v8::Isolate::GetCurrent(), field_names.get()[i], v8::NewStringType::kInternalized).ToLocalChecked()).Check();
       }
       args.GetReturnValue().Set(array);
     }

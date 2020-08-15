@@ -27,9 +27,9 @@ namespace NodeHDF5 {
       tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
       // Prototype
-      NODE_SET_PROTOTYPE_METHOD(tpl, "isAvailable", isAvailable);
-      NODE_SET_PROTOTYPE_METHOD(tpl, "getNFilters", getNFilters);
-      NODE_SET_PROTOTYPE_METHOD(tpl, "getFilter", getFilter);
+      setPrototypeMethod(isolate, tpl, v8::String::NewFromUtf8(isolate, "isAvailable", v8::NewStringType::kInternalized).ToLocalChecked(), isAvailable);
+      setPrototypeMethod(isolate, tpl, v8::String::NewFromUtf8(isolate, "getNFilters", v8::NewStringType::kInternalized).ToLocalChecked(), getNFilters);
+      setPrototypeMethod(isolate, tpl, v8::String::NewFromUtf8(isolate, "getFilter", v8::NewStringType::kInternalized).ToLocalChecked(), getFilter);
 
       Constructor.Reset(v8::Isolate::GetCurrent(), tpl->GetFunction(context).ToLocalChecked());
       v8::Maybe<bool> ret = exports->Set(context, v8::String::NewFromUtf8(isolate, "Filters", v8::NewStringType::kInternalized).ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
