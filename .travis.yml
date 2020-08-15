@@ -6,8 +6,11 @@ node_js:
   - "8"
   
 env:
-  - GCC_VERSION="export CC=gcc-7 && export CXX=g++-7"
-  #  - GCC_VERSION="export CC=gcc-6 && export CXX=g++-6"
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+      CLANG_VERSION="export CC=gcc-7 && export CXX=g++-7";
+    else
+      GCC_VERSION="export CC=gcc-7 && export CXX=g++-7";
+    fi
   
 os: 
   - linux
