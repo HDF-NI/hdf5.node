@@ -49,7 +49,7 @@ before_install:
       cd build;
       which devenv.exe;
       cd ../../;
-      get -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.6/bin/hdf5-1.10.6-Std-win10_64-vs15.zip -O /tmp/hdf5-1.10.6-Std-win10_64-vs15.zip;
+      wget -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.6/bin/hdf5-1.10.6-Std-win10_64-vs15.zip -O /tmp/hdf5-1.10.6-Std-win10_64-vs15.zip;
       unzip -q /tmp/hdf5-1.10.6-Std-win10_64-vs15.zip;
       cd hdf;
       msiexec //i HDF5-1.10.6-win64.msi.msi //quiet TARGETDIR=`pwd`/hdf5-1.10.6/dist //qb;
