@@ -6,6 +6,8 @@ node_js:
 env:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
       CLANG_VERSION="export CC=gcc-7 && export CXX=g++-7";
+    elif [[ "$TRAVIS_OS_NAME" == "windows" ]] ; then
+      echo "Windoes compiler?"
     else
       GCC_VERSION="export CC=gcc-7 && export CXX=g++-7";
     fi
@@ -37,6 +39,7 @@ before_install:
       cd ..;
       export HDF5_HOME_MAC=`pwd`/hdf5-1.10.5/dist;
     elif [[ "$TRAVIS_OS_NAME" == "windows" ]] ; then
+      /c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/2017/BuildTools/Common7/Tools/VsDevCmd.bat;
       which cmake;
       cmake --version;
       wget -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.zip -O /tmp/hdf5-1.10.5.zip;
