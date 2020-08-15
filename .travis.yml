@@ -53,7 +53,7 @@ before_install:
       get -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.6/bin/hdf5-1.10.6-Std-win10_64-vs15.zip;
       unzip -q /tmp/hdf5-1.10.6.zip;
       cd hdf;
-      msiexec //i /c/Example_Folder\example.msi //quiet TARGETDIR=`pwd`/hdf5-1.10.6/dist //qb;
+      msiexec //i HDF5-1.10.6-win64.msi.msi //quiet TARGETDIR=`pwd`/hdf5-1.10.6/dist //qb;
       cd ..;
       which h5dump;
       ls `pwd`/hdf5-1.10.6/dist;
