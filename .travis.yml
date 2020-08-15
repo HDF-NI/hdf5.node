@@ -50,8 +50,14 @@ before_install:
       cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=../dist -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHDF5_BUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT=OFF  ..;
       which devenv.exe;
       cd ../../;
-      ls `pwd`/hdf5-1.10.5/dist;
-      export HDF5_HOME_WIN=`pwd`/hdf5-1.10.5/dist;
+      get -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.6/bin/hdf5-1.10.6-Std-win10_64-vs15.zip;
+      unzip -q /tmp/hdf5-1.10.6.zip;
+      cd hdf;
+      msiexec //i /c/Example_Folder\example.msi //quiet TARGETDIR=`pwd`/hdf5-1.10.6/dist //qb;
+      cd ..;
+      which h5dump;
+      ls `pwd`/hdf5-1.10.6/dist;
+      export HDF5_HOME_WIN=`pwd`/hdf5-1.10.6/dist;
     fi
   
 install:
