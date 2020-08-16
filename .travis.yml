@@ -45,10 +45,10 @@ before_install:
       wget -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.6/bin/hdf5-1.10.6-Std-win10_64-vs15.zip -O /tmp/hdf5-1.10.6-Std-win10_64-vs15.zip;
       unzip -q /tmp/hdf5-1.10.6-Std-win10_64-vs15.zip;
       ls ./hdf;
-      mkdir `pwd`/hdf5-1.10.6/dist;
+      mkdir -p `pwd`/hdf5-1.10.6/dist;
       cd hdf;
       echo `pwd`;
-      which readlink;
+      readlink -f HDF5-1.10.6-win64.msi;
       msiexec //i `pwd`/HDF5-1.10.6-win64.msi //quiet TARGETDIR=`pwd`/../hdf5-1.10.6/dist //qb;
       cd ..;
       which h5dump;
