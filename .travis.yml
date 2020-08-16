@@ -49,6 +49,7 @@ before_install:
       cd hdf;
       echo `pwd`;
       readlink -f HDF5-1.10.6-win64.msi;
+      ls -lastr `pwd`/HDF5-1.10.6-win64.msi
       msiexec //i `pwd`/HDF5-1.10.6-win64.msi //quiet TARGETDIR=`pwd`/../hdf5-1.10.6/dist //qb;
       cd ..;
       which h5dump;
