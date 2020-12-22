@@ -60,7 +60,7 @@ namespace NodeHDF5 {
       H5Aclose(attr_id);
       
     }
-    else if(array->Length()>0 && array->Get(0)->IsObject() && std::strncmp("Uint64", (*v8::String::Utf8Value(array->Get(0)->ToObject()->GetConstructorName())), 5)==0){
+    else if(array->Length()>0 && array->Get(0)->IsObject() && std::strncmp("Uint64", (*v8::String::Utf8Value(array->Get(0)->ToObject()->GetConstructorName())), 6)==0){
       hid_t type_id     =  H5Tcopy(H5T_NATIVE_UINT64);
 //      H5Tset_size(type_id, array->Length());
 //      hid_t                     arraytype_id = H5Tarray_create(type_id, rank, count.get());
