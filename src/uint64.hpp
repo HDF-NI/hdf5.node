@@ -21,7 +21,7 @@ namespace NodeHDF5 {
 
   protected:
   public:
-    static void Initialize(v8::Handle<v8::Object> target);
+    static void Initialize(v8::Local<v8::Object> exports);
     static v8::Local<v8::Object> Instantiate(unsigned long long value);
     static v8::Local<v8::Object> Instantiate(std::string value = "0");
     static v8::Local<v8::Object> Instantiate(v8::Local<v8::Object> parent, unsigned long long value = 0);
@@ -49,19 +49,21 @@ namespace NodeHDF5 {
     static v8::Persistent<v8::Function> Constructor;
 
     static void New(const v8::FunctionCallbackInfo<v8::Value>& args) {
+      v8::Isolate* isolate = args.GetIsolate();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
       // Xdm value object
       Uint64* xp;
       if (args.Length() < 1)
         xp = new Uint64(-1);
       else if((args.Length() == 1 || args.Length() == 2) && args[args.Length() - 1]->IsString()){
-        std::string value = args[args.Length() - 1]->IsUndefined() ? std::string("0") : std::string(*v8::String::Utf8Value(args[args.Length() - 1]->ToString()));
+        std::string value = args[args.Length() - 1]->IsUndefined() ? std::string("0") : std::string(*v8::String::Utf8Value(isolate, args[args.Length() - 1]->ToString(context).ToLocalChecked()));
         char *end;
         xp = new Uint64((unsigned long long)std::strtoll(value.c_str(), &end, 10));
           
       }
       else {
 
-        xp = new Uint64((unsigned long long)args[args.Length() - 1]->Int32Value());
+        xp = new Uint64((unsigned long long)args[args.Length() - 1]->Int32Value(context).ToChecked());
       }
 
 //      xp->value = 0;

@@ -136,6 +136,10 @@ of images can now be read.
 * Christian Nienhaus ([@NINI1988](https://github.com/NINI1988)) added typescript definitions and many pull requests and bug fixes for hdf5 native calls.
 * John Shumway ([@shumway](https://github.com/shumway)) refurbished the documentation when the project was split into an organization.
 
+## Contact
+
+My twitch stream is https://www.twitch.tv/sylvanmats
+
 [npm-image]: https://badge.fury.io/js/hdf5.svg
 [npm-url]: https://www.npmjs.com/package/hdf5
 [downloads-image]: https://img.shields.io/npm/dm/hdf5.svg
