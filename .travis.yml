@@ -5,8 +5,13 @@ node_js:
   - "12"
   
 env:
-  - GCC_VERSION="export CC=gcc-7 && export CXX=g++-7"
-  #  - GCC_VERSION="export CC=gcc-6 && export CXX=g++-6"
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
+      CLANG_VERSION="export CC=gcc-7 && export CXX=g++-7";
+    elif [[ "$TRAVIS_OS_NAME" == "windows" ]] ; then
+      echo "Windoes compiler?";
+    else
+      GCC_VERSION="export CC=gcc-7 && export CXX=g++-7";
+    fi
   
 os: 
   - linux
@@ -35,26 +40,36 @@ before_install:
       cd ..;
       export HDF5_HOME_MAC=`pwd`/hdf5-1.10.5/dist;
     elif [[ "$TRAVIS_OS_NAME" == "windows" ]] ; then
+      /c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/2017/BuildTools/Common7/Tools/VsDevCmd.bat;
       which cmake;
       cmake --version;
-      wget -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.zip -O /tmp/hdf5-1.10.5.zip;
-      unzip -q /tmp/hdf5-1.10.5.zip;
-      cd hdf5-1.10.5;
-      mkdir -p build;
-      cd build;
-      cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=../dist -DCMAKE_BUILD_TYPE=RelWithDebInfo -DHDF5_BUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT=OFF  ..;
-      which devenv.exe;
-      devenv.exe //build;
-      cd ../../;
-      ls `pwd`/hdf5-1.10.5/dist;
-      export HDF5_HOME_WIN=`pwd`/hdf5-1.10.5/dist;
+      wget -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.0/bin/hdf5-1.12.0-Std-win10_64-vs15.zip -O /tmp/hdf5-1.12.0-Std-win10_64-vs15.zip;
+      unzip -q /tmp/hdf5-1.12.0-Std-win10_64-vs15.zip;
+      ls ./hdf;
+      mkdir -p `pwd`/hdf5-1.12.0/dist;
+      cd hdf;
+      echo `pwd`;
+      readlink -f HDF5-1.12.0-win64.msi;
+      ls -lastr `pwd`/HDF5-1.12.0-win64.msi;
+      msiexec //i `pwd`/HDF5-1.12.0-win64.msi //quiet TARGETDIR=`pwd`/../hdf5-1.12.0/dist //qb;
+      cd ..;
+      which h5dump;
+      ls `pwd`/hdf5-1.12.0/dist;
+      export HDF5_HOME_WIN=`pwd`/hdf5-1.12.0/dist;
     fi
   
 install:
-  - export HDF5_HOME_LINUX=/usr/lib/x86_64-linux-gnu/hdf5/serial
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then echo ${HDF5_HOME} ; else eval "${GCC_VERSION}" ; fi
-  # ${CXX} --version
-  - npm install --longlong_type=LONGLONG53BITS --hdf5_home_mac=${HDF5_HOME_MAC} --hdf5_home_linux=${HDF5_HOME_LINUX} --hdf5_home_win=${HDF5_HOME_WIN}
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
+      echo ${HDF5_HOME};
+      npm install --longlong_type=LONGLONG53BITS --hdf5_home_mac=${HDF5_HOME_MAC};
+    elif [[ "$TRAVIS_OS_NAME" == "windows" ]] ; then
+      echo "Windoes compiler?";
+      npm install --longlong_type=LONGLONG53BITS --hdf5_home_win=${HDF5_HOME_WIN};
+    else
+      export HDF5_HOME_LINUX=/usr/lib/x86_64-linux-gnu/hdf5/serial;
+      eval "${GCC_VERSION}" ;
+      npm install --longlong_type=LONGLONG53BITS --hdf5_home_linux=${HDF5_HOME_LINUX};
+    fi
 
 before-scripte:
   - export PATH=`pwd`/node_modules/.bin:${PATH}

@@ -1,3 +1,4 @@
+#include <sstream>
 
 #include "hdf5.h"
 #include "hdf5_hl.h"
@@ -74,30 +75,18 @@ namespace NodeHDF5 {
 
     // store specified attribute name
     v8::String::Utf8Value attribute_name(isolate, args[0]->ToString(context).ToLocalChecked());
-
     // unwrap group
     Methods* group       = ObjectWrap::Unwrap<Methods>(args.This());
+    if(!H5Aexists(group->id, (const char*)*attribute_name)){
+        std::stringstream ss;
+      ss<<"Attribute '"<<(*attribute_name)<<"' does not exist.";
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
+      args.GetReturnValue().SetUndefined();
+      return;
+    }
     v8::Local<v8::Value>&& value = readAttributeByName(args.This(), group->id, (*attribute_name));
     args.GetReturnValue().Set(value);
-    /*hid_t    attr_id     = H5Aopen(group->id, (*attribute_name), H5P_DEFAULT);
-    hid_t    datatype_id = H5Aget_type(attr_id);
-    switch (H5Tget_class(datatype_id)) {
-      case 1:
-        double value;
-        H5Aread(attr_id, datatype_id, &value);
-        args.This()->Set(String::NewFromUtf8(v8::Isolate::GetCurrent(), (*attribute_name)),
-                         v8::Number::New(v8::Isolate::GetCurrent(), value));
-        args.GetReturnValue().Set(value);
-        break;
-      default:
-        v8::Isolate::GetCurrent()->ThrowException(
-            v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), "unsupported data type")));
-        args.GetReturnValue().SetUndefined();
-        return;
-        break;
-    }
-    H5Tclose(datatype_id);
-    H5Aclose(attr_id);*/
     return;
   }
 

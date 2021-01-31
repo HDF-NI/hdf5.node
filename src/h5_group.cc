@@ -83,7 +83,7 @@ namespace NodeHDF5 {
     setPrototypeMethod(isolate, t, v8::String::NewFromUtf8(isolate, "getByteOrder", v8::NewStringType::kInternalized).ToLocalChecked(), getByteOrder);
     setPrototypeMethod(isolate, t, v8::String::NewFromUtf8(isolate, "getFilters", v8::NewStringType::kInternalized).ToLocalChecked(), getFilters);
     setPrototypeMethod(isolate, t, v8::String::NewFromUtf8(isolate, "iterate", v8::NewStringType::kInternalized).ToLocalChecked(), iterate);
-    setPrototypeMethod(isolate, t, v8::String::NewFromUtf8(isolate, "iterate", v8::NewStringType::kInternalized).ToLocalChecked(), iterate);
+    setPrototypeMethod(isolate, t, v8::String::NewFromUtf8(isolate, "visit", v8::NewStringType::kInternalized).ToLocalChecked(), visit);
 
     // initialize constructor reference
     Constructor.Reset(v8::Isolate::GetCurrent(), t->GetFunction(context).ToLocalChecked());

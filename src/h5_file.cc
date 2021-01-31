@@ -131,6 +131,8 @@ namespace NodeHDF5 {
     Local<FunctionTemplate> t = FunctionTemplate::New(isolate, New);
     t->SetClassName(String::NewFromUtf8(isolate, "File", v8::NewStringType::kInternalized).ToLocalChecked());
     t->InstanceTemplate()->SetInternalFieldCount(1);
+    t->InstanceTemplate()->SetHandler(v8::NamedPropertyHandlerConfiguration(
+      nullptr, nullptr, nullptr, QueryCallbackDelete));
     Constructor.Reset(v8::Isolate::GetCurrent(), t);
     // member method prototypes
     setPrototypeMethod(isolate, t, v8::String::NewFromUtf8(isolate, "enableSingleWriteMultiRead", v8::NewStringType::kInternalized).ToLocalChecked(), EnableSingleWriteMultiRead);
@@ -508,9 +510,9 @@ namespace NodeHDF5 {
       }
 
       if ((size = H5Fget_obj_count(file->id, H5F_OBJ_ATTR)) > 0) {
+        allClosed=false;
         std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
         H5Fget_obj_ids(file->id, H5F_OBJ_ATTR, size, groupList.get());
-        std::stringstream ss;
         ss << "H5 has not closed all attributes: " << H5Fget_obj_count(file->id, H5F_OBJ_ATTR) << " H5F_OBJ_ATTRs OPEN" << std::endl;
         for (int i = 0; i < (int)size; i++) {
           std::unique_ptr<char[]> buffer(new char[1024]);
