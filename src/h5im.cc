@@ -8,7 +8,7 @@ using namespace NodeHDF5;
 
 extern "C" {
 
-static void init_im(Handle<Object> target) {
+static void init_im(v8::Local<v8::Object> target) {
 
   // create local scope
   HandleScope scope(v8::Isolate::GetCurrent());

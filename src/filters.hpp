@@ -17,23 +17,27 @@ namespace NodeHDF5 {
 
   class Filters : public node::ObjectWrap {
   public:
-    static void Init(v8::Handle<v8::Object> exports) {
-      v8::Isolate* isolate = Isolate::GetCurrent();
+    static void Init(v8::Local<v8::Object> exports) {
+      v8::Isolate* isolate = exports->GetIsolate();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
       // Prepare constructor template
       v8::Local<v8::FunctionTemplate> tpl = FunctionTemplate::New(isolate, New);
-      tpl->SetClassName(v8::String::NewFromUtf8(isolate, "Filters"));
+      tpl->SetClassName(v8::String::NewFromUtf8(isolate, "Filters", v8::NewStringType::kInternalized).ToLocalChecked());
       tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
       // Prototype
-      NODE_SET_PROTOTYPE_METHOD(tpl, "isAvailable", isAvailable);
-      NODE_SET_PROTOTYPE_METHOD(tpl, "getNFilters", getNFilters);
-      NODE_SET_PROTOTYPE_METHOD(tpl, "getFilter", getFilter);
+      setPrototypeMethod(isolate, tpl, v8::String::NewFromUtf8(isolate, "isAvailable", v8::NewStringType::kInternalized).ToLocalChecked(), isAvailable);
+      setPrototypeMethod(isolate, tpl, v8::String::NewFromUtf8(isolate, "getNFilters", v8::NewStringType::kInternalized).ToLocalChecked(), getNFilters);
+      setPrototypeMethod(isolate, tpl, v8::String::NewFromUtf8(isolate, "getFilter", v8::NewStringType::kInternalized).ToLocalChecked(), getFilter);
 
-      Constructor.Reset(v8::Isolate::GetCurrent(), tpl->GetFunction());
-      exports->Set(v8::String::NewFromUtf8(isolate, "Filters"), tpl->GetFunction());
+      Constructor.Reset(v8::Isolate::GetCurrent(), tpl->GetFunction(context).ToLocalChecked());
+      v8::Maybe<bool> ret = exports->Set(context, v8::String::NewFromUtf8(isolate, "Filters", v8::NewStringType::kInternalized).ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
+      if(ret.ToChecked()){
+        
+      }
     }
-
+  
     static Local<Object> Instantiate(hid_t parentId, std::string dset_name) {
       v8::Isolate* isolate = v8::Isolate::GetCurrent();
 
@@ -41,7 +45,7 @@ namespace NodeHDF5 {
       Int64*        idWrap             = ObjectWrap::Unwrap<Int64>(idInstance);
       idWrap->value                    = parentId;
       const unsigned        argc       = 2;
-      v8::Handle<v8::Value> argv[argc] = {idInstance, v8::String::NewFromUtf8(isolate, dset_name.c_str())};
+      v8::Local<v8::Value> argv[argc] = {idInstance, v8::String::NewFromUtf8(isolate, dset_name.c_str(), v8::NewStringType::kInternalized).ToLocalChecked()};
 
       return v8::Local<v8::Function>::New(isolate, Constructor)->NewInstance(isolate->GetCurrentContext(), argc, argv).ToLocalChecked();
     }
@@ -56,23 +60,25 @@ namespace NodeHDF5 {
     ~Filters(){};
 
     static void New(const v8::FunctionCallbackInfo<v8::Value>& args) {
-      v8::Isolate*    isolate = v8::Isolate::GetCurrent();
+      v8::Isolate*    isolate = args.GetIsolate();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
       v8::HandleScope scope(isolate);
       // Invoked as constructor: `new MyObject(...)`
-      Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject());
+      Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject(context).ToLocalChecked());
       hid_t  value  = args[0]->IsUndefined() ? -1 : idWrap->Value();
 
-      std::string name = args[1]->IsUndefined() ? std::string("") : std::string(*v8::String::Utf8Value(args[1]->ToString()));
+      std::string name = args[1]->IsUndefined() ? std::string("") : std::string(*v8::String::Utf8Value(isolate, args[1]->ToString(context).ToLocalChecked()));
       Filters*    obj  = new Filters(value, name);
       obj->Wrap(args.This());
       args.GetReturnValue().Set(args.This());
     }
 
     static void isAvailable(const v8::FunctionCallbackInfo<v8::Value>& args) {
-      v8::Isolate*    isolate = v8::Isolate::GetCurrent();
+      v8::Isolate*    isolate = args.GetIsolate();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
       v8::HandleScope scope(isolate);
 
-      args.GetReturnValue().Set((H5Zfilter_avail(args[0]->Int32Value())) ? true : false);
+      args.GetReturnValue().Set((H5Zfilter_avail(args[0]->Int32Value(context).ToChecked())) ? true : false);
     }
 
     static void getNFilters(const v8::FunctionCallbackInfo<v8::Value>& args) {

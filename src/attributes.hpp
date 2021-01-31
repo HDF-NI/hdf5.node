@@ -18,7 +18,9 @@
 namespace NodeHDF5 {
     
 inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, hid_t id, std::string name){
-    v8::Local<v8::Value> value;
+      v8::Isolate*    isolate = v8::Isolate::GetCurrent();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
+      v8::Local<v8::Value> value;
       bool indexedArray=true;
       hid_t attr_id   = H5Aopen(id, name.c_str(), H5P_DEFAULT);
       hid_t attr_type = H5Aget_type(attr_id);
@@ -52,10 +54,13 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
                 for (unsigned int arrayIndex = 0; arrayIndex < arrayDims.get()[0]; arrayIndex++) {
                   std::string s(vl.get()[arrayIndex]);
 
-                  array->Set(
+                  v8::Maybe<bool> ret = array->Set(context,
                       arrayIndex,
                       v8::String::NewFromUtf8(
-                          v8::Isolate::GetCurrent(), vl.get()[arrayIndex], v8::String::kNormalString, std::strlen(vl.get()[arrayIndex])));
+                          v8::Isolate::GetCurrent(), vl.get()[arrayIndex], v8::NewStringType::kNormal, std::strlen(vl.get()[arrayIndex])).ToLocalChecked());
+                  if(ret.ToChecked()){
+                    
+                  }
                 }
                 value = array;
               }
@@ -71,9 +76,12 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
                       std::string attrValue = "";
                       if (buf.get()[elementIndex] != NULL)
                         attrValue = std::string(buf.get()[elementIndex]);
-                      array->Set(elementIndex,
-                                 v8::String::NewFromUtf8(
-                                     v8::Isolate::GetCurrent(), (char*)(attrValue.c_str()), v8::String::kNormalString, attrValue.length()));
+                      v8::Maybe<bool> ret = array->Set(context, elementIndex,
+                               v8::String::NewFromUtf8(
+                                   v8::Isolate::GetCurrent(), (char*)(attrValue.c_str()), v8::NewStringType::kNormal, attrValue.length()).ToLocalChecked());
+                      if(ret.ToChecked()){
+                        
+                      }
                     }
                     value = array;
 
@@ -85,7 +93,7 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
                     if (data.get()[0] != NULL)
                         attrValue = std::string(data.get()[0]);
                     value =  v8::String::NewFromUtf8(
-                                   v8::Isolate::GetCurrent(), (char*)(attrValue.c_str()), v8::String::kNormalString, attrValue.length());
+                                   v8::Isolate::GetCurrent(), (char*)(attrValue.c_str()), v8::NewStringType::kNormal, attrValue.length()).ToLocalChecked();
                   }
                 } else {
 
@@ -102,15 +110,18 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
                       if (data.get()[elementIndex*offset+trimOffset-1] ==0){
                           trimOffset=std::strlen((char*)(data.get()+elementIndex*offset));
                       }
-                      array->Set(elementIndex,
+                      v8::Maybe<bool> ret = array->Set(context, elementIndex,
                                  v8::String::NewFromUtf8(
-                                     v8::Isolate::GetCurrent(), (char*)(data.get()+elementIndex*offset), v8::String::kNormalString, trimOffset));
+                                     v8::Isolate::GetCurrent(), (char*)(data.get()+elementIndex*offset), v8::NewStringType::kNormal, trimOffset).ToLocalChecked());
+                      if(ret.ToChecked()){
+                        
+                      }
                     }
                     value = array;
                   }
                   else{
                     value = v8::String::NewFromUtf8(
-                                 v8::Isolate::GetCurrent(), (char*)data.get(), v8::String::kNormalString, storeSize);
+                                 v8::Isolate::GetCurrent(), (char*)data.get(), v8::NewStringType::kNormal, storeSize).ToLocalChecked();
                   }
                 }
                 break;
@@ -143,7 +154,8 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
                     v8::Local<v8::Object> int64Instance = Int64::Instantiate(focus, intValue[i]);
                     Int64*        idWrap   = node::ObjectWrap::Unwrap<Int64>(int64Instance);
                     idWrap->setValue(intValue[i]);
-                    array->Set(i, int64Instance);
+                    v8::Maybe<bool> ret = array->Set(context, i, int64Instance);
+                    if(ret.ToChecked()){};
                   }
                 } else {
                   std::unique_ptr<uint64_t[]> uintValue(new uint64_t[numberOfElements]);
@@ -152,7 +164,8 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
                     v8::Local<v8::Object> uint64Instance = Uint64::Instantiate(focus, uintValue[i]);
                     Uint64*        idWrap   = node::ObjectWrap::Unwrap<Uint64>(uint64Instance);
                     idWrap->setValue(uintValue[i]);
-                    array->Set(i, uint64Instance);
+                    v8::Maybe<bool> ret = array->Set(context, i, uint64Instance);
+                    if(ret.ToChecked()){};
                   }
                 }
                 value = array;
@@ -221,7 +234,7 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
               }
               if(indexedArray){
 #if NODE_VERSION_AT_LEAST(8,0,0)
-                H5Aread(attr_id, attr_type, node::Buffer::Data(buffer->ToObject()));
+                H5Aread(attr_id, attr_type, node::Buffer::Data(buffer->ToObject(isolate->GetCurrentContext()).ToLocalChecked()));
 #else
                 H5Aread(attr_id, attr_type, buffer->Buffer()->Externalize().Data());
 #endif
@@ -262,7 +275,7 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
                 hsize_t     storeSize = H5Aget_storage_size(attr_id);
                 std::string strValue(storeSize, '\0');
                 H5Aread(attr_id, attr_type, (void*)strValue.c_str());
-                value = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str());
+                value = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), strValue.c_str(), v8::NewStringType::kInternalized).ToLocalChecked();
               } else if (isVlen != -1) {
 
                 H5A_info_t ainfo;
@@ -283,10 +296,11 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
                  * Read the data.
                  */
                 status                                = H5Aread(attr_id, type, buffer.get());
-                v8::Local<v8::String> varLenStr       = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), buffer.get()[0]);
-                v8::Local<v8::Value>  varLenStrObject = v8::StringObject::New(varLenStr);
-                varLenStrObject->ToObject()->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "type"),
-                                                 v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "variable-length"));
+                v8::Local<v8::String> varLenStr       = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), buffer.get()[0], v8::NewStringType::kInternalized).ToLocalChecked();
+                v8::Local<v8::Value>  varLenStrObject = v8::StringObject::New(v8::Isolate::GetCurrent(), varLenStr);
+                bool ret = varLenStrObject->ToObject(isolate->GetCurrentContext()).ToLocalChecked()->Set(context, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "type", v8::NewStringType::kInternalized).ToLocalChecked(),
+                                                 v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "variable-length", v8::NewStringType::kInternalized).ToLocalChecked()).ToChecked();
+                if(ret){};
                 value = varLenStrObject;
 
                 /*
@@ -309,9 +323,11 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
 };
 
     inline void refreshAttributes(v8::Local<v8::Object>& focus, hid_t id){
-    hsize_t                  index = 0;
-    std::vector<std::string> holder;
-    H5Aiterate(id,
+      v8::Isolate*    isolate = v8::Isolate::GetCurrent();
+      v8::Local<v8::Context> context = isolate->GetCurrentContext();
+      hsize_t                  index = 0;
+      std::vector<std::string> holder;
+      H5Aiterate(id,
                H5_INDEX_NAME,
                H5_ITER_INC,
                &index,
@@ -320,10 +336,13 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
                  return 0;
                },
                &holder);
-    for (index = 0; index < (uint32_t)holder.size(); index++) {
-        v8::Local<v8::Value>&& value = readAttributeByName(focus, id, holder[index]);
-        focus->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str()), value);
-    }
+      for (index = 0; index < (uint32_t)holder.size(); index++) {
+          v8::Local<v8::Value>&& value = readAttributeByName(focus, id, holder[index]);
+          v8::Maybe<bool> ret = focus->Set(context, v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), holder[index].c_str(), v8::NewStringType::kInternalized).ToLocalChecked(), value);
+          if(ret.ToChecked()){
+            
+          }
+      }
         
     };
 
@@ -342,9 +361,9 @@ inline  v8::Local<v8::Value>   readAttributeByName(v8::Local<v8::Object> focus, 
 
     static void make_attribute_from_typed_array(const hid_t&               group_id,
                                                 const char*                attribute_name,
-                                                v8::Handle<v8::TypedArray> buffer,
+                                                v8::Local<v8::TypedArray> buffer,
                                                 hid_t                      type_id);
-    static void make_attribute_from_array(const hid_t& group_id, const char* attribute_name, v8::Handle<v8::Array> array);
+    static void make_attribute_from_array(const hid_t& group_id, const char* attribute_name, v8::Local<v8::Array> array);
     static void Refresh(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void Flush(const v8::FunctionCallbackInfo<v8::Value>& args);
 

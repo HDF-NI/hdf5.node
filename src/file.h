@@ -35,7 +35,7 @@ namespace NodeHDF5 {
     bool         error       = false;
 
   public:
-    static void Initialize(Handle<Object> target);
+    static void Initialize(v8::Local<v8::Object> target);
 
     hid_t getId() {
       return id;
