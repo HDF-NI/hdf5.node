@@ -167,7 +167,7 @@ namespace NodeHDF5 {
           v8::Local<v8::Value> argv[1] = {options};
           v8::MaybeLocal<v8::Value> ret=v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)
               ->Call(v8::Isolate::GetCurrent()->GetCurrentContext(), v8::Null(v8::Isolate::GetCurrent()), argc, argv);
-          if(ret.ToLocalChecked()->IsNumber()){
+          if(!ret.IsEmpty() && ret.ToLocalChecked()->IsNumber()){
 
           }
         } else{

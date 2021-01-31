@@ -195,7 +195,7 @@ namespace NodeHDF5 {
                                             v8::String::NewFromUtf8(isolate, "success", v8::NewStringType::kInternalized).ToLocalChecked()};
             v8::MaybeLocal<v8::Value> ret = v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)
                 ->Call(context, v8::Null(isolate), argc, argv);
-            if(ret.ToLocalChecked()->IsNumber()){
+            if(!ret.IsEmpty() && ret.ToLocalChecked()->IsNumber()){
 
             }
             return (herr_t)0;
@@ -209,7 +209,7 @@ namespace NodeHDF5 {
                                                                         v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "success", v8::NewStringType::kInternalized).ToLocalChecked()};
                                         v8::MaybeLocal<v8::Value> ret = ((v8::Local<v8::Function>*)visitor_data)[0]->Call(
                                             v8::Isolate::GetCurrent()->GetCurrentContext(), v8::Null(v8::Isolate::GetCurrent()), 3, argv);
-                                        if(ret.ToLocalChecked()->IsNumber()){
+                                        if(!ret.IsEmpty() && ret.ToLocalChecked()->IsNumber()){
                                             
                                         }
                                         return (herr_t)0;

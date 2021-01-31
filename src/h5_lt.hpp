@@ -1824,13 +1824,8 @@ namespace NodeHDF5 {
               return;
             }
           }
-#if NODE_VERSION_AT_LEAST(8,0,0)
           //v8::Local<v8::Object> buffer = node::Buffer::New(v8::Isolate::GetCurrent(), bufSize * theSize).ToLocalChecked();
           err                          = H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, (char*)node::Buffer::Data(buffer->ToObject(context).ToLocalChecked()));
-#else
-          //v8::Local<v8::Object> buffer = node::Buffer::New(v8::Isolate::GetCurrent(), bufSize * theSize).ToLocalChecked();
-          err                          = H5Dread(did, type_id, memspace_id, dataspace_id, H5P_DEFAULT, (char*)buffer->Buffer()->Externalize().Data());
-#endif
           if (err < 0) {
             if (subsetOn) {
               H5Sclose(memspace_id);
@@ -1902,7 +1897,7 @@ namespace NodeHDF5 {
             v8::Local<v8::Value> argv[1] = {options};
             v8::MaybeLocal<v8::Value> ret = v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)
                 ->Call(v8::Isolate::GetCurrent()->GetCurrentContext(), v8::Null(isolate), argc, argv);
-            if(ret.ToLocalChecked()->IsNumber()){
+            if(!ret.IsEmpty() && ret.ToLocalChecked()->IsNumber()){
                 
             }
           } else{
@@ -2130,7 +2125,7 @@ namespace NodeHDF5 {
             v8::Local<v8::Value> argv[1] = {options};
             v8::MaybeLocal<v8::Value> ret = v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), callback)
                 ->Call(v8::Isolate::GetCurrent()->GetCurrentContext(), v8::Null(isolate), argc, argv);
-            if(ret.ToLocalChecked()->IsNumber()){
+            if(!ret.IsEmpty() && ret.ToLocalChecked()->IsNumber()){
                 
             }
           } else{

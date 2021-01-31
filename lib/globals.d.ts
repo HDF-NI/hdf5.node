@@ -15,6 +15,10 @@ export declare enum Access {
     ACC_DEBUG,
     /** create non-existing files  */
     ACC_CREAT
+    /** read/write in SWMR mode*/	
+    ACC_SWMR_WRITE
+    /** read in SWMR mode*/	
+    ACC_SWMR_READ
 }
 
 export declare enum CreationOrder {
