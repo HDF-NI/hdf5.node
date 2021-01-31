@@ -61,7 +61,7 @@ namespace NodeHDF5 {
     args.GetReturnValue().Set(array);
   }
 
-  void Methods::readAttribute(const v8::FunctionCallbackInfo<Value>& args) {
+  void Methods::readAttribute(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::Isolate* isolate = args.GetIsolate();
     v8::Local<v8::Context> context = isolate->GetCurrentContext();
     // fail out if arguments are not correct
@@ -81,7 +81,7 @@ namespace NodeHDF5 {
         std::stringstream ss;
       ss<<"Attribute '"<<(*attribute_name)<<"' does not exist.";
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str())));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str()).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }

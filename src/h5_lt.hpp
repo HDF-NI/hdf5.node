@@ -168,7 +168,7 @@ namespace NodeHDF5 {
         return subsetOn;
     }
 
-    inline static int get_array_rank(Handle<Array> array){
+    /*inline static int get_array_rank(v8::Local<v8::Array> array){
         int rank=1;
         Handle<Array> arrayCheck=array;
         bool look=true;
@@ -185,9 +185,9 @@ namespace NodeHDF5 {
         if(!hit)look=false;
         }
         return rank;
-    }
+    }*/
     
-    inline static void get_array_dimensions(Handle<Array> array, std::unique_ptr<hsize_t[]>& dims, int rank){
+    /*inline static void get_array_dimensions(v8::Local<v8::Array> array, std::unique_ptr<hsize_t[]>& dims, int rank){
         Handle<Array> arrayCheck=array;
         int count=0;
         dims[count++]=arrayCheck->Length();
@@ -204,9 +204,9 @@ namespace NodeHDF5 {
         }
         if(!hit)look=false;
         }
-    }
+    }*/
 
-    static void fill_buffer_from_multi_array(Handle<Array> array, std::unique_ptr<char[]>& vl, unsigned int fixedWidth, unsigned int& index, int rank){
+    /*static void fill_buffer_from_multi_array(v8::Local<v8::Array> array, std::unique_ptr<char[]>& vl, unsigned int fixedWidth, unsigned int& index, int rank){
         Local<Array> names = array->ToObject()->GetOwnPropertyNames();
         for (uint32_t arrayIndex = 0; arrayIndex < names->Length(); arrayIndex++) {
           if (array->ToObject()->Get(names->Get(arrayIndex))->ToObject()->IsArray()) {
@@ -225,9 +225,9 @@ namespace NodeHDF5 {
               
           }
         }
-    }
+    }*/
     
-    static void fill_multi_array(Handle<Array>& array, std::unique_ptr<char[]>& tbuffer, std::unique_ptr<hsize_t[]>& dims, std::unique_ptr<hsize_t[]>& count, size_t fixedWidth, hsize_t& index, int depth, int rank, H5T_str_t paddingType){
+    /*static void fill_multi_array(v8::Local<v8::Array>& array, std::unique_ptr<char[]>& tbuffer, std::unique_ptr<hsize_t[]>& dims, std::unique_ptr<hsize_t[]>& count, size_t fixedWidth, hsize_t& index, int depth, int rank, H5T_str_t paddingType){
 
         for (uint32_t arrayIndex = 0; arrayIndex < std::min(dims.get()[depth], count.get()[depth]); arrayIndex++) {
           if (depth<rank-1) {
@@ -251,7 +251,7 @@ namespace NodeHDF5 {
               
           }
         }
-    }
+    }*/
     
     inline static int get_array_rank(v8::Local<v8::Array> array){
       v8::Isolate* isolate = v8::Isolate::GetCurrent();
@@ -378,7 +378,7 @@ namespace NodeHDF5 {
       return (H5T_str_t)options->Get(context, name).ToLocalChecked()->Uint32Value(context).ToChecked();
     }
 
-    inline static H5T_str_t get_padding_type(Handle<Object> options) {
+    /*inline static H5T_str_t get_padding_type(v8::Local<v8::Object> options) {
       if (options.IsEmpty()) {
         return H5T_STR_NULLTERM;
       }
@@ -390,7 +390,7 @@ namespace NodeHDF5 {
       }
 
       return (H5T_str_t)options->Get(name)->Uint32Value();
-    }
+    }*/
 
     static void get_type(v8::Local<v8::Object> options, std::function<void(hid_t)> cb) {
       v8::Isolate* isolate = v8::Isolate::GetCurrent();
