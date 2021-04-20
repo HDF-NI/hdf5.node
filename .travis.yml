@@ -3,7 +3,7 @@ node_js:
   - "node"
   - "14"
   - "12"
-  
+
 env:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
       CLANG_VERSION="export CC=gcc-7 && export CXX=g++-7";
@@ -12,12 +12,12 @@ env:
     else
       GCC_VERSION="export CC=gcc-7 && export CXX=g++-7";
     fi
-  
-os: 
+
+os:
   - linux
   - osx
   - windows
-  
+
 addons:
   apt:
     sources:
@@ -26,8 +26,37 @@ addons:
       - g++-7
       - libhdf5-dev
       - cmake
-      
+
 osx_image: xcode8
+
+# before_install:
+#   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
+#       wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.tar.gz -O /tmp/hdf5-1.10.5.tar.gz;
+#       tar -zxvf /tmp/hdf5-1.10.5.tar.gz;
+#       cd `pwd`/hdf5-1.10.5;
+#       ./configure --prefix=`pwd`/dist --enable-shared=yes --enable-static=no --enable-parallel=no --enable-hl --enable-build-mode=production --without-szlib;
+#       make -j2 2>&1 &> hdf5_screen.txt;
+#       make install;
+#       cd ..;
+#       export HDF5_HOME_MAC=`pwd`/hdf5-1.10.5/dist;
+#     elif [[ "$TRAVIS_OS_NAME" == "windows" ]] ; then
+#       /c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/2017/BuildTools/Common7/Tools/VsDevCmd.bat;
+#       which cmake;
+#       cmake --version;
+#       wget -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.0/bin/hdf5-1.12.0-Std-win10_64-vs15.zip -O /tmp/hdf5-1.12.0-Std-win10_64-vs15.zip;
+#       unzip -q /tmp/hdf5-1.12.0-Std-win10_64-vs15.zip;
+#       ls ./hdf;
+#       mkdir -p `pwd`/hdf5-1.12.0/dist;
+#       cd hdf;
+#       echo `pwd`;
+#       readlink -f HDF5-1.12.0-win64.msi;
+#       ls -lastr `pwd`/HDF5-1.12.0-win64.msi;
+#       msiexec //i `pwd`/HDF5-1.12.0-win64.msi //quiet TARGETDIR=`pwd`/../hdf5-1.12.0/dist //qb;
+#       cd ..;
+#       which h5dump;
+#       ls `pwd`/hdf5-1.12.0/dist;
+#       export HDF5_HOME_WIN=`pwd`/hdf5-1.12.0/dist;
+#     fi
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
@@ -40,24 +69,24 @@ before_install:
       cd ..;
       export HDF5_HOME_MAC=`pwd`/hdf5-1.10.5/dist;
     elif [[ "$TRAVIS_OS_NAME" == "windows" ]] ; then
-      /c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/2017/BuildTools/Common7/Tools/VsDevCmd.bat;
-      which cmake;
-      cmake --version;
-      wget -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.0/bin/hdf5-1.12.0-Std-win10_64-vs15.zip -O /tmp/hdf5-1.12.0-Std-win10_64-vs15.zip;
-      unzip -q /tmp/hdf5-1.12.0-Std-win10_64-vs15.zip;
-      ls ./hdf;
-      mkdir -p `pwd`/hdf5-1.12.0/dist;
-      cd hdf;
-      echo `pwd`;
-      readlink -f HDF5-1.12.0-win64.msi;
-      ls -lastr `pwd`/HDF5-1.12.0-win64.msi;
-      msiexec //i `pwd`/HDF5-1.12.0-win64.msi //quiet TARGETDIR=`pwd`/../hdf5-1.12.0/dist //qb;
-      cd ..;
-      which h5dump;
-      ls `pwd`/hdf5-1.12.0/dist;
-      export HDF5_HOME_WIN=`pwd`/hdf5-1.12.0/dist;
+      wget -q https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/bin/hdf5-1.10.5-Std-win10_64-vs15.zip -O hdf5-1.10.5-Std-win10_64-vs15.zip ;
+      unzip -q hdf5-1.10.5-Std-win10_64-vs15.zip ;
+      powershell "Start-Process msiexec.exe -Wait -ArgumentList '/I C:\\Users\\travis\\build\\HDF-NI\\hdf5.node\\hdf\\HDF5-1.10.5-win64.msi /quiet'" ;
     fi
-  
+
+# install:
+#   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
+#       echo ${HDF5_HOME};
+#       npm install --longlong_type=LONGLONG53BITS --hdf5_home_mac=${HDF5_HOME_MAC};
+#     elif [[ "$TRAVIS_OS_NAME" == "windows" ]] ; then
+#       echo "Windoes compiler?";
+#       npm install --longlong_type=LONGLONG53BITS --hdf5_home_win=${HDF5_HOME_WIN};
+#     else
+#       export HDF5_HOME_LINUX=/usr/lib/x86_64-linux-gnu/hdf5/serial;
+#       eval "${GCC_VERSION}" ;
+#       npm install --longlong_type=LONGLONG53BITS --hdf5_home_linux=${HDF5_HOME_LINUX};
+#     fi
+
 install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
       echo ${HDF5_HOME};
@@ -71,11 +100,12 @@ install:
       npm install --longlong_type=LONGLONG53BITS --hdf5_home_linux=${HDF5_HOME_LINUX};
     fi
 
+
 before-scripte:
   - export PATH=`pwd`/node_modules/.bin:${PATH}
   - export LD_LIBRARY_PATH=`pwd`/hdf5-1.10.2/dist/lib:${LD_LIBRARY_PATH}
   - export DYLD_LIBRARY_PATH=`pwd`/hdf5-1.10.2/dist/lib:${DYLD_LIBRARY_PATH}
-  
+
 script:
   - export PATH=`pwd`/node_modules/.bin:${PATH}
   - export LD_LIBRARY_PATH=`pwd`/hdf5-1.10.2/dist/lib:${LD_LIBRARY_PATH}
