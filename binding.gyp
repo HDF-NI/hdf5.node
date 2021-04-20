@@ -1,7 +1,7 @@
 {
     "variables": {
         "hdf5_home_linux%": "/usr/local",
-        "hdf5_home_win%": "C:/Software/hdf5",
+        "hdf5_home_win%": "C:/Program Files/HDF_Group/HDF5/1.10.5",
         "hdf5_home_mac%": "/usr/local",
         "link_type%": "shared",
         "debug_mode%": "",

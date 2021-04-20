@@ -93,7 +93,7 @@ install:
       npm install --longlong_type=LONGLONG53BITS --hdf5_home_mac=${HDF5_HOME_MAC};
     elif [[ "$TRAVIS_OS_NAME" == "windows" ]] ; then
       echo "Windoes compiler?";
-      npm install --longlong_type=LONGLONG53BITS --hdf5_home_win=${HDF5_HOME_WIN};
+      npm install --longlong_type=LONGLONG53BITS;
     else
       export HDF5_HOME_LINUX=/usr/lib/x86_64-linux-gnu/hdf5/serial;
       eval "${GCC_VERSION}" ;
