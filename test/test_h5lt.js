@@ -416,7 +416,7 @@ describe("testing lite interface ", function() {
             let numberOfDataLines;
             let title;
             let state              = State.COUNT;
-            const lineArr          =  sodiumIcosanoateXmol.trim().split("\n");
+            const lineArr          =  sodiumIcosanoateXmol.trim().split(/\r?\n/);
             let columnCount        = 0;
             let firstFrequency     = true;
             let firstTrajectory    = new Float64Array(3*numberOfDataLines);

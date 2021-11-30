@@ -11,12 +11,18 @@ const h5lt          = hdf5Lib.h5lt;
 
 const globs   = require('../lib/globals');
 
+const semver = require('semver')
+
 /*test inspired/brought from https://github.com/KirmTwinty work*/
 describe("testing hdf5 dataset reading in SWMR mode ", function(){
     describe("opening hdf5 dataset ", function(){
 	let file;
 	before(function(done){
-	    file = new hdf5Lib.hdf5.File('./test/examples/swmr-1.h5', globs.Access.ACC_RDONLY | globs.Access.ACC_SWMR_READ);
+	    file = new hdf5Lib.hdf5.File(
+				'./test/examples/swmr-1.h5',
+				globs.Access.ACC_RDONLY | globs.Access.ACC_SWMR_READ
+				? semver.gte(hdf5.getLibVersion(), '1.10.0')
+				: globs.Access.ACC_RDONLY);
 	    done();
 	});
 

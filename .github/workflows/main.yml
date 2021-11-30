@@ -1,0 +1,77 @@
+name: hdf5.node build
+on: [push]
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [12, 14, 16]
+    steps:
+      - name: Checkout repo code
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install libhdf5-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install libhdf5-dev
+      - name: Build & Test
+        run: |
+          cd ${{ github.workspace }}
+          export HDF5_HOME_LINUX=/usr/lib/x86_64-linux-gnu/hdf5/serial
+          npm install --longlong_type=LONGLONG53BITS --hdf5_home_linux=$HDF5_HOME_LINUX
+          export PATH=${{ github.workspace }}/node_modules/.bin:$PATH
+          mocha --harmony --require should
+
+  osx:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        node: [12, 14, 16]
+    steps:
+      - name: Checkout repo code
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install hdf5
+        run: |
+          brew update
+          brew install hdf5@1.10
+      - name: Build & Test
+        run: |
+          cd ${{ github.workspace }}
+          export HDF5_HOME_MAC=/usr/local/opt/hdf5@1.10
+          npm install --longlong_type=LONGLONG53BITS --hdf5_home_mac=$HDF5_HOME_MAC
+          export PATH=${{ github.workspace }}/node_modules/.bin:$PATH
+          mocha --harmony --require should
+
+  windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        node: [12, 14, 16]
+    steps:
+      - name: Checkout repo code
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install hdf5
+        run: |
+          cd ${{ github.workspace }}
+          $psfile = "${{ github.workspace }}/.github/workflows/install_hdf5.ps1"
+          & $psfile
+        shell: pwsh
+      - name: Build & Test
+        run: |
+          $HDF5_HOME_WIN="C:/Program Files/HDF_Group/HDF5/1.10.8"
+          npm install --longlong_type=LONGLONG53BITS --hdf5_home_win=$HDF5_HOME_WIN
+          $Env:path += ";" + $HDF5_HOME_WIN + "/bin"
+          npm run test
+        shell: pwsh
+      

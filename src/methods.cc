@@ -81,7 +81,7 @@ namespace NodeHDF5 {
         std::stringstream ss;
       ss<<"Attribute '"<<(*attribute_name)<<"' does not exist.";
       v8::Isolate::GetCurrent()->ThrowException(
-          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str()).ToLocalChecked()));
+          v8::Exception::Error(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str(), v8::NewStringType::kNormal).ToLocalChecked()));
       args.GetReturnValue().SetUndefined();
       return;
     }
