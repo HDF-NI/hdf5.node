@@ -14,11 +14,11 @@ export declare enum Access {
     /** print debug info      */
     ACC_DEBUG,
     /** create non-existing files  */
-    ACC_CREAT
+    ACC_CREAT,
     /** read/write in SWMR mode*/	
-    ACC_SWMR_WRITE
+    ACC_SWMR_WRITE,
     /** read in SWMR mode*/	
-    ACC_SWMR_READ
+    ACC_SWMR_READ,
 }
 
 export declare enum CreationOrder {
