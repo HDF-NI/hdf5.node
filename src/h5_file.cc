@@ -493,58 +493,58 @@ namespace NodeHDF5 {
     }
 
     H5Pclose(file->gcpl);
-    ssize_t size = 0;
+    //ssize_t size = 0;
     std::stringstream ss;
     bool allClosed=true;
-    if (H5Fget_obj_count(file->id, H5F_OBJ_FILE) == 1) {
-      if ((size = H5Fget_obj_count(file->id, H5F_OBJ_GROUP)) > 0) {
-        allClosed=false;
-        std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
-        H5Fget_obj_ids(file->id, H5F_OBJ_GROUP, size, groupList.get());
-        ss << "H5 has not closed all groups: " << H5Fget_obj_count(file->id, H5F_OBJ_GROUP) << " H5F_OBJ_GROUPs OPEN" << std::endl;
-        for (int i = 0; i < (int)size; i++) {
-          std::unique_ptr<char[]> buffer(new char[1024]);
-          H5Iget_name(groupList[i], buffer.get(), 1024);
-          ss << groupList[i] << " " << buffer.get() << std::endl;
-        }
-      }
+    //if (H5Fget_obj_count(file->id, H5F_OBJ_FILE) == 1) {
+    //  if ((size = H5Fget_obj_count(file->id, H5F_OBJ_GROUP)) > 0) {
+    //    allClosed=false;
+    //    std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
+    //    H5Fget_obj_ids(file->id, H5F_OBJ_GROUP, size, groupList.get());
+    //    ss << "H5 has not closed all groups: " << H5Fget_obj_count(file->id, H5F_OBJ_GROUP) << " H5F_OBJ_GROUPs OPEN" << std::endl;
+    //    for (int i = 0; i < (int)size; i++) {
+    //      std::unique_ptr<char[]> buffer(new char[1024]);
+    //      H5Iget_name(groupList[i], buffer.get(), 1024);
+    //      ss << groupList[i] << " " << buffer.get() << std::endl;
+    //    }
+    //  }
 
-      if ((size = H5Fget_obj_count(file->id, H5F_OBJ_ATTR)) > 0) {
-        allClosed=false;
-        std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
-        H5Fget_obj_ids(file->id, H5F_OBJ_ATTR, size, groupList.get());
-        ss << "H5 has not closed all attributes: " << H5Fget_obj_count(file->id, H5F_OBJ_ATTR) << " H5F_OBJ_ATTRs OPEN" << std::endl;
-        for (int i = 0; i < (int)size; i++) {
-          std::unique_ptr<char[]> buffer(new char[1024]);
-          H5Iget_name(groupList[i], buffer.get(), 1024);
-          ss << groupList[i] << " " << buffer.get() << std::endl;
-        }
-      }
+    //  if ((size = H5Fget_obj_count(file->id, H5F_OBJ_ATTR)) > 0) {
+    //    allClosed=false;
+    //    std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
+    //    H5Fget_obj_ids(file->id, H5F_OBJ_ATTR, size, groupList.get());
+    //    ss << "H5 has not closed all attributes: " << H5Fget_obj_count(file->id, H5F_OBJ_ATTR) << " H5F_OBJ_ATTRs OPEN" << std::endl;
+    //    for (int i = 0; i < (int)size; i++) {
+    //      std::unique_ptr<char[]> buffer(new char[1024]);
+    //      H5Iget_name(groupList[i], buffer.get(), 1024);
+    //      ss << groupList[i] << " " << buffer.get() << std::endl;
+    //    }
+    //  }
 
-      if ((size = H5Fget_obj_count(file->id, H5F_OBJ_DATASET)) > 0) {
-        allClosed=false;
-        std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
-        H5Fget_obj_ids(file->id, H5F_OBJ_DATASET, size, groupList.get());
-        ss << "H5 has not closed all datasets" << H5Fget_obj_count(file->id, H5F_OBJ_DATASET) << " H5F_OBJ_DATASETs OPEN" << std::endl;
-        for (int i = 0; i < (int)size; i++) {
-          std::unique_ptr<char[]> buffer(new char[1024]);
-          H5Iget_name(groupList[i], buffer.get(), 1024);
-          ss << groupList[i] << " " << buffer.get() << std::endl;
-        }
-      }
+    //  if ((size = H5Fget_obj_count(file->id, H5F_OBJ_DATASET)) > 0) {
+    //    allClosed=false;
+    //    std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
+    //    H5Fget_obj_ids(file->id, H5F_OBJ_DATASET, size, groupList.get());
+    //    ss << "H5 has not closed all datasets" << H5Fget_obj_count(file->id, H5F_OBJ_DATASET) << " H5F_OBJ_DATASETs OPEN" << std::endl;
+    //    for (int i = 0; i < (int)size; i++) {
+    //      std::unique_ptr<char[]> buffer(new char[1024]);
+    //      H5Iget_name(groupList[i], buffer.get(), 1024);
+    //      ss << groupList[i] << " " << buffer.get() << std::endl;
+    //    }
+    //  }
 
-      if ((size = H5Fget_obj_count(file->id, H5F_OBJ_DATATYPE)) > 0) {
-        allClosed=false;
-        std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
-        H5Fget_obj_ids(file->id, H5F_OBJ_DATATYPE, size, groupList.get());
-        ss << "H5 has not closed all datatypes" << H5Fget_obj_count(file->id, H5F_OBJ_DATATYPE) << " H5F_OBJ_DATATYPEs OPEN" << std::endl;
-        for (int i = 0; i < (int)size; i++) {
-          std::unique_ptr<char[]> buffer(new char[1024]);
-          H5Iget_name(groupList[i], buffer.get(), 1024);
-          ss << groupList[i] << " " << buffer.get() << std::endl;
-        }
-      }
-    }
+    //  if ((size = H5Fget_obj_count(file->id, H5F_OBJ_DATATYPE)) > 0) {
+    //    allClosed=false;
+    //    std::unique_ptr<hid_t[]> groupList(new hid_t[size]);
+    //    H5Fget_obj_ids(file->id, H5F_OBJ_DATATYPE, size, groupList.get());
+    //    ss << "H5 has not closed all datatypes" << H5Fget_obj_count(file->id, H5F_OBJ_DATATYPE) << " H5F_OBJ_DATATYPEs OPEN" << std::endl;
+    //    for (int i = 0; i < (int)size; i++) {
+    //      std::unique_ptr<char[]> buffer(new char[1024]);
+    //      H5Iget_name(groupList[i], buffer.get(), 1024);
+    //      ss << groupList[i] << " " << buffer.get() << std::endl;
+    //    }
+    //  }
+    //}
 
     herr_t err = H5Fclose(file->id);
     if (err < 0) {
