@@ -1645,7 +1645,7 @@ namespace NodeHDF5 {
             }
             args.GetReturnValue().Set(array);
             H5Tclose(basetype_id);
-          } else if (rank > 1 && values_dim.get()[0] > 0) {
+          } else if (rank >= 1 && values_dim.get()[0] > 0) {
             hid_t                   dataspace_id = H5S_ALL;
             hid_t                   memspace_id  = H5S_ALL;
             size_t                  typeSize     = H5Tget_size(t);
