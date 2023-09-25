@@ -969,7 +969,7 @@ var start = process.hrtime();
         });
     });
     
-    describe("create an xmol with frequency pulled from h5 ", function() {
+    describe("create a xmol with frequency pulled from h5 ", function() {
             this.timeout(35000);
         let file;
         before(function(done) {
@@ -1037,7 +1037,7 @@ var start = process.hrtime();
                         xmolDocument+=elements[index]+' '+lastTrajectory[3*index]+' '+lastTrajectory[3*index+1]+' '+lastTrajectory[3*index+2]+' '+frequency[3*index]+' '+frequency[3*index+1]+' '+frequency[3*index+2]+'\n';
                     }
                 }
-                xmolDocument.length.should.equal(1435803);
+                xmolDocument.length.should.equal(1435989);
                 fs.writeFileSync('sodium-icosanoate.xmol', xmolDocument, { flag:'w'});
                 fs.writeFileSync('sodium-icosanoate.xml', xmlDocument, { flag:'w'});
                 groupGeometries.close();

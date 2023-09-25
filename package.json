@@ -1,14 +1,14 @@
 {
-  "name": "hdf5",
-  "version": "0.4.0",
-  "description": "Native Abstractions for hdf5 file io",
+  "name": "hdf5.node18",
+  "description": "Native Abstractions for hdf5 file io, forked from https://github.com/HDF-NI/hdf5.node.git, upgrade to node18",
+  "version": "0.0.4",
   "main": "./index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/HDF-NI/hdf5.node.git"
+    "url": "https://github.com/HanyuITK/hdf5-node18.node"
   },
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=18.0.0"
   },
   "devDependencies": {
     "mocha": "8.1.1",
@@ -21,7 +21,8 @@
   },
   "contributors": [
     "Ryan Cole <ryan@rycole.com> (https://github.com/ryancole/)",
-    "Roger I Martin <mathmldashx@yahoo.com> (https://github.com/rimmartin/)"
+    "Roger I Martin <mathmldashx@yahoo.com> (https://github.com/rimmartin/)",
+    "Hanyu <hanyu.sun@itk-engineering.de>"
   ],
   "license": "MIT",
   "keywords": [],
