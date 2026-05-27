@@ -97,7 +97,7 @@ namespace NodeHDF5 {
       v8::Local<v8::Context> context = isolate->GetCurrentContext();
       v8::HandleScope scope(isolate);
 
-      PacketTable* obj = ObjectWrap::Unwrap<PacketTable>(args.Holder());
+      PacketTable* obj = ObjectWrap::Unwrap<PacketTable>(args.This());
       obj->p_data.reset(new char*[obj->nmembers]);
       v8::Local<v8::Object> record = args.This()->ToObject(context).ToLocalChecked()->Get(context, String::NewFromUtf8(v8::Isolate::GetCurrent(), "record", v8::NewStringType::kInternalized).ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
       for (unsigned int index = 0; index < obj->nmembers; index++) {

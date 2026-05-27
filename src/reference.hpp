@@ -122,7 +122,7 @@ namespace NodeHDF5 {
       v8::Isolate*    isolate = v8::Isolate::GetCurrent();
       v8::HandleScope scope(isolate);
 
-      Reference* obj = ObjectWrap::Unwrap<Reference>(args.Holder());
+      Reference* obj = ObjectWrap::Unwrap<Reference>(args.This());
       Int64* idWrap = ObjectWrap::Unwrap<Int64>(args[0]->ToObject(isolate->GetCurrentContext()).ToLocalChecked());
       hid_t  locId  = args[0]->IsUndefined() ? -1 : idWrap->Value();
       
