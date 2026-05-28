@@ -10,14 +10,25 @@
   "engines": {
     "node": ">=12.0.0"
   },
+  "type": "module",
   "devDependencies": {
     "mocha": "11.7.6",
     "should": "13.2.3",
     "xml2js": "0.6.2"
   },
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.cjs"
+    },
+    "./lib/globals": {
+      "import": "./lib/globals.js",
+      "require": "./lib/globals.cjs"
+    }
+  },
   "scripts": {
     "install": "node-gyp rebuild --jobs max",
-    "test": "mocha test"
+    "test": "mocha test/**/*.js"
   },
   "contributors": [
     "Ryan Cole <ryan@rycole.com> (https://github.com/ryancole/)",

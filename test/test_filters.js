@@ -1,10 +1,10 @@
 'use strict';
 
-(require('mocha'));
-require('should');
+import 'mocha';
+import 'should';
 
-const hdf5Lib = require('..');
-const globs   = require('../lib/globals');
+import globs from '../lib/globals.js';
+import hdf5Lib from '../index.js';
 
 describe("testing fiter interface ",function(){
 

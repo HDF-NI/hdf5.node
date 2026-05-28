@@ -1,13 +1,12 @@
 'use strict';
 
-(require('mocha'));
-require('should');
+import 'mocha';
+import 'should';
 
-const hdf5Lib = require('..');
-const globs   = require('../lib/globals');
-const H5RType        = globs.H5RType;
-const hdf5          = hdf5Lib.hdf5;
-const h5lt          = hdf5Lib.h5lt;
+import hdf5Lib from '../index.js';
+import globs from '../lib/globals.js';
+const { hdf5, h5lt } = hdf5Lib;
+const { H5RType } = globs;
 
 describe("testing attribute interface",function(){
 

@@ -1,10 +1,11 @@
 'use strict';
 
-(require('mocha'));
-require("should");
+import 'mocha';
+import 'should';
 
-const hdf5Lib = require('..');
-const Access  = require('../lib/globals.js').Access;
+import hdf5Lib from '../index.js';
+import globs from '../lib/globals.js';
+const Access  = globs.Access;
 
 describe("testing images ",function() {
     const hdf5   = hdf5Lib.hdf5;

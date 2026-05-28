@@ -1,15 +1,15 @@
 'use strict';
 
-(require('mocha'));
-require('should');
+import 'mocha';
+import 'should';
 
-const util = require('util');
-const hdf5Lib = require('..');
+import util from 'util';
+import hdf5Lib from '../index.js';
 
 const hdf5          = hdf5Lib.hdf5;
 const h5lt          = hdf5Lib.h5lt;
 
-const globs   = require('../lib/globals');
+import globs from '../lib/globals.js';
 
 /*test inspired/brought from https://github.com/KirmTwinty work*/
 describe("testing hdf5 dataset reading in SWMR mode ", function(){

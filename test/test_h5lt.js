@@ -1,13 +1,13 @@
 'use strict';
 
-(require('mocha'));
-require("should");
+import 'mocha';
+import 'should';
 
-const fs            = require('fs');
-const parseString   = require('xml2js').parseString;
-const util          = require('util');
-const hdf5Lib       = require('..');
-const globs         = require('../lib/globals');
+import fs         from 'fs';
+import {parseString} from 'xml2js';
+import util       from 'util';
+import hdf5Lib from '../index.js';
+import globs from '../lib/globals.js';
 
 const hdf5          = hdf5Lib.hdf5;
 const h5lt          = hdf5Lib.h5lt;
