@@ -1,11 +1,11 @@
 'use strict';
 
-(require('mocha'));
-require('should');
+import 'mocha';
+import 'should';
 
 
-const hdf5Lib = require('..');
-const globs   = require('../lib/globals');
+import hdf5Lib from '../index.js';
+import globs from '../lib/globals.js';
 
 describe("testing c interface ", function() {
 
