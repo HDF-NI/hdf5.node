@@ -6,6 +6,15 @@
 HDF5 is a node module for reading and writing the 
 [HDF5](https://www.hdfgroup.org/HDF5/) file format.
 
+## Note:
+
+[hdf5.bun](https://github.com/HDF-NI/hdf5.bun) is a new project that is being developed to provide a more native and performant interface to hdf5 files.  FFI interface is being developed for better performance and more control over the data.
+The API documentation at https://hdf-ni.github.io/hdf5.node/ will not change and any code written based on it should be drop-in-compatible with hdf5.bun. And the hdf5.node project will also switch to FFI underneath with no changes to the API.
+
+Any changes to the API will only be additions such as websockets. Or hdf5.ws will be upgraded for bun websockets(not sure yet on the design).
+
+In October when nodejs is released with FFI compatibility this project, hdf5.node, will be updated to use the same FFI interface as hdf5.bun.
+
 ## Documentation
 
 API documentation is available at <http://hdf-ni.github.io/hdf5.node>
