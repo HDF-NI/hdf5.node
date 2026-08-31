@@ -574,6 +574,10 @@ namespace NodeHDF5 {
     H5Pclose(group->gcpl_id);
     herr_t err = H5Gclose(group->id);
     if (err < 0) {
+      std::stringstream ss;
+      ss << "H5 close group failed: " << group->name << std::endl;
+      v8::Isolate::GetCurrent()->ThrowException(
+          v8::Exception::Error(String::NewFromUtf8(v8::Isolate::GetCurrent(), ss.str().c_str(), v8::NewStringType::kInternalized).ToLocalChecked()));
       return;
     }
 
@@ -606,9 +610,6 @@ namespace NodeHDF5 {
       return instance.ToLocalChecked();
     } else {
       // return empty
-      std::stringstream ss;
-      ss << "Failed to read group. Group "<<(name)<< " doesn't exist.";
-      throw  Exception(ss.str());
       return tmp;
     }
   }

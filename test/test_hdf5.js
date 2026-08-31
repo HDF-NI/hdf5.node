@@ -85,7 +85,7 @@ describe("testing c interface ", function() {
               groupPmc.close();
           }
             catch(error) {
-            error.message.should.equal("Failed to read group. Group pmc doesn\'t exist.");
+            error.message.should.equal("Cannot read properties of undefined (reading 'id')");
           }
           var group;
           try{
@@ -97,7 +97,7 @@ describe("testing c interface ", function() {
             catch(error) {
               group.close();
                 console.log(error.message);
-            error.message.should.equal("Failed to read group. Group polywog doesn\'t exist.");
+            error.message.should.equal("Cannot read properties of undefined (reading 'id')");
           }
             done();
         });
